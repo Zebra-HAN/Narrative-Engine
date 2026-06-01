@@ -9,14 +9,238 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #0c0c10; color: #ccc; font-family: 'Noto Sans KR', sans-serif; }
+  body { background: #0c0c10; color: #ccc; font-family: 'Noto Sans KR', sans-serif; overflow: hidden; }
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: #0c0c10; }
   ::-webkit-scrollbar-thumb { background: #2a2a35; border-radius: 2px; }
+
+  /* ── 오프닝 오버레이 ── */
+  #opening {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    transition: opacity 0.8s ease;
+  }
+  #opening.fade-out {
+    opacity: 0;
+  }
+
+  .logo-wrap {
+    position: relative;
+    text-align: center;
+    opacity: 0;
+    animation: logoAppear 0.6s ease 0.4s forwards;
+  }
+
+  @keyframes logoAppear {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  .logo-text {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: clamp(1.6rem, 5vw, 2.8rem);
+    font-weight: 400;
+    letter-spacing: 0.35em;
+    color: #c9a96e;
+    position: relative;
+    display: inline-block;
+    /* 왼→오른쪽 마스크 reveal */
+    clip-path: inset(0 100% 0 0);
+    animation: revealText 1.4s cubic-bezier(0.4, 0, 0.2, 1) 0.5s forwards;
+  }
+
+  @keyframes revealText {
+    0%   { clip-path: inset(0 100% 0 0); }
+    100% { clip-path: inset(0 0% 0 0); }
+  }
+
+  /* 광택 슬라이드 */
+  .logo-text::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -60%;
+    width: 45%;
+    height: 100%;
+    background: linear-gradient(
+      105deg,
+      transparent 30%,
+      rgba(255, 240, 190, 0.55) 50%,
+      transparent 70%
+    );
+    animation: sheen 1.4s ease 0.5s forwards;
+    pointer-events: none;
+  }
+
+  @keyframes sheen {
+    0%   { left: -60%; opacity: 0; }
+    15%  { opacity: 1; }
+    100% { left: 130%; opacity: 0; }
+  }
+
+  /* 후광 */
+  .logo-glow {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120%;
+    height: 200%;
+    background: radial-gradient(ellipse at center,
+      rgba(201, 169, 110, 0.12) 0%,
+      transparent 65%
+    );
+    opacity: 0;
+    animation: glowIn 1s ease 0.8s forwards;
+    pointer-events: none;
+  }
+
+  @keyframes glowIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  /* 하단 라인 */
+  .logo-line {
+    width: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #c9a96e80, transparent);
+    margin: 0.6rem auto 0;
+    animation: lineExpand 0.8s ease 1.5s forwards;
+  }
+
+  @keyframes lineExpand {
+    from { width: 0; opacity: 0; }
+    to   { width: 80%; opacity: 1; }
+  }
+
+  /* ── 메인 앱 ── */
+  #app-root {
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    height: 100vh;
+    overflow: hidden;
+  }
+  #app-root.visible {
+    opacity: 1;
+    overflow: auto;
+  }
+
+  /* ── 모바일 레이아웃 ── */
+  @media (max-width: 640px) {
+    body { overflow: auto; }
+    #app-root.visible { overflow: auto; height: auto; }
+
+    .main-layout {
+      flex-direction: column !important;
+      height: auto !important;
+      overflow: visible !important;
+    }
+
+    /* 카테고리 탭: 가로 스크롤 */
+    .cat-sidebar {
+      width: 100% !important;
+      min-width: unset !important;
+      border-right: none !important;
+      border-bottom: 1px solid #1e1e2e !important;
+      flex-direction: row !important;
+      overflow-x: auto !important;
+      overflow-y: hidden !important;
+      flex-shrink: 0 !important;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .cat-sidebar::-webkit-scrollbar { display: none; }
+
+    .cat-tab {
+      padding: 0.6rem 0.85rem !important;
+      border-left: none !important;
+      border-bottom: 2px solid transparent !important;
+      white-space: nowrap !important;
+      flex-shrink: 0 !important;
+    }
+    .cat-tab.active {
+      border-bottom-color: #c9a96e !important;
+      border-left-color: transparent !important;
+    }
+    .cat-tab-num { display: none !important; }
+    .cat-tab-icon { display: none !important; }
+
+    /* 오른쪽 장착 패널: 아래로 이동 */
+    .equip-panel {
+      width: 100% !important;
+      min-width: unset !important;
+      border-left: none !important;
+      border-top: 1px solid #1e1e2e !important;
+      padding: 0.8rem !important;
+    }
+    .equip-list {
+      display: grid !important;
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 0.5rem !important;
+    }
+    .equip-item {
+      margin-bottom: 0 !important;
+      padding-bottom: 0 !important;
+      border-bottom: none !important;
+      background: #13131c;
+      padding: 0.5rem !important;
+      border-radius: 2px;
+    }
+
+    /* 카드 그리드 */
+    .card-grid {
+      grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    /* 헤더 */
+    .header-title { font-size: 0.82rem !important; }
+    .header-btn { padding: 0.35rem 0.6rem !important; font-size: 0.6rem !important; }
+  }
 </style>
 </head>
 <body>
-<div id="root"></div>
+
+<!-- 오프닝 -->
+<div id="opening">
+  <div class="logo-wrap">
+    <div class="logo-glow"></div>
+    <div class="logo-text">NARRATIVE ENGINE</div>
+    <div class="logo-line"></div>
+  </div>
+</div>
+
+<!-- 메인 앱 -->
+<div id="app-root">
+  <div id="root"></div>
+</div>
+
+<script>
+  // 오프닝 타이밍 제어
+  // reveal: 0.5s delay + 1.4s 애니 = 1.9s
+  // 유지: 1s
+  // 페이드아웃 시작: 2.9s
+  // 페이드아웃 duration: 0.8s → 총 3.7s 뒤 제거
+  window.addEventListener('DOMContentLoaded', function() {
+    var opening = document.getElementById('opening');
+    var appRoot = document.getElementById('app-root');
+
+    setTimeout(function() {
+      opening.classList.add('fade-out');
+    }, 2900);
+
+    setTimeout(function() {
+      opening.style.display = 'none';
+      appRoot.classList.add('visible');
+      document.body.style.overflow = '';
+    }, 3700);
+  });
+</script>
+
 <script type="text/babel">
 
 const ACCENT = "#c9a96e";
@@ -183,13 +407,13 @@ function App() {
       }}>
         <div>
           <div style={{ fontSize:"0.55rem", letterSpacing:"0.3em", color:"#333", marginBottom:"0.15rem" }}>NARRATIVE ENGINE</div>
-          <div style={{ fontSize:"0.95rem", color:"#e8e0d5", letterSpacing:"0.05em" }}>창작 설계 보드</div>
+          <div className="header-title" style={{ fontSize:"0.95rem", color:"#e8e0d5", letterSpacing:"0.05em" }}>창작 설계 보드</div>
         </div>
         <div style={{ display:"flex", gap:"0.6rem", alignItems:"center" }}>
           <div style={{ fontSize:"0.65rem", color: totalSelected > 0 ? ACCENT : "#333" }}>
             {totalSelected} / {CATEGORY_ORDER.length}
           </div>
-          <button onClick={randomAll} style={{
+          <button className="header-btn" onClick={randomAll} style={{
             padding:"0.4rem 0.8rem",
             background:"transparent",
             border:`1px solid #333`,
@@ -199,7 +423,7 @@ function App() {
             letterSpacing:"0.1em",
             borderRadius:"1px",
           }}>랜덤</button>
-          <button onClick={reset} style={{
+          <button className="header-btn" onClick={reset} style={{
             padding:"0.4rem 0.8rem",
             background:"transparent",
             border:`1px solid #222`,
@@ -212,34 +436,41 @@ function App() {
         </div>
       </div>
 
-      <div style={{ display:"flex", flex:1, overflow:"hidden" }}>
+      <div className="main-layout" style={{ display:"flex", flex:1, overflow:"hidden" }}>
 
         {/* 왼쪽 카테고리 탭 */}
-        <div style={{
+        <div className="cat-sidebar" style={{
           width:"110px", minWidth:"110px",
           borderRight:`1px solid ${BORDER}`,
           background:"#0e0e14",
           overflowY:"auto",
+          display:"flex",
+          flexDirection:"column",
         }}>
           {CATEGORY_ORDER.map((key, i) => {
             const cat = DATA[key];
             const isActive = activeCategory === key;
             const isDone = !!selected[key];
             return (
-              <div key={key} onClick={() => setActiveCategory(key)} style={{
-                padding:"0.85rem 0.8rem",
-                cursor:"pointer",
-                borderLeft: isActive ? `2px solid ${ACCENT}` : "2px solid transparent",
-                background: isActive ? CARD_BG : "transparent",
-                transition:"all 0.15s",
-              }}>
-                <div style={{ fontSize:"0.55rem", color: isDone ? ACCENT : "#2a2a35", marginBottom:"0.2rem" }}>
+              <div
+                key={key}
+                className={`cat-tab${isActive ? ' active' : ''}`}
+                onClick={() => setActiveCategory(key)}
+                style={{
+                  padding:"0.85rem 0.8rem",
+                  cursor:"pointer",
+                  borderLeft: isActive ? `2px solid ${ACCENT}` : "2px solid transparent",
+                  background: isActive ? CARD_BG : "transparent",
+                  transition:"all 0.15s",
+                }}
+              >
+                <div className="cat-tab-num" style={{ fontSize:"0.55rem", color: isDone ? ACCENT : "#2a2a35", marginBottom:"0.2rem" }}>
                   {isDone ? "✓" : `0${i+1}`}
                 </div>
                 <div style={{ fontSize:"0.65rem", color: isActive ? "#e8e0d5" : isDone ? ACCENT : "#444", lineHeight:1.4 }}>
                   {cat.label}
                 </div>
-                <div style={{ fontSize:"0.55rem", color:"#2a2a35", marginTop:"0.15rem" }}>
+                <div className="cat-tab-icon" style={{ fontSize:"0.55rem", color:"#2a2a35", marginTop:"0.15rem" }}>
                   {cat.icon}
                 </div>
               </div>
@@ -261,7 +492,7 @@ function App() {
                   </div>
                   <div style={{ fontSize:"0.6rem", color:"#333", letterSpacing:"0.1em" }}>{cat.sub}</div>
                 </div>
-                <div style={{
+                <div className="card-grid" style={{
                   display:"grid",
                   gridTemplateColumns:"repeat(auto-fill, minmax(150px, 1fr))",
                   gap:"0.7rem",
@@ -309,7 +540,7 @@ function App() {
         </div>
 
         {/* 오른쪽 장착 패널 */}
-        <div style={{
+        <div className="equip-panel" style={{
           width:"170px", minWidth:"170px",
           borderLeft:`1px solid ${BORDER}`,
           background:"#0e0e14",
@@ -322,25 +553,27 @@ function App() {
             장착 목록
           </div>
 
-          {CATEGORY_ORDER.map(key => {
-            const cat = DATA[key];
-            const selId = selected[key];
-            const selItem = selId ? cat.items.find(i => i.id === selId) : null;
-            return (
-              <div key={key} style={{
-                marginBottom:"0.7rem",
-                paddingBottom:"0.7rem",
-                borderBottom:`1px solid ${BORDER}`,
-              }}>
-                <div style={{ fontSize:"0.52rem", color:"#2a2a35", letterSpacing:"0.08em", marginBottom:"0.25rem" }}>
-                  {cat.icon} {cat.label}
+          <div className="equip-list">
+            {CATEGORY_ORDER.map(key => {
+              const cat = DATA[key];
+              const selId = selected[key];
+              const selItem = selId ? cat.items.find(i => i.id === selId) : null;
+              return (
+                <div key={key} className="equip-item" style={{
+                  marginBottom:"0.7rem",
+                  paddingBottom:"0.7rem",
+                  borderBottom:`1px solid ${BORDER}`,
+                }}>
+                  <div style={{ fontSize:"0.52rem", color:"#2a2a35", letterSpacing:"0.08em", marginBottom:"0.25rem" }}>
+                    {cat.icon} {cat.label}
+                  </div>
+                  <div style={{ fontSize:"0.72rem", color: selItem ? "#e8e0d5" : "#1e1e2e" }}>
+                    {selItem ? selItem.name : "—"}
+                  </div>
                 </div>
-                <div style={{ fontSize:"0.72rem", color: selItem ? "#e8e0d5" : "#1e1e2e" }}>
-                  {selItem ? selItem.name : "—"}
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
 
           <div style={{ flex:1 }} />
 
