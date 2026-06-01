@@ -1,1 +1,439 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Narrative Engine</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0c0c10; color: #ccc; font-family: 'Noto Sans KR', sans-serif; }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: #0c0c10; }
+  ::-webkit-scrollbar-thumb { background: #2a2a35; border-radius: 2px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
 
+const ACCENT = "#c9a96e";
+const BG = "#0c0c10";
+const CARD_BG = "#13131c";
+const BORDER = "#1e1e2e";
+
+const DATA = {
+  character: {
+    label: "캐릭터",
+    icon: "◈",
+    sub: "주인공 유형",
+    items: [
+      { id: "c1", name: "영웅형", sub: "앞으로 나아가는 자" },
+      { id: "c2", name: "아웃사이더형", sub: "경계에 선 자" },
+      { id: "c3", name: "속죄자형", sub: "과거를 짊어진 자" },
+      { id: "c4", name: "각성자형", sub: "진실에 눈뜨는 자" },
+      { id: "c5", name: "수호자형", sub: "타인을 위해 사는 자" },
+      { id: "c6", name: "반항아형", sub: "세계에 맞서는 자" },
+    ],
+  },
+  inner: {
+    label: "내면",
+    icon: "◇",
+    sub: "상처 / 가면",
+    items: [
+      { id: "i1", name: "버려진 기억", sub: "유기의 상처" },
+      { id: "i2", name: "지키지 못한 약속", sub: "죄책의 상처" },
+      { id: "i3", name: "존재 부정", sub: "정체성의 상처" },
+      { id: "i4", name: "배신당한 믿음", sub: "신뢰의 상처" },
+      { id: "i5", name: "아무것도 못 했던 순간", sub: "무력감의 상처" },
+      { id: "i6", name: "잘못된 선택", sub: "후회의 상처" },
+    ],
+  },
+  desire: {
+    label: "욕망",
+    icon: "♦",
+    sub: "Want / 표면 욕구",
+    items: [
+      { id: "d1", name: "강해지고 싶다", sub: "성장 동기" },
+      { id: "d2", name: "인정받고 싶다", sub: "자존 동기" },
+      { id: "d3", name: "지키고 싶다", sub: "보호 동기" },
+      { id: "d4", name: "진실을 알고 싶다", sub: "탐구 동기" },
+      { id: "d5", name: "용서받고 싶다", sub: "속죄 동기" },
+      { id: "d6", name: "연결되고 싶다", sub: "유대 동기" },
+    ],
+  },
+  need: {
+    label: "Need",
+    icon: "◉",
+    sub: "진짜 필요 / 내면 과제",
+    items: [
+      { id: "n1", name: "자기 자신을 용서하기", sub: "내면 해방" },
+      { id: "n2", name: "타인을 믿는 법 배우기", sub: "신뢰 회복" },
+      { id: "n3", name: "놓아주는 것", sub: "집착 해소" },
+      { id: "n4", name: "자기 존재 긍정하기", sub: "정체성 확립" },
+      { id: "n5", name: "혼자서도 설 수 있기", sub: "자립 성장" },
+      { id: "n6", name: "책임을 받아들이기", sub: "성숙" },
+    ],
+  },
+  conflict: {
+    label: "갈등구조",
+    icon: "✕",
+    sub: "핵심 역설",
+    items: [
+      { id: "cf1", name: "강해질수록 고독해진다", sub: "성장의 역설" },
+      { id: "cf2", name: "지킬수록 상처 입힌다", sub: "보호의 역설" },
+      { id: "cf3", name: "진실이 파멸을 부른다", sub: "인식의 역설" },
+      { id: "cf4", name: "복수가 자신을 갉아먹는다", sub: "증오의 역설" },
+      { id: "cf5", name: "사랑하기에 떠나야 한다", sub: "감정의 역설" },
+      { id: "cf6", name: "믿음이 배신의 씨앗이 된다", sub: "신뢰의 역설" },
+    ],
+  },
+  ending: {
+    label: "결말",
+    icon: "◎",
+    sub: "결말 유형",
+    items: [
+      { id: "e1", name: "성장형 해피엔딩", sub: "극복하고 앞으로" },
+      { id: "e2", name: "비극적 각성", sub: "잃고 나서 깨달음" },
+      { id: "e3", name: "열린 결말", sub: "여운을 남김" },
+      { id: "e4", name: "속죄 완성", sub: "죄를 갚고 평화" },
+      { id: "e5", name: "희생형 엔딩", sub: "타인을 위한 선택" },
+      { id: "e6", name: "순환형 엔딩", sub: "다시 시작되는 여정" },
+    ],
+  },
+  genre: {
+    label: "장르/톤",
+    icon: "▣",
+    sub: "분위기",
+    items: [
+      { id: "g1", name: "소년만화", sub: "성장·우정·배틀" },
+      { id: "g2", name: "치유·일상", sub: "따뜻함·회복" },
+      { id: "g3", name: "미스터리", sub: "긴장·반전" },
+      { id: "g4", name: "다크판타지", sub: "절망·구원" },
+      { id: "g5", name: "로맨스", sub: "감정·관계" },
+      { id: "g6", name: "개그·코미디", sub: "웃음·템포" },
+    ],
+  },
+  message: {
+    label: "메시지",
+    icon: "◐",
+    sub: "작품이 말하려는 것",
+    items: [
+      { id: "m1", name: "약함도 힘이 된다", sub: "취약성의 가치" },
+      { id: "m2", name: "혼자가 아니다", sub: "연결의 가치" },
+      { id: "m3", name: "선택이 사람을 만든다", sub: "의지의 가치" },
+      { id: "m4", name: "과거는 바꿀 수 없지만 의미는 바꿀 수 있다", sub: "해석의 자유" },
+      { id: "m5", name: "진짜 강함은 포기하지 않는 것", sub: "인내의 가치" },
+      { id: "m6", name: "용서는 상대가 아닌 자신을 위한 것", sub: "내면 해방" },
+    ],
+  },
+};
+
+const CATEGORY_ORDER = ["character","inner","desire","need","conflict","ending","genre","message"];
+
+function getRandom(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function App() {
+  const [selected, setSelected] = React.useState({});
+  const [activeCategory, setActiveCategory] = React.useState("character");
+  const [showResult, setShowResult] = React.useState(false);
+
+  function toggle(catId, itemId) {
+    setSelected(prev => ({
+      ...prev,
+      [catId]: prev[catId] === itemId ? null : itemId,
+    }));
+    setShowResult(false);
+  }
+
+  function randomAll() {
+    const result = {};
+    CATEGORY_ORDER.forEach(key => {
+      const items = DATA[key].items;
+      result[key] = getRandom(items).id;
+    });
+    setSelected(result);
+    setShowResult(true);
+  }
+
+  function reset() {
+    setSelected({});
+    setShowResult(false);
+  }
+
+  const totalSelected = CATEGORY_ORDER.filter(k => selected[k]).length;
+  const allSelected = CATEGORY_ORDER.every(k => selected[k]);
+
+  return (
+    <div style={{ display:"flex", flexDirection:"column", height:"100vh" }}>
+
+      {/* 헤더 */}
+      <div style={{
+        borderBottom:`1px solid ${BORDER}`,
+        padding:"0.9rem 1.2rem",
+        display:"flex",
+        alignItems:"center",
+        justifyContent:"space-between",
+        background:"#0e0e14",
+        flexShrink:0,
+      }}>
+        <div>
+          <div style={{ fontSize:"0.55rem", letterSpacing:"0.3em", color:"#333", marginBottom:"0.15rem" }}>NARRATIVE ENGINE</div>
+          <div style={{ fontSize:"0.95rem", color:"#e8e0d5", letterSpacing:"0.05em" }}>창작 설계 보드</div>
+        </div>
+        <div style={{ display:"flex", gap:"0.6rem", alignItems:"center" }}>
+          <div style={{ fontSize:"0.65rem", color: totalSelected > 0 ? ACCENT : "#333" }}>
+            {totalSelected} / {CATEGORY_ORDER.length}
+          </div>
+          <button onClick={randomAll} style={{
+            padding:"0.4rem 0.8rem",
+            background:"transparent",
+            border:`1px solid #333`,
+            color:"#666",
+            fontSize:"0.65rem",
+            cursor:"pointer",
+            letterSpacing:"0.1em",
+            borderRadius:"1px",
+          }}>랜덤</button>
+          <button onClick={reset} style={{
+            padding:"0.4rem 0.8rem",
+            background:"transparent",
+            border:`1px solid #222`,
+            color:"#444",
+            fontSize:"0.65rem",
+            cursor:"pointer",
+            letterSpacing:"0.1em",
+            borderRadius:"1px",
+          }}>초기화</button>
+        </div>
+      </div>
+
+      <div style={{ display:"flex", flex:1, overflow:"hidden" }}>
+
+        {/* 왼쪽 카테고리 탭 */}
+        <div style={{
+          width:"110px", minWidth:"110px",
+          borderRight:`1px solid ${BORDER}`,
+          background:"#0e0e14",
+          overflowY:"auto",
+        }}>
+          {CATEGORY_ORDER.map((key, i) => {
+            const cat = DATA[key];
+            const isActive = activeCategory === key;
+            const isDone = !!selected[key];
+            return (
+              <div key={key} onClick={() => setActiveCategory(key)} style={{
+                padding:"0.85rem 0.8rem",
+                cursor:"pointer",
+                borderLeft: isActive ? `2px solid ${ACCENT}` : "2px solid transparent",
+                background: isActive ? CARD_BG : "transparent",
+                transition:"all 0.15s",
+              }}>
+                <div style={{ fontSize:"0.55rem", color: isDone ? ACCENT : "#2a2a35", marginBottom:"0.2rem" }}>
+                  {isDone ? "✓" : `0${i+1}`}
+                </div>
+                <div style={{ fontSize:"0.65rem", color: isActive ? "#e8e0d5" : isDone ? ACCENT : "#444", lineHeight:1.4 }}>
+                  {cat.label}
+                </div>
+                <div style={{ fontSize:"0.55rem", color:"#2a2a35", marginTop:"0.15rem" }}>
+                  {cat.icon}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* 중앙 카드 그리드 */}
+        <div style={{ flex:1, padding:"1.2rem", overflowY:"auto" }}>
+          {CATEGORY_ORDER.map(key => {
+            if (activeCategory !== key) return null;
+            const cat = DATA[key];
+            return (
+              <div key={key}>
+                <div style={{ marginBottom:"1rem" }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:"0.5rem", marginBottom:"0.2rem" }}>
+                    <span style={{ color:ACCENT }}>{cat.icon}</span>
+                    <span style={{ fontSize:"0.85rem", color:"#e8e0d5" }}>{cat.label}</span>
+                  </div>
+                  <div style={{ fontSize:"0.6rem", color:"#333", letterSpacing:"0.1em" }}>{cat.sub}</div>
+                </div>
+                <div style={{
+                  display:"grid",
+                  gridTemplateColumns:"repeat(auto-fill, minmax(150px, 1fr))",
+                  gap:"0.7rem",
+                }}>
+                  {cat.items.map(item => {
+                    const isSel = selected[key] === item.id;
+                    return (
+                      <div key={item.id} onClick={() => toggle(key, item.id)} style={{
+                        background: isSel ? `${ACCENT}18` : CARD_BG,
+                        border:`1px solid ${isSel ? ACCENT : BORDER}`,
+                        borderRadius:"2px",
+                        padding:"0.9rem",
+                        cursor:"pointer",
+                        transition:"all 0.15s",
+                        transform: isSel ? "translateY(-2px)" : "none",
+                      }}>
+                        <div style={{ fontSize:"0.82rem", color: isSel ? ACCENT : "#c8c0b8", marginBottom:"0.25rem" }}>
+                          {item.name}
+                        </div>
+                        <div style={{ fontSize:"0.6rem", color:"#333" }}>{item.sub}</div>
+                        {isSel && <div style={{ fontSize:"0.5rem", color:ACCENT, marginTop:"0.5rem", letterSpacing:"0.15em" }}>✓ 장착됨</div>}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* 다음 단계 */}
+                {CATEGORY_ORDER.indexOf(key) < CATEGORY_ORDER.length - 1 && (
+                  <div onClick={() => setActiveCategory(CATEGORY_ORDER[CATEGORY_ORDER.indexOf(key)+1])} style={{
+                    marginTop:"1.2rem",
+                    padding:"0.5rem",
+                    textAlign:"center",
+                    fontSize:"0.6rem",
+                    color:"#2a2a35",
+                    cursor:"pointer",
+                    letterSpacing:"0.2em",
+                    borderTop:`1px solid ${BORDER}`,
+                  }}>
+                    다음 단계 →
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* 오른쪽 장착 패널 */}
+        <div style={{
+          width:"170px", minWidth:"170px",
+          borderLeft:`1px solid ${BORDER}`,
+          background:"#0e0e14",
+          padding:"1rem 0.9rem",
+          overflowY:"auto",
+          display:"flex",
+          flexDirection:"column",
+        }}>
+          <div style={{ fontSize:"0.55rem", color:"#2a2a35", letterSpacing:"0.25em", marginBottom:"0.8rem" }}>
+            장착 목록
+          </div>
+
+          {CATEGORY_ORDER.map(key => {
+            const cat = DATA[key];
+            const selId = selected[key];
+            const selItem = selId ? cat.items.find(i => i.id === selId) : null;
+            return (
+              <div key={key} style={{
+                marginBottom:"0.7rem",
+                paddingBottom:"0.7rem",
+                borderBottom:`1px solid ${BORDER}`,
+              }}>
+                <div style={{ fontSize:"0.52rem", color:"#2a2a35", letterSpacing:"0.08em", marginBottom:"0.25rem" }}>
+                  {cat.icon} {cat.label}
+                </div>
+                <div style={{ fontSize:"0.72rem", color: selItem ? "#e8e0d5" : "#1e1e2e" }}>
+                  {selItem ? selItem.name : "—"}
+                </div>
+              </div>
+            );
+          })}
+
+          <div style={{ flex:1 }} />
+
+          {/* 완성 버튼 */}
+          <div onClick={() => allSelected && setShowResult(true)} style={{
+            padding:"0.7rem",
+            textAlign:"center",
+            background: allSelected ? `${ACCENT}20` : "transparent",
+            border:`1px solid ${allSelected ? ACCENT : "#1e1e2e"}`,
+            borderRadius:"1px",
+            fontSize:"0.65rem",
+            color: allSelected ? ACCENT : "#1e1e2e",
+            cursor: allSelected ? "pointer" : "default",
+            letterSpacing:"0.15em",
+            transition:"all 0.3s",
+            marginTop:"0.5rem",
+          }}>
+            {allSelected ? "뼈대 완성 →" : "모두 선택하면\n완성"}
+          </div>
+        </div>
+      </div>
+
+      {/* 결과 오버레이 */}
+      {showResult && (
+        <div onClick={() => setShowResult(false)} style={{
+          position:"fixed", inset:0,
+          background:"rgba(0,0,0,0.88)",
+          display:"flex", alignItems:"center", justifyContent:"center",
+          padding:"1.5rem", zIndex:100,
+        }}>
+          <div onClick={e => e.stopPropagation()} style={{
+            background:CARD_BG,
+            border:`1px solid ${ACCENT}50`,
+            borderRadius:"2px",
+            padding:"1.8rem",
+            maxWidth:"460px", width:"100%",
+            maxHeight:"85vh", overflowY:"auto",
+          }}>
+            <div style={{ fontSize:"0.55rem", color:ACCENT, letterSpacing:"0.3em", marginBottom:"1.2rem" }}>
+              ✓ 서사 뼈대 완성
+            </div>
+
+            {CATEGORY_ORDER.map(key => {
+              const cat = DATA[key];
+              const selItem = cat.items.find(i => i.id === selected[key]);
+              if (!selItem) return null;
+              return (
+                <div key={key} style={{
+                  display:"flex", gap:"0.8rem",
+                  marginBottom:"0.9rem", paddingBottom:"0.9rem",
+                  borderBottom:`1px solid ${BORDER}`,
+                }}>
+                  <div style={{ fontSize:"0.55rem", color:"#333", minWidth:"60px", paddingTop:"0.15rem" }}>
+                    {cat.label}
+                  </div>
+                  <div>
+                    <div style={{ fontSize:"0.85rem", color:"#e8e0d5" }}>{selItem.name}</div>
+                    <div style={{ fontSize:"0.6rem", color:"#444", marginTop:"0.15rem" }}>{selItem.sub}</div>
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* 서사 씨앗 */}
+            <div style={{
+              background:"#0d0d0f",
+              border:`1px solid ${BORDER}`,
+              padding:"1rem", marginTop:"0.5rem", borderRadius:"1px",
+            }}>
+              <div style={{ fontSize:"0.52rem", color:"#2a2a35", letterSpacing:"0.2em", marginBottom:"0.5rem" }}>서사 씨앗</div>
+              <div style={{ fontSize:"0.75rem", color:"#666", lineHeight:1.9 }}>
+                「{selected.character && DATA.character.items.find(i=>i.id===selected.character)?.name}」은<br/>
+                「{selected.desire && DATA.desire.items.find(i=>i.id===selected.desire)?.name}」을 원하지만,<br/>
+                「{selected.conflict && DATA.conflict.items.find(i=>i.id===selected.conflict)?.name}」<br/>
+                진짜 과제는 「{selected.need && DATA.need.items.find(i=>i.id===selected.need)?.name}」이다.
+              </div>
+            </div>
+
+            <div onClick={() => setShowResult(false)} style={{
+              marginTop:"1.2rem", textAlign:"center",
+              fontSize:"0.6rem", color:"#333",
+              cursor:"pointer", letterSpacing:"0.2em",
+            }}>
+              닫기
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
