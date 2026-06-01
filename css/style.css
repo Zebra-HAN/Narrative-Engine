@@ -1,25 +1,125 @@
-
-:root{
---bg:#0a0a0d;
---panel:#141419;
---gold:#c9a96e;
---text:#f5f5f5;
---sub:#b9b9b9;
---line:#27272f;
+/* ══════════════════════════════════════════
+   CSS 변수 (색상 시스템)
+══════════════════════════════════════════ */
+:root {
+  --bg:       #080808;
+  --bg2:      #0f0f0f;
+  --bg3:      #141414;
+  --bg4:      #1a1a1a;
+  --border:   #252525;
+  --border2:  #2e2e2e;
+  --gold:     #c9a96e;
+  --gold2:    #e8d5a3;
+  --gold-dim: #7a6340;
+  --text:     #f0ece4;
+  --text2:    #a89f90;
+  --text3:    #6b6358;
 }
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:sans-serif}
-.header{padding:20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between}
-.brand{letter-spacing:.25em;color:var(--gold);font-size:12px}
-.title{font-size:24px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;padding:30px}
-.card{background:linear-gradient(180deg,#17171d,#121216);border:1px solid var(--line);padding:24px;cursor:pointer;transition:.25s}
-.card:hover{transform:translateY(-4px);border-color:var(--gold);box-shadow:0 10px 30px rgba(201,169,110,.15)}
-.card h3{margin:0 0 10px 0;color:var(--text)}
-.card p{margin:0;color:var(--sub)}
-.page{padding:24px}
-.btn{background:#18181f;color:white;border:1px solid var(--line);padding:10px 14px;margin:4px;cursor:pointer}
-.btn:hover{border-color:var(--gold)}
-.mini{position:fixed;left:12px;right:12px;bottom:12px;background:#111;border:1px solid var(--line);padding:10px}
-.tag{display:inline-block;padding:4px 8px;margin:4px;border:1px solid #444;color:var(--gold)}
-@media(max-width:768px){.grid{grid-template-columns:1fr 1fr;padding:16px}.title{font-size:18px}}
+
+/* ══════════════════════════════════════════
+   기본 리셋
+══════════════════════════════════════════ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans KR', sans-serif;
+  font-weight: 300;
+  overflow: hidden;
+  height: 100vh;
+}
+
+::-webkit-scrollbar { width: 3px; height: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* ══════════════════════════════════════════
+   오프닝
+══════════════════════════════════════════ */
+#opening {
+  position: fixed; inset: 0;
+  background: #000;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.9s ease;
+}
+#opening.fade-out { opacity: 0; pointer-events: none; }
+
+.logo-wrap {
+  position: relative;
+  text-align: center;
+  opacity: 0;
+  animation: logoIn 0.4s ease 0.3s forwards;
+}
+@keyframes logoIn { to { opacity: 1; } }
+
+.logo-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-size: clamp(1.8rem, 5vw, 3.2rem);
+  letter-spacing: 0.55em;
+  color: var(--gold);
+  clip-path: inset(0 100% 0 0);
+  animation: revealL 1.5s cubic-bezier(0.25, 0, 0.15, 1) 0.4s forwards;
+  position: relative;
+}
+.logo-text::after {
+  content: '';
+  position: absolute; top: 0; left: -50%; width: 40%; height: 100%;
+  background: linear-gradient(105deg, transparent 20%, rgba(255,240,190,0.6) 50%, transparent 80%);
+  animation: sheen 1.5s ease 0.4s forwards;
+  pointer-events: none;
+}
+@keyframes revealL { to { clip-path: inset(0 0% 0 0); } }
+@keyframes sheen { 0%{left:-50%;opacity:0} 10%{opacity:1} 100%{left:130%;opacity:0} }
+
+.logo-sub {
+  font-family: 'Noto Sans KR', sans-serif;
+  font-weight: 300;
+  font-size: 0.6rem;
+  letter-spacing: 0.45em;
+  color: var(--text3);
+  margin-top: 0.7rem;
+  opacity: 0;
+  animation: fadeInSub 0.6s ease 1.6s forwards;
+}
+@keyframes fadeInSub { to { opacity: 1; } }
+
+.logo-line {
+  width: 0; height: 1px; margin: 0.5rem auto 0;
+  background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+  animation: lineEx 0.7s ease 1.8s forwards;
+}
+@keyframes lineEx { to { width: 70%; } }
+
+.logo-glow {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 140%; height: 300%;
+  background: radial-gradient(ellipse, rgba(201,169,110,0.1) 0%, transparent 60%);
+  opacity: 0;
+  animation: glowIn 1s ease 0.8s forwards;
+  pointer-events: none;
+}
+@keyframes glowIn { to { opacity: 1; } }
+
+/* ══════════════════════════════════════════
+   앱 루트
+══════════════════════════════════════════ */
+#app-root {
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+#app-root.visible { opacity: 1; }
+
+/* ══════════════════════════════════════════
+   공통 컴포넌트
+══════════════════════════════════════════ */
+.btn-ghost {
+  background: transp
