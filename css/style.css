@@ -122,4 +122,460 @@ body {
    공통 컴포넌트
 ══════════════════════════════════════════ */
 .btn-ghost {
-  background: transp
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--text3);
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  padding: 0.35rem 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-ghost:hover {
+  border-color: var(--gold-dim);
+  color: var(--gold);
+}
+
+.tag {
+  display: inline-block;
+  font-size: 0.55rem;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+  background: rgba(201,169,110,0.08);
+  border: 1px solid rgba(201,169,110,0.2);
+  padding: 0.15rem 0.45rem;
+  border-radius: 1px;
+  white-space: nowrap;
+}
+
+/* ══════════════════════════════════════════
+   헤더
+══════════════════════════════════════════ */
+.app-header {
+  height: 48px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.2rem;
+  flex-shrink: 0;
+}
+.header-brand {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.9rem;
+  letter-spacing: 0.35em;
+  color: var(--gold);
+  font-weight: 300;
+  cursor: pointer;
+}
+.header-brand:hover { color: var(--gold2); }
+
+.header-nav {
+  display: flex;
+  gap: 0;
+  height: 100%;
+}
+.header-nav-item {
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  color: var(--text3);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+}
+.header-nav-item:hover { color: var(--text2); }
+.header-nav-item.active {
+  color: var(--gold);
+  border-bottom-color: var(--gold);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+/* ══════════════════════════════════════════
+   홈 화면
+══════════════════════════════════════════ */
+.home-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+.home-eyebrow {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.5em;
+  color: var(--gold-dim);
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+.home-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  max-width: 680px;
+  width: 100%;
+}
+.home-btn {
+  background: var(--bg2);
+  border: none;
+  padding: 2.4rem 2rem;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  position: relative;
+  overflow: hidden;
+}
+.home-btn::before {
+  content: '';
+  position: absolute; top: 0; left: 0;
+  width: 2px; height: 0;
+  background: var(--gold);
+  transition: height 0.3s ease;
+}
+.home-btn:hover { background: var(--bg3); }
+.home-btn:hover::before { height: 100%; }
+
+.home-btn-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.75rem;
+  color: var(--gold-dim);
+  letter-spacing: 0.2em;
+}
+.home-btn-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: var(--text);
+  letter-spacing: 0.05em;
+}
+.home-btn-sub {
+  font-size: 0.6rem;
+  color: var(--text3);
+  letter-spacing: 0.12em;
+}
+.home-btn-arrow {
+  font-size: 0.8rem;
+  color: var(--gold-dim);
+  margin-top: 1rem;
+  transition: transform 0.2s, color 0.2s;
+}
+.home-btn:hover .home-btn-arrow {
+  transform: translateX(4px);
+  color: var(--gold);
+}
+
+/* ══════════════════════════════════════════
+   섹션 레이아웃
+══════════════════════════════════════════ */
+.engine-layout {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* 좌측 사이드바 */
+.sidebar {
+  width: 190px;
+  min-width: 190px;
+  border-right: 1px solid var(--border);
+  background: var(--bg2);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+.sidebar-section-title {
+  font-size: 0.48rem;
+  letter-spacing: 0.35em;
+  color: var(--text3);
+  padding: 1rem 1rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-item {
+  padding: 0.75rem 1rem;
+  font-size: 0.68rem;
+  color: var(--text3);
+  cursor: pointer;
+  letter-spacing: 0.06em;
+  border-left: 2px solid transparent;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sidebar-item:hover { color: var(--text2); background: var(--bg3); }
+.sidebar-item.active {
+  color: var(--gold);
+  border-left-color: var(--gold);
+  background: var(--bg3);
+}
+.sidebar-item-count {
+  font-size: 0.5rem;
+  color: var(--gold-dim);
+  background: rgba(201,169,110,0.1);
+  padding: 0.1rem 0.35rem;
+  border-radius: 1px;
+}
+
+/* 중앙 패널 */
+.main-panel {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.8rem;
+  background: var(--bg);
+}
+.panel-header {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+.panel-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.6rem;
+  font-weight: 400;
+  color: var(--text);
+  letter-spacing: 0.05em;
+}
+.panel-subtitle {
+  font-size: 0.58rem;
+  color: var(--text3);
+  letter-spacing: 0.2em;
+  margin-top: 0.3rem;
+}
+
+/* 검색 바 */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.2rem;
+}
+.search-input {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 0.65rem;
+  padding: 0.4rem 0.8rem;
+  letter-spacing: 0.05em;
+  outline: none;
+  flex: 1;
+  max-width: 280px;
+  transition: border-color 0.2s;
+}
+.search-input:focus { border-color: var(--gold-dim); }
+.search-input::placeholder { color: var(--text3); }
+
+/* 옵션 카드 그리드 */
+.option-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.6rem;
+}
+.option-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  padding: 0.85rem 1rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  border-radius: 1px;
+  position: relative;
+}
+.option-card:hover {
+  border-color: var(--border2);
+  background: var(--bg3);
+}
+.option-card.selected {
+  border-color: var(--gold);
+  background: rgba(201,169,110,0.06);
+}
+.option-card-name {
+  font-size: 0.78rem;
+  color: var(--text2);
+  margin-bottom: 0.2rem;
+  transition: color 0.15s;
+}
+.option-card.selected .option-card-name { color: var(--gold); }
+.option-card-sub {
+  font-size: 0.55rem;
+  color: var(--text3);
+  letter-spacing: 0.05em;
+}
+.option-card-check {
+  position: absolute; top: 0.5rem; right: 0.6rem;
+  font-size: 0.5rem;
+  color: var(--gold);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.option-card.selected .option-card-check { opacity: 1; }
+
+/* 사전 카드 (나침반용) */
+.dict-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  padding: 1.2rem;
+  margin-bottom: 0.5rem;
+  border-radius: 1px;
+  transition: border-color 0.2s;
+}
+.dict-card:hover { border-color: var(--border2); }
+.dict-card-title {
+  font-size: 0.85rem;
+  color: var(--text);
+  margin-bottom: 0.3rem;
+}
+.dict-card-desc {
+  font-size: 0.6rem;
+  color: var(--text3);
+  line-height: 1.8;
+}
+.dict-card-tags {
+  margin-top: 0.6rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+/* 우측 요약 패널 */
+.summary-panel {
+  width: 190px;
+  min-width: 190px;
+  border-left: 1px solid var(--border);
+  background: var(--bg2);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+.summary-panel-title {
+  font-size: 0.48rem;
+  letter-spacing: 0.35em;
+  color: var(--text3);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.5rem;
+}
+.summary-section-title {
+  font-size: 0.48rem;
+  letter-spacing: 0.3em;
+  color: var(--text3);
+  margin-bottom: 0.4rem;
+}
+.summary-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.summary-empty {
+  font-size: 0.55rem;
+  color: var(--border2);
+}
+
+/* ══════════════════════════════════════════
+   하단 미니맵
+══════════════════════════════════════════ */
+.minimap {
+  height: 52px;
+  border-top: 1px solid var(--border);
+  background: var(--bg2);
+  display: flex;
+  align-items: center;
+  padding: 0 1.2rem;
+  gap: 1.5rem;
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+.minimap::-webkit-scrollbar { height: 0; }
+.minimap-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+.minimap-label {
+  font-size: 0.48rem;
+  letter-spacing: 0.2em;
+  color: var(--text3);
+  white-space: nowrap;
+}
+.minimap-tags {
+  display: flex;
+  gap: 0.3rem;
+}
+.minimap-divider {
+  width: 1px; height: 20px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+/* ══════════════════════════════════════════
+   모바일 대응
+══════════════════════════════════════════ */
+@media (max-width: 640px) {
+  body { overflow: auto; }
+  #app-root { height: auto; }
+  #app-root.visible { overflow: auto; }
+
+  .engine-layout { flex-direction: column; height: auto; overflow: visible; }
+
+  .sidebar {
+    width: 100%; min-width: unset;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    flex-direction: row;
+    overflow-x: auto; overflow-y: hidden;
+    height: auto;
+  }
+  .sidebar::-webkit-scrollbar { height: 0; }
+  .sidebar-section-title { display: none; }
+  .sidebar-item {
+    padding: 0.7rem 0.85rem;
+    border-left: none;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .sidebar-item.active {
+    border-left-color: transparent;
+    border-bottom-color: var(--gold);
+  }
+  .sidebar-item-count { display: none; }
+
+  .summary-panel {
+    width: 100%; min-width: unset;
+    border-left: none;
+    border-top: 1px solid var(--border);
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    height: auto;
+    padding: 0.8rem;
+  }
+
+  .home-grid { grid-template-columns: 1fr; }
+  .home-btn { padding: 1.5rem 1.2rem; }
+  .header-nav { display: none; }
+  .main-panel { padding: 1rem; }
+  .option-grid { grid-template-columns: repeat(2, 1fr); }
+}
