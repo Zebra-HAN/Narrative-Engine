@@ -1,15 +1,25 @@
 
 :root{
---bg:#0b0b0f;--panel:#13131a;--gold:#c9a96e;--text:#f3f3f3;--sub:#b8b8b8;
+--bg:#0a0a0d;
+--panel:#141419;
+--gold:#c9a96e;
+--text:#f5f5f5;
+--sub:#b9b9b9;
+--line:#27272f;
 }
+*{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font-family:sans-serif}
-.header{padding:16px;border-bottom:1px solid #222}
-.home-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;padding:20px}
-.card{background:var(--panel);border:1px solid #2a2a2a;padding:20px;cursor:pointer}
-.card:hover{border-color:var(--gold)}
-.mini{position:fixed;bottom:10px;left:10px;right:10px;background:#111;padding:10px;border:1px solid #333}
-.tag{display:inline-block;margin:3px;padding:4px 8px;background:#1b1b22;border:1px solid #333}
-.page{padding:20px}
-.btn{padding:8px 12px;margin:4px;cursor:pointer}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
-@media(max-width:768px){.home-grid{grid-template-columns:1fr 1fr}}
+.header{padding:20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between}
+.brand{letter-spacing:.25em;color:var(--gold);font-size:12px}
+.title{font-size:24px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;padding:30px}
+.card{background:linear-gradient(180deg,#17171d,#121216);border:1px solid var(--line);padding:24px;cursor:pointer;transition:.25s}
+.card:hover{transform:translateY(-4px);border-color:var(--gold);box-shadow:0 10px 30px rgba(201,169,110,.15)}
+.card h3{margin:0 0 10px 0;color:var(--text)}
+.card p{margin:0;color:var(--sub)}
+.page{padding:24px}
+.btn{background:#18181f;color:white;border:1px solid var(--line);padding:10px 14px;margin:4px;cursor:pointer}
+.btn:hover{border-color:var(--gold)}
+.mini{position:fixed;left:12px;right:12px;bottom:12px;background:#111;border:1px solid var(--line);padding:10px}
+.tag{display:inline-block;padding:4px 8px;margin:4px;border:1px solid #444;color:var(--gold)}
+@media(max-width:768px){.grid{grid-template-columns:1fr 1fr;padding:16px}.title{font-size:18px}}
