@@ -1,58 +1,1852 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Narrative Engine</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Narrative Builder — 창조주의 설계도</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Noto+Serif+KR:wght@300;400;500;600&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet" />
 
-  <!-- 스타일 -->
-  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ═══════════════════════════════════════════════
+       RESET & ROOT VARIABLES
+    ═══════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  <!-- React / Babel -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+    :root {
+      --bg-deepest:    #080a0f;
+      --bg-dark:       #0d1017;
+      --bg-panel:      #111520;
+      --bg-panel2:     #161c2a;
+      --bg-bar:        #0a0d14;
+
+      --gold-dim:      #8a7340;
+      --gold-mid:      #c9a84c;
+      --gold-bright:   #e8c96a;
+      --gold-glow:     #f5d98a;
+      --bronze:        #a0693a;
+      --ivory:         #f0e8d5;
+      --ivory-dim:     #c8bfa8;
+      --lavender:      #9b8ec4;
+      --lavender-dim:  #6b5e8a;
+
+      --text-primary:  #e8dfc8;
+      --text-secondary:#a09070;
+      --text-muted:    #5a5040;
+
+      --border-gold:   rgba(180, 145, 60, 0.35);
+      --border-gold2:  rgba(200, 165, 70, 0.6);
+      --shadow-gold:   0 0 20px rgba(180,145,50,0.15);
+      --shadow-deep:   0 8px 32px rgba(0,0,0,0.7);
+
+      --radius-card:   10px;
+      --radius-btn:    8px;
+      --radius-panel:  12px;
+
+      --transition-smooth: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-fast:   0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: var(--bg-deepest);
+      color: var(--text-primary);
+      font-family: 'Noto Sans KR', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      user-select: none;
+    }
+
+    /* ═══════════════════════════════════════════════
+       SCREEN MANAGEMENT
+    ═══════════════════════════════════════════════ */
+    .screen {
+      position: fixed; inset: 0;
+      width: 100%; height: 100%;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+    .screen.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    /* ═══════════════════════════════════════════════
+       PAGE TURN ANIMATION
+    ═══════════════════════════════════════════════ */
+    .page-turn-overlay {
+      position: fixed; inset: 0; z-index: 9999;
+      pointer-events: none;
+      perspective: 1200px;
+    }
+    .page-turn-flap {
+      position: absolute; inset: 0;
+      background: #f5f0e8;
+      transform-origin: left center;
+      transform: rotateY(0deg);
+      backface-visibility: hidden;
+      display: none;
+      box-shadow: -10px 0 40px rgba(0,0,0,0.5);
+    }
+    .page-turn-flap.turning {
+      display: block;
+      animation: pageTurn 0.75s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    @keyframes pageTurn {
+      0%   { transform: rotateY(0deg); clip-path: polygon(100% 0%, 100% 100%, 0% 100%, 0% 0%); }
+      100% { transform: rotateY(-180deg); clip-path: polygon(100% 0%, 100% 100%, 0% 100%, 0% 0%); }
+    }
+
+    /* 책장 넘기기 — 오른쪽 하단에서 왼쪽으로 */
+    .page-curtain {
+      position: fixed; inset: 0; z-index: 9998;
+      pointer-events: none;
+      overflow: hidden;
+      display: none;
+    }
+    .page-curtain.active { display: block; }
+    .page-curtain-inner {
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, #f5efe0 0%, #e8dfc8 40%, #d5c9b0 100%);
+      transform-origin: right bottom;
+      transform: translate(100%, 100%);
+    }
+    .page-curtain-inner.animate {
+      animation: curtainFlip 0.75s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+    }
+    @keyframes curtainFlip {
+      0%   { transform: translate(100%, 100%) scale(0.1); opacity: 0.9; }
+      40%  { transform: translate(0%, 0%) scale(1.05); opacity: 1; }
+      100% { transform: translate(-100%, 0%) scale(1); opacity: 0; }
+    }
+
+
+    /* ═══════════════════════════════════════════════
+       OPENING SCREEN
+    ═══════════════════════════════════════════════ */
+    #screen-opening {
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    .opening-content {
+      text-align: center;
+      opacity: 0;
+      transform: scale(0.88);
+    }
+    .opening-content.animate {
+      animation: openingZoom 2.8s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+    }
+    @keyframes openingZoom {
+      0%   { opacity: 0; transform: scale(0.88); }
+      30%  { opacity: 1; transform: scale(0.94); }
+      70%  { opacity: 1; transform: scale(0.99); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    .opening-title {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(2rem, 8vw, 3.8rem);
+      font-weight: 700;
+      color: var(--ivory);
+      letter-spacing: 0.12em;
+      text-shadow: 0 0 40px rgba(220,185,100,0.3);
+    }
+    .opening-divider-wrap {
+      position: relative;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 8px 0;
+      overflow: hidden;
+    }
+    .opening-divider {
+      height: 1.5px;
+      width: 0;
+      background: linear-gradient(90deg, transparent, var(--gold-bright) 20%, var(--gold-glow) 50%, var(--gold-bright) 80%, transparent);
+      box-shadow: 0 0 8px var(--gold-bright), 0 0 20px rgba(230,200,100,0.4);
+      transition: width 1.0s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .opening-divider.expand {
+      width: 220px;
+    }
+    /* 중앙 빛 번쩍임 */
+    .opening-divider::before {
+      content: '';
+      position: absolute;
+      left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--gold-glow);
+      box-shadow: 0 0 12px 4px var(--gold-bright);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .opening-divider.flash::before { opacity: 1; }
+
+    .opening-subtitle {
+      font-family: 'Noto Serif KR', serif;
+      font-size: clamp(0.85rem, 3vw, 1.15rem);
+      font-weight: 300;
+      color: var(--gold-mid);
+      letter-spacing: 0.35em;
+      text-transform: none;
+    }
+
+
+    /* ═══════════════════════════════════════════════
+       HOME SCREEN
+    ═══════════════════════════════════════════════ */
+    #screen-home {
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 90;
+    }
+    .home-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      width: 100%;
+      max-width: 420px;
+      padding: 24px;
+    }
+    .home-btn {
+      width: 100%;
+      border: none;
+      border-radius: 16px;
+      cursor: pointer;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.12);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .home-btn:active {
+      transform: scale(0.97);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+    }
+    .home-btn-inner {
+      width: 100%;
+      height: 175px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: flex-end;
+      padding: 16px 20px;
+    }
+    .home-btn-label {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+      z-index: 2;
+      position: relative;
+    }
+    .home-btn-sublabel {
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      z-index: 2;
+      position: relative;
+      margin-top: 2px;
+      opacity: 0.8;
+    }
+
+    /* 서사 구조 버튼 — 하얀/밝은 테마 */
+    #btn-narrative {
+      background: linear-gradient(135deg, #f8f4ed 0%, #ede5d5 50%, #e0d5bf 100%);
+    }
+    #btn-narrative .home-btn-label { color: #3a2e1a; }
+    #btn-narrative .home-btn-sublabel { color: #7a6540; }
+
+    /* 창작 시작 버튼 — 어두운 우주 테마 */
+    #btn-create {
+      background: linear-gradient(135deg, #05080f 0%, #0a1020 50%, #0e1530 100%);
+    }
+    #btn-create .home-btn-label { color: var(--ivory); }
+    #btn-create .home-btn-sublabel { color: var(--gold-mid); }
+
+    /* 서사 구조 SVG 일러스트 */
+    .narrative-illustration {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+    }
+
+    /* 창작 시작 SVG 일러스트 */
+    .create-illustration {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+    }
+
+
+    /* ═══════════════════════════════════════════════
+       NARRATIVE STRUCTURE PAGE
+    ═══════════════════════════════════════════════ */
+    #screen-narrative {
+      background: var(--bg-deepest);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 80;
+      padding: 24px;
+      gap: 24px;
+    }
+    .narrative-header {
+      text-align: center;
+    }
+    .narrative-header h2 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.1rem;
+      color: var(--gold-mid);
+      letter-spacing: 0.2em;
+    }
+    .narrative-divider {
+      width: 80px; height: 1px;
+      background: var(--gold-dim);
+      margin: 10px auto;
+    }
+
+    .narrative-main-row {
+      display: flex;
+      gap: 14px;
+      width: 100%;
+      max-width: 420px;
+    }
+    .narrative-main-btn {
+      flex: 1;
+      aspect-ratio: 0.85;
+      border: 1px solid var(--border-gold2);
+      border-radius: var(--radius-panel);
+      background: linear-gradient(160deg, var(--bg-panel2) 0%, var(--bg-panel) 100%);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 16px 10px;
+      box-shadow: var(--shadow-gold), var(--shadow-deep);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .narrative-main-btn:active { transform: scale(0.96); }
+    .narrative-main-btn-icon { font-size: 2.2rem; }
+    .narrative-main-btn-title {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 0.85rem;
+      color: var(--gold-bright);
+      text-align: center;
+      line-height: 1.5;
+    }
+    .narrative-main-btn-sub {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      text-align: center;
+    }
+
+    .narrative-sub-btn {
+      width: 100%;
+      max-width: 420px;
+      border: 1px solid var(--border-gold);
+      border-radius: var(--radius-btn);
+      background: linear-gradient(90deg, var(--bg-panel) 0%, var(--bg-panel2) 100%);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 20px;
+      box-shadow: var(--shadow-deep);
+      transition: transform 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .narrative-sub-btn:active { transform: scale(0.97); }
+    .narrative-sub-btn-icon { font-size: 1.4rem; }
+    .narrative-sub-btn-text {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 0.82rem;
+      color: var(--ivory-dim);
+    }
+
+    .narrative-back-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      padding: 8px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .narrative-back-btn:active { color: var(--gold-mid); }
+
+
+    /* ═══════════════════════════════════════════════
+       MAIN CREATIVE PAGE
+    ═══════════════════════════════════════════════ */
+    #screen-create {
+      background: var(--bg-deepest);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+      z-index: 70;
+    }
+
+    /* ── TOP PANEL ── */
+    .top-panel {
+      background: var(--bg-bar);
+      border-bottom: 1px solid var(--border-gold);
+      padding: 6px 10px 5px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .top-row1 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .profile-avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      border: 1.5px solid var(--gold-dim);
+      background: linear-gradient(135deg, var(--bg-panel2), var(--bg-deepest));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .minimap-panel {
+      flex: 1;
+      height: 34px;
+      border: 1px solid var(--border-gold);
+      border-radius: 6px;
+      background: var(--bg-panel);
+      overflow: hidden;
+      position: relative;
+    }
+    .minimap-svg {
+      width: 100%; height: 100%;
+    }
+
+    .top-row2 {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .top-icon-btn {
+      background: none; border: none; cursor: pointer;
+      color: var(--text-secondary);
+      font-size: 1rem; padding: 3px 5px;
+      border-radius: 4px;
+      transition: color 0.2s, background 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      line-height: 1;
+    }
+    .top-icon-btn:active { color: var(--gold-mid); background: rgba(180,145,60,0.1); }
+    .top-icon-btn.back-btn { font-size: 1.1rem; }
+
+    .reset-btns {
+      display: flex; gap: 5px; align-items: center;
+    }
+    .reset-btn {
+      background: rgba(100,80,40,0.15);
+      border: 1px solid var(--border-gold);
+      border-radius: 4px;
+      color: var(--text-secondary);
+      font-size: 0.6rem;
+      padding: 3px 7px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s, color 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+    .reset-btn:active { background: rgba(180,145,60,0.2); color: var(--gold-bright); }
+    #btn-partial-reset { min-width: 68px; }
+
+    /* ── SUBNAVIGATION (bar-style, horizontal scroll) ── */
+    .subnav-panel {
+      flex-shrink: 0;
+      background: linear-gradient(180deg, #0e1220 0%, #0a0d16 100%);
+      border-bottom: 1px solid var(--border-gold);
+      padding: 0 10px;
+      overflow: hidden;
+      position: relative;
+      height: 80px;
+    }
+    /* 바 테이블 느낌 배경 */
+    .subnav-panel::before {
+      content: '';
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--gold-dim) 30%, var(--gold-mid) 50%, var(--gold-dim) 70%, transparent);
+    }
+    /* 진열장 블러 배경 */
+    .subnav-bg {
+      position: absolute; inset: 0;
+      display: flex; align-items: flex-start;
+      padding-top: 4px;
+      gap: 4px;
+      opacity: 0.18;
+      pointer-events: none;
+    }
+    .subnav-bottle {
+      flex-shrink: 0;
+      width: 22px; height: 55px;
+      background: linear-gradient(180deg, #4a3a20 0%, #2a1a08 100%);
+      border-radius: 3px 3px 0 0;
+      filter: blur(1.5px);
+    }
+
+    .subnav-scroll {
+      display: flex;
+      align-items: center;
+      height: 100%;
+      gap: 14px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      padding: 0 4px;
+      position: relative;
+    }
+    .subnav-scroll::-webkit-scrollbar { display: none; }
+
+    .subnav-item {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      position: relative;
+      padding: 8px 4px 6px;
+    }
+    /* 마름모 (다이아몬드) 버튼 */
+    .diamond-btn {
+      width: 38px; height: 38px;
+      position: relative;
+      display: flex; align-items: center; justify-content: center;
+      transform: rotate(45deg);
+      border: 1.5px solid var(--border-gold);
+      border-radius: 4px;
+      background: linear-gradient(135deg, var(--bg-panel2), var(--bg-panel));
+      transition: background 0.25s, border-color 0.25s, box-shadow 0.25s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    }
+    .diamond-btn-icon {
+      transform: rotate(-45deg);
+      font-size: 1.1rem;
+      line-height: 1;
+    }
+    /* 그림자 (바 테이블) */
+    .diamond-shadow {
+      width: 30px; height: 5px;
+      background: radial-gradient(ellipse, rgba(0,0,0,0.5) 0%, transparent 70%);
+      margin-top: 2px;
+    }
+    .subnav-label {
+      font-size: 0.6rem;
+      color: var(--text-secondary);
+      letter-spacing: 0.05em;
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+    .subnav-item.active .diamond-btn {
+      background: linear-gradient(135deg, #1e1a08, #2a2210);
+      border-color: var(--gold-bright);
+      box-shadow: 0 0 12px rgba(200,170,70,0.4), 0 2px 8px rgba(0,0,0,0.5);
+    }
+    .subnav-item.active .subnav-label { color: var(--gold-bright); }
+    .subnav-item:active .diamond-btn { background: rgba(180,145,60,0.2); }
+
+    /* ── CENTER AREA ── */
+    .center-area {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+    .center-page {
+      position: absolute; inset: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 10px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--gold-dim) transparent;
+      opacity: 0;
+      transform: translateY(16px);
+      pointer-events: none;
+      transition: opacity 0.28s ease, transform 0.28s ease;
+    }
+    .center-page::-webkit-scrollbar { width: 3px; }
+    .center-page::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
+    .center-page.active {
+      opacity: 1; transform: translateY(0);
+      pointer-events: all;
+    }
+
+    /* 섹션 헤더 */
+    .section-label {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 0.7rem;
+      color: var(--gold-dim);
+      letter-spacing: 0.15em;
+      margin-bottom: 8px;
+      padding-left: 4px;
+      border-left: 2px solid var(--gold-dim);
+      padding-left: 8px;
+    }
+
+    /* 카드 그리드 */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px 5px;
+      margin-bottom: 16px;
+    }
+    @media (min-width: 500px) {
+      .card-grid { grid-template-columns: repeat(5, 1fr); }
+    }
+    @media (min-width: 700px) {
+      .card-grid { grid-template-columns: repeat(6, 1fr); }
+    }
+
+    .data-card {
+      aspect-ratio: 0.72;
+      border: 1px solid var(--border-gold);
+      border-radius: var(--radius-card);
+      background: linear-gradient(170deg, var(--bg-panel2) 0%, var(--bg-panel) 60%, #0d1018 100%);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      padding-bottom: 6px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(180,145,60,0.08);
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .data-card:active {
+      transform: scale(0.94);
+      border-color: var(--gold-mid);
+      box-shadow: 0 0 16px rgba(180,145,60,0.25);
+    }
+    .data-card.selected {
+      border-color: var(--gold-bright);
+      box-shadow: 0 0 14px rgba(200,170,70,0.35), 0 2px 8px rgba(0,0,0,0.5);
+    }
+    .data-card.selected::after {
+      content: '✓';
+      position: absolute; top: 4px; right: 5px;
+      font-size: 0.65rem;
+      color: var(--gold-bright);
+    }
+    .card-icon-area {
+      flex: 1;
+      width: 100%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      padding-top: 8px;
+    }
+    .card-name {
+      font-size: 0.6rem;
+      color: var(--ivory-dim);
+      text-align: center;
+      padding: 0 3px;
+      line-height: 1.3;
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+
+    /* 팝업 */
+    .popup-overlay {
+      position: fixed; inset: 0; z-index: 500;
+      background: rgba(0,0,0,0.75);
+      display: flex; align-items: flex-end;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .popup-overlay.active { opacity: 1; pointer-events: all; }
+    .popup-sheet {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      background: linear-gradient(180deg, var(--bg-panel2), var(--bg-panel));
+      border: 1px solid var(--border-gold2);
+      border-bottom: none;
+      border-radius: 16px 16px 0 0;
+      padding: 20px 18px 30px;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 -8px 40px rgba(0,0,0,0.6), 0 -2px 0 var(--gold-dim);
+    }
+    .popup-overlay.active .popup-sheet { transform: translateY(0); }
+    .popup-handle {
+      width: 36px; height: 3px;
+      background: var(--gold-dim);
+      border-radius: 2px;
+      margin: 0 auto 16px;
+    }
+    .popup-title {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 1.05rem;
+      color: var(--gold-bright);
+      margin-bottom: 8px;
+    }
+    .popup-desc {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+    .popup-select-btn {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--gold-dim);
+      border-radius: var(--radius-btn);
+      background: linear-gradient(90deg, rgba(120,100,40,0.2), rgba(80,65,25,0.15));
+      color: var(--gold-bright);
+      font-size: 0.85rem;
+      cursor: pointer;
+      font-family: 'Noto Sans KR', sans-serif;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .popup-select-btn:active { background: rgba(180,145,60,0.3); }
+    .popup-close {
+      position: absolute; top: 14px; right: 16px;
+      background: none; border: none; cursor: pointer;
+      color: var(--text-muted); font-size: 1.2rem;
+    }
+
+    /* ── BOTTOM NAV ── */
+    .bottom-nav {
+      flex-shrink: 0;
+      background: var(--bg-bar);
+      border-top: 1px solid var(--border-gold);
+      display: flex;
+      height: 62px;
+    }
+    .nav-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      border-right: 1px solid rgba(120,90,30,0.15);
+      padding: 0 2px;
+      position: relative;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.2s;
+    }
+    .nav-btn:last-child { border-right: none; }
+    .nav-btn:active { background: rgba(180,145,60,0.08); }
+    .nav-btn.active { background: rgba(180,145,60,0.06); }
+    .nav-btn.active::before {
+      content: '';
+      position: absolute; top: 0; left: 10%; right: 10%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold-bright), transparent);
+    }
+    .nav-icon {
+      font-size: 1.3rem;
+      line-height: 1;
+    }
+    .nav-label {
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+    .nav-btn.active .nav-label { color: var(--gold-bright); }
+
+
+    /* ═══════════════════════════════════════════════
+       EMPTY STATE
+    ═══════════════════════════════════════════════ */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      gap: 12px;
+      opacity: 0.4;
+    }
+    .empty-icon { font-size: 2.5rem; }
+    .empty-text {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      text-align: center;
+    }
+
+    /* 커튼 내려오는 전환 효과 */
+    .curtain-drop {
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 100%;
+      background: linear-gradient(180deg, var(--bg-panel2) 0%, transparent 100%);
+      transform: translateY(-100%);
+      pointer-events: none;
+      z-index: 10;
+    }
+    .curtain-drop.animate {
+      animation: curtainDown 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    @keyframes curtainDown {
+      0%   { transform: translateY(-100%); opacity: 1; }
+      60%  { transform: translateY(0%); opacity: 0.8; }
+      100% { transform: translateY(100%); opacity: 0; }
+    }
+
+    /* 서브메뉴 페이드인 */
+    @keyframes subnavReveal {
+      0%   { opacity: 0; transform: scale(0.85) rotate(45deg); }
+      100% { opacity: 1; transform: scale(1) rotate(45deg); }
+    }
+    .subnav-item .diamond-btn {
+      animation: none;
+    }
+    .subnav-item.reveal .diamond-btn {
+      animation: subnavReveal 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
+    }
+
+    /* 선택된 카운터 배지 */
+    .selection-badge {
+      position: absolute; top: -4px; right: -4px;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--gold-bright);
+      color: #1a1200;
+      font-size: 0.55rem;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 6px rgba(200,170,70,0.5);
+    }
+
+    /* 반응형: 태블릿/PC */
+    @media (min-width: 600px) {
+      .home-btn-inner { height: 200px; }
+      .subnav-panel { height: 90px; }
+      .diamond-btn { width: 44px; height: 44px; }
+    }
+  </style>
 </head>
 <body>
 
-  <!-- 오프닝 -->
-  <div id="opening">
-    <div class="logo-wrap">
-      <div class="logo-glow"></div>
-      <div class="logo-text">NARRATIVE ENGINE</div>
-      <div class="logo-sub">창작 설계 엔진</div>
-      <div class="logo-line"></div>
+<!-- ══════════════════════════════════════
+     OPENING SCREEN
+══════════════════════════════════════ -->
+<div id="screen-opening" class="screen active">
+  <div class="opening-content" id="opening-content">
+    <div class="opening-title">Narrative Builder</div>
+    <div class="opening-divider-wrap">
+      <div class="opening-divider" id="opening-divider"></div>
+    </div>
+    <div class="opening-subtitle">창조주의 설계도</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     HOME SCREEN
+══════════════════════════════════════ -->
+<div id="screen-home" class="screen">
+  <div class="home-container">
+
+    <!-- 서사 구조 버튼 -->
+    <button class="home-btn" id="btn-narrative" onclick="goToNarrative()">
+      <div class="home-btn-inner">
+        <!-- 서사 구조 일러스트 SVG -->
+        <svg class="narrative-illustration" viewBox="0 0 420 175" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+          <defs>
+            <radialGradient id="narGlow" cx="50%" cy="60%" r="55%">
+              <stop offset="0%" stop-color="#f8f0e0" />
+              <stop offset="100%" stop-color="#e0d4b8" />
+            </radialGradient>
+            <radialGradient id="rainbowCenter" cx="50%" cy="45%" r="40%">
+              <stop offset="0%" stop-color="rgba(255,255,255,0.9)" />
+              <stop offset="100%" stop-color="rgba(255,255,255,0)" />
+            </radialGradient>
+            <filter id="glow-soft">
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <rect width="420" height="175" fill="url(#narGlow)"/>
+          <!-- 배경: 신전 기둥들 -->
+          <rect x="30" y="55" width="18" height="100" rx="3" fill="rgba(200,185,150,0.4)"/>
+          <rect x="30" y="48" width="18" height="10" rx="2" fill="rgba(190,175,140,0.5)"/>
+          <rect x="55" y="65" width="16" height="90" rx="3" fill="rgba(200,185,150,0.3)"/>
+          <rect x="55" y="58" width="16" height="10" rx="2" fill="rgba(190,175,140,0.4)"/>
+          <rect x="78" y="70" width="14" height="85" rx="2" fill="rgba(200,185,150,0.25)"/>
+          <!-- 신전 지붕 -->
+          <polygon points="15,55 110,55 90,32 35,32" fill="rgba(185,170,135,0.35)"/>
+          <!-- 무지개 빛 (신성한 빛) -->
+          <ellipse cx="210" cy="20" rx="180" ry="60" fill="none" stroke="rgba(255,150,150,0.12)" stroke-width="10"/>
+          <ellipse cx="210" cy="20" rx="165" ry="52" fill="none" stroke="rgba(255,200,100,0.12)" stroke-width="10"/>
+          <ellipse cx="210" cy="20" rx="150" ry="44" fill="none" stroke="rgba(150,220,150,0.12)" stroke-width="10"/>
+          <ellipse cx="210" cy="20" rx="135" ry="36" fill="none" stroke="rgba(100,180,255,0.12)" stroke-width="10"/>
+          <ellipse cx="210" cy="20" rx="120" ry="28" fill="none" stroke="rgba(180,120,255,0.12)" stroke-width="10"/>
+          <!-- 두루마기 (펼쳐진) -->
+          <g transform="translate(110, 60)">
+            <rect x="0" y="20" width="90" height="60" rx="3" fill="rgba(245,238,220,0.9)" stroke="rgba(160,130,70,0.6)" stroke-width="1.5"/>
+            <rect x="-8" y="20" width="10" height="60" rx="5" fill="rgba(200,175,120,0.8)"/>
+            <rect x="88" y="20" width="10" height="60" rx="5" fill="rgba(200,175,120,0.8)"/>
+            <!-- 두루마기 글줄 -->
+            <line x1="10" y1="35" x2="80" y2="35" stroke="rgba(100,80,40,0.35)" stroke-width="1.2"/>
+            <line x1="10" y1="44" x2="75" y2="44" stroke="rgba(100,80,40,0.3)" stroke-width="1"/>
+            <line x1="10" y1="53" x2="80" y2="53" stroke="rgba(100,80,40,0.3)" stroke-width="1"/>
+            <line x1="10" y1="62" x2="65" y2="62" stroke="rgba(100,80,40,0.25)" stroke-width="1"/>
+          </g>
+          <!-- 현대 책 (펼쳐진) -->
+          <g transform="translate(220, 55)">
+            <rect x="0" y="0" width="80" height="65" rx="3" fill="rgba(245,240,228,0.92)" stroke="rgba(150,120,60,0.5)" stroke-width="1.5"/>
+            <line x1="40" y1="0" x2="40" y2="65" stroke="rgba(150,120,60,0.3)" stroke-width="1.5"/>
+            <!-- 책 글줄 왼쪽 -->
+            <line x1="5" y1="12" x2="35" y2="12" stroke="rgba(80,60,30,0.3)" stroke-width="1"/>
+            <line x1="5" y1="20" x2="35" y2="20" stroke="rgba(80,60,30,0.25)" stroke-width="1"/>
+            <line x1="5" y1="28" x2="35" y2="28" stroke="rgba(80,60,30,0.25)" stroke-width="1"/>
+            <line x1="5" y1="36" x2="32" y2="36" stroke="rgba(80,60,30,0.2)" stroke-width="1"/>
+            <!-- 책 글줄 오른쪽 -->
+            <line x1="45" y1="12" x2="75" y2="12" stroke="rgba(80,60,30,0.3)" stroke-width="1"/>
+            <line x1="45" y1="20" x2="75" y2="20" stroke="rgba(80,60,30,0.25)" stroke-width="1"/>
+            <line x1="45" y1="28" x2="72" y2="28" stroke="rgba(80,60,30,0.25)" stroke-width="1"/>
+            <line x1="45" y1="36" x2="68" y2="36" stroke="rgba(80,60,30,0.2)" stroke-width="1"/>
+          </g>
+          <!-- 신성한 빛 오라 -->
+          <ellipse cx="210" cy="90" rx="80" ry="40" fill="url(#rainbowCenter)" opacity="0.5"/>
+          <!-- 제목 영역 그라데이션 오버레이 -->
+          <rect x="0" y="100" width="420" height="75" fill="url(#narBtnOverlay)" opacity="0.5"/>
+          <defs>
+            <linearGradient id="narBtnOverlay" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="transparent"/>
+              <stop offset="100%" stop-color="rgba(220,210,190,0.7)"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div style="position:relative;z-index:2;text-align:right;">
+          <div class="home-btn-label" style="color:#3a2e1a;">서사 구조</div>
+          <div class="home-btn-sublabel" style="color:#7a6540;">Narrative Structure</div>
+        </div>
+      </div>
+    </button>
+
+    <!-- 창작 시작 버튼 -->
+    <button class="home-btn" id="btn-create" onclick="goToCreate()">
+      <div class="home-btn-inner">
+        <!-- 창작 시작 일러스트 SVG -->
+        <svg class="create-illustration" viewBox="0 0 420 175" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+          <defs>
+            <radialGradient id="spaceGrad" cx="50%" cy="50%" r="70%">
+              <stop offset="0%" stop-color="#0a1535"/>
+              <stop offset="100%" stop-color="#020510"/>
+            </radialGradient>
+            <radialGradient id="earthGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#4ab8f0"/>
+              <stop offset="40%" stop-color="#2278c8"/>
+              <stop offset="100%" stop-color="#1050a0"/>
+            </radialGradient>
+            <radialGradient id="earthAtmo" cx="50%" cy="50%" r="50%">
+              <stop offset="70%" stop-color="transparent"/>
+              <stop offset="100%" stop-color="rgba(100,180,255,0.3)"/>
+            </radialGradient>
+            <filter id="earthBlur">
+              <feGaussianBlur stdDeviation="1.5" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <rect width="420" height="175" fill="url(#spaceGrad)"/>
+          <!-- 별들 -->
+          <circle cx="20" cy="15" r="0.8" fill="white" opacity="0.7"/>
+          <circle cx="55" cy="30" r="0.6" fill="white" opacity="0.6"/>
+          <circle cx="90" cy="10" r="1" fill="white" opacity="0.8"/>
+          <circle cx="140" cy="25" r="0.7" fill="white" opacity="0.5"/>
+          <circle cx="180" cy="8" r="0.9" fill="white" opacity="0.7"/>
+          <circle cx="230" cy="18" r="0.6" fill="white" opacity="0.6"/>
+          <circle cx="280" cy="12" r="0.8" fill="white" opacity="0.8"/>
+          <circle cx="320" cy="28" r="0.7" fill="white" opacity="0.5"/>
+          <circle cx="360" cy="15" r="1" fill="white" opacity="0.7"/>
+          <circle cx="400" cy="5" r="0.8" fill="white" opacity="0.6"/>
+          <circle cx="35" cy="60" r="0.6" fill="white" opacity="0.4"/>
+          <circle cx="75" cy="80" r="0.7" fill="white" opacity="0.5"/>
+          <circle cx="380" cy="50" r="0.8" fill="white" opacity="0.6"/>
+          <circle cx="40" cy="130" r="0.6" fill="white" opacity="0.4"/>
+          <circle cx="390" cy="140" r="0.7" fill="white" opacity="0.5"/>
+          <!-- 지구 -->
+          <circle cx="300" cy="88" r="42" fill="url(#earthGlow)" filter="url(#earthBlur)"/>
+          <!-- 대기권 -->
+          <circle cx="300" cy="88" r="47" fill="none" stroke="rgba(100,180,255,0.25)" stroke-width="6"/>
+          <!-- 대륙 모양 -->
+          <path d="M285,65 Q295,60 305,68 Q310,72 308,80 Q303,85 295,82 Q287,78 285,72 Z" fill="rgba(80,160,80,0.6)"/>
+          <path d="M315,75 Q322,72 325,78 Q324,84 318,85 Q313,83 312,78 Z" fill="rgba(80,160,80,0.5)"/>
+          <path d="M278,88 Q283,84 290,86 Q294,92 290,96 Q283,98 278,94 Z" fill="rgba(80,160,80,0.5)"/>
+          <!-- 지구 빛 반짝임 -->
+          <ellipse cx="287" cy="72" rx="12" ry="8" fill="rgba(255,255,255,0.12)" transform="rotate(-20, 287, 72)"/>
+          <!-- 생각하는 사람 동상 (단순화된 형태) -->
+          <g transform="translate(145, 38)" fill="rgba(230,225,210,0.92)">
+            <!-- 머리 -->
+            <ellipse cx="40" cy="10" rx="10" ry="11" fill="rgba(225,220,205,0.95)"/>
+            <!-- 몸통 -->
+            <path d="M28,20 Q25,35 27,55 Q32,60 40,60 Q48,60 53,55 Q55,35 52,20 Q48,16 40,15 Q32,16 28,20 Z" fill="rgba(225,220,205,0.9)"/>
+            <!-- 왼팔 (지구 들기) — 오른쪽으로 뻗음 -->
+            <path d="M52,25 Q60,20 70,18 Q75,17 80,20" stroke="rgba(225,220,205,0.9)" stroke-width="7" fill="none" stroke-linecap="round"/>
+            <!-- 오른팔 (턱 괴기) — 왼쪽으로 굽힘 -->
+            <path d="M28,25 Q22,32 22,40 Q22,45 28,44" stroke="rgba(225,220,205,0.9)" stroke-width="7" fill="none" stroke-linecap="round"/>
+            <!-- 턱 괸 손 -->
+            <ellipse cx="29" cy="47" rx="6" ry="5" fill="rgba(225,220,205,0.9)"/>
+            <!-- 다리 -->
+            <path d="M33,60 Q32,75 33,90" stroke="rgba(220,215,200,0.85)" stroke-width="8" fill="none" stroke-linecap="round"/>
+            <path d="M47,60 Q48,75 47,90" stroke="rgba(220,215,200,0.85)" stroke-width="8" fill="none" stroke-linecap="round"/>
+            <!-- 좌대 -->
+            <rect x="20" y="88" width="40" height="8" rx="2" fill="rgba(200,195,175,0.8)"/>
+          </g>
+          <!-- 제목 그라데이션 -->
+          <rect x="0" y="120" width="420" height="55" fill="rgba(5,8,20,0.5)"/>
+        </svg>
+        <div style="position:relative;z-index:2;text-align:right;">
+          <div class="home-btn-label">창작 시작</div>
+          <div class="home-btn-sublabel">Start Creating</div>
+        </div>
+      </div>
+    </button>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     NARRATIVE STRUCTURE PAGE
+══════════════════════════════════════ -->
+<div id="screen-narrative" class="screen">
+  <div class="narrative-header">
+    <div style="font-size:0.65rem;color:var(--text-muted);letter-spacing:0.2em;margin-bottom:4px;">NARRATIVE BUILDER</div>
+    <h2>서사 구조</h2>
+    <div class="narrative-divider"></div>
+    <div style="font-size:0.72rem;color:var(--text-secondary);">구조를 이해하면 이야기가 보인다</div>
+  </div>
+
+  <div class="narrative-main-row">
+    <button class="narrative-main-btn" onclick="alert('신화의 여정 17단계 — 준비 중')">
+      <div class="narrative-main-btn-icon">📜</div>
+      <div class="narrative-main-btn-title">신화의 여정<br>17단계</div>
+      <div class="narrative-main-btn-sub">조셉 캠벨</div>
+    </button>
+    <button class="narrative-main-btn" onclick="alert('작가의 여정 12단계 — 준비 중')">
+      <div class="narrative-main-btn-icon">⚔️</div>
+      <div class="narrative-main-btn-title">영웅의 여정<br>12단계</div>
+      <div class="narrative-main-btn-sub">크리스토퍼 보글러</div>
+    </button>
+  </div>
+
+  <button class="narrative-sub-btn" onclick="alert('창조자의 설계도 18단계 — 준비 중')">
+    <span class="narrative-sub-btn-icon">✦</span>
+    <span class="narrative-sub-btn-text">창조자의 설계도 18단계 (HAN)</span>
+  </button>
+
+  <button class="narrative-back-btn" onclick="goHome()">
+    ← 홈으로
+  </button>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     MAIN CREATIVE PAGE
+══════════════════════════════════════ -->
+<div id="screen-create" class="screen">
+
+  <!-- 위쪽 패널 -->
+  <div class="top-panel">
+    <div class="top-row1">
+      <div class="profile-avatar">⚡</div>
+      <div class="minimap-panel">
+        <svg class="minimap-svg" viewBox="0 0 300 34" xmlns="http://www.w3.org/2000/svg">
+          <rect width="300" height="34" fill="#0a0d14"/>
+          <!-- 바다 -->
+          <rect x="0" y="10" width="300" height="24" fill="#0d1a2a" rx="0"/>
+          <!-- 섬 1 -->
+          <ellipse cx="50" cy="18" rx="22" ry="10" fill="#1a2e18"/>
+          <ellipse cx="50" cy="16" rx="14" ry="6" fill="#223820"/>
+          <!-- 섬 2 -->
+          <ellipse cx="120" cy="20" rx="30" ry="12" fill="#1a2e18"/>
+          <ellipse cx="120" cy="17" rx="18" ry="7" fill="#223820"/>
+          <!-- 섬 3 -->
+          <ellipse cx="200" cy="19" rx="25" ry="10" fill="#1a2e18"/>
+          <ellipse cx="200" cy="17" rx="16" ry="6" fill="#223820"/>
+          <!-- 섬 4 -->
+          <ellipse cx="268" cy="20" rx="20" ry="9" fill="#1a2e18"/>
+          <ellipse cx="268" cy="18" rx="13" ry="5" fill="#223820"/>
+          <!-- 별빛 -->
+          <circle cx="20" cy="6" r="0.8" fill="rgba(255,255,255,0.5)"/>
+          <circle cx="80" cy="4" r="0.6" fill="rgba(255,255,255,0.4)"/>
+          <circle cx="155" cy="5" r="0.7" fill="rgba(255,255,255,0.5)"/>
+          <circle cx="235" cy="3" r="0.8" fill="rgba(255,255,255,0.4)"/>
+          <!-- 금색 테두리 효과 -->
+          <rect x="0" y="0" width="300" height="34" fill="none" stroke="rgba(150,120,50,0.3)" stroke-width="1"/>
+        </svg>
+      </div>
+    </div>
+    <div class="top-row2">
+      <div style="display:flex;gap:4px;align-items:center;">
+        <button class="top-icon-btn back-btn" onclick="goHome()" title="홈으로">◀</button>
+        <button class="top-icon-btn" title="설정">⚙</button>
+      </div>
+      <div class="reset-btns">
+        <button class="reset-btn" id="btn-partial-reset" onclick="partialReset()">캐릭터 초기화</button>
+        <button class="reset-btn" onclick="fullReset()" style="color:rgba(160,80,60,0.8);border-color:rgba(160,80,60,0.3);">전체 초기화</button>
+      </div>
     </div>
   </div>
 
-  <!-- 메인 앱 -->
-  <div id="app-root">
-    <div id="root"></div>
+  <!-- 서브 메뉴 패널 (다이아몬드 버튼들) -->
+  <div class="subnav-panel">
+    <!-- 진열장 블러 배경 -->
+    <div class="subnav-bg" id="subnav-bg">
+      <div class="subnav-bottle"></div><div class="subnav-bottle"></div>
+      <div class="subnav-bottle"></div><div class="subnav-bottle"></div>
+      <div class="subnav-bottle"></div><div class="subnav-bottle"></div>
+      <div class="subnav-bottle"></div><div class="subnav-bottle"></div>
+      <div class="subnav-bottle"></div><div class="subnav-bottle"></div>
+      <div class="subnav-bottle"></div><div class="subnav-bottle"></div>
+    </div>
+    <div class="subnav-scroll" id="subnav-scroll">
+      <!-- JS로 채워짐 -->
+    </div>
   </div>
 
-  <!-- 오프닝 타이밍 -->
-  <script>
-    window.addEventListener('DOMContentLoaded', function () {
-      var opening = document.getElementById('opening');
-      var appRoot = document.getElementById('app-root');
-      setTimeout(function () { opening.classList.add('fade-out'); }, 3000);
-      setTimeout(function () {
-        opening.style.display = 'none';
-        appRoot.classList.add('visible');
-      }, 3900);
+  <!-- 중앙 영역 -->
+  <div class="center-area" id="center-area">
+    <!-- 커튼 효과 -->
+    <div class="curtain-drop" id="curtain-drop"></div>
+
+    <!-- 각 서브메뉴별 페이지들이 JS로 생성 -->
+    <div class="center-page active" id="page-default">
+      <div class="empty-state">
+        <div class="empty-icon">✦</div>
+        <div class="empty-text">아래 메뉴에서<br>카테고리를 선택하세요</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 팝업 -->
+  <div class="popup-overlay" id="popup-overlay" onclick="closePopup(event)">
+    <div class="popup-sheet">
+      <button class="popup-close" onclick="closePopup()">✕</button>
+      <div class="popup-handle"></div>
+      <div class="popup-title" id="popup-title">카드 이름</div>
+      <div class="popup-desc" id="popup-desc">상세 설명이 여기에 표시됩니다.</div>
+      <button class="popup-select-btn" id="popup-select-btn">이 항목 선택</button>
+    </div>
+  </div>
+
+  <!-- 하단 네비게이션 -->
+  <div class="bottom-nav">
+    <button class="nav-btn active" id="nav-character" onclick="switchNav('character')">
+      <div class="nav-icon">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- 투구 -->
+          <path d="M4,12 Q3,7 11,5 Q19,7 18,12" stroke="currentColor" stroke-width="1.5" fill="none"/>
+          <path d="M4,12 L4,15 Q6,17 11,18 Q16,17 18,15 L18,12" stroke="currentColor" stroke-width="1.5" fill="none"/>
+          <path d="M6,12 L6,15" stroke="currentColor" stroke-width="1" opacity="0.5"/>
+          <path d="M16,12 L16,15" stroke="currentColor" stroke-width="1" opacity="0.5"/>
+          <!-- 투구 챙 -->
+          <path d="M2,12 L20,12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <!-- 볏 -->
+          <path d="M9,5 Q11,2 13,5" stroke="currentColor" stroke-width="1.2" fill="none"/>
+        </svg>
+      </div>
+      <div class="nav-label">캐릭터</div>
+    </button>
+    <button class="nav-btn" id="nav-narrative2" onclick="switchNav('narrative2')">
+      <div class="nav-icon">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- 책 -->
+          <path d="M5,4 Q11,2 17,4 L17,18 Q11,16 5,18 Z" stroke="currentColor" stroke-width="1.4" fill="none"/>
+          <line x1="11" y1="3" x2="11" y2="17" stroke="currentColor" stroke-width="1" opacity="0.6"/>
+          <!-- 구슬 -->
+          <circle cx="11" cy="9" r="3.5" stroke="currentColor" stroke-width="1.3" fill="none"/>
+          <circle cx="11" cy="9" r="1.5" fill="currentColor" opacity="0.4"/>
+          <!-- 불꽃 아우라 -->
+          <path d="M8,6 Q6.5,3 9,5" stroke="currentColor" stroke-width="1" opacity="0.5" fill="none"/>
+          <path d="M14,6 Q15.5,3 13,5" stroke="currentColor" stroke-width="1" opacity="0.5" fill="none"/>
+        </svg>
+      </div>
+      <div class="nav-label">서사</div>
+    </button>
+    <button class="nav-btn" id="nav-world" onclick="switchNav('world')">
+      <div class="nav-icon">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/>
+          <ellipse cx="11" cy="11" rx="3.5" ry="8" stroke="currentColor" stroke-width="1" fill="none"/>
+          <line x1="3" y1="11" x2="19" y2="11" stroke="currentColor" stroke-width="1" opacity="0.6"/>
+          <path d="M5,7 Q11,8 17,7" stroke="currentColor" stroke-width="1" fill="none" opacity="0.5"/>
+          <path d="M5,15 Q11,14 17,15" stroke="currentColor" stroke-width="1" fill="none" opacity="0.5"/>
+        </svg>
+      </div>
+      <div class="nav-label">세계관</div>
+    </button>
+    <button class="nav-btn" id="nav-compass" onclick="switchNav('compass')">
+      <div class="nav-icon">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="11" cy="11" r="8.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+          <!-- 나침반 바늘 (북: 밝음, 남: 어둠) -->
+          <path d="M11,4 L13,11 L11,12 L9,11 Z" fill="currentColor" opacity="0.9"/>
+          <path d="M11,18 L13,11 L11,12 L9,11 Z" fill="currentColor" opacity="0.35"/>
+          <!-- 중심 -->
+          <circle cx="11" cy="11" r="1.8" fill="none" stroke="currentColor" stroke-width="1.2"/>
+          <!-- N S 방위 -->
+          <text x="10" y="3.5" fill="currentColor" font-size="2.5" font-family="sans-serif" opacity="0.7">N</text>
+        </svg>
+      </div>
+      <div class="nav-label">나침반</div>
+    </button>
+  </div>
+
+</div>
+
+<!-- 페이지 전환 커튼 -->
+<div class="page-curtain" id="page-curtain">
+  <div class="page-curtain-inner" id="page-curtain-inner"></div>
+</div>
+
+
+<script>
+/* ════════════════════════════════════════════════
+   DATA DEFINITIONS
+════════════════════════════════════════════════ */
+const NAV_DATA = {
+  character: {
+    label: '캐릭터',
+    resetLabel: '캐릭터 초기화',
+    subs: [
+      { id:'archetype', label:'원형', icon:'♟' },
+      { id:'race',      label:'종족', icon:'🐉' },
+      { id:'job',       label:'직업', icon:'⚒' },
+      { id:'personality',label:'성격',icon:'💫' },
+      { id:'attribute', label:'속성', icon:'⚡' },
+      { id:'ability',   label:'능력', icon:'✨' },
+      { id:'relation',  label:'관계', icon:'🔗' },
+    ]
+  },
+  narrative2: {
+    label: '서사',
+    resetLabel: '서사 초기화',
+    subs: [
+      { id:'goal',      label:'목표', icon:'🎯' },
+      { id:'desire',    label:'욕망', icon:'🔥' },
+      { id:'conflict',  label:'갈등', icon:'⚔' },
+      { id:'distort',   label:'왜곡', icon:'🌀' },
+      { id:'event',     label:'사건', icon:'💥' },
+      { id:'choice',    label:'선택', icon:'⚖' },
+      { id:'twist',     label:'반전', icon:'🌊' },
+      { id:'ending',    label:'결말', icon:'🌅' },
+    ]
+  },
+  world: {
+    label: '세계관',
+    resetLabel: '세계관 초기화',
+    subs: [
+      { id:'tech',      label:'기술', icon:'⚙' },
+      { id:'culture',   label:'문화', icon:'🏛' },
+      { id:'setting',   label:'배경', icon:'🗺' },
+    ]
+  },
+  compass: {
+    label: '나침반',
+    resetLabel: '나침반 초기화',
+    subs: [
+      { id:'type',      label:'서사 유형', icon:'📐' },
+      { id:'genre',     label:'장르',     icon:'🎭' },
+      { id:'message',   label:'메시지',   icon:'📢' },
+      { id:'theme',     label:'테마',     icon:'🌙' },
+      { id:'reader',    label:'독자 체험', icon:'👁' },
+      { id:'tone',      label:'감정 톤',  icon:'🎼' },
+    ]
+  }
+};
+
+/* 각 서브메뉴에 표시할 카드 20개 (아이콘 + 이름) */
+const CARD_DATA = {
+  archetype: [
+    {icon:'🦁',name:'영웅'},{icon:'🧙',name:'현자'},{icon:'😈',name:'악당'},
+    {icon:'🃏',name:'트릭스터'},{icon:'👼',name:'수호자'},{icon:'🔮',name:'예언자'},
+    {icon:'⚔',name:'전사'},{icon:'💀',name:'파멸자'},{icon:'🌹',name:'연인'},
+    {icon:'👑',name:'통치자'},{icon:'🌿',name:'치유자'},{icon:'🕵',name:'탐정'},
+    {icon:'🐺',name:'이방인'},{icon:'🌟',name:'선택받은 자'},{icon:'🦊',name:'교활한 자'},
+    {icon:'🔗',name:'속박된 자'},{icon:'🌊',name:'방랑자'},{icon:'⚖',name:'심판자'},
+    {icon:'🌙',name:'어둠의 자'},{icon:'☀',name:'빛의 자'},
+  ],
+  race: [
+    {icon:'🧝',name:'엘프'},{icon:'🪨',name:'드워프'},{icon:'🧛',name:'뱀파이어'},
+    {icon:'🐉',name:'드래곤족'},{icon:'👁',name:'신족'},{icon:'🌿',name:'수인족'},
+    {icon:'💀',name:'언데드'},{icon:'🌊',name:'해양족'},{icon:'🔥',name:'화염족'},
+    {icon:'⚡',name:'뇌전족'},{icon:'🌙',name:'달의 종족'},{icon:'☀',name:'태양족'},
+    {icon:'🌀',name:'공허족'},{icon:'🍃',name:'정령족'},{icon:'🧬',name:'혼혈'},
+    {icon:'🤖',name:'기계인'},{icon:'👤',name:'인간'},{icon:'🦋',name:'환상족'},
+    {icon:'🌑',name:'심연족'},{icon:'💎',name:'결정족'},
+  ],
+  job: [
+    {icon:'⚔',name:'검사'},{icon:'🏹',name:'궁수'},{icon:'🧙',name:'마법사'},
+    {icon:'🛡',name:'기사'},{icon:'🗡',name:'암살자'},{icon:'🎵',name:'음유시인'},
+    {icon:'⚕',name:'치유사'},{icon:'🔧',name:'장인'},{icon:'📜',name:'학자'},
+    {icon:'🏴',name:'해적'},{icon:'🐾',name:'사냥꾼'},{icon:'💰',name:'상인'},
+    {icon:'👑',name:'귀족'},{icon:'🌿',name:'드루이드'},{icon:'🎭',name:'배우'},
+    {icon:'🔮',name:'점술사'},{icon:'🌑',name:'네크로맨서'},{icon:'🐉',name:'용기사'},
+    {icon:'⚗',name:'연금술사'},{icon:'🕵',name:'첩보원'},
+  ],
+  personality: [
+    {icon:'🔥',name:'열정적'},{icon:'❄',name:'냉정한'},{icon:'🌊',name:'유연한'},
+    {icon:'🪨',name:'완고한'},{icon:'🌟',name:'낙관적'},{icon:'🌑',name:'비관적'},
+    {icon:'💫',name:'충동적'},{icon:'⚖',name:'신중한'},{icon:'🎭',name:'이중적'},
+    {icon:'🦁',name:'용감한'},{icon:'🐇',name:'소심한'},{icon:'🦊',name:'교활한'},
+    {icon:'🕊',name:'온화한'},{icon:'🐺',name:'거친'},{icon:'🌹',name:'낭만적'},
+    {icon:'🔬',name:'분석적'},{icon:'🎨',name:'예술적'},{icon:'🤝',name:'친화적'},
+    {icon:'👤',name:'고독한'},{icon:'✨',name:'신비로운'},
+  ],
+  attribute: [
+    {icon:'🔥',name:'화염'},{icon:'❄',name:'빙결'},{icon:'⚡',name:'번개'},
+    {icon:'🌊',name:'물'},{icon:'🌿',name:'자연'},{icon:'💨',name:'바람'},
+    {icon:'🪨',name:'대지'},{icon:'✨',name:'빛'},{icon:'🌑',name:'어둠'},
+    {icon:'🌀',name:'공허'},{icon:'☠',name:'독'},{icon:'⚙',name:'기계'},
+    {icon:'🧿',name:'마법'},{icon:'💫',name:'성스러움'},{icon:'💀',name:'죽음'},
+    {icon:'🌙',name:'달'},{icon:'☀',name:'태양'},{icon:'🌌',name:'우주'},
+    {icon:'🩸',name:'피'},{icon:'🎭',name:'환상'},
+  ],
+  ability: [
+    {icon:'🔮',name:'예지'},{icon:'🌀',name:'공간이동'},{icon:'⏳',name:'시간조작'},
+    {icon:'🔗',name:'결박'},{icon:'🌊',name:'소환'},{icon:'💥',name:'폭발'},
+    {icon:'🛡',name:'방벽'},{icon:'👁',name:'투시'},{icon:'🎭',name:'변신'},
+    {icon:'💀',name:'부활'},{icon:'⚡',name:'가속'},{icon:'🌿',name:'치유'},
+    {icon:'🔥',name:'소각'},{icon:'❄',name:'동결'},{icon:'💫',name:'정화'},
+    {icon:'🌑',name:'잠식'},{icon:'🎵',name:'매혹'},{icon:'🧠',name:'독심'},
+    {icon:'⚔',name:'검기'},{icon:'🌌',name:'절대영역'},
+  ],
+  relation: [
+    {icon:'👥',name:'동료'},{icon:'❤',name:'연인'},{icon:'🤝',name:'동맹'},
+    {icon:'⚔',name:'라이벌'},{icon:'🐍',name:'배신자'},{icon:'🛡',name:'보호자'},
+    {icon:'👑',name:'주종'},{icon:'🎭',name:'쌍둥이'},{icon:'💀',name:'숙적'},
+    {icon:'🌹',name:'짝사랑'},{icon:'🔗',name:'운명적 인연'},{icon:'🌙',name:'비밀결사'},
+    {icon:'🐾',name:'사제지간'},{icon:'👤',name:'고독한 자'},{icon:'🌊',name:'이별'},
+    {icon:'🔮',name:'예언의 관계'},{icon:'💫',name:'전생인연'},{icon:'🌿',name:'치유자와 상처'},
+    {icon:'⚖',name:'거래관계'},{icon:'🌑',name:'어둠의 계약'},
+  ],
+  goal: [
+    {icon:'🏆',name:'최강'},{icon:'👑',name:'왕위'},{icon:'💎',name:'보물'},
+    {icon:'🔮',name:'진실'},{icon:'🌅',name:'평화'},{icon:'💀',name:'복수'},
+    {icon:'❤',name:'사랑'},{icon:'🌿',name:'생존'},{icon:'🌌',name:'신'},
+    {icon:'⚔',name:'전쟁 종식'},{icon:'🔗',name:'자유'},{icon:'🌊',name:'귀환'},
+    {icon:'🧬',name:'불사'},{icon:'🔥',name:'혁명'},{icon:'💫',name:'구원'},
+    {icon:'🌙',name:'기억'},{icon:'👥',name:'가족'},{icon:'⚖',name:'정의'},
+    {icon:'🎭',name:'인정'},{icon:'🌱',name:'성장'},
+  ],
+  desire: [
+    {icon:'🔥',name:'힘'},{icon:'❤',name:'사랑'},{icon:'💎',name:'소유'},
+    {icon:'👁',name:'인정'},{icon:'🌊',name:'자유'},{icon:'💀',name:'복수'},
+    {icon:'🌿',name:'안식'},{icon:'🌟',name:'영광'},{icon:'🔮',name:'지식'},
+    {icon:'💫',name:'신성'},{icon:'🌑',name:'망각'},{icon:'⚔',name:'전투'},
+    {icon:'🌹',name:'아름다움'},{icon:'🎭',name:'변신'},{icon:'🌙',name:'비밀'},
+    {icon:'⚖',name:'균형'},{icon:'👑',name:'지배'},{icon:'🐾',name:'야성'},
+    {icon:'🌌',name:'초월'},{icon:'🔗',name:'연결'},
+  ],
+  conflict: [
+    {icon:'⚔',name:'인간 vs 인간'},{icon:'🌊',name:'인간 vs 자연'},
+    {icon:'🤖',name:'인간 vs 기계'},{icon:'🌑',name:'인간 vs 어둠'},
+    {icon:'💫',name:'자아 vs 자아'},{icon:'👑',name:'개인 vs 사회'},
+    {icon:'🔮',name:'운명 vs 자유의지'},{icon:'⚖',name:'선 vs 악'},
+    {icon:'❤',name:'사랑 vs 의무'},{icon:'🌿',name:'생존 vs 신념'},
+    {icon:'💀',name:'삶 vs 죽음'},{icon:'🎭',name:'진실 vs 거짓'},
+    {icon:'🔥',name:'욕망 vs 이성'},{icon:'🌙',name:'과거 vs 현재'},
+    {icon:'🌌',name:'인간 vs 신'},{icon:'🐺',name:'본능 vs 문명'},
+    {icon:'🌊',name:'혁명 vs 질서'},{icon:'💎',name:'희생 vs 이익'},
+    {icon:'👥',name:'집단 vs 개인'},{icon:'⚡',name:'전통 vs 변화'},
+  ],
+  distort: [
+    {icon:'🎭',name:'거짓 믿음'},{icon:'🌑',name:'자기부정'},
+    {icon:'💀',name:'트라우마'},{icon:'🔗',name:'집착'},
+    {icon:'🌀',name:'망상'},{icon:'⚖',name:'합리화'},
+    {icon:'👁',name:'편견'},{icon:'🐍',name:'배신의 상처'},
+    {icon:'🔥',name:'분노'},{icon:'❄',name:'감정 마비'},
+    {icon:'🌊',name:'공허'},{icon:'🧠',name:'인지왜곡'},
+    {icon:'💫',name:'이상화'},{icon:'🌙',name:'집단 사고'},
+    {icon:'⚔',name:'복수심'},{icon:'🌿',name:'죄책감'},
+    {icon:'👑',name:'자만'},{icon:'🐾',name:'공포'},
+    {icon:'🎵',name:'유혹'},{icon:'🔮',name:'예언의 굴레'},
+  ],
+  event: [
+    {icon:'🌋',name:'대재앙'},{icon:'💥',name:'충돌'},
+    {icon:'👑',name:'왕의 죽음'},{icon:'🔮',name:'예언 성취'},
+    {icon:'❤',name:'첫 만남'},{icon:'💀',name:'배신'},
+    {icon:'🌊',name:'전쟁'},{icon:'🌱',name:'탄생'},
+    {icon:'🌅',name:'각성'},{icon:'🔗',name:'계약'},
+    {icon:'🎭',name:'정체 폭로'},{icon:'⚔',name:'결투'},
+    {icon:'🌙',name:'밤의 습격'},{icon:'💎',name:'보물 발견'},
+    {icon:'🌿',name:'치유'},{icon:'🌌',name:'차원 이동'},
+    {icon:'🔥',name:'혁명'},{icon:'⚖',name:'재판'},
+    {icon:'🌑',name:'봉인 해제'},{icon:'✨',name:'기적'},
+  ],
+  choice: [
+    {icon:'⚖',name:'희생 vs 생존'},{icon:'❤',name:'사랑 vs 의무'},
+    {icon:'👑',name:'권력 vs 양심'},{icon:'💀',name:'복수 vs 용서'},
+    {icon:'🌊',name:'도피 vs 직면'},{icon:'🔗',name:'자유 vs 안전'},
+    {icon:'🌿',name:'진실 vs 평화'},{icon:'🎭',name:'위선 vs 솔직'},
+    {icon:'⚔',name:'싸움 vs 화해'},{icon:'🌙',name:'과거 vs 미래'},
+    {icon:'💫',name:'개인 vs 공동체'},{icon:'🔥',name:'욕망 vs 신념'},
+    {icon:'🌑',name:'어둠 vs 빛'},{icon:'🐺',name:'본능 vs 이성'},
+    {icon:'🌌',name:'초월 vs 인간'},{icon:'💎',name:'명예 vs 생명'},
+    {icon:'🌱',name:'성장 vs 안주'},{icon:'👥',name:'혼자 vs 함께'},
+    {icon:'🔮',name:'운명 수용 vs 저항'},{icon:'⚡',name:'행동 vs 침묵'},
+  ],
+  twist: [
+    {icon:'🎭',name:'적이 아군'},{icon:'💀',name:'아군이 적'},
+    {icon:'🔮',name:'예언의 반전'},{icon:'👁',name:'정체 폭로'},
+    {icon:'🌑',name:'선인의 타락'},{icon:'⚔',name:'악인의 구원'},
+    {icon:'🌊',name:'죽은 자의 귀환'},{icon:'🌀',name:'시간의 역전'},
+    {icon:'💫',name:'기억의 조작'},{icon:'🔗',name:'진짜 목적'},
+    {icon:'🌙',name:'꿈과 현실'},{icon:'💥',name:'동기의 반전'},
+    {icon:'🌿',name:'희생의 이유'},{icon:'🌌',name:'세계의 진실'},
+    {icon:'⚖',name:'판단의 오류'},{icon:'❤',name:'사랑의 배신'},
+    {icon:'👑',name:'왕의 비밀'},{icon:'🐍',name:'내부의 적'},
+    {icon:'🔥',name:'신의 거짓'},{icon:'✨',name:'기적의 대가'},
+  ],
+  ending: [
+    {icon:'🌅',name:'완전한 승리'},{icon:'⚖',name:'쓸쓸한 승리'},
+    {icon:'💀',name:'비극적 결말'},{icon:'🌱',name:'열린 결말'},
+    {icon:'🔗',name:'순환의 결말'},{icon:'🌊',name:'희생의 결말'},
+    {icon:'❤',name:'화해'},{icon:'🌑',name:'타락의 결말'},
+    {icon:'💫',name:'초월의 결말'},{icon:'🌿',name:'재생'},
+    {icon:'👑',name:'왕국의 건설'},{icon:'🌌',name:'새로운 세계'},
+    {icon:'🎭',name:'아이러니'},{icon:'💎',name:'대가의 결말'},
+    {icon:'⚡',name:'혁명 성공'},{icon:'🌙',name:'진실 수용'},
+    {icon:'🔥',name:'자기 파멸'},{icon:'✨',name:'구원'},
+    {icon:'⚔',name:'끝나지 않은 싸움'},{icon:'🌸',name:'평화'},
+  ],
+  tech: [
+    {icon:'⚙',name:'증기 기술'},{icon:'💡',name:'전기 문명'},
+    {icon:'🤖',name:'인공지능'},{icon:'🚀',name:'우주 항법'},
+    {icon:'🧬',name:'생체공학'},{icon:'🔮',name:'마법 기계'},
+    {icon:'⚗',name:'연금술'},{icon:'📡',name:'통신망'},
+    {icon:'🌌',name:'차원 기술'},{icon:'⚡',name:'에너지 결정'},
+    {icon:'🏗',name:'거대 건축'},{icon:'🛡',name:'방어 시스템'},
+    {icon:'🌊',name:'해양 기술'},{icon:'🌿',name:'바이오 기술'},
+    {icon:'💻',name:'사이버네틱스'},{icon:'🔭',name:'천문학'},
+    {icon:'⚖',name:'자동화'},{icon:'🔬',name:'나노 기술'},
+    {icon:'🌑',name:'어둠의 기술'},{icon:'✨',name:'신성 공학'},
+  ],
+  culture: [
+    {icon:'👑',name:'군주제'},{icon:'⚖',name:'공화제'},
+    {icon:'🌿',name:'자연 숭배'},{icon:'🔥',name:'전쟁 문화'},
+    {icon:'📜',name:'학문 중심'},{icon:'🎭',name:'예술 중심'},
+    {icon:'🌊',name:'해양 문화'},{icon:'🏛',name:'고대 문명'},
+    {icon:'🌑',name:'어둠의 의식'},{icon:'✨',name:'신성 종교'},
+    {icon:'🔗',name:'씨족 사회'},{icon:'👥',name:'집단주의'},
+    {icon:'💎',name:'상업 중심'},{icon:'⚔',name:'명예 사회'},
+    {icon:'🌙',name:'신비 결사'},{icon:'🌌',name:'다신교'},
+    {icon:'🌿',name:'자연 공존'},{icon:'🤖',name:'기계 숭배'},
+    {icon:'🌊',name:'유목 문화'},{icon:'🏔',name:'산악 문화'},
+  ],
+  setting: [
+    {icon:'🏰',name:'중세 왕국'},{icon:'🌆',name:'미래 도시'},
+    {icon:'🌿',name:'원시 밀림'},{icon:'🌊',name:'심해 세계'},
+    {icon:'🏔',name:'고산 왕국'},{icon:'🌌',name:'우주'},
+    {icon:'🌑',name:'지하 세계'},{icon:'🌅',name:'사막 제국'},
+    {icon:'❄',name:'빙하 세계'},{icon:'🔥',name:'화산 땅'},
+    {icon:'🌙',name:'달 세계'},{icon:'🌀',name:'차원 공간'},
+    {icon:'🏛',name:'고대 유적'},{icon:'🌿',name:'마법 숲'},
+    {icon:'💀',name:'폐허'},{icon:'🌊',name:'섬 군도'},
+    {icon:'⚙',name:'스팀펑크 도시'},{icon:'🎭',name:'환상 무대'},
+    {icon:'🌸',name:'평화로운 마을'},{icon:'🌑',name:'암흑 지대'},
+  ],
+  type: [
+    {icon:'🌟',name:'영웅 서사'},{icon:'💀',name:'비극'},
+    {icon:'🌱',name:'성장담'},{icon:'🌊',name:'모험담'},
+    {icon:'❤',name:'로맨스'},{icon:'🕵',name:'추리'},
+    {icon:'🌌',name:'서사시'},{icon:'🎭',name:'풍자'},
+    {icon:'🔮',name:'신화'},{icon:'🌿',name:'힐링'},
+    {icon:'💥',name:'액션'},{icon:'⚖',name:'철학적 탐구'},
+    {icon:'🌙',name:'다크 판타지'},{icon:'🤖',name:'SF'},
+    {icon:'🔥',name:'혁명 서사'},{icon:'💫',name:'초자연'},
+    {icon:'👥',name:'앙상블'},{icon:'🏆',name:'스포츠'},
+    {icon:'🌑',name:'호러'},{icon:'🌸',name:'일상'},
+  ],
+  genre: [
+    {icon:'⚔',name:'판타지'},{icon:'🚀',name:'SF'},
+    {icon:'❤',name:'로맨스'},{icon:'🕵',name:'미스터리'},
+    {icon:'💀',name:'호러'},{icon:'🌌',name:'서사시'},
+    {icon:'🎭',name:'드라마'},{icon:'💥',name:'액션'},
+    {icon:'🌿',name:'힐링'},{icon:'🌸',name:'일상'},
+    {icon:'🔥',name:'무협'},{icon:'👑',name:'궁중'},
+    {icon:'🌑',name:'다크 판타지'},{icon:'⚗',name:'스팀펑크'},
+    {icon:'🌊',name:'해양'},{icon:'🏔',name:'고산'},
+    {icon:'🤖',name:'사이버펑크'},{icon:'🌙',name:'고딕'},
+    {icon:'🔮',name:'신화'},{icon:'💫',name:'초자연'},
+  ],
+  message: [
+    {icon:'🌱',name:'성장'},{icon:'❤',name:'사랑의 힘'},
+    {icon:'⚖',name:'정의'},{icon:'🔥',name:'용기'},
+    {icon:'🌊',name:'자유'},{icon:'💀',name:'희생의 의미'},
+    {icon:'🌿',name:'공존'},{icon:'💫',name:'초월'},
+    {icon:'🌙',name:'어둠 속의 빛'},{icon:'🔗',name:'연결'},
+    {icon:'👑',name:'권력의 부패'},{icon:'🌌',name:'존재의 의미'},
+    {icon:'🎭',name:'진실의 가치'},{icon:'🐺',name:'본성의 수용'},
+    {icon:'⚔',name:'전쟁의 무의미'},{icon:'✨',name:'기적'},
+    {icon:'🌑',name:'어둠의 필요성'},{icon:'🌸',name:'일상의 소중함'},
+    {icon:'🔮',name:'운명과 의지'},{icon:'👥',name:'공동체'},
+  ],
+  theme: [
+    {icon:'🔥',name:'복수'},{icon:'❤',name:'사랑'},
+    {icon:'🌱',name:'성장'},{icon:'💀',name:'죽음'},
+    {icon:'⚖',name:'정의'},{icon:'🌊',name:'자유'},
+    {icon:'👑',name:'권력'},{icon:'🌿',name:'자연'},
+    {icon:'🔮',name:'운명'},{icon:'🌑',name:'어둠'},
+    {icon:'✨',name:'구원'},{icon:'🎭',name:'정체성'},
+    {icon:'🌌',name:'우주'},{icon:'🐾',name:'야성'},
+    {icon:'💫',name:'초월'},{icon:'🌙',name:'신비'},
+    {icon:'🔗',name:'유대'},{icon:'⚔',name:'전쟁'},
+    {icon:'🌸',name:'치유'},{icon:'💎',name:'희생'},
+  ],
+  reader: [
+    {icon:'🔥',name:'흥분'},{icon:'❄',name:'소름'},
+    {icon:'❤',name:'설렘'},{icon:'💀',name:'공포'},
+    {icon:'😢',name:'슬픔'},{icon:'😂',name:'웃음'},
+    {icon:'🌊',name:'해방감'},{icon:'💫',name:'경이로움'},
+    {icon:'⚖',name:'공감'},{icon:'🌑',name:'불안'},
+    {icon:'✨',name:'희망'},{icon:'🌹',name:'두근거림'},
+    {icon:'🎭',name:'충격'},{icon:'🌿',name:'위로'},
+    {icon:'👁',name:'통찰'},{icon:'🌌',name:'몰입'},
+    {icon:'🔮',name:'신비감'},{icon:'💥',name:'카타르시스'},
+    {icon:'🌸',name:'따뜻함'},{icon:'⚔',name:'긴장감'},
+  ],
+  tone: [
+    {icon:'🔥',name:'열정적'},{icon:'❄',name:'냉담한'},
+    {icon:'🌊',name:'서정적'},{icon:'💀',name:'어두운'},
+    {icon:'✨',name:'밝은'},{icon:'🌿',name:'잔잔한'},
+    {icon:'💥',name:'격렬한'},{icon:'🌙',name:'몽환적'},
+    {icon:'⚖',name:'중립적'},{icon:'😂',name:'유머러스'},
+    {icon:'😢',name:'비장한'},{icon:'🎭',name:'아이러니'},
+    {icon:'🌌',name:'웅장한'},{icon:'🌸',name:'따뜻한'},
+    {icon:'⚡',name:'긴박한'},{icon:'🔮',name:'신비로운'},
+    {icon:'💫',name:'초월적'},{icon:'🌑',name:'음울한'},
+    {icon:'🌹',name:'로맨틱'},{icon:'🐾',name:'야성적'},
+  ],
+};
+
+/* ════════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════════ */
+let currentNav   = 'character';
+let currentSubId = null;
+let selectedCards = {};   // { subId: Set<idx> }
+
+/* ════════════════════════════════════════════════
+   OPENING ANIMATION
+════════════════════════════════════════════════ */
+window.addEventListener('load', () => {
+  const content  = document.getElementById('opening-content');
+  const divider  = document.getElementById('opening-divider');
+
+  // 줌업 시작
+  setTimeout(() => {
+    content.classList.add('animate');
+  }, 300);
+
+  // 선 등장 (줌업 시작 후 1초)
+  setTimeout(() => {
+    divider.classList.add('flash');
+    setTimeout(() => {
+      divider.classList.add('expand');
+      setTimeout(() => divider.classList.remove('flash'), 600);
+    }, 80);
+  }, 1400);
+
+  // 홈화면으로 페이지 넘기기
+  setTimeout(() => {
+    pageTurnTo('screen-home');
+  }, 3800);
+});
+
+/* ════════════════════════════════════════════════
+   SCREEN TRANSITION (페이지 넘기기)
+════════════════════════════════════════════════ */
+function pageTurnTo(targetId, callback) {
+  const curtain = document.getElementById('page-curtain');
+  const inner   = document.getElementById('page-curtain-inner');
+
+  curtain.classList.add('active');
+  inner.classList.add('animate');
+
+  setTimeout(() => {
+    // 모든 스크린 비활성화
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    // 타겟 활성화
+    document.getElementById(targetId).classList.add('active');
+    if (callback) callback();
+  }, 380);
+
+  setTimeout(() => {
+    inner.classList.remove('animate');
+    curtain.classList.remove('active');
+  }, 780);
+}
+
+/* ════════════════════════════════════════════════
+   NAVIGATION
+════════════════════════════════════════════════ */
+function goHome() {
+  pageTurnTo('screen-home');
+}
+function goToNarrative() {
+  setTimeout(() => pageTurnTo('screen-narrative'), 180);
+}
+function goToCreate() {
+  setTimeout(() => {
+    pageTurnTo('screen-create', () => {
+      switchNav('character', true);
     });
-  </script>
+  }, 180);
+}
 
-  <!-- 데이터 (순서 중요) -->
-  <script src="data/character.js"></script>
-  <script src="data/narrative.js"></script>
-  <script src="data/world.js"></script>
-  <script src="data/compass.js"></script>
+/* ════════════════════════════════════════════════
+   MAIN NAV SWITCH
+════════════════════════════════════════════════ */
+function switchNav(navId, skipAnimation) {
+  if (navId === currentNav && !skipAnimation) return;
 
-  <!-- 앱 로직 -->
-  <script type="text/babel" src="js/app.js"></script>
+  const prev = currentNav;
+  currentNav = navId;
+  currentSubId = null;
 
+  // 버튼 상태
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const navMap = { character:'nav-character', narrative2:'nav-narrative2', world:'nav-world', compass:'nav-compass' };
+  const nb = document.getElementById(navMap[navId]);
+  if (nb) nb.classList.add('active');
+
+  // 부분 초기화 버튼 텍스트
+  document.getElementById('btn-partial-reset').textContent = NAV_DATA[navId].resetLabel;
+
+  // 서브 메뉴 렌더
+  renderSubnav(navId, !skipAnimation && prev !== navId);
+
+  // 중앙 기본 상태로
+  showDefaultCenter(!skipAnimation && prev !== navId);
+}
+
+function renderSubnav(navId, animate) {
+  const scroll = document.getElementById('subnav-scroll');
+  scroll.innerHTML = '';
+
+  const subs = NAV_DATA[navId].subs;
+  subs.forEach((sub, i) => {
+    const item = document.createElement('div');
+    item.className = 'subnav-item' + (animate ? ' reveal' : '');
+    item.style.animationDelay = animate ? (i * 0.05) + 's' : '0s';
+    item.setAttribute('data-sub-id', sub.id);
+    item.onclick = () => selectSub(sub.id, navId);
+
+    const count = selectedCards[sub.id] ? selectedCards[sub.id].size : 0;
+
+    item.innerHTML = `
+      <div class="diamond-btn" style="animation-delay:${animate ? i*0.05 : 0}s">
+        <span class="diamond-btn-icon">${sub.icon}</span>
+        ${count > 0 ? `<div class="selection-badge">${count}</div>` : ''}
+      </div>
+      <div class="diamond-shadow"></div>
+      <div class="subnav-label">${sub.label}</div>
+    `;
+    scroll.appendChild(item);
+  });
+}
+
+/* ════════════════════════════════════════════════
+   SUB MENU SELECT
+════════════════════════════════════════════════ */
+function selectSub(subId, navId) {
+  // 이전 active 제거
+  document.querySelectorAll('.subnav-item').forEach(el => el.classList.remove('active'));
+  // 현재 active
+  const el = document.querySelector(`[data-sub-id="${subId}"]`);
+  if (el) el.classList.add('active');
+
+  const same = currentSubId === subId;
+  currentSubId = subId;
+
+  showCardPage(subId, !same);
+}
+
+/* ════════════════════════════════════════════════
+   CENTER DISPLAY
+════════════════════════════════════════════════ */
+function showDefaultCenter(animate) {
+  const area = document.getElementById('center-area');
+
+  // 기존 동적 페이지 제거
+  area.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
+
+  const def = document.getElementById('page-default');
+  def.classList.add('active');
+
+  if (animate) {
+    triggerCurtain();
+  }
+}
+
+function showCardPage(subId, animate) {
+  const area = document.getElementById('center-area');
+
+  // default 숨기기
+  document.getElementById('page-default').classList.remove('active');
+
+  // 기존 페이지 제거 (애니메이션 없이 즉시)
+  area.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
+
+  if (animate) triggerCurtain();
+
+  const page = document.createElement('div');
+  page.className = 'center-page active';
+  page.id = 'page-' + subId;
+
+  const cards = CARD_DATA[subId] || [];
+  const navInfo = Object.values(NAV_DATA).find(n => n.subs.find(s => s.id === subId));
+  const subInfo = navInfo ? navInfo.subs.find(s => s.id === subId) : null;
+  const label = subInfo ? subInfo.label : subId;
+
+  let html = `<div class="section-label">${label}</div><div class="card-grid">`;
+
+  if (!selectedCards[subId]) selectedCards[subId] = new Set();
+
+  cards.forEach((card, idx) => {
+    const sel = selectedCards[subId].has(idx) ? ' selected' : '';
+    html += `
+      <div class="data-card${sel}" onclick="cardClick('${subId}', ${idx}, '${escHtml(card.name)}', '${escHtml(card.icon)}')">
+        <div class="card-icon-area">${card.icon}</div>
+        <div class="card-name">${card.name}</div>
+      </div>
+    `;
+  });
+
+  html += '</div>';
+  page.innerHTML = html;
+  area.appendChild(page);
+
+  // 약간의 딜레이 후 active 적용 (CSS transition 발동)
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      page.classList.add('active');
+    });
+  });
+}
+
+function triggerCurtain() {
+  const curtain = document.getElementById('curtain-drop');
+  curtain.classList.remove('animate');
+  void curtain.offsetWidth;
+  curtain.classList.add('animate');
+  setTimeout(() => curtain.classList.remove('animate'), 500);
+}
+
+/* ════════════════════════════════════════════════
+   CARD INTERACTION
+════════════════════════════════════════════════ */
+function cardClick(subId, idx, name, icon) {
+  // 팝업 표시
+  document.getElementById('popup-title').textContent = icon + ' ' + name;
+  document.getElementById('popup-desc').textContent = `[${name}] 항목의 상세 설명이 여기에 표시됩니다. 추후 각 항목별 설명과 서사적 활용 예시가 추가될 예정입니다.`;
+
+  const overlay = document.getElementById('popup-overlay');
+  overlay.classList.add('active');
+  overlay.setAttribute('data-sub', subId);
+  overlay.setAttribute('data-idx', idx);
+
+  const btn = document.getElementById('popup-select-btn');
+  const isSelected = selectedCards[subId] && selectedCards[subId].has(idx);
+  btn.textContent = isSelected ? '✓ 선택 해제' : '이 항목 선택';
+  btn.onclick = () => toggleCardSelect(subId, idx);
+}
+
+function toggleCardSelect(subId, idx) {
+  if (!selectedCards[subId]) selectedCards[subId] = new Set();
+  if (selectedCards[subId].has(idx)) {
+    selectedCards[subId].delete(idx);
+  } else {
+    selectedCards[subId].add(idx);
+  }
+
+  // 카드 UI 업데이트
+  const page = document.getElementById('page-' + subId);
+  if (page) {
+    const cards = page.querySelectorAll('.data-card');
+    cards.forEach((card, i) => {
+      if (i === idx) {
+        card.classList.toggle('selected', selectedCards[subId].has(idx));
+      }
+    });
+  }
+
+  // 서브메뉴 배지 업데이트
+  renderSubnav(currentNav, false);
+  if (currentSubId) {
+    const el = document.querySelector(`[data-sub-id="${currentSubId}"]`);
+    if (el) el.classList.add('active');
+  }
+
+  // 팝업 버튼 텍스트
+  const isSelected = selectedCards[subId].has(idx);
+  document.getElementById('popup-select-btn').textContent = isSelected ? '✓ 선택 해제' : '이 항목 선택';
+}
+
+function closePopup(e) {
+  if (e && e.target !== document.getElementById('popup-overlay')) return;
+  document.getElementById('popup-overlay').classList.remove('active');
+}
+
+/* ════════════════════════════════════════════════
+   RESET
+════════════════════════════════════════════════ */
+function partialReset() {
+  const subs = NAV_DATA[currentNav].subs;
+  subs.forEach(sub => { delete selectedCards[sub.id]; });
+  if (currentSubId) showCardPage(currentSubId, false);
+  renderSubnav(currentNav, false);
+  if (currentSubId) {
+    const el = document.querySelector(`[data-sub-id="${currentSubId}"]`);
+    if (el) el.classList.add('active');
+  }
+}
+
+function fullReset() {
+  if (!confirm('모든 선택을 초기화할까요?')) return;
+  selectedCards = {};
+  if (currentSubId) showCardPage(currentSubId, false);
+  renderSubnav(currentNav, false);
+  if (currentSubId) {
+    const el = document.querySelector(`[data-sub-id="${currentSubId}"]`);
+    if (el) el.classList.add('active');
+  }
+}
+
+/* ════════════════════════════════════════════════
+   UTIL
+════════════════════════════════════════════════ */
+function escHtml(s) {
+  return s.replace(/'/g, "\\'");
+}
+</script>
 </body>
 </html>
