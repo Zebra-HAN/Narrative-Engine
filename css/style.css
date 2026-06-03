@@ -1101,7 +1101,8 @@
     }
 
     /* 창작 페이지 — 버튼 눌림 효과 */
-    #screen-create .pressable:active {
+    #screen-create .pressable:active,
+    #screen-create .pressable.is-pressing {
       transform: scale(0.94);
       filter: brightness(0.88);
     }
