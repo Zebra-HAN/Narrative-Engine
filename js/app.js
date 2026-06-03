@@ -834,3 +834,29 @@ async function fullReset() {
 function escHtml(s) {
   return s.replace(/'/g, "\\'");
 }
+
+/* ════════════════════════════════════════════════
+   MOBILE TOUCH — pressable 눌림 효과
+   iOS Safari는 :active가 터치에서 작동 안 함
+   → touchstart/touchend로 직접 클래스 제어
+════════════════════════════════════════════════ */
+(function () {
+  function onTouchStart(e) {
+    const el = e.target.closest('.pressable');
+    if (!el) return;
+    el.classList.add('is-pressing');
+  }
+
+  function onTouchEnd(e) {
+    // 현재 누르고 있는 모든 pressable에서 클래스 제거
+    document.querySelectorAll('.is-pressing').forEach(el => {
+      el.classList.remove('is-pressing');
+    });
+  }
+
+  document.addEventListener('touchstart', onTouchStart, { passive: true });
+  document.addEventListener('touchend',   onTouchEnd,   { passive: true });
+  document.addEventListener('touchcancel',onTouchEnd,   { passive: true });
+})();
+
+
