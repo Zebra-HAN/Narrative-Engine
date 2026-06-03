@@ -1158,3 +1158,31 @@
       .subnav-panel { height: 90px; }
       .diamond-btn { width: 44px; height: 44px; }
     }
+
+/* ═══════════════════════════════════════════════
+   [모바일 전용] 모든 버튼 & 카드 터치 효과 일괄 적용
+   ═══════════════════════════════════════════════ */
+
+/* 1. 마우스가 없는 '터치 스크린(모바일)' 환경에서만 작동하도록 제한 */
+@media (hover: none) {
+
+  /* 2. 누를 수 있는 모든 요소들을 전부 지정 (버튼, 링크, 카드 등) */
+  button:active, 
+  a:active, 
+  .card:active, 
+  [role="button"]:active {
+    /* 꾹 눌렸을 때 0.96배로 살짝 들어가게 만듦 */
+    transform: scale(0.96) !important;
+    
+    /* 누르는 순간 살짝 어둡거나 밝게 해서 피드백 주기 (선택) */
+    filter: brightness(0.9) !important;
+    
+    /* 누르는 순간에는 대기 시간 없이 즉시 반응하도록 설정 */
+    transition: transform 0.05s ease !important;
+  }
+
+  /* 3. 부드럽게 원래 크기로 돌아오도록 기본 애니메이션 속도 보장 */
+  button, a, .card, [role="button"] {
+    transition: transform 0.15s ease-in-out, filter 0.15s ease-in-out;
+  }
+}
