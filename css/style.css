@@ -150,7 +150,8 @@
       text-transform: none;
     }
 
-/* ═══════════════════════════════════════════════
+
+    /* ═══════════════════════════════════════════════
        HOME SCREEN
     ═══════════════════════════════════════════════ */
     #screen-home {
@@ -188,49 +189,30 @@
       position: relative;
       z-index: 1;
     }
-/* --- 기본 버튼 스타일 (기존 코드 유지) --- */
-.home-link {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-family: 'Noto Serif KR', serif;
-  font-size: clamp(1.6rem, 6vw, 2.4rem);
-  font-weight: 500;
-  color: var(--gold-bright);
-  letter-spacing: 0.12em;
-  padding: 8px 16px;
-  /* 💡 핵심: 모든 변화가 부드럽게 일어나도록 설정 */
-  transition: all 0.2s ease-in-out;
-  -webkit-tap-highlight-color: transparent; /* 모바일 기본 터치 하이라이트 제거 */
-  outline: none; /* 포커스 테두리 제거 */
-}
-
-/* 💡 PC에서 마우스를 올렸을 때만 빛나게 (선택 사항, 모바일엔 영향 없음) */
-@media (hover: hover) {
-  .home-link:hover {
-    color: #fff8e8;
-    text-shadow:
-      0 0 28px rgba(245, 217, 138, 0.75),
-      0 0 48px rgba(232, 201, 106, 0.45);
-    filter: brightness(1.35);
-  }
-}
-
-/* 💡 [핵심 해결책] JavaScript가 터치 시 추가할 새로운 클래스 스타일 */
-.home-link.is-pressed {
-  /* 1. 쫀득하게 들어가는 효과 (크기 축소) */
-  transform: scale(0.95);
-  
-  /* 2. 환하게 빛나는 효과 (PC와 동일) */
-  color: #fff8e8;
-  text-shadow:
-    0 0 28px rgba(245, 217, 138, 0.75),
-    0 0 48px rgba(232, 201, 106, 0.45);
-  filter: brightness(1.35);
-  
-  /* 부드러운 효과 속도 */
-  transition: all 0.05s ease; /* 누를 때는 더 빠르게 변경 */
-}
+    .home-link {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'Noto Serif KR', serif;
+      font-size: clamp(1.6rem, 6vw, 2.4rem);
+      font-weight: 500;
+      color: var(--gold-bright);
+      letter-spacing: 0.12em;
+      padding: 8px 16px;
+      transition: color 0.35s ease, text-shadow 0.35s ease, transform 0.12s ease, filter 0.12s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .home-link:hover {
+      color: #fff8e8;
+      text-shadow:
+        0 0 28px rgba(245, 217, 138, 0.75),
+        0 0 48px rgba(232, 201, 106, 0.45);
+      filter: brightness(1.35);
+    }
+    .home-link:active {
+      transform: scale(0.97);
+      filter: brightness(1.15);
+    }
 
 
     /* ═══════════════════════════════════════════════
@@ -1158,31 +1140,3 @@
       .subnav-panel { height: 90px; }
       .diamond-btn { width: 44px; height: 44px; }
     }
-
-/* ═══════════════════════════════════════════════
-   [모바일 전용] 모든 버튼 & 카드 터치 효과 일괄 적용
-   ═══════════════════════════════════════════════ */
-
-/* 1. 마우스가 없는 '터치 스크린(모바일)' 환경에서만 작동하도록 제한 */
-@media (hover: none) {
-
-  /* 2. 누를 수 있는 모든 요소들을 전부 지정 (버튼, 링크, 카드 등) */
-  button:active, 
-  a:active, 
-  .card:active, 
-  [role="button"]:active {
-    /* 꾹 눌렸을 때 0.96배로 살짝 들어가게 만듦 */
-    transform: scale(0.96) !important;
-    
-    /* 누르는 순간 살짝 어둡거나 밝게 해서 피드백 주기 (선택) */
-    filter: brightness(0.9) !important;
-    
-    /* 누르는 순간에는 대기 시간 없이 즉시 반응하도록 설정 */
-    transition: transform 0.05s ease !important;
-  }
-
-  /* 3. 부드럽게 원래 크기로 돌아오도록 기본 애니메이션 속도 보장 */
-  button, a, .card, [role="button"] {
-    transition: transform 0.15s ease-in-out, filter 0.15s ease-in-out;
-  }
-}
