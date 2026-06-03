@@ -324,9 +324,17 @@ let currentNav   = 'character';
 let currentSubId = null;
 let selectedCards = {};   // { subId: Set<idx> }
 let focusedCard  = null;  // { subId, idx, name, icon }
+let infoSlideCategory = false; // false=카드, true=카테고리
 
 function getCardDescription(name) {
   return `[${name}] 항목의 상세 설명이 여기에 표시됩니다. 추후 각 항목별 설명과 서사적 활용 예시가 추가될 예정입니다.`;
+}
+
+function getSubDescription(subId) {
+  const navInfo = Object.values(NAV_DATA).find(n => n.subs.find(s => s.id === subId));
+  const sub = navInfo ? navInfo.subs.find(s => s.id === subId) : null;
+  const label = sub ? sub.label : subId;
+  return `[${label}] 카테고리에 대한 설명이 여기에 표시됩니다. 추후 카테고리별 가이드와 활용 예시가 추가될 예정입니다.`;
 }
 
 /* ════════════════════════════════════════════════
@@ -338,20 +346,22 @@ window.addEventListener('load', () => {
   const content = document.getElementById('opening-content');
   const divider = document.getElementById('opening-divider');
 
-  // 제목 + 부제 + 선 페이드인
-  setTimeout(() => content.classList.add('visible'), 300);
+  // 페이드인 + 선 확장 (동시에, 약 0.5초 분량)
+  setTimeout(() => {
+    content.classList.add('visible');
+    divider.classList.add('expand');
+  }, 150);
 
-  // 금색 선 중앙에서 양쪽으로 확장
-  setTimeout(() => divider.classList.add('expand'), 1400);
+  // 짧은 정지 후 페이드 아웃
+  setTimeout(() => content.classList.add('fade-out'), 1700);
 
-  // 1~2초 정지 후 페이드 아웃
-  setTimeout(() => content.classList.add('fade-out'), 3400);
-
-  // 디졸브로 홈 화면 전환
+  // 디졸브로 홈 화면 전환 (전체 약 2.1초)
   setTimeout(() => {
     switchScreen('screen-home', null, true);
-  }, 4200);
+  }, 2100);
 });
+
+initInfoSliderSwipe();
 
 /* ════════════════════════════════════════════════
    SCREEN TRANSITION
@@ -391,13 +401,20 @@ function switchScreen(targetId, callback, useFade) {
 function goHome() {
   closeDetailSheet();
   closeStatusOverlay();
-  switchScreen('screen-home', null, false);
+  const create = document.getElementById('screen-create');
+  if (create) create.classList.remove('entering');
+  switchScreen('screen-home', null, true);
 }
 function goToNarrative() {
   switchScreen('screen-narrative', null, true);
 }
 function goToCreate() {
   switchScreen('screen-create', () => {
+    const create = document.getElementById('screen-create');
+    create.classList.remove('entering');
+    void create.offsetWidth;
+    create.classList.add('entering');
+    setTimeout(() => create.classList.remove('entering'), 600);
     switchNav('character', true);
   }, true);
 }
@@ -425,7 +442,9 @@ function switchNav(navId, skipAnimation) {
   renderSubnav(navId, !skipAnimation && prev !== navId);
 
   // 중앙 기본 상태로
+  focusedCard = null;
   showDefaultCenter();
+  updateInfoPanel();
 }
 
 function renderSubnav(navId, animate) {
@@ -447,7 +466,6 @@ function renderSubnav(navId, animate) {
         <span class="diamond-btn-icon">${sub.icon}</span>
         ${count > 0 ? `<div class="selection-badge">${count}</div>` : ''}
       </div>
-      <div class="diamond-shadow"></div>
       <div class="subnav-label">${sub.label}</div>
     `;
     scroll.appendChild(item);
@@ -466,8 +484,13 @@ function selectSub(subId, navId) {
 
   const same = currentSubId === subId;
   currentSubId = subId;
+  if (!same) {
+    focusedCard = null;
+    setInfoSlide(false);
+  }
 
   showCardPage(subId, !same);
+  updateInfoPanel();
 }
 
 /* ════════════════════════════════════════════════
@@ -527,30 +550,98 @@ function showCardPage(subId, animate) {
 ════════════════════════════════════════════════ */
 function cardClick(subId, idx, name, icon) {
   focusedCard = { subId, idx, name, icon };
+  setInfoSlide(false);
   updateInfoPanel();
+}
+
+function setInfoSlide(showCategory) {
+  infoSlideCategory = showCategory;
+  const track = document.getElementById('info-slider-track');
+  const hint = document.getElementById('info-swipe-hint');
+  if (!track) return;
+  track.classList.toggle('show-category', showCategory);
+  if (hint) {
+    hint.textContent = showCategory ? '카드 설명 보기 →' : '← 카테고리 설명 보기';
+    hint.classList.toggle('hidden', !currentSubId);
+  }
+}
+
+function initInfoSliderSwipe() {
+  const viewport = document.getElementById('info-slider-viewport');
+  if (!viewport) return;
+
+  let startX = 0;
+  let dragging = false;
+
+  viewport.addEventListener('touchstart', (e) => {
+    if (!currentSubId) return;
+    startX = e.touches[0].clientX;
+    dragging = true;
+  }, { passive: true });
+
+  viewport.addEventListener('touchend', (e) => {
+    if (!dragging || !currentSubId) return;
+    dragging = false;
+    const dx = e.changedTouches[0].clientX - startX;
+    if (dx < -40) setInfoSlide(true);
+    else if (dx > 40) setInfoSlide(false);
+  }, { passive: true });
+
+  viewport.addEventListener('mousedown', (e) => {
+    if (!currentSubId) return;
+    startX = e.clientX;
+    dragging = true;
+  });
+
+  window.addEventListener('mouseup', (e) => {
+    if (!dragging || !currentSubId) return;
+    dragging = false;
+    const dx = e.clientX - startX;
+    if (dx < -40) setInfoSlide(true);
+    else if (dx > 40) setInfoSlide(false);
+  });
 }
 
 function updateInfoPanel() {
   const emptyEl = document.getElementById('info-empty');
-  const contentEl = document.getElementById('info-content');
+  const sliderWrap = document.getElementById('info-slider-wrap');
   const selectBtn = document.getElementById('info-select-btn');
 
-  if (!focusedCard) {
+  if (!currentSubId) {
     emptyEl.classList.remove('hidden');
-    contentEl.classList.add('hidden');
+    sliderWrap.classList.add('hidden');
     return;
   }
 
   emptyEl.classList.add('hidden');
-  contentEl.classList.remove('hidden');
+  sliderWrap.classList.remove('hidden');
 
-  document.getElementById('info-icon').textContent = focusedCard.icon;
-  document.getElementById('info-name').textContent = focusedCard.name;
-  document.getElementById('info-desc').textContent = getCardDescription(focusedCard.name);
+  const navInfo = Object.values(NAV_DATA).find(n => n.subs.find(s => s.id === currentSubId));
+  const subInfo = navInfo ? navInfo.subs.find(s => s.id === currentSubId) : null;
 
-  const isSelected = selectedCards[focusedCard.subId] && selectedCards[focusedCard.subId].has(focusedCard.idx);
-  selectBtn.textContent = isSelected ? '✓ 선택됨' : '선택';
-  selectBtn.classList.toggle('is-selected', isSelected);
+  document.getElementById('info-cat-icon').textContent = subInfo ? subInfo.icon : '✦';
+  document.getElementById('info-cat-name').textContent = subInfo ? subInfo.label : currentSubId;
+  document.getElementById('info-cat-desc').textContent = getSubDescription(currentSubId);
+
+  if (focusedCard && focusedCard.subId === currentSubId) {
+    document.getElementById('info-card-icon').textContent = focusedCard.icon;
+    document.getElementById('info-card-name').textContent = focusedCard.name;
+    document.getElementById('info-card-desc').textContent = getCardDescription(focusedCard.name);
+    const isSelected = selectedCards[focusedCard.subId] && selectedCards[focusedCard.subId].has(focusedCard.idx);
+    selectBtn.textContent = isSelected ? '✓ 선택됨' : '선택';
+    selectBtn.classList.toggle('is-selected', isSelected);
+    setInfoSlide(false);
+  } else {
+    document.getElementById('info-card-icon').textContent = '·';
+    document.getElementById('info-card-name').textContent = '카드 미선택';
+    document.getElementById('info-card-desc').textContent = '카드를 탭하면 이곳에 항목 설명이 표시됩니다.';
+    selectBtn.textContent = '선택';
+    selectBtn.classList.remove('is-selected');
+    setInfoSlide(true);
+  }
+
+  const hint = document.getElementById('info-swipe-hint');
+  if (hint) hint.classList.remove('hidden');
 }
 
 function selectCurrentCard() {
@@ -591,8 +682,9 @@ function toggleCardSelect(subId, idx) {
   refreshStatusIfOpen();
 }
 
-function openDetailSheet() {
-  if (!focusedCard) return;
+function openDetailSheet(mode) {
+  if (mode === 'card' && !focusedCard) return;
+  if (mode === 'category' && !currentSubId) return;
   document.getElementById('detail-overlay').classList.add('active');
 }
 
@@ -647,7 +739,53 @@ function renderStatusContent() {
 }
 
 function shareStatus() {
-  alert('공유 기능은 다음 업데이트 예정입니다.');
+  showAppNotice('공유 기능은 다음 업데이트 예정입니다.');
+}
+
+/* ════════════════════════════════════════════════
+   APP DIALOG (confirm / notice)
+════════════════════════════════════════════════ */
+let appDialogResolve = null;
+
+function showAppDialog(msg, buttons) {
+  return new Promise((resolve) => {
+    appDialogResolve = resolve;
+    const overlay = document.getElementById('app-dialog-overlay');
+    const actions = document.getElementById('app-dialog-actions');
+    document.getElementById('app-dialog-msg').textContent = msg;
+    actions.innerHTML = '';
+    buttons.forEach((b) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'app-dialog-btn pressable ' + b.className;
+      btn.textContent = b.label;
+      btn.onclick = () => closeAppDialog(b.value);
+      actions.appendChild(btn);
+    });
+    overlay.classList.add('active');
+  });
+}
+
+function closeAppDialog(value) {
+  document.getElementById('app-dialog-overlay').classList.remove('active');
+  if (appDialogResolve) {
+    const r = appDialogResolve;
+    appDialogResolve = null;
+    r(value);
+  }
+}
+
+function showAppNotice(msg) {
+  return showAppDialog(msg, [
+    { label: '확인', className: 'app-dialog-btn-single', value: true }
+  ]);
+}
+
+function showAppConfirm(msg) {
+  return showAppDialog(msg, [
+    { label: '아니오', className: 'app-dialog-btn-cancel', value: false },
+    { label: '예', className: 'app-dialog-btn-confirm', value: true }
+  ]);
 }
 
 function refreshStatusIfOpen() {
@@ -660,7 +798,10 @@ function refreshStatusIfOpen() {
 /* ════════════════════════════════════════════════
    RESET
 ════════════════════════════════════════════════ */
-function partialReset() {
+async function partialReset() {
+  const label = NAV_DATA[currentNav].label;
+  const ok = await showAppConfirm(`${label} 탭의 선택을 모두 초기화할까요?`);
+  if (!ok) return;
   const subs = NAV_DATA[currentNav].subs;
   subs.forEach(sub => { delete selectedCards[sub.id]; });
   if (currentSubId) showCardPage(currentSubId, false);
@@ -673,8 +814,9 @@ function partialReset() {
   refreshStatusIfOpen();
 }
 
-function fullReset() {
-  if (!confirm('모든 선택을 초기화할까요?')) return;
+async function fullReset() {
+  const ok = await showAppConfirm('모든 선택을 초기화할까요?');
+  if (!ok) return;
   selectedCards = {};
   if (currentSubId) showCardPage(currentSubId, false);
   renderSubnav(currentNav, false);

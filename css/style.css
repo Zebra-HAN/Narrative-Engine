@@ -83,19 +83,19 @@
     .opening-content {
       text-align: center;
       opacity: 0;
-      transition: opacity 1.4s ease;
+      transition: opacity 0.7s ease;
     }
     .opening-content.visible {
       opacity: 1;
     }
     .opening-content.fade-out {
       opacity: 0;
-      transition: opacity 0.7s ease;
+      transition: opacity 0.35s ease;
     }
 
     .opening-title {
       font-family: 'Cinzel', serif;
-      font-size: clamp(2rem, 8vw, 3.8rem);
+      font-size: clamp(1rem, 4vw, 1.9rem);
       font-weight: 700;
       color: var(--ivory);
       letter-spacing: 0.12em;
@@ -122,7 +122,7 @@
         transparent 100%
       );
       box-shadow: 0 0 4px rgba(232, 201, 106, 0.5), 0 0 10px rgba(232, 201, 106, 0.25);
-      transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .opening-divider::after {
       content: '';
@@ -203,8 +203,11 @@
       -webkit-tap-highlight-color: transparent;
     }
     .home-link:hover {
-      color: var(--gold-glow);
-      text-shadow: 0 0 24px rgba(232, 201, 106, 0.35);
+      color: #fff8e8;
+      text-shadow:
+        0 0 28px rgba(245, 217, 138, 0.75),
+        0 0 48px rgba(232, 201, 106, 0.45);
+      filter: brightness(1.35);
     }
     .home-link:active {
       transform: scale(0.97);
@@ -328,11 +331,30 @@
       overflow: hidden;
       z-index: 70;
     }
+    #screen-create.entering .info-panel {
+      animation: infoPanelEnter 0.55s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    #screen-create.entering .create-chrome-bottom {
+      animation: chromeBottomEnter 0.55s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    @keyframes infoPanelEnter {
+      0%   { transform: translateY(-100%); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes chromeBottomEnter {
+      0%   { transform: translateY(100%); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+    .create-chrome-bottom {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+    }
 
     /* ── INFO PANEL (설명창) ── */
     .info-panel {
       flex-shrink: 0;
-      min-height: 118px;
+      min-height: 177px;
       background: linear-gradient(180deg, var(--bg-panel2) 0%, var(--bg-bar) 100%);
       border-bottom: 1px solid var(--border-gold);
       padding: 14px 14px 12px;
@@ -353,14 +375,46 @@
     .info-empty.hidden {
       display: none;
     }
-    .info-content {
+    .info-slider-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-height: 138px;
+    }
+    .info-slider-wrap.hidden {
+      display: none;
+    }
+    .info-swipe-hint {
+      font-size: 0.58rem;
+      color: var(--text-muted);
+      text-align: center;
+      letter-spacing: 0.08em;
+      transition: opacity 0.25s ease;
+    }
+    .info-swipe-hint.hidden {
+      display: none;
+    }
+    .info-slider-viewport {
+      overflow: hidden;
+      touch-action: pan-y;
+      flex: 1;
+    }
+    .info-slider-track {
+      display: flex;
+      width: 200%;
+      transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .info-slider-track.show-category {
+      transform: translateX(-50%);
+    }
+    .info-slide {
+      width: 50%;
+      flex-shrink: 0;
       display: flex;
       flex-direction: column;
       gap: 10px;
-      min-height: 92px;
-    }
-    .info-content.hidden {
-      display: none;
+      padding: 0 2px;
+      box-sizing: border-box;
     }
     .info-main {
       display: flex;
@@ -400,7 +454,7 @@
       color: var(--text-secondary);
       line-height: 1.65;
       display: -webkit-box;
-      -webkit-line-clamp: 3;
+      -webkit-line-clamp: 5;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
@@ -547,26 +601,13 @@
       border: 1.5px solid var(--border-gold);
       border-radius: 4px;
       background: linear-gradient(135deg, var(--bg-panel2), var(--bg-panel));
-      transition:
-        transform 0.32s cubic-bezier(0.4, 0, 0.2, 1),
-        width 0.32s cubic-bezier(0.4, 0, 0.2, 1),
-        height 0.32s cubic-bezier(0.4, 0, 0.2, 1),
-        background 0.25s,
-        border-color 0.25s,
-        box-shadow 0.25s;
+      transition: background 0.25s, border-color 0.25s, box-shadow 0.25s;
       box-shadow: 0 2px 8px rgba(0,0,0,0.5);
     }
     .diamond-btn-icon {
       transform: rotate(-45deg);
       font-size: 1.1rem;
       line-height: 1;
-      transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    /* 그림자 (바 테이블) */
-    .diamond-shadow {
-      width: 30px; height: 5px;
-      background: radial-gradient(ellipse, rgba(0,0,0,0.5) 0%, transparent 70%);
-      margin-top: 2px;
     }
     .subnav-label {
       font-size: 0.6rem;
@@ -575,15 +616,9 @@
       font-family: 'Noto Sans KR', sans-serif;
     }
     .subnav-item.active .diamond-btn {
-      width: 44px;
-      height: 44px;
-      transform: rotate(0deg) scale(1.02);
       background: linear-gradient(135deg, #1e1a08, #2a2210);
       border-color: var(--gold-bright);
-      box-shadow: 0 0 14px rgba(200,170,70,0.45), 0 2px 8px rgba(0,0,0,0.5);
-    }
-    .subnav-item.active .diamond-btn-icon {
-      transform: rotate(0deg);
+      box-shadow: 0 0 12px rgba(200,170,70,0.4), 0 2px 8px rgba(0,0,0,0.5);
     }
     .subnav-item.active .subnav-label { color: var(--gold-bright); }
 
@@ -992,6 +1027,79 @@
       text-align: center;
     }
 
+    /* 앱 스타일 다이얼로그 */
+    .app-dialog-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 800;
+      background: rgba(0, 0, 0, 0.78);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .app-dialog-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .app-dialog {
+      width: 100%;
+      max-width: 320px;
+      background: linear-gradient(180deg, var(--bg-panel2), var(--bg-panel));
+      border: 1px solid var(--border-gold2);
+      border-radius: 12px;
+      padding: 22px 20px 18px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.65), 0 0 20px rgba(180, 145, 60, 0.12);
+      transform: scale(0.94);
+      transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .app-dialog-overlay.active .app-dialog {
+      transform: scale(1);
+    }
+    .app-dialog-msg {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 0.88rem;
+      color: var(--ivory-dim);
+      line-height: 1.65;
+      text-align: center;
+      margin-bottom: 18px;
+    }
+    .app-dialog-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+    }
+    .app-dialog-btn {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: var(--radius-btn);
+      font-size: 0.78rem;
+      font-family: 'Noto Sans KR', sans-serif;
+      cursor: pointer;
+      border: 1px solid var(--border-gold);
+      transition: background 0.2s, transform 0.12s ease, filter 0.12s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .app-dialog-btn-cancel {
+      background: rgba(60, 50, 30, 0.2);
+      color: var(--text-secondary);
+    }
+    .app-dialog-btn-confirm {
+      background: linear-gradient(90deg, rgba(140, 115, 45, 0.35), rgba(100, 80, 30, 0.25));
+      color: var(--gold-glow);
+      border-color: var(--gold-mid);
+    }
+    .app-dialog-btn-single {
+      background: linear-gradient(90deg, rgba(140, 115, 45, 0.35), rgba(100, 80, 30, 0.25));
+      color: var(--gold-glow);
+      border-color: var(--gold-mid);
+      flex: none;
+      min-width: 120px;
+    }
+
     /* 창작 페이지 — 버튼 눌림 효과 */
     #screen-create .pressable:active {
       transform: scale(0.94);
@@ -1025,10 +1133,10 @@
 
     /* 반응형: 태블릿/PC */
     @media (min-width: 600px) {
-      .info-panel { min-height: 128px; padding: 16px 18px 14px; }
+      .info-panel { min-height: 192px; padding: 16px 18px 14px; }
+      .info-slider-wrap { min-height: 150px; }
       .info-icon { width: 52px; height: 52px; font-size: 1.9rem; }
       .ctrl-btn { font-size: 0.62rem; padding: 6px 8px; }
       .subnav-panel { height: 90px; }
       .diamond-btn { width: 44px; height: 44px; }
-      .subnav-item.active .diamond-btn { width: 48px; height: 48px; }
     }

@@ -49,19 +49,19 @@
   </div>
 
   <div class="narrative-main-row">
-    <button class="narrative-main-btn" onclick="alert('신화의 여정 17단계 — 준비 중')">
+    <button class="narrative-main-btn" onclick="showAppNotice('신화의 여정 17단계 — 준비 중')">
       <div class="narrative-main-btn-icon">📜</div>
       <div class="narrative-main-btn-title">신화의 여정<br>17단계</div>
       <div class="narrative-main-btn-sub">조셉 캠벨</div>
     </button>
-    <button class="narrative-main-btn" onclick="alert('작가의 여정 12단계 — 준비 중')">
+    <button class="narrative-main-btn" onclick="showAppNotice('영웅의 여정 12단계 — 준비 중')">
       <div class="narrative-main-btn-icon">⚔️</div>
       <div class="narrative-main-btn-title">영웅의 여정<br>12단계</div>
       <div class="narrative-main-btn-sub">크리스토퍼 보글러</div>
     </button>
   </div>
 
-  <button class="narrative-sub-btn" onclick="alert('창조자의 설계도 18단계 — 준비 중')">
+  <button class="narrative-sub-btn" onclick="showAppNotice('창조자의 설계도 18단계 — 준비 중')">
     <span class="narrative-sub-btn-icon">✦</span>
     <span class="narrative-sub-btn-text">창조자의 설계도 18단계 (HAN)</span>
   </button>
@@ -77,20 +77,39 @@
 ══════════════════════════════════════ -->
 <div id="screen-create" class="screen">
 
-  <!-- ① 설명창 (info-panel) -->
+  <!-- ① 설명창 (info-panel) — 카드 / 카테고리 슬라이드 -->
   <div class="info-panel" id="info-panel">
-    <div class="info-empty" id="info-empty">카드를 선택하면 정보가 표시됩니다</div>
-    <div class="info-content hidden" id="info-content">
-      <div class="info-main">
-        <div class="info-icon" id="info-icon"></div>
-        <div class="info-text-wrap">
-          <div class="info-name" id="info-name"></div>
-          <div class="info-desc" id="info-desc"></div>
+    <div class="info-empty" id="info-empty">아래에서 카테고리를 선택하세요</div>
+    <div class="info-slider-wrap hidden" id="info-slider-wrap">
+      <div class="info-swipe-hint" id="info-swipe-hint">← 카테고리 설명 보기</div>
+      <div class="info-slider-viewport" id="info-slider-viewport">
+        <div class="info-slider-track" id="info-slider-track">
+          <div class="info-slide info-slide-card">
+            <div class="info-main">
+              <div class="info-icon" id="info-card-icon"></div>
+              <div class="info-text-wrap">
+                <div class="info-name" id="info-card-name"></div>
+                <div class="info-desc" id="info-card-desc"></div>
+              </div>
+            </div>
+            <div class="info-actions">
+              <button type="button" class="info-btn-detail pressable" onclick="openDetailSheet('card')">상세 정보</button>
+              <button type="button" class="info-btn-select pressable" id="info-select-btn" onclick="selectCurrentCard()">선택</button>
+            </div>
+          </div>
+          <div class="info-slide info-slide-category">
+            <div class="info-main">
+              <div class="info-icon" id="info-cat-icon"></div>
+              <div class="info-text-wrap">
+                <div class="info-name" id="info-cat-name"></div>
+                <div class="info-desc" id="info-cat-desc"></div>
+              </div>
+            </div>
+            <div class="info-actions">
+              <button type="button" class="info-btn-detail pressable" onclick="openDetailSheet('category')">상세 정보</button>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="info-actions">
-        <button type="button" class="info-btn-detail pressable" onclick="openDetailSheet()">상세 정보</button>
-        <button type="button" class="info-btn-select pressable" id="info-select-btn" onclick="selectCurrentCard()">선택</button>
       </div>
     </div>
   </div>
@@ -105,6 +124,7 @@
     </div>
   </div>
 
+  <div class="create-chrome-bottom" id="create-chrome-bottom">
   <!-- ③ 컨트롤 바 -->
   <div class="control-bar">
     <button type="button" class="ctrl-btn pressable" onclick="goHome()">
@@ -182,6 +202,7 @@
       <div class="nav-label">나침반</div>
     </button>
   </div>
+  </div>
 
   <!-- 상태 오버레이 -->
   <div class="status-overlay" id="status-overlay" onclick="closeStatusOverlay(event)">
@@ -205,6 +226,14 @@
     </div>
   </div>
 
+</div>
+
+<!-- 앱 스타일 다이얼로그 -->
+<div class="app-dialog-overlay" id="app-dialog-overlay">
+  <div class="app-dialog">
+    <p class="app-dialog-msg" id="app-dialog-msg"></p>
+    <div class="app-dialog-actions" id="app-dialog-actions"></div>
+  </div>
 </div>
 
 <script src="js/app.js"></script>
