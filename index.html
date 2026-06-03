@@ -237,5 +237,32 @@
 </div>
 
 <script src="js/app.js"></script>
+
+  <script>
+  // 모든 .home-link 버튼을 찾습니다.
+  const homeLinks = document.querySelectorAll('.home-link');
+
+  // 각 버튼에 터치 이벤트를 추가합니다.
+  homeLinks.forEach(link => {
+    // 1. 터치 시작 (손가락을 댈 때)
+    link.addEventListener('touchstart', () => {
+      link.classList.add('is-pressed'); // '눌림' 클래스 추가 -> CSS 효과 발동
+    });
+
+    // 2. 터치 종료 (손가락을 뗄 때)
+    link.addEventListener('touchend', () => {
+      // 부드러운 복귀를 위해 약간의 지연 시간을 둡니다.
+      setTimeout(() => {
+        link.classList.remove('is-pressed'); // '눌림' 클래스 제거 -> 원래대로
+      }, 150);
+    });
+
+    // 3. 터치 취소 (터치 도중 화면을 쓸어넘길 때 등)
+    link.addEventListener('touchcancel', () => {
+      link.classList.remove('is-pressed'); // 즉시 원래대로
+    });
+  });
+</script>
+  
 </body>
 </html>
