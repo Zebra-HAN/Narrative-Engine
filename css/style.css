@@ -150,8 +150,7 @@
       text-transform: none;
     }
 
-
-    /* ═══════════════════════════════════════════════
+/* ═══════════════════════════════════════════════
        HOME SCREEN
     ═══════════════════════════════════════════════ */
     #screen-home {
@@ -202,16 +201,19 @@
       transition: color 0.35s ease, text-shadow 0.35s ease, transform 0.12s ease, filter 0.12s ease;
       -webkit-tap-highlight-color: transparent;
     }
-    .home-link:hover {
+
+    /* 💡 [수정됨] 컴터에서 마우스 올렸을 때(hover) & 폰에서 손가락으로 누를 때(active) 둘 다 빛나게 만들기 */
+    .home-link:hover, .home-link:active {
       color: #fff8e8;
       text-shadow:
         0 0 28px rgba(245, 217, 138, 0.75),
         0 0 48px rgba(232, 201, 106, 0.45);
-      filter: brightness(1.35);
     }
+
+    /* 💡 [수정됨] 누르는 순간(active)에는 빛나는 밝기를 유지하면서 크기도 살짝 쫀득하게 줄이기 */
     .home-link:active {
       transform: scale(0.97);
-      filter: brightness(1.15);
+      filter: brightness(1.35); /* 폰에서 누를 때도 컴터처럼 최대 밝기로 유지 */
     }
 
 
