@@ -849,7 +849,7 @@ function toggleExtraMenu() {
   panel.classList.toggle('open', extraMenuOpen);
   btn.classList.toggle('open', extraMenuOpen);
 
-  // 아이콘: 닫혀있을때 ☰, 열려있을때 ▼
+  // 닫혀있을때 ☰, 열려있을때 역삼각형 ▼
   icon.textContent = extraMenuOpen ? '▼' : '☰';
 }
 
