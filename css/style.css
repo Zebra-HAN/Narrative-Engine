@@ -1169,8 +1169,8 @@
   padding: 4px 7px;
   cursor: pointer;
   white-space: nowrap;
-  min-width: 36px;
-  max-width: 36px;
+  min-width: 45px;
+  max-width: 45px;
   -webkit-tap-highlight-color: transparent;
 }
 .ctrl-btn-back .ctrl-icon { font-size: 0.85rem; line-height: 1; }
@@ -1208,19 +1208,17 @@
   color: var(--text-secondary);
   padding: 4px 0;
   cursor: pointer;
-  min-width: 36px;
-  max-width: 36px;
+  min-width: 45px;
+  max-width: 45px;
   -webkit-tap-highlight-color: transparent;
   transition: color 0.2s, background 0.2s, transform 0.12s, filter 0.12s;
 }
 .ctrl-menu-icon {
-  font-size: 1.1rem;
+  font-size: 1.4rem;
   line-height: 1;
-  transition: transform 0.3s ease;
-}
-.ctrl-btn-menu.open .ctrl-menu-icon {
-  /* 역삼각형 느낌으로 회전 */
-  transform: rotate(180deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .ctrl-btn-menu.open {
   color: var(--gold-bright);
