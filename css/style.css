@@ -1282,3 +1282,8 @@
 .nav-icon-status { color: inherit; }
 
 
+
+/* 버튼이미지  */
+
+.diamond-img { width: 28px; height: 28px; object-fit: contain; }
+
