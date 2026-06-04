@@ -542,15 +542,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .ctrl-btn-status {
-      color: var(--gold-dim);
-      border-color: rgba(180, 145, 60, 0.2);
-      background: rgba(60, 50, 25, 0.1);
-    }
-    .ctrl-btn-full {
-      color: rgba(160, 80, 60, 0.85);
-      border-color: rgba(160, 80, 60, 0.3);
-    }
+
 
     /* ── SUBNAVIGATION (bar-style, horizontal scroll) ── */
     .subnav-panel {
@@ -861,10 +853,6 @@
       color: var(--gold-bright);
     }
 
-    /* 상태 탭 — 아이콘만 금색 */
-    .nav-icon-status {
-      color: var(--gold-bright);
-    }
 
     /* 상태 오버레이 */
     .status-overlay {
@@ -1141,3 +1129,142 @@
       .subnav-panel { height: 90px; }
       .diamond-btn { width: 44px; height: 44px; }
     }
+
+
+/* ── 컨트롤 바 개편 ── */
+.control-bar {
+  display: flex;
+  align-items: stretch;
+  gap: 5px;
+  padding: 6px 8px;
+  background: var(--bg-bar);
+  border-bottom: 1px solid var(--border-gold);
+  min-height: 48px;
+}
+
+.ctrl-btn-back {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  background: rgba(60,50,30,0.2);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-btn);
+  color: var(--text-secondary);
+  font-size: 0.58rem;
+  padding: 4px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  min-width: 52px;
+  -webkit-tap-highlight-color: transparent;
+}
+.ctrl-btn-back .ctrl-icon { font-size: 0.85rem; line-height: 1; }
+.ctrl-btn-back .ctrl-label { font-family: 'Noto Sans KR', sans-serif; }
+
+/* 아이디어 통합 — 중앙 대형 버튼 */
+.ctrl-btn-idea {
+  flex: 1;
+  background: linear-gradient(135deg, rgba(120,95,35,0.35) 0%, rgba(80,62,22,0.25) 100%);
+  border: 1px solid var(--gold-mid);
+  border-radius: var(--radius-btn);
+  color: var(--gold-glow);
+  font-family: 'Noto Serif KR', serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  box-shadow: 0 0 12px rgba(180,145,60,0.15), inset 0 1px 0 rgba(200,165,70,0.12);
+  transition: background 0.2s, box-shadow 0.2s, transform 0.12s, filter 0.12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.ctrl-btn-idea:hover {
+  background: linear-gradient(135deg, rgba(140,110,42,0.45) 0%, rgba(95,74,26,0.35) 100%);
+  box-shadow: 0 0 18px rgba(200,165,60,0.25);
+}
+
+/* 三 메뉴 버튼 */
+.ctrl-btn-menu {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(60,50,30,0.2);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-btn);
+  color: var(--text-secondary);
+  padding: 4px 12px;
+  cursor: pointer;
+  min-width: 44px;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.2s, background 0.2s, transform 0.12s, filter 0.12s;
+}
+.ctrl-menu-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+  transition: transform 0.3s ease;
+}
+.ctrl-btn-menu.open .ctrl-menu-icon {
+  /* 역삼각형 느낌으로 회전 */
+  transform: rotate(180deg);
+}
+.ctrl-btn-menu.open {
+  color: var(--gold-bright);
+  border-color: var(--gold-mid);
+}
+
+/* 확장 메뉴 패널 */
+.extra-menu-panel {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 8px;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border-gold);
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1),
+              opacity 0.28s ease,
+              padding 0.28s ease;
+}
+.extra-menu-panel.open {
+  max-height: 64px;
+  opacity: 1;
+  padding: 7px 8px;
+}
+
+.extra-btn {
+  flex: 1;
+  padding: 8px 4px;
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-btn);
+  background: rgba(60,50,30,0.2);
+  color: var(--text-secondary);
+  font-size: 0.62rem;
+  font-family: 'Noto Sans KR', sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  text-align: center;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s, color 0.2s, transform 0.12s, filter 0.12s;
+}
+.extra-btn-danger {
+  color: rgba(220,90,80,0.85);
+  border-color: rgba(200,80,70,0.35);
+  background: rgba(120,40,35,0.15);
+}
+.extra-btn-random-all {
+  color: rgba(80,190,110,0.9);
+  border-color: rgba(60,170,90,0.4);
+  background: rgba(30,100,55,0.15);
+}
+.extra-btn-random {
+  color: var(--ivory-dim);
+  border-color: var(--border-gold);
+}
+
+/* 상태 오버레이 트리거를 ctrl-btn-idea로 이동했으니
+   nav-icon-status 제거해도 무방 — 아래 선언만 남김 */
+.nav-icon-status { color: inherit; }
+
+
