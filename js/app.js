@@ -836,6 +836,85 @@ function escHtml(s) {
 }
 
 /* ════════════════════════════════════════════════
+   EXTRA MENU TOGGLE
+════════════════════════════════════════════════ */
+let extraMenuOpen = false;
+
+function toggleExtraMenu() {
+  extraMenuOpen = !extraMenuOpen;
+  const panel = document.getElementById('extra-menu-panel');
+  const btn   = document.getElementById('btn-extra-menu');
+  const icon  = document.getElementById('extra-menu-icon');
+
+  panel.classList.toggle('open', extraMenuOpen);
+  btn.classList.toggle('open', extraMenuOpen);
+
+  // 아이콘: 닫혀있을때 ☰, 열려있을때 ▼
+  icon.textContent = extraMenuOpen ? '▼' : '☰';
+}
+
+/* ════════════════════════════════════════════════
+   RANDOM SELECT
+════════════════════════════════════════════════ */
+
+// 현재 탭의 현재 서브(마름모) 카드 1개 랜덤 선택
+async function randomSelectCurrent() {
+  if (!currentSubId) {
+    showAppNotice('먼저 카테고리를 선택해주세요.');
+    return;
+  }
+  const navLabel = NAV_DATA[currentNav].label;
+  const subLabel = NAV_DATA[currentNav].subs.find(s => s.id === currentSubId)?.label || currentSubId;
+  const ok = await showAppConfirm(`[${navLabel} — ${subLabel}]\n랜덤 선택을 하시겠습니까?`);
+  if (!ok) return;
+
+  const cards = CARD_DATA[currentSubId];
+  if (!cards || cards.length === 0) return;
+
+  const randomIdx = Math.floor(Math.random() * cards.length);
+  if (!selectedCards[currentSubId]) selectedCards[currentSubId] = new Set();
+  selectedCards[currentSubId].add(randomIdx);
+
+  // UI 갱신
+  showCardPage(currentSubId, false);
+  renderSubnav(currentNav, false);
+  const el = document.querySelector(`[data-sub-id="${currentSubId}"]`);
+  if (el) el.classList.add('active');
+
+  // 설명창 갱신
+  focusedCard = { subId: currentSubId, idx: randomIdx, ...cards[randomIdx] };
+  updateInfoPanel();
+  refreshStatusIfOpen();
+}
+
+// 현재 탭의 모든 서브(마름모) 각 1개씩 랜덤 선택
+async function randomSelectAll() {
+  const navLabel = NAV_DATA[currentNav].label;
+  const ok = await showAppConfirm(`[${navLabel}]\n모든 카테고리에서 각 1개씩\n랜덤 선택을 하시겠습니까?`);
+  if (!ok) return;
+
+  const subs = NAV_DATA[currentNav].subs;
+  subs.forEach(sub => {
+    const cards = CARD_DATA[sub.id];
+    if (!cards || cards.length === 0) return;
+    const randomIdx = Math.floor(Math.random() * cards.length);
+    if (!selectedCards[sub.id]) selectedCards[sub.id] = new Set();
+    selectedCards[sub.id].add(randomIdx);
+  });
+
+  // UI 갱신
+  if (currentSubId) showCardPage(currentSubId, false);
+  renderSubnav(currentNav, false);
+  if (currentSubId) {
+    const el = document.querySelector(`[data-sub-id="${currentSubId}"]`);
+    if (el) el.classList.add('active');
+  }
+  updateInfoPanel();
+  refreshStatusIfOpen();
+}
+
+
+/* ════════════════════════════════════════════════
    MOBILE TOUCH — pressable 눌림 효과
    iOS Safari는 :active가 터치에서 작동 안 함
    → touchstart/touchend로 직접 클래스 제어
