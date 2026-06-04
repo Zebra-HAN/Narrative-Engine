@@ -125,6 +125,18 @@
   </div>
 
   <div class="create-chrome-bottom" id="create-chrome-bottom">
+
+
+
+    
+<!-- 확장 메뉴 패널 (기본 숨김) -->
+<div class="extra-menu-panel" id="extra-menu-panel">
+  <button type="button" class="extra-btn extra-btn-danger pressable" onclick="fullReset()">전체 초기화</button>
+  <button type="button" class="extra-btn pressable" id="btn-partial-reset" onclick="partialReset()">캐릭터 초기화</button>
+  <button type="button" class="extra-btn extra-btn-random-all pressable" onclick="randomSelectAll()">전체 랜덤 선택</button>
+  <button type="button" class="extra-btn extra-btn-random pressable" onclick="randomSelectCurrent()">랜덤 선택</button>
+</div>
+
     
   <!-- ③ 컨트롤 바 -->
 <div class="control-bar">
@@ -140,13 +152,7 @@
   </button>
 </div>
 
-<!-- 확장 메뉴 패널 (기본 숨김) -->
-<div class="extra-menu-panel" id="extra-menu-panel">
-  <button type="button" class="extra-btn extra-btn-danger pressable" onclick="fullReset()">전체 초기화</button>
-  <button type="button" class="extra-btn pressable" id="btn-partial-reset" onclick="partialReset()">캐릭터 초기화</button>
-  <button type="button" class="extra-btn extra-btn-random-all pressable" onclick="randomSelectAll()">전체 랜덤 선택</button>
-  <button type="button" class="extra-btn extra-btn-random pressable" onclick="randomSelectCurrent()">랜덤 선택</button>
-</div>
+    
 
   <!-- ② 서브 메뉴 패널 (하단 네비 위) -->
   <div class="subnav-panel">
