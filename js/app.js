@@ -6,7 +6,7 @@ const NAV_DATA = {
     label: '캐릭터',
     resetLabel: '캐릭터 초기화',
     subs: [
-      { id:'archetype', label:'원형', icon:'<img src="images/거인 엘프.png" class="diamond-img">' },
+      { id:'archetype', label:'원형', icon:'<img src="images/Giant_Elf0.png" class="diamond-img">' },
       { id:'race',      label:'종족', icon:'🐉' },
       { id:'job',       label:'직업', icon:'⚒' },
       { id:'personality',label:'성격',icon:'💫' },
