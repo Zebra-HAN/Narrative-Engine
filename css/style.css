@@ -849,9 +849,22 @@
       font-family: 'Noto Sans KR', sans-serif;
       transition: color 0.35s ease;
     }
-    .nav-tab.active .nav-label {
-      color: var(--gold-bright);
-    }
+.nav-tab .nav-label {
+  font-size: 0.58rem;
+  color: rgba(80,130,220,0.5);
+  font-family: 'Noto Sans KR', sans-serif;
+  transition: color 0.35s ease;
+}
+.nav-tab.active .nav-label {
+  color: #6aa3f5;
+}
+.nav-tab .nav-svg {
+  color: rgba(80,130,220,0.5);
+  transition: color 0.35s ease;
+}
+.nav-tab.active .nav-svg {
+  color: #6aa3f5;
+}
 
 
     /* 상태 오버레이 */
@@ -1153,10 +1166,11 @@
   border-radius: var(--radius-btn);
   color: var(--text-secondary);
   font-size: 0.58rem;
-  padding: 4px 10px;
+  padding: 4px 7px;
   cursor: pointer;
   white-space: nowrap;
-  min-width: 52px;
+  min-width: 36px;
+  max-width: 36px;
   -webkit-tap-highlight-color: transparent;
 }
 .ctrl-btn-back .ctrl-icon { font-size: 0.85rem; line-height: 1; }
@@ -1192,9 +1206,10 @@
   border: 1px solid var(--border-gold);
   border-radius: var(--radius-btn);
   color: var(--text-secondary);
-  padding: 4px 12px;
+  padding: 4px 0;
   cursor: pointer;
-  min-width: 44px;
+  min-width: 36px;
+  max-width: 36px;
   -webkit-tap-highlight-color: transparent;
   transition: color 0.2s, background 0.2s, transform 0.12s, filter 0.12s;
 }
@@ -1212,17 +1227,18 @@
   border-color: var(--gold-mid);
 }
 
-/* 확장 메뉴 패널 */
+/* 확장 메뉴 패널 — 컨트롤바 위에서 슬라이드 다운 */
 .extra-menu-panel {
   display: flex;
   align-items: center;
   gap: 5px;
   padding: 0 8px;
   background: var(--bg-panel);
-  border-bottom: 1px solid var(--border-gold);
+  border-top: 1px solid var(--border-gold);
   overflow: hidden;
   max-height: 0;
   opacity: 0;
+  order: -1;
   transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1),
               opacity 0.28s ease,
               padding 0.28s ease;
