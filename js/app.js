@@ -346,19 +346,19 @@ window.addEventListener('load', () => {
   const content = document.getElementById('opening-content');
   const divider = document.getElementById('opening-divider');
 
-  // 페이드인 + 선 확장 (동시에, 약 0.5초 분량)
+  // 페이드인 + 선 확장 (동시에, 약 0.5초 분량에서 수정함)
   setTimeout(() => {
     content.classList.add('visible');
     divider.classList.add('expand');
   }, 100);
 
-  // 짧은 정지 후 페이드 아웃
-  setTimeout(() => content.classList.add('fade-out'), 1300);
+  // 짧은 정지 후 페이드 아웃 (1000으로 줄임)
+  setTimeout(() => content.classList.add('fade-out'), 1000);
 
-  // 디졸브로 홈 화면 전환 (전체 약 2.1초)
+  // 디졸브로 홈 화면 전환 (전체 약 2.1초에서 1초로 변경) 
   setTimeout(() => {
     switchScreen('screen-home', null, true);
-  }, 1700);
+  }, 1000);
 });
 
 initInfoSliderSwipe();
