@@ -340,7 +340,7 @@ function getSubDescription(subId) {
 /* ════════════════════════════════════════════════
    OPENING ANIMATION   오프닝
 ════════════════════════════════════════════════ */
-  // 검은 화면의 시간 300 에서 100으로 줄임 다사300
+  // 검은 화면의 시간 300 에서 100으로 줄임 다시300
 const FADE_MS = 300;
 
 window.addEventListener('load', () => {
@@ -353,13 +353,13 @@ window.addEventListener('load', () => {
     divider.classList.add('expand');
   }, 130);
 
-  // 짧은 정지 후 페이드 아웃 (1000에서 1300으로 다시 변경,이번엔 늘임 1500)
-  setTimeout(() => content.classList.add('fade-out'), 1500);
+  // 짧은 정지 후 페이드 아웃 (페이드인+선확장의 시간과 여기 시간을 빼면 제목표시시간. 1500에서 1100로 수정)
+  setTimeout(() => content.classList.add('fade-out'), 1100);
 
-  // 디졸브로 홈 화면 전환 (전체 약 2.1초에서 1.2초로 변경 1600) 
+  // 디졸브로 홈 화면 전환 (전체 약 2.1초에서 1.2초 변경 1.9초) 
   setTimeout(() => {
     switchScreen('screen-home', null, true);
-  }, 1600);
+  }, 1900);
 });
 
 initInfoSliderSwipe();
