@@ -692,8 +692,8 @@
     }
     .data-card.selected::after {
       content: '🔒';
-      position: absolute; top: 4px; right: 5px;
-      font-size: 0.95rem;
+      position: absolute; top: 1px; right: 1px;
+      font-size: 0.70rem;
       color: var(--gold-bright);
     }
     .card-icon-area {
