@@ -16,8 +16,8 @@ const NAV_DATA = {
     ]
   },
   narrative2: {
-    label: '서사',
-    resetLabel: '서사 초기화',
+    label: '스토리',
+    resetLabel: '스토리 초기화',
     subs: [
       { id:'goal',      label:'목표', icon:'🎯' },
       { id:'desire',    label:'욕망', icon:'🔥' },
