@@ -682,7 +682,7 @@ function toggleCardSelect(subId, idx) {
     updateInfoPanel();
   }
   refreshStatusIfOpen();
-   updateNavBadges();  // ← 여기 추가, 선택한 카드 총량 표시 추가
+   updateNavBadges();  /* ← 여기 추가, 선택한 카드 총량 표시 추가*/
 }
 
 function openDetailSheet(mode) {
