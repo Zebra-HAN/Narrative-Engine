@@ -122,7 +122,7 @@
       );
       box-shadow: 0 0 4px rgba(232,201,106,0.5), 0 0 10px rgba(232,201,106,0.25); /* 빛 번짐 */
       /* [유지] 새로 받은 코드의 ... 대신 기존의 부드러운 고급 속도(cubic-bezier)를 적용 */
-      transition: width 0.9s cubic-bezier(0.4, 0, 0.2, 1) 0.2s;   /* 라인 뻗는 속도0.6초랑, 끝에0.2초는 한반자 늦게 시작하라는 수치  */
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.1s;   /* 라인 뻗는 속도0.6초랑, 끝에0.2초는 한반자 늦게 시작하라는 수치  */
     }
 
     .opening-divider::after {
