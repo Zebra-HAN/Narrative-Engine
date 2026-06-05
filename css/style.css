@@ -1111,7 +1111,7 @@
 
     /* 서브메뉴 페이드인 */
     @keyframes subnavReveal {
-      0%   { opacity: 0; transform: scale(0.85) rotate(45deg); }
+      0%   { opacity: 0; transform: scale(0.65) rotate(45deg); }
       100% { opacity: 1; transform: scale(1) rotate(45deg); }
     }
     .subnav-item .diamond-btn {
@@ -1121,7 +1121,7 @@
       animation: subnavReveal 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
     }
 
-    /* 선택된 카운터 배지 */
+    /* 선택된 카운터 배지  -카테고리에 선택된 카드 숫자 표시하는 번호배지  */
     .selection-badge {
       position: absolute; top: -4px; right: -4px;
       width: 14px; height: 14px;
@@ -1132,6 +1132,7 @@
       font-weight: 700;
       display: flex; align-items: center; justify-content: center;
       box-shadow: 0 0 6px rgba(200,170,70,0.5);
+      transform: rotate(-45deg); /* 마름모 기울기 상쇄 */
     }
 
     /* 반응형: 태블릿/PC */
@@ -1292,12 +1293,12 @@
 
 
 
-/* 다이아몬드 마름모 그림 45 기울어진 그림을 되돌리기  */
+/* 다이아몬드 마름모 속 그림 45 기울어진 그림을 되돌리기  */
 .diamond-img {
   width: 110%;
   height: 110%;
   object-fit: cover;
-  transform: rotate(-45deg);
+  transform: rotate(-0deg);
   border-radius: 4px;
 }
 
@@ -1312,3 +1313,17 @@
 
 
 
+
+/* 하단 탭 배지  네비게이션 4개의 메인 버튼에 선택된 갯수 배지 기능 추가  */
+.nav-btn { position: relative; }
+.nav-badge {
+  position: absolute; top: 4px; right: 14px;
+  min-width: 14px; height: 14px;
+  border-radius: 7px;
+  background: #6aa3f5;
+  color: #fff;
+  font-size: 0.5rem;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 3px;
+}
