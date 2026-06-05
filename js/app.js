@@ -338,28 +338,28 @@ function getSubDescription(subId) {
 }
 
 /* ════════════════════════════════════════════════
-   OPENING ANIMATION
+   OPENING ANIMATION   오프닝
 ════════════════════════════════════════════════ */
-  // 검은 화면의 시간 300 에서 100으로 줄임
-const FADE_MS = 200;
+  // 검은 화면의 시간 300 에서 100으로 줄임 다사300
+const FADE_MS = 300;
 
 window.addEventListener('load', () => {
   const content = document.getElementById('opening-content');
   const divider = document.getElementById('opening-divider');
 
-  // 페이드인 + 선 확장 (동시에, 약 0.5초 분량에서 수정함)
+  // 페이드인 + 선 확장 (동시에, 약 0.5초 분량에서 수정함 100에서 130 )
   setTimeout(() => {
     content.classList.add('visible');
     divider.classList.add('expand');
-  }, 100);
+  }, 130);
 
-  // 짧은 정지 후 페이드 아웃 (1000에서 1300으로 다시 변경,이번엔 늘임)
-  setTimeout(() => content.classList.add('fade-out'), 1300);
+  // 짧은 정지 후 페이드 아웃 (1000에서 1300으로 다시 변경,이번엔 늘임 1500)
+  setTimeout(() => content.classList.add('fade-out'), 1500);
 
-  // 디졸브로 홈 화면 전환 (전체 약 2.1초에서 1.2초로 변경) 
+  // 디졸브로 홈 화면 전환 (전체 약 2.1초에서 1.2초로 변경 1600) 
   setTimeout(() => {
     switchScreen('screen-home', null, true);
-  }, 1200);
+  }, 1600);
 });
 
 initInfoSliderSwipe();
