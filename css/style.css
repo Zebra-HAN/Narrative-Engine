@@ -1155,6 +1155,7 @@
   min-height: 48px;
 }
 
+/* 뒤로가기 버튼 */
 .ctrl-btn-back {
   display: flex;
   flex-direction: column;
@@ -1169,8 +1170,8 @@
   padding: 4px 7px;
   cursor: pointer;
   white-space: nowrap;
-  min-width: 45px;
-  max-width: 45px;
+  min-width: 55px;
+  max-width: 55px;
   -webkit-tap-highlight-color: transparent;
 }
 .ctrl-btn-back .ctrl-icon { font-size: 0.85rem; line-height: 1; }
@@ -1208,8 +1209,8 @@
   color: var(--text-secondary);
   padding: 4px 0;
   cursor: pointer;
-  min-width: 45px;
-  max-width: 45px;
+  min-width: 55px;
+  max-width: 55px;
   -webkit-tap-highlight-color: transparent;
   transition: color 0.2s, background 0.2s, transform 0.12s, filter 0.12s;
 }
