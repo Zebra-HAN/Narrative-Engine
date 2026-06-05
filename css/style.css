@@ -691,9 +691,9 @@
       box-shadow: 0 0 14px rgba(200,170,70,0.35), 0 2px 8px rgba(0,0,0,0.5);
     }
     .data-card.selected::after {
-      content: '✓';
+      content: '🔒';
       position: absolute; top: 4px; right: 5px;
-      font-size: 0.65rem;
+      font-size: 0.95rem;
       color: var(--gold-bright);
     }
     .card-icon-area {
