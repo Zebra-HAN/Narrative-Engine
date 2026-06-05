@@ -885,7 +885,7 @@ function toggleExtraMenu() {
   btn.classList.toggle('open', extraMenuOpen);
 
   // 닫혀있을때 ☰, 열려있을때 삼각형 ▲
-  icon.textContent = extraMenuOpen ? '▲' : '☰';
+  icon.textContent = extraMenuOpen ? '▼' : '☰';
 }
 
 /* ════════════════════════════════════════════════
