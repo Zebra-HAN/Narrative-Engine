@@ -535,7 +535,7 @@ function showCardPage(subId, animate) {
     const deal = animate ? ' card-deal' : '';
     const delay = animate ? ` style="animation-delay:${idx * 0.04}s"` : '';
     html += `
-      <div class="data-card pressable${sel}${deal}"${delay} onclick="cardClick('${subId}', ${idx}, '${escHtml(card.name)}', '${escHtml(card.icon)}')">
+      <div class="data-card pressable${sel}${deal}"${delay} onclick="cardClick('${subId}', ${idx}, '${escHtml(card.name)}', '${escHtml(card.icon)}')"ondblclick="toggleCardSelect('${subId}', ${idx})">
         <div class="card-icon-area">${card.icon}</div>
         <div class="card-name">${card.name}</div>
       </div>
@@ -875,7 +875,7 @@ async function randomSelectCurrent() {
 
   const randomIdx = Math.floor(Math.random() * cards.length);
   if (!selectedCards[currentSubId]) selectedCards[currentSubId] = new Set();
-  selectedCards[currentSubId].add(randomIdx);
+  selectedCards[currentSubId] = new Set([randomIdx]);
 
   // UI 갱신
   showCardPage(currentSubId, false);
@@ -896,13 +896,12 @@ async function randomSelectAll() {
   if (!ok) return;
 
   const subs = NAV_DATA[currentNav].subs;
-  subs.forEach(sub => {
-    const cards = CARD_DATA[sub.id];
-    if (!cards || cards.length === 0) return;
-    const randomIdx = Math.floor(Math.random() * cards.length);
-    if (!selectedCards[sub.id]) selectedCards[sub.id] = new Set();
-    selectedCards[sub.id].add(randomIdx);
-  });
+subs.forEach(sub => {
+  const cards = CARD_DATA[sub.id];
+  if (!cards || cards.length === 0) return;
+  const randomIdx = Math.floor(Math.random() * cards.length);
+  selectedCards[sub.id] = new Set([randomIdx]);              // 기존 초기화 후 새로 선택
+});
 
   // UI 갱신
   if (currentSubId) showCardPage(currentSubId, false);
