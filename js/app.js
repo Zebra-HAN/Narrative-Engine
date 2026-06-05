@@ -359,7 +359,7 @@ window.addEventListener('load', () => {
   // 디졸브로 홈 화면 전환 (전체 약 2.1초에서 1.2초 변경 1.9초) 
   setTimeout(() => {
     switchScreen('screen-home', null, true);
-  }, 1900);
+  }, 1300);
 });
 
 initInfoSliderSwipe();
