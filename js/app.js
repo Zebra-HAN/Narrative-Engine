@@ -340,7 +340,8 @@ function getSubDescription(subId) {
 /* ════════════════════════════════════════════════
    OPENING ANIMATION
 ════════════════════════════════════════════════ */
-const FADE_MS = 300;
+  // 검은 화면의 시간 300 에서 100으로 줄임
+const FADE_MS = 100;
 
 window.addEventListener('load', () => {
   const content = document.getElementById('opening-content');
