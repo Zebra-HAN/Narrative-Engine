@@ -1123,7 +1123,11 @@
 
     /* 선택된 카운터 배지  -카테고리에 선택된 카드 숫자 표시하는 번호배지  */
     .selection-badge {
-      position: absolute; top: -1px; right: -3px;   /* 👈 탑-4px,오른쪽-4px이 기존값임  */
+      position: absolute; 
+        top: -10px;   /* 위아래 조절, 마이너스가 될수록 다이아몬드 위쪽(북동쪽)으로 올라감 원래-4px였음 */
+        left: 10px;   /* 좌우 조절 (플러스 값이 커질수록 다이아몬드 오른쪽으로) */
+        /* right: -4px; 👈 이 녀석은 과감하게 삭제! */
+        
       width: 14px; height: 14px;
       border-radius: 50%;
       background: var(--gold-bright);
