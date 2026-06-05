@@ -110,20 +110,21 @@
       margin: 14px 0;
     }
     .opening-divider {
-      height: 1px;
+      height: 1px;        /* 라인 두께 */
       width: 0;
-      position: relative;
+      position: relative; /* [유지] 보조 효과 위치 조절용 필수 속성 */
+      /* [교체] 새로 주문한 3단계 심플 그라데이션 */
       background: linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(200, 168, 76, 0.25) 12%,
-        rgba(245, 217, 138, 0.95) 50%,
-        rgba(200, 168, 76, 0.25) 88%,
-        transparent 100%
+      90deg, 
+      transparent, 
+      rgba(245,217,138,0.95), 
+      transparent
       );
-      box-shadow: 0 0 4px rgba(232, 201, 106, 0.5), 0 0 10px rgba(232, 201, 106, 0.25);
-      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 0 4px rgba(232,201,106,0.5), 0 0 10px rgba(232,201,106,0.25); /* 빛 번짐 */
+      /* [유지] 새로 받은 코드의 ... 대신 기존의 부드러운 고급 속도(cubic-bezier)를 적용 */
+      transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1) 0.4s;   /* 라인 뻗는 속도  끝에 0.4초는 한반자 늦게 시작하라는 수치  */
     }
+
     .opening-divider::after {
       content: '';
       position: absolute;
@@ -138,7 +139,7 @@
       pointer-events: none;
     }
     .opening-divider.expand {
-      width: min(300px, 78vw);
+      width: min(450px, 78vw);    /* 라인 길이  컴터픽셀 길이랑, 모바일 전체크기100%중 78%vw를 뜻함 뷰width 가로길이 */
     }
 
     .opening-subtitle {
