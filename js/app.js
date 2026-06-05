@@ -350,15 +350,15 @@ window.addEventListener('load', () => {
   setTimeout(() => {
     content.classList.add('visible');
     divider.classList.add('expand');
-  }, 150);
+  }, 100);
 
   // 짧은 정지 후 페이드 아웃
-  setTimeout(() => content.classList.add('fade-out'), 1700);
+  setTimeout(() => content.classList.add('fade-out'), 1300);
 
   // 디졸브로 홈 화면 전환 (전체 약 2.1초)
   setTimeout(() => {
     switchScreen('screen-home', null, true);
-  }, 2100);
+  }, 1700);
 });
 
 initInfoSliderSwipe();
