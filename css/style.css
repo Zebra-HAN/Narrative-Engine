@@ -1123,7 +1123,7 @@
 
     /* 선택된 카운터 배지  -카테고리에 선택된 카드 숫자 표시하는 번호배지  */
     .selection-badge {
-      position: absolute; top: -4px; right: -4px;
+      position: absolute; top: -1px; right: -3px;   /* 👈 탑-4px,오른쪽-4px이 기존값임  */
       width: 14px; height: 14px;
       border-radius: 50%;
       background: var(--gold-bright);
