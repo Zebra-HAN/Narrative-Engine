@@ -341,7 +341,7 @@ function getSubDescription(subId) {
    OPENING ANIMATION   오프닝
 ════════════════════════════════════════════════ */
   // 검은 화면의 시간 300 에서 100으로 줄임 다시300
-const FADE_MS = 300;
+const FADE_MS = 150;
 
 window.addEventListener('load', () => {
   const content = document.getElementById('opening-content');
