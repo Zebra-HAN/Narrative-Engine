@@ -352,13 +352,13 @@ window.addEventListener('load', () => {
     divider.classList.add('expand');
   }, 100);
 
-  // 짧은 정지 후 페이드 아웃 (1000으로 줄임)
-  setTimeout(() => content.classList.add('fade-out'), 1000);
+  // 짧은 정지 후 페이드 아웃 (1000에서 1300으로 다시 변경,이번엔 늘임)
+  setTimeout(() => content.classList.add('fade-out'), 1300);
 
-  // 디졸브로 홈 화면 전환 (전체 약 2.1초에서 1초로 변경) 
+  // 디졸브로 홈 화면 전환 (전체 약 2.1초에서 1.2초로 변경) 
   setTimeout(() => {
     switchScreen('screen-home', null, true);
-  }, 1000);
+  }, 1200);
 });
 
 initInfoSliderSwipe();
