@@ -628,7 +628,7 @@ function updateInfoPanel() {
     document.getElementById('info-card-name').textContent = focusedCard.name;
     document.getElementById('info-card-desc').textContent = getCardDescription(focusedCard.name);
     const isSelected = selectedCards[focusedCard.subId] && selectedCards[focusedCard.subId].has(focusedCard.idx);
-    selectBtn.textContent = isSelected ? '🔓 선택 취소' : '선택';
+    selectBtn.textContent = isSelected ? '취소' : '선택';
     selectBtn.classList.toggle('is-selected', isSelected);
     setInfoSlide(false);
   } else {
