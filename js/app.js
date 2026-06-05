@@ -682,6 +682,7 @@ function toggleCardSelect(subId, idx) {
     updateInfoPanel();
   }
   refreshStatusIfOpen();
+   updateNavBadges();  // ← 여기 추가, 선택한 카드 총량 표시 추가
 }
 
 function openDetailSheet(mode) {
@@ -813,6 +814,7 @@ async function partialReset() {
     if (el) el.classList.add('active');
   }
   updateInfoPanel();
+   updateNavBadges();  // ← 여기 추가,  선택한 총량 표시 배지 추가
   refreshStatusIfOpen();
 }
 
@@ -827,7 +829,38 @@ async function fullReset() {
     if (el) el.classList.add('active');
   }
   updateInfoPanel();
+   updateNavBadges();  // ← 여기 추가,  선택한 총량 표시 배지 추가
   refreshStatusIfOpen();
+}
+
+
+    // 해당 탭 전체 선택 수 합산 하단 탭 배지 렌더 함수
+function updateNavBadges() {
+  Object.keys(NAV_DATA).forEach(navId => {
+    const navMap = {
+      character: 'nav-character',
+      narrative2: 'nav-narrative2',
+      world: 'nav-world',
+      compass: 'nav-compass'
+    };
+    const btn = document.getElementById(navMap[navId]);
+    if (!btn) return;
+
+    // 해당 탭 전체 선택 수 합산 
+    const total = NAV_DATA[navId].subs.reduce((sum, sub) => {
+      return sum + (selectedCards[sub.id] ? selectedCards[sub.id].size : 0);
+    }, 0);
+
+    // 기존 배지 제거 후 다시 렌더
+    const existing = btn.querySelector('.nav-badge');
+    if (existing) existing.remove();
+    if (total > 0) {
+      const badge = document.createElement('div');
+      badge.className = 'nav-badge';
+      badge.textContent = total;
+      btn.appendChild(badge);
+    }
+  });
 }
 
 /* ════════════════════════════════════════════════
@@ -887,6 +920,7 @@ async function randomSelectCurrent() {
   focusedCard = { subId: currentSubId, idx: randomIdx, ...cards[randomIdx] };
   updateInfoPanel();
   refreshStatusIfOpen();
+   updateNavBadges();  // ← 여기 추가,  선택한 총량 표시 배지 추가
 }
 
 // 현재 탭의 모든 서브(마름모) 각 1개씩 랜덤 선택
@@ -912,6 +946,7 @@ subs.forEach(sub => {
   }
   updateInfoPanel();
   refreshStatusIfOpen();
+   updateNavBadges();  // ← 여기 추가,  선택한 총량 표시 배지 추가
 }
 
 
