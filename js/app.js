@@ -648,7 +648,7 @@ function groupCardDblClick(subId, groupIdx, idx) {
     selectedCards[subId].add(globalIdx);
   }
 
-  // 해당 카드 DOM만 토글 (애니메이션 재발생 없음, 더블클릭 후 카드 뒤집는 모션 오류 수정한듯)
+  // 카드 DOM 토글 (애니메이션 재발생 없음, 더블클릭 후 카드 뒤집는 모션 오류 수정한듯)
   const page = document.getElementById('page-' + subId + '_' + CARD_DATA[subId].groups[groupIdx].id);
   if (page) {
     const cards = page.querySelectorAll('.data-card');
@@ -657,6 +657,9 @@ function groupCardDblClick(subId, groupIdx, idx) {
       cards[idx].classList.toggle('selected', selectedCards[subId].has(globalIdx));
     }
   }
+
+  // 그룹 배지 직접 갱신
+  updateGroupBadges(subId);
 
   // focusedCard 동기화
   groupCardClick(subId, groupIdx, idx);
@@ -669,6 +672,28 @@ function groupCardDblClick(subId, groupIdx, idx) {
   refreshStatusIfOpen();
 }
 
+function updateGroupBadges(subId) {
+  const data = CARD_DATA[subId];
+  if (!data || !data.groups) return;
+  data.groups.forEach((grp, gIdx) => {
+    const btn = document.querySelector(`.group-select-btn[onclick="showGroupCards('${subId}', ${gIdx})"]`);
+    if (!btn) return;
+    const count = grp.cards.reduce((sum, _, cIdx) => {
+      return sum + (selectedCards[subId]?.has(gIdx * 1000 + cIdx) ? 1 : 0);
+    }, 0);
+    let badge = btn.querySelector('.group-badge');
+    if (count > 0) {
+      if (!badge) {
+        badge = document.createElement('div');
+        badge.className = 'group-badge';
+        btn.appendChild(badge);
+      }
+      badge.textContent = count;
+    } else {
+      if (badge) badge.remove();
+    }
+  });
+}
 
 
 function showCardPage(subId, animate = true) {
