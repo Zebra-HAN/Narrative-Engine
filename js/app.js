@@ -561,6 +561,9 @@ function showGroupPage(subId, animate = true) {
   let html = '<div class="group-select-wrap">';
   data.groups.forEach((grp, i) => {
     const delay = animate ? `style="animation-delay:${i * 0.08}s"` : '';
+const grpCount = grp.cards.reduce((sum, _, cIdx) => {
+      return sum + (selectedCards[subId]?.has(i * 1000 + cIdx) ? 1 : 0);
+    }, 0);
     html += `
       <button
         class="group-select-btn pressable group-deal"
@@ -569,6 +572,7 @@ function showGroupPage(subId, animate = true) {
       >
         <span class="group-btn-icon">${grp.icon}</span>
         <span class="group-btn-label">${grp.label}</span>
+        ${grpCount > 0 ? `<div class="group-badge">${grpCount}</div>` : ''}
       </button>
     `;
     // ↑ 버튼 하나당 이 블록 하나.
