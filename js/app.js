@@ -658,8 +658,9 @@ function groupCardDblClick(subId, groupIdx, idx) {
     }
   }
 
-  // 그룹 배지 직접 갱신
-  updateGroupBadges(subId);
+// 그룹 페이지가 현재 열려있으면 배지 갱신, 없으면 패스 (showGroupPage 호출 시 자동 반영)
+  const groupPageEl = document.getElementById('page-' + subId);
+  if (groupPageEl) updateGroupBadges(subId);
 
   // focusedCard 동기화
   groupCardClick(subId, groupIdx, idx);
@@ -676,7 +677,7 @@ function updateGroupBadges(subId) {
   const data = CARD_DATA[subId];
   if (!data || !data.groups) return;
   data.groups.forEach((grp, gIdx) => {
-    const btn = document.querySelector(`.group-select-btn[onclick="showGroupCards('${subId}', ${gIdx})"]`);
+    const btn = document.querySelector(`#page-${subId} .group-select-btn:nth-child(${gIdx + 1})`);
     if (!btn) return;
     const count = grp.cards.reduce((sum, _, cIdx) => {
       return sum + (selectedCards[subId]?.has(gIdx * 1000 + cIdx) ? 1 : 0);
