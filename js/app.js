@@ -537,10 +537,127 @@ function showDefaultCenter() {
   def.classList.add('active');
 }
 
-function showCardPage(subId, animate) {
+
+
+/* ════════════════════════════════════════════════
+   그룹 선택 화면 렌더
+   ─ type:'group' 인 카테고리를 클릭했을 때 열리는 화면
+   ─ 버튼 수를 늘리려면 CARD_DATA 의 groups 배열에 항목 추가만 하면 됨
+════════════════════════════════════════════════ */
+function showGroupPage(subId, animate = true) {
   const area = document.getElementById('center-area');
 
+  // 기존 페이지 제거
+  document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
+
+  const data = CARD_DATA[subId];
+  if (!data || !data.groups) return;
+
+  const page = document.createElement('div');
+  page.className = 'center-page active';
+  page.id = 'page-' + subId;
+
+  // 그룹 버튼들을 세로로 나열 (3x1, 6x1 등 groups 배열 길이에 따라 자동)
+  let html = '<div class="group-select-wrap">';
+  data.groups.forEach((grp, i) => {
+    const delay = animate ? `style="animation-delay:${i * 0.08}s"` : '';
+    html += `
+      <button
+        class="group-select-btn pressable group-deal"
+        ${delay}
+        onclick="showGroupCards('${subId}', ${i})"
+      >
+        <span class="group-btn-icon">${grp.icon}</span>
+        <span class="group-btn-label">${grp.label}</span>
+      </button>
+    `;
+    // ↑ 버튼 하나당 이 블록 하나.
+    // groups 배열에 항목 추가하면 버튼 자동으로 늘어남
+  });
+  html += '</div>';
+
+  page.innerHTML = html;
+  area.appendChild(page);
+}
+
+/* ════════════════════════════════════════════════
+   그룹 버튼 클릭 → 해당 그룹의 카드 목록 열기
+════════════════════════════════════════════════ */
+function showGroupCards(subId, groupIdx) {
+  const area = document.getElementById('center-area');
+  const data = CARD_DATA[subId];
+  if (!data || !data.groups) return;
+
+  const grp = data.groups[groupIdx];
+  if (!grp) return;
+
+  // 기존 페이지 제거 후 카드 페이지 새로 그리기
+  document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
+
+  const page = document.createElement('div');
+  page.className = 'center-page active';
+  page.id = 'page-' + subId + '_' + grp.id;
+
+  // 그룹별로 선택 상태를 관리하려면 subId+groupIdx 키를 사용
+  const storeKey = subId + '_' + groupIdx;
+  if (!selectedCards[storeKey]) selectedCards[storeKey] = new Set();
+
+  let html = `<div class="section-label">${grp.icon} ${grp.label}</div>`;
+  html += '<div class="card-grid">';
+  grp.cards.forEach((card, idx) => {
+    const sel = selectedCards[storeKey].has(idx) ? ' selected' : '';
+    const delay = `style="animation-delay:${idx * 0.04}s"`;
+    html += `
+      <div class="data-card pressable card-deal${sel}" ${delay}
+        onclick="groupCardClick('${storeKey}', ${idx}, '${subId}', ${groupIdx})"
+        ondblclick="toggleGroupCardSelect('${storeKey}', ${idx})">
+        <div class="card-icon-area">${renderIcon(card.icon, card.img, 'card-img')}</div>
+        <div class="card-name">${card.name}</div>
+      </div>
+    `;
+  });
+  html += '</div>';
+  page.innerHTML = html;
+  area.appendChild(page);
+}
+
+/* 그룹 카드 클릭 — info 패널 업데이트 */
+function groupCardClick(storeKey, idx, subId, groupIdx) {
+  const grp = CARD_DATA[subId].groups[groupIdx];
+  const card = grp.cards[idx];
+  focusedCard = { subId: storeKey, idx, name: card.name, icon: card.icon, img: card.img };
+  setInfoSlide(false);
+  updateInfoPanel();
+}
+
+/* 그룹 카드 더블클릭 — 선택/해제 */
+function toggleGroupCardSelect(storeKey, idx) {
+  if (!selectedCards[storeKey]) selectedCards[storeKey] = new Set();
+  if (selectedCards[storeKey].has(idx)) {
+    selectedCards[storeKey].delete(idx);
+  } else {
+    selectedCards[storeKey].add(idx);
+  }
+  // 현재 subId 찾아서 페이지 다시 그리기
+  const [subId, groupIdx] = storeKey.split('_');
+  showGroupCards(subId, parseInt(groupIdx));
+}
+
+
+
+function showCardPage(subId, animate = true) {
+  // ── 여기서부터 추가 ──────────────────────────
+  // type:'group' 인 경우 카드 목록 대신 그룹 선택 화면을 열어
+  const subInfo = getAllSubs().find(s => s.id === subId);
+  if (subInfo && subInfo.type === 'group') {
+    showGroupPage(subId, animate);
+    return; // 카드 목록으로 가지 않고 여기서 끝
+  }
+  // ── 여기까지 추가 ──────────────────────────
+
    
+   const area = document.getElementById('center-area');
+
 
   // default 숨기기
   document.getElementById('page-default').classList.remove('active');
