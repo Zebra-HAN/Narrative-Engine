@@ -101,7 +101,7 @@ const CARD_DATA = {
       ]
     },
   ]
-},,
+},
   job: [
     {icon:'⚔',name:'검사'},{icon:'🏹',name:'궁수'},{icon:'🧙',name:'마법사'},
     {icon:'🛡',name:'기사'},{icon:'🗡',name:'암살자'},{icon:'🎵',name:'음유시인'},
@@ -646,23 +646,21 @@ function toggleGroupCardSelect(storeKey, idx) {
 
 
 function showCardPage(subId, animate = true) {
-  // ── 여기서부터 추가 ──────────────────────────
-  // type:'group' 인 경우 카드 목록 대신 그룹 선택 화면을 열어
-  const subInfo = getAllSubs().find(s => s.id === subId);
-  if (subInfo && subInfo.type === 'group') {
+
+  // type:'group' 인 경우 그룹 선택 화면을 열고 종료
+  const navInfo2 = Object.values(NAV_DATA).find(n => n.subs.find(s => s.id === subId));
+  const subCheck = navInfo2 ? navInfo2.subs.find(s => s.id === subId) : null;
+  if (subCheck && subCheck.type === 'group') {
     showGroupPage(subId, animate);
-    return; // 카드 목록으로 가지 않고 여기서 끝
+    return;
   }
-  // ── 여기까지 추가 ──────────────────────────
 
-   
-   const area = document.getElementById('center-area');
-
+  const area = document.getElementById('center-area');
 
   // default 숨기기
   document.getElementById('page-default').classList.remove('active');
 
-  // 기존 페이지 제거 (애니메이션 없이 즉시)
+  // 기존 페이지 제거
   area.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
 
   const page = document.createElement('div');
