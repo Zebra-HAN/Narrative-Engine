@@ -6,7 +6,7 @@ const NAV_DATA = {
     label: '캐릭터',
     resetLabel: '캐릭터 초기화',
     subs: [
-      { id:'archetype', label:'원형', icon:'<img src="images/Giant_Elf.png" class="diamond-img">' },
+      { id:'archetype', label:'원형', icon:'⚔', img:'images/Giant_Elf.png' },
       { id:'race',      label:'종족', icon:'🐉' },
       { id:'job',       label:'직업', icon:'⚒' },
       { id:'personality',label:'성격',icon:'💫' },
@@ -55,7 +55,7 @@ const NAV_DATA = {
 /* 각 서브메뉴에 표시할 카드 20개 (아이콘 + 이름) */
 const CARD_DATA = {
   archetype: [
-    {icon:'<img src="images/Giant_Elf.png" class="card-img">', name:'영웅'},
+    {icon:'⚔', img:'images/Giant_Elf.png', name:'영웅'},
      {icon:'🧙',name:'현자'},{icon:'😈',name:'악당'},
     {icon:'🃏',name:'트릭스터'},{icon:'👼',name:'수호자'},{icon:'🔮',name:'예언자'},
     {icon:'⚔',name:'전사'},{icon:'💀',name:'파멸자'},{icon:'🌹',name:'연인'},
@@ -457,15 +457,15 @@ function renderSubnav(navId, animate) {
   subs.forEach((sub, i) => {
     const item = document.createElement('div');
     item.className = 'subnav-item pressable' + (animate ? ' reveal' : '');
-    item.style.animationDelay = animate ? (i * 0.05) + 's' : '0s';
+    item.style.animationDelay = animate ? (i * 0.12) + 's' : '0s';
     item.setAttribute('data-sub-id', sub.id);
     item.onclick = () => selectSub(sub.id, navId);
 
     const count = selectedCards[sub.id] ? selectedCards[sub.id].size : 0;
 
     item.innerHTML = `
-      <div class="diamond-btn" style="animation-delay:${animate ? i*0.05 : 0}s">
-        <span class="diamond-btn-icon">${sub.icon}</span>
+      <div class="diamond-btn" style="animation-delay:${animate ? i*0.12 : 0}s">
+        <span class="diamond-btn-icon">${renderIcon(sub.icon, sub.img, 'diamond-img')}</span>
         ${count > 0 ? `<div class="selection-badge">${count}</div>` : ''}
       </div>
       <div class="subnav-label">${sub.label}</div>
@@ -535,8 +535,8 @@ function showCardPage(subId, animate) {
     const deal = animate ? ' card-deal' : '';
     const delay = animate ? ` style="animation-delay:${idx * 0.04}s"` : '';
     html += `
-      <div class="data-card pressable${sel}${deal}"${delay} onclick="cardClick('${subId}', ${idx}, '${escHtml(card.name)}', '${escHtml(card.icon)}')"ondblclick="toggleCardSelect('${subId}', ${idx})">
-        <div class="card-icon-area">${card.icon}</div>
+      <div class="data-card pressable${sel}${deal}"${delay} onclick="cardClick('${subId}', ${idx})"ondblclick="toggleCardSelect('${subId}', ${idx})">
+        <div class="card-icon-area">${renderIcon(card.icon, card.img, 'card-img')}</div>
         <div class="card-name">${card.name}</div>
       </div>
     `;
@@ -550,8 +550,9 @@ function showCardPage(subId, animate) {
 /* ════════════════════════════════════════════════
    CARD INTERACTION & INFO PANEL
 ════════════════════════════════════════════════ */
-function cardClick(subId, idx, name, icon) {
-  focusedCard = { subId, idx, name, icon };
+function cardClick(subId, idx) {
+  const card = CARD_DATA[subId][idx];
+  focusedCard = { subId, idx, name: card.name, icon: card.icon, img: card.img };
   setInfoSlide(false);
   updateInfoPanel();
 }
@@ -621,12 +622,12 @@ function updateInfoPanel() {
   const navInfo = Object.values(NAV_DATA).find(n => n.subs.find(s => s.id === currentSubId));
   const subInfo = navInfo ? navInfo.subs.find(s => s.id === currentSubId) : null;
 
-  document.getElementById('info-cat-icon').textContent = subInfo ? subInfo.icon : '✦';
+  document.getElementById('info-cat-icon').innerHTML = subInfo ? renderIcon(subInfo.icon, subInfo.img, 'info-icon-img') : '✦';
   document.getElementById('info-cat-name').textContent = subInfo ? subInfo.label : currentSubId;
   document.getElementById('info-cat-desc').textContent = getSubDescription(currentSubId);
 
   if (focusedCard && focusedCard.subId === currentSubId) {
-    document.getElementById('info-card-icon').textContent = focusedCard.icon;
+    document.getElementById('info-card-icon').innerHTML = renderIcon(focusedCard.icon, focusedCard.img, 'info-icon-img');
     document.getElementById('info-card-name').textContent = focusedCard.name;
     document.getElementById('info-card-desc').textContent = getCardDescription(focusedCard.name);
     const isSelected = selectedCards[focusedCard.subId] && selectedCards[focusedCard.subId].has(focusedCard.idx);
@@ -634,7 +635,7 @@ function updateInfoPanel() {
     selectBtn.classList.toggle('is-selected', isSelected);
     setInfoSlide(false);
   } else {
-    document.getElementById('info-card-icon').textContent = '·';
+    document.getElementById('info-card-icon').innerHTML = '·';
     document.getElementById('info-card-name').textContent = '카드 미선택';
     document.getElementById('info-card-desc').textContent = '카드를 탭하면 이곳에 항목 설명이 표시됩니다.';
     selectBtn.textContent = '선택';
@@ -861,6 +862,16 @@ function updateNavBadges() {
       btn.appendChild(badge);
     }
   });
+}
+
+/* ════════════════════════════════════════════════
+   RENDER ICON (이모지 or 이미지 자동 분기)
+════════════════════════════════════════════════ */
+function renderIcon(icon, img, className) {
+  if (img) {
+    return `<img src="${img}" class="${className}" alt="">`;
+  }
+  return icon || '';
 }
 
 /* ════════════════════════════════════════════════
