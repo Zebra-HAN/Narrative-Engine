@@ -902,12 +902,23 @@ function renderStatusContent() {
       if (!set || set.size === 0) return;
       hasAny = true;
       itemsHtml += `<div class="status-sub"><div class="status-sub-label">${sub.label}</div><div class="status-chips">`;
-      set.forEach(idx => {
-        const card = CARD_DATA[sub.id][idx];
+
+      const data = CARD_DATA[sub.id];
+      set.forEach(globalIdx => {
+        let card = null;
+        if (data && data.groups) {
+          // 그룹 타입: globalIdx = groupIdx * 1000 + cardIdx
+          const groupIdx = Math.floor(globalIdx / 1000);
+          const cardIdx = globalIdx % 1000;
+          card = data.groups[groupIdx]?.cards[cardIdx];
+        } else if (Array.isArray(data)) {
+          card = data[globalIdx];
+        }
         if (card) {
           itemsHtml += `<span class="status-chip">${card.icon} ${card.name}</span>`;
         }
       });
+
       itemsHtml += '</div></div>';
     });
 
