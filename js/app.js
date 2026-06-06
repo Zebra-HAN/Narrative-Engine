@@ -591,26 +591,29 @@ function showGroupCards(subId, groupIdx) {
   const grp = data.groups[groupIdx];
   if (!grp) return;
 
-  // 기존 페이지 제거 후 카드 페이지 새로 그리기
+  // 기존 페이지 제거
   document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
 
   const page = document.createElement('div');
   page.className = 'center-page active';
   page.id = 'page-' + subId + '_' + grp.id;
 
-  // 그룹별로 선택 상태를 관리하려면 subId+groupIdx 키를 사용
-  const storeKey = subId + '_' + groupIdx;
-  if (!selectedCards[storeKey]) selectedCards[storeKey] = new Set();
+  // storeKey = subId (종족 전체로 통합)
+  if (!selectedCards[subId]) selectedCards[subId] = new Set();
+
+  // 카드 idx = groupIdx * 1000 + cardIdx (그룹 구분용 오프셋)
+  const offset = groupIdx * 1000;
 
   let html = `<div class="section-label">${grp.icon} ${grp.label}</div>`;
   html += '<div class="card-grid">';
   grp.cards.forEach((card, idx) => {
-    const sel = selectedCards[storeKey].has(idx) ? ' selected' : '';
-    const delay = `style="animation-delay:${idx * 0.04}s"`;
+    const globalIdx = offset + idx;
+    const sel = selectedCards[subId].has(globalIdx) ? ' selected' : '';
     html += `
-      <div class="data-card pressable card-deal${sel}" ${delay}
-        onclick="groupCardClick('${storeKey}', ${idx}, '${subId}', ${groupIdx})"
-        ondblclick="toggleGroupCardSelect('${storeKey}', ${idx})">
+      <div class="data-card pressable${sel}"
+        style="animation-delay:${idx * 0.04}s"
+        onclick="groupCardClick('${subId}', ${groupIdx}, ${idx})"
+        ondblclick="groupCardDblClick('${subId}', ${groupIdx}, ${idx})">
         <div class="card-icon-area">${renderIcon(card.icon, card.img, 'card-img')}</div>
         <div class="card-name">${card.name}</div>
       </div>
@@ -622,25 +625,41 @@ function showGroupCards(subId, groupIdx) {
 }
 
 /* 그룹 카드 클릭 — info 패널 업데이트 */
-function groupCardClick(storeKey, idx, subId, groupIdx) {
+function groupCardClick(subId, groupIdx, idx) {
   const grp = CARD_DATA[subId].groups[groupIdx];
   const card = grp.cards[idx];
-  focusedCard = { subId: storeKey, idx, name: card.name, icon: card.icon, img: card.img };
+  const globalIdx = groupIdx * 1000 + idx;
+  focusedCard = { subId, idx: globalIdx, name: card.name, icon: card.icon, img: card.img };
   setInfoSlide(false);
   updateInfoPanel();
 }
 
 /* 그룹 카드 더블클릭 — 선택/해제 */
-function toggleGroupCardSelect(storeKey, idx) {
-  if (!selectedCards[storeKey]) selectedCards[storeKey] = new Set();
-  if (selectedCards[storeKey].has(idx)) {
-    selectedCards[storeKey].delete(idx);
+function groupCardDblClick(subId, groupIdx, idx) {
+  const globalIdx = groupIdx * 1000 + idx;
+  if (!selectedCards[subId]) selectedCards[subId] = new Set();
+  if (selectedCards[subId].has(globalIdx)) {
+    selectedCards[subId].delete(globalIdx);
   } else {
-    selectedCards[storeKey].add(idx);
+    selectedCards[subId].add(globalIdx);
   }
-  // 현재 subId 찾아서 페이지 다시 그리기
-  const [subId, groupIdx] = storeKey.split('_');
-  showGroupCards(subId, parseInt(groupIdx));
+
+  // 해당 카드 DOM만 토글 (애니메이션 재발생 없음, 더블클릭 후 카드 뒤집는 모션 오류 수정한듯)
+  const page = document.getElementById('page-' + subId + '_' + CARD_DATA[subId].groups[groupIdx].id);
+  if (page) {
+    const cards = page.querySelectorAll('.data-card');
+    if (cards[idx]) cards[idx].classList.toggle('selected', selectedCards[subId].has(globalIdx));
+  }
+
+  // focusedCard 동기화
+  groupCardClick(subId, groupIdx, idx);
+
+  // 배지 & 상태 갱신
+  renderSubnav(currentNav, false);
+  const el = document.querySelector(`[data-sub-id="${subId}"]`);
+  if (el) el.classList.add('active');
+  updateNavBadges();
+  refreshStatusIfOpen();
 }
 
 
@@ -1062,12 +1081,24 @@ async function randomSelectCurrent() {
   const ok = await showAppConfirm(`[${navLabel} — ${subLabel}]\n랜덤 선택을 하시겠습니까?`);
   if (!ok) return;
 
-  const cards = CARD_DATA[currentSubId];
-  if (!cards || cards.length === 0) return;
+   
+const data = CARD_DATA[currentSubId];
+  // group 타입 처리
+  let allCards = [];
+  if (data && data.groups) {
+    data.groups.forEach((grp, gIdx) => {
+      grp.cards.forEach((card, cIdx) => {
+        allCards.push({ globalIdx: gIdx * 1000 + cIdx, ...card });
+      });
+    });
+  } else if (Array.isArray(data)) {
+    allCards = data.map((card, idx) => ({ globalIdx: idx, ...card }));
+  }
+  if (allCards.length === 0) return;
 
-  const randomIdx = Math.floor(Math.random() * cards.length);
-  if (!selectedCards[currentSubId]) selectedCards[currentSubId] = new Set();
-  selectedCards[currentSubId] = new Set([randomIdx]);
+  const pick = allCards[Math.floor(Math.random() * allCards.length)];
+  selectedCards[currentSubId] = new Set([pick.globalIdx]);
+   
 
   // UI 갱신
   showCardPage(currentSubId, false);
@@ -1076,7 +1107,7 @@ async function randomSelectCurrent() {
   if (el) el.classList.add('active');
 
   // 설명창 갱신
-  focusedCard = { subId: currentSubId, idx: randomIdx, ...cards[randomIdx] };
+  focusedCard = { subId: currentSubId, idx: pick.globalIdx, name: pick.name, icon: pick.icon, img: pick.img };
   updateInfoPanel();
   refreshStatusIfOpen();
    updateNavBadges();  // ← 여기 추가,  선택한 총량 표시 배지 추가
@@ -1090,11 +1121,22 @@ async function randomSelectAll() {
 
   const subs = NAV_DATA[currentNav].subs;
 subs.forEach(sub => {
-  const cards = CARD_DATA[sub.id];
-  if (!cards || cards.length === 0) return;
-  const randomIdx = Math.floor(Math.random() * cards.length);
-  selectedCards[sub.id] = new Set([randomIdx]);              // 기존 초기화 후 새로 선택
+  const data = CARD_DATA[sub.id];
+  let allCards = [];
+  if (data && data.groups) {
+    data.groups.forEach((grp, gIdx) => {
+      grp.cards.forEach((card, cIdx) => {
+        allCards.push({ globalIdx: gIdx * 1000 + cIdx });
+      });
+    });
+  } else if (Array.isArray(data)) {
+    allCards = data.map((_, idx) => ({ globalIdx: idx }));
+  }
+  if (allCards.length === 0) return;
+  const pick = allCards[Math.floor(Math.random() * allCards.length)];
+  selectedCards[sub.id] = new Set([pick.globalIdx]);
 });
+   
 
   // UI 갱신
   if (currentSubId) showCardPage(currentSubId, false);
