@@ -486,14 +486,14 @@ function renderSubnav(navId, animate) {
   subs.forEach((sub, i) => {
     const item = document.createElement('div');
     item.className = 'subnav-item pressable' + (animate ? ' reveal' : '');
-    item.style.animationDelay = animate ? (i * 0.08) + 's' : '0s';    /* 마름모 회전 속도 05빠름,높으면 느림 0.10*/
+    item.style.animationDelay = animate ? (i * 0.08) + 's' : '0s';    /* 마름모 등장 속도 05빠름,높으면 느림 0.10*/
     item.setAttribute('data-sub-id', sub.id);
     item.onclick = () => selectSub(sub.id, navId);
 
     const count = selectedCards[sub.id] ? selectedCards[sub.id].size : 0;
 
     item.innerHTML = `
-      <div class="diamond-btn" style="animation-delay:${animate ? i*0.12 : 0}s">
+      <div class="diamond-btn" style="animation-delay:${animate ? i*0.08 : 0}s">  /* 이부분도 똑같이 설정해야함 기존0.5*/
         <span class="diamond-btn-icon">${renderIcon(sub.icon, sub.img, 'diamond-img')}</span>
         ${count > 0 ? `<div class="selection-badge">${count}</div>` : ''}
       </div>
