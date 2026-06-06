@@ -610,7 +610,7 @@ function showGroupCards(subId, groupIdx) {
     const globalIdx = offset + idx;
     const sel = selectedCards[subId].has(globalIdx) ? ' selected' : '';
     html += `
-      <div class="data-card pressable${sel}"
+      <div class="data-card pressable card-deal${sel}"
         style="animation-delay:${idx * 0.04}s"
         onclick="groupCardClick('${subId}', ${groupIdx}, ${idx})"
         ondblclick="groupCardDblClick('${subId}', ${groupIdx}, ${idx})">
@@ -648,7 +648,10 @@ function groupCardDblClick(subId, groupIdx, idx) {
   const page = document.getElementById('page-' + subId + '_' + CARD_DATA[subId].groups[groupIdx].id);
   if (page) {
     const cards = page.querySelectorAll('.data-card');
-    if (cards[idx]) cards[idx].classList.toggle('selected', selectedCards[subId].has(globalIdx));
+    if (cards[idx]) {
+      cards[idx].classList.remove('card-deal');
+      cards[idx].classList.toggle('selected', selectedCards[subId].has(globalIdx));
+    }
   }
 
   // focusedCard 동기화
