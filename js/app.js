@@ -7,7 +7,7 @@ const NAV_DATA = {
     resetLabel: '캐릭터 초기화',
     subs: [
       { id:'archetype', label:'원형', icon:'⚔', img:'images/Giant_Elf.png' },
-      { id:'race',      label:'종족', icon:'🐉' },
+      { id:'race',      label:'종족', icon:'🐉', type:'group'  },
       { id:'job',       label:'직업', icon:'⚒' },
       { id:'personality',label:'성격',icon:'💫' },
       { id:'attribute', label:'속성', icon:'⚡' },
@@ -64,15 +64,44 @@ const CARD_DATA = {
     {icon:'🔗',name:'속박된 자'},{icon:'🌊',name:'방랑자'},{icon:'⚖',name:'심판자'},
     {icon:'🌙',name:'어둠의 자'},{icon:'☀',name:'빛의 자'},
   ],
-  race: [
-    {icon:'🧝',name:'엘프'},{icon:'🪨',name:'드워프'},{icon:'🧛',name:'뱀파이어'},
-    {icon:'🐉',name:'드래곤족'},{icon:'👁',name:'신족'},{icon:'🌿',name:'수인족'},
-    {icon:'💀',name:'언데드'},{icon:'🌊',name:'해양족'},{icon:'🔥',name:'화염족'},
-    {icon:'⚡',name:'뇌전족'},{icon:'🌙',name:'달의 종족'},{icon:'☀',name:'태양족'},
-    {icon:'🌀',name:'공허족'},{icon:'🍃',name:'정령족'},{icon:'🧬',name:'혼혈'},
-    {icon:'🤖',name:'기계인'},{icon:'👤',name:'인간'},{icon:'🦋',name:'환상족'},
-    {icon:'🌑',name:'심연족'},{icon:'💎',name:'결정족'},
-  ],
+  race: {
+  // ── type:'group' 구조일 때는 배열 대신 이 형태로 작성 ──
+  // groups 배열 안에 그룹 하나씩 추가하면 돼
+  groups: [
+    {
+      id: 'race_human',       // 고유 ID (겹치면 안됨)
+      label: '인간',           // 버튼에 표시될 이름
+      icon: '👤',             // 버튼 아이콘
+      cards: [
+        // 여기에 인간 카드들을 넣어
+        { icon:'👦', name:'소년' }, { icon:'👧', name:'소녀' },
+        { icon:'👨', name:'청년' },
+        { icon:'🤖', name:'AI' },
+         
+      ]
+    },
+    {
+      id: 'race_animal',
+      label: '의인화',
+      icon: '🐾',
+      cards: [
+        { icon:'🐺', name:'늑대인간' },
+        { icon:'🦊', name:'여우인간' },
+        { icon:'🐱', name:'고양이인간' },
+      ]
+    },
+    {
+      id: 'race_fantasy',
+      label: '판타지',
+      icon: '✨',
+      cards: [
+        { icon:'🧝', name:'엘프' },
+        { icon:'🧟', name:'언데드' },
+        { icon:'🐉', name:'드래곤족' },
+      ]
+    },
+  ]
+},,
   job: [
     {icon:'⚔',name:'검사'},{icon:'🏹',name:'궁수'},{icon:'🧙',name:'마법사'},
     {icon:'🛡',name:'기사'},{icon:'🗡',name:'암살자'},{icon:'🎵',name:'음유시인'},
@@ -511,6 +540,8 @@ function showDefaultCenter() {
 function showCardPage(subId, animate) {
   const area = document.getElementById('center-area');
 
+   
+
   // default 숨기기
   document.getElementById('page-default').classList.remove('active');
 
@@ -546,6 +577,8 @@ function showCardPage(subId, animate) {
   page.innerHTML = html;
   area.appendChild(page);
 }
+
+
 
 /* ════════════════════════════════════════════════
    CARD INTERACTION & INFO PANEL
