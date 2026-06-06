@@ -816,7 +816,16 @@ function updateInfoPanel() {
 
 function selectCurrentCard() {
   if (!focusedCard) return;
-  toggleCardSelect(focusedCard.subId, focusedCard.idx);
+  // 그룹 타입 카드인지 판별 (globalIdx >= 0, subId에 groups가 있으면)
+  const data = CARD_DATA[focusedCard.subId];
+  if (data && data.groups) {
+    // globalIdx에서 groupIdx, cardIdx 역산
+    const groupIdx = Math.floor(focusedCard.idx / 1000);
+    const cardIdx = focusedCard.idx % 1000;
+    groupCardDblClick(focusedCard.subId, groupIdx, cardIdx);
+  } else {
+    toggleCardSelect(focusedCard.subId, focusedCard.idx);
+  }
 }
 
 function toggleCardSelect(subId, idx) {
