@@ -486,7 +486,7 @@ function renderSubnav(navId, animate) {
   subs.forEach((sub, i) => {
     const item = document.createElement('div');
     item.className = 'subnav-item pressable' + (animate ? ' reveal' : '');
-    item.style.animationDelay = animate ? (i * 0.12) + 's' : '0s';
+    item.style.animationDelay = animate ? (i * 0.08) + 's' : '0s';    /* 마름모 회전 속도 05빠름,높으면 느림 0.10*/
     item.setAttribute('data-sub-id', sub.id);
     item.onclick = () => selectSub(sub.id, navId);
 
