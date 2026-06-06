@@ -1334,16 +1334,13 @@
   pointer-events: none;
 }
 
-/* 설명창(info-panel) 속 아이콘 이미지 */
+/* 설명창(info-panel) 속 아이콘 이미지 꽉차게 */
 .info-icon-img {
-  width: 32px;
-  height: 32px;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border-radius: 4px;
-  display: block;
+  border-radius: inherit;
 }
-
-
 
 
 /* 하단 탭 배지  네비게이션 4개의 메인 버튼에 선택된 갯수 배지 기능 추가  */
@@ -1359,8 +1356,6 @@
   display: flex; align-items: center; justify-content: center;
   padding: 0 3px;
 }
-
-
 
 
 /* ── 그룹 선택 화면 ── */
