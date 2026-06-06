@@ -1121,7 +1121,7 @@
       animation: subnavReveal 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
     }
 
-    /* 선택된 카운터 배지  -카테고리에 선택된 카드 숫자 표시하는 번호배지  */
+    /* 선택된 카운트 배지  -카테고리에 선택된 카드 숫자 표시하는 번호배지  */
     .selection-badge {
       position: absolute; 
         top: -10px;   /* 위아래 조절, 마이너스가 될수록 다이아몬드 위쪽(북동쪽)으로 올라감 원래-4px였음 */
@@ -1138,6 +1138,28 @@
       box-shadow: 0 0 6px rgba(200,170,70,0.5);
       transform: rotate(-45deg); /* 마름모 기울기 상쇄 */
     }
+
+ /*  그룹 버튼 카운트 배지    */
+.group-select-btn { position: relative; }
+.group-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  background: var(--accent);
+  color: #000;
+  border-radius: 9px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 2;
+}
+
 
     /* 반응형: 태블릿/PC */
     @media (min-width: 600px) {
