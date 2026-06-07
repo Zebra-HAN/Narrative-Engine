@@ -597,6 +597,9 @@
       transition: background 0.25s, border-color 0.25s, box-shadow 0.25s;
       box-shadow: 0 2px 8px rgba(0,0,0,0.5);
     }
+  overflow: hidden;
+  position: relative;
+
     .diamond-btn-icon {
       transform: rotate(-45deg);
       font-size: 1.1rem;
@@ -715,39 +718,38 @@
 
     /* 상세 정보 시트 */
     .detail-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 500;
-      background: rgba(0, 0, 0, 0.75);
-      display: flex;
-      align-items: flex-end;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.28s ease;
-    }
-    .detail-overlay.active {
-      opacity: 1;
-      pointer-events: all;
-    }
-    .detail-sheet {
-      position: relative;
-      width: 100%;
-      max-width: 480px;
-      margin: 0 auto;
-      height: 65vh;
-      max-height: 65vh;
-      background: linear-gradient(180deg, var(--bg-panel2), var(--bg-panel));
-      border: 1px solid var(--border-gold2);
-      border-bottom: none;
-      border-radius: 16px 16px 0 0;
-      padding: 24px 18px;
-      transform: translateY(100%);
-      transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.6), 0 -2px 0 var(--gold-dim);
-    }
-    .detail-overlay.active .detail-sheet {
-      transform: translateY(0);
-    }
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 200;
+  display: flex;
+  align-items: flex-start;      /* 위쪽 정렬 */
+  justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.detail-overlay.active {
+  opacity: 1; pointer-events: all;
+}
+
+.detail-sheet {
+  position: relative;
+  width: min(88%, 400px);       /* ← 가로 폭 여기서 조절 */
+  max-height: 85vh;             /* ← 세로 최대 높이 */
+  background: var(--bg-panel2);
+  border: 1px solid var(--border-gold2);
+  border-radius: 0 0 var(--radius-panel) var(--radius-panel);
+  padding: 20px 18px 28px;
+  overflow-y: auto;
+  box-shadow: var(--shadow-deep);
+
+  /* 위에서 아래로 슬라이드 */
+  transform: translateY(-100%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.detail-overlay.active .detail-sheet {
+  transform: translateY(0);
+}
+
     .detail-close {
       position: absolute;
       top: 14px;
@@ -1316,8 +1318,8 @@
 
 /* 마름모 버튼 속 이미지 — 45도 회전된 부모를 역보정해서 정방향으로 */
 .diamond-img {
-  width: 100%;
-  height: 100%;
+  width: 142%;
+  height: 142%;
   object-fit: cover;
   transform: rotate(-45deg);
   border-radius: 4px;
