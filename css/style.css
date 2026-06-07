@@ -1393,4 +1393,37 @@
 }
 
 
+/* ── info-slider-track: classList 방식 제거 → transform 방식 ── */
+.info-slider-track {
+  transform: translateX(0);
+  /* show-category 클래스 기반 이동 삭제, JS transform으로 제어 */
+}
+
+/* ── Dot Indicator ── */
+.info-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0 2px;
+}
+.info-dot {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold-mid);
+  opacity: 0.45;
+  transform: scale(1);
+  transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+/* ── 버튼 크기 줄이기 (상세정보 & 선택/취소 동일하게) ── */
+.info-btn-detail,
+.info-btn-select {
+  padding: 4px 10px;
+  font-size: 0.62rem;
+  min-width: 56px;
+  height: 28px;
+}
 
