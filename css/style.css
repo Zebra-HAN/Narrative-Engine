@@ -1324,7 +1324,6 @@
   width: 142%;
   height: 142%;
   object-fit: cover;
-  transform: rotate(-45deg);
   display: block;
   pointer-events: none;      /* ← 이미지 드래그/저장 차단 */
   -webkit-user-drag: none;   /* ← Safari 드래그 차단 */
