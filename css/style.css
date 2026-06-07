@@ -740,10 +740,12 @@
 
 .detail-sheet {
   position: relative;
-  width: min(88%, 400px);   /* ← 가로 폭 여기서 조절 */
+  width: min(70%, 700px);   /* ← 가로 폭 여기서 조절 */
   height: 85vh;  /* ← 세로 최대 높이 */
   max-height: 85vh;
-  background: var(--bg-panel2);
+  background: rgba(20,20,20,0.85);
+  backdrop-filter: blur(10px);
+    
   border: 1px solid var(--border-gold2);
   border-radius: var(--radius-panel);   /* 위에서 내려오는 느낌 */
   padding: 20px 18px 28px;
@@ -763,6 +765,7 @@ opacity: 0;
   transform: scale(1);
   opacity: 1;
 }
+
 
     .detail-close {
       position: absolute;
