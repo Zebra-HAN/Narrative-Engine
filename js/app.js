@@ -614,10 +614,15 @@ function showGroupCards(subId, groupIdx) {
     const globalIdx = offset + idx;
     const sel = selectedCards[subId].has(globalIdx) ? ' selected' : '';
     html += `
-      <div class="data-card pressable card-deal${sel}"
-        style="animation-delay:${idx * 0.04}s"
-        onclick="groupCardClick('${subId}', ${groupIdx}, ${idx})"
-        ondblclick="groupCardDblClick('${subId}', ${groupIdx}, ${idx})">
+  <div class="data-card pressable card-deal${sel}"
+    style="animation-delay:${idx * 0.04}s"
+    onclick="groupCardClick('${subId}', ${groupIdx}, ${idx})"
+    ondblclick="groupCardDblClick('${subId}', ${groupIdx}, ${idx})"
+    onmousedown="startLongPress(this,'group','${subId}',${groupIdx},${idx})"
+    ontouchstart="startLongPress(this,'group','${subId}',${groupIdx},${idx})"
+    onmouseup="cancelLongPress()" ontouchend="cancelLongPress()"
+    onmouseleave="cancelLongPress()" ontouchcancel="cancelLongPress()">
+        
         <div class="card-icon-area">${renderIcon(card.icon, card.img, 'card-img')}</div>
         <div class="card-name">${card.name}</div>
       </div>
@@ -732,8 +737,15 @@ function showCardPage(subId, animate = true) {
     const sel = selectedCards[subId].has(idx) ? ' selected' : '';
     const deal = animate ? ' card-deal' : '';
     const delay = animate ? ` style="animation-delay:${idx * 0.04}s"` : '';
-    html += `
-      <div class="data-card pressable${sel}${deal}"${delay} onclick="cardClick('${subId}', ${idx})"ondblclick="toggleCardSelect('${subId}', ${idx})">
+   html += `
+  <div class="data-card pressable${sel}${deal}"${delay}
+    onclick="cardClick('${subId}', ${idx})"
+    ondblclick="toggleCardSelect('${subId}', ${idx})"
+    onmousedown="startLongPress(this,'card','${subId}',${idx})"
+    ontouchstart="startLongPress(this,'card','${subId}',${idx})"
+    onmouseup="cancelLongPress()"  ontouchend="cancelLongPress()"
+    onmouseleave="cancelLongPress()" ontouchcancel="cancelLongPress()">
+    
         <div class="card-icon-area">${renderIcon(card.icon, card.img, 'card-img')}</div>
         <div class="card-name">${card.name}</div>
       </div>
@@ -759,50 +771,124 @@ function cardClick(subId, idx) {
 
 function setInfoSlide(showCategory) {
   infoSlideCategory = showCategory;
-  const track = document.getElementById('info-slider-track');
-  const hint = document.getElementById('info-swipe-hint');
-  if (!track) return;
-  track.classList.toggle('show-category', showCategory);
-  if (hint) {
-    hint.textContent = showCategory ? '카드 설명 보기 →' : '← 카테고리 설명 보기';
-    hint.classList.toggle('hidden', !currentSubId);
+  const track    = document.getElementById('info-slider-track');
+  const viewport = document.getElementById('info-slider-viewport');
+  if (!track || !viewport) return;
+  // classList 방식 제거 → transform 방식으로 직접 이동
+  const w = viewport.offsetWidth;
+  const offset = showCategory ? -w : 0;
+  track.style.transition = 'transform 0.32s cubic-bezier(0.4, 0, 0.2, 1)';
+  track.style.transform  = `translateX(${offset}px)`;
+  // dot 갱신
+  const dot0 = document.getElementById('dot-0');
+  const dot1 = document.getElementById('dot-1');
+  if (dot0 && dot1) {
+    dot0.style.transform = showCategory ? 'scale(1)' : 'scale(1.55)';
+    dot1.style.transform = showCategory ? 'scale(1.55)' : 'scale(1)';
+    dot0.style.opacity   = showCategory ? '0.45' : '1';
+    dot1.style.opacity   = showCategory ? '1' : '0.45';
   }
+  const hint = document.getElementById('info-swipe-hint');
+  if (hint) hint.classList.add('hidden');
 }
 
 function initInfoSliderSwipe() {
   const viewport = document.getElementById('info-slider-viewport');
-  if (!viewport) return;
+  const track    = document.getElementById('info-slider-track');
+  if (!viewport || !track) return;
 
-  let startX = 0;
+  let startX   = 0;
+  let curX     = 0;
   let dragging = false;
+  let baseOffset = 0; // 현재 슬라이드의 시작 오프셋 (0 or -50%)
 
-  viewport.addEventListener('touchstart', (e) => {
+  function getSlideWidth() {
+    return viewport.offsetWidth;
+  }
+
+  function applyTransform(offsetPx, animate) {
+    track.style.transition = animate
+      ? 'transform 0.32s cubic-bezier(0.4, 0, 0.2, 1)'
+      : 'none';
+    track.style.transform = `translateX(${offsetPx}px)`;
+    updateDots(offsetPx);
+  }
+
+  function updateDots(offsetPx) {
+    const w = getSlideWidth();
+    // 0px = 카드(왼쪽), -w = 카테고리(오른쪽)
+    // ratio: 0(카드) ~ 1(카테고리)
+    const ratio = Math.min(1, Math.max(0, -offsetPx / w));
+    const dot0 = document.getElementById('dot-0');
+    const dot1 = document.getElementById('dot-1');
+    if (!dot0 || !dot1) return;
+    // 큰 점이 ratio에 따라 오른쪽으로 이동
+    // dot0: ratio=0일때 크게, dot1: ratio=1일때 크게
+    const s0 = 1 + (1 - ratio) * 0.55; // 1 ~ 1.55
+    const s1 = 1 + ratio * 0.55;
+    dot0.style.transform = `scale(${s0})`;
+    dot1.style.transform = `scale(${s1})`;
+    dot0.style.opacity = 0.45 + (1 - ratio) * 0.55;
+    dot1.style.opacity = 0.45 + ratio * 0.55;
+  }
+
+  function snapToSlide(targetCategory) {
+    infoSlideCategory = targetCategory;
+    baseOffset = targetCategory ? -getSlideWidth() : 0;
+    applyTransform(baseOffset, true);
+    updateDots(baseOffset);
+    // hint 숨기기
+    const hint = document.getElementById('info-swipe-hint');
+    if (hint) hint.classList.add('hidden');
+  }
+
+  function onStart(clientX) {
     if (!currentSubId) return;
-    startX = e.touches[0].clientX;
+    startX = clientX;
+    curX   = clientX;
     dragging = true;
-  }, { passive: true });
+    baseOffset = infoSlideCategory ? -getSlideWidth() : 0;
+    track.style.transition = 'none';
+  }
 
-  viewport.addEventListener('touchend', (e) => {
+  function onMove(clientX) {
+    if (!dragging || !currentSubId) return;
+    curX = clientX;
+    const dx = curX - startX;
+    // 경계에서 저항감 (rubber band)
+    let offset = baseOffset + dx;
+    const w = getSlideWidth();
+    if (offset > 0)        offset = offset * 0.25;
+    if (offset < -w)       offset = -w + (offset + w) * 0.25;
+    applyTransform(offset, false);
+  }
+
+  function onEnd() {
     if (!dragging || !currentSubId) return;
     dragging = false;
-    const dx = e.changedTouches[0].clientX - startX;
-    if (dx < -40) setInfoSlide(true);
-    else if (dx > 40) setInfoSlide(false);
-  }, { passive: true });
+    const dx = curX - startX;
+    const w  = getSlideWidth();
+    const THRESHOLD = w * 0.2; // 20%만 넘어도 전환
+    if (dx < -THRESHOLD && !infoSlideCategory) {
+      snapToSlide(true);
+    } else if (dx > THRESHOLD && infoSlideCategory) {
+      snapToSlide(false);
+    } else {
+      // 원래 위치로 복귀
+      applyTransform(baseOffset, true);
+      updateDots(baseOffset);
+    }
+  }
 
-  viewport.addEventListener('mousedown', (e) => {
-    if (!currentSubId) return;
-    startX = e.clientX;
-    dragging = true;
-  });
+  // Touch
+  viewport.addEventListener('touchstart', (e) => onStart(e.touches[0].clientX), { passive: true });
+  viewport.addEventListener('touchmove',  (e) => onMove(e.touches[0].clientX),  { passive: true });
+  viewport.addEventListener('touchend',   (e) => onEnd(), { passive: true });
 
-  window.addEventListener('mouseup', (e) => {
-    if (!dragging || !currentSubId) return;
-    dragging = false;
-    const dx = e.clientX - startX;
-    if (dx < -40) setInfoSlide(true);
-    else if (dx > 40) setInfoSlide(false);
-  });
+  // Mouse
+  viewport.addEventListener('mousedown', (e) => { e.preventDefault(); onStart(e.clientX); });
+  window.addEventListener('mousemove',   (e) => onMove(e.clientX));
+  window.addEventListener('mouseup',     ()  => onEnd());
 }
 
 function updateInfoPanel() {
@@ -1227,5 +1313,33 @@ subs.forEach(sub => {
   document.addEventListener('touchend',   onTouchEnd,   { passive: true });
   document.addEventListener('touchcancel',onTouchEnd,   { passive: true });
 })();
+
+
+/* ════════════════════════════════════════════════
+   LONG PRESS → 상세 정보 열기
+════════════════════════════════════════════════ */
+let _lpTimer = null;
+const LONG_PRESS_MS = 480; // 꾹 누르는 시간 (ms)
+
+function startLongPress(el, type, subId, a, b) {
+  cancelLongPress();
+  _lpTimer = setTimeout(() => {
+    _lpTimer = null;
+    // 카드 포커스 먼저 맞추기
+    if (type === 'group') {
+      groupCardClick(subId, a, b);
+    } else {
+      cardClick(subId, a);
+    }
+    openDetailSheet('card');
+  }, LONG_PRESS_MS);
+}
+
+function cancelLongPress() {
+  if (_lpTimer) {
+    clearTimeout(_lpTimer);
+    _lpTimer = null;
+  }
+}
 
 
