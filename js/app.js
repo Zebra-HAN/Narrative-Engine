@@ -1319,32 +1319,40 @@ subs.forEach(sub => {
    LONG PRESS → 상세 정보 열기
 ════════════════════════════════════════════════ */
 let _lpTimer = null;
+let _lpStartX = 0;
+let _lpStartY = 0;
 const LONG_PRESS_MS = 480; // 꾹 누르는 시간 (ms)
 
 function startLongPress(el, type, subId, a, b) {
   cancelLongPress();
+  _lpStartX = event.touches ? event.touches[0].clientX : event.clientX;
+  _lpStartY = event.touches ? event.touches[0].clientY : event.clientY;
+
   _lpTimer = setTimeout(() => {
     _lpTimer = null;
-    // 카드 포커스 먼저 맞추기
-    if (type === 'group') {
-      groupCardClick(subId, a, b);
-    } else {
-      cardClick(subId, a);
-    }
+    if (type === 'group') groupCardClick(subId, a, b);
+    else cardClick(subId, a);
     openDetailSheet('card');
   }, LONG_PRESS_MS);
 }
 
 function cancelLongPress() {
-  if (_lpTimer) {
-    clearTimeout(_lpTimer);
-    _lpTimer = null;
-  }
+  if (_lpTimer) { clearTimeout(_lpTimer); _lpTimer = null; }
 }
-
 
 /* ════════════════════════════════════════════════
    컨텍스트 메뉴 / 텍스트 선택 차단 (앱처럼)  꾸욱 눌렀을때 전체선택되며뜨는거 차단
 ════════════════════════════════════════════════ */
 document.addEventListener('contextmenu', (e) => e.preventDefault());
 document.addEventListener('selectstart', (e) => e.preventDefault());
+
+// 스크롤 중 long press 취소
+document.addEventListener('touchmove', (e) => {
+  if (_lpTimer) {
+    const dx = e.touches[0].clientX - _lpStartX;
+    const dy = e.touches[0].clientY - _lpStartY;
+    if (Math.abs(dx) > 8 || Math.abs(dy) > 8) cancelLongPress();
+  }
+}, { passive: true });
+
+
