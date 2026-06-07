@@ -733,19 +733,22 @@
 
 .detail-sheet {
   position: relative;
-  width: min(88%, 400px);       /* ← 가로 폭 여기서 조절 */
-  max-height: 85vh;             /* ← 세로 최대 높이 */
+  width: min(88%, 400px);   /* ← 가로 폭 여기서 조절 */
+  height: 85vh;  /* ← 세로 최대 높이 */
+  max-height: 85vh;
   background: var(--bg-panel2);
   border: 1px solid var(--border-gold2);
-  border-radius: 0 0 var(--radius-panel) var(--radius-panel);
+  border-radius: 0 0 var(--radius-panel) var(--radius-panel);   /* 위에서 내려오는 느낌 */
   padding: 20px 18px 28px;
+
+  /* 내용이 넘치면 내부 스크롤 */
   overflow-y: auto;
   box-shadow: var(--shadow-deep);
 
-  /* 위에서 아래로 슬라이드 */
   transform: translateY(-100%);
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 .detail-overlay.active .detail-sheet {
   transform: translateY(0);
 }
