@@ -1056,8 +1056,8 @@ opacity: 0;
       inset: 0;
       z-index: 800;
       background: rgba(0, 0, 0, 0.55);    /* 블러 쓰면 어두운 정도 살짝 줄여도 돼*/
-  backdrop-filter: blur(6px);           /* 숫자 클수록 더 흐릿*/
-  -webkit-backdrop-filter: blur(6px);   /* Safari용*/
+  backdrop-filter: blur(2px);           /* 숫자 클수록 더 흐릿*/
+  -webkit-backdrop-filter: blur(2px);   /* Safari용*/
       display: flex;
       align-items: center;
       justify-content: center;
