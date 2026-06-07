@@ -727,7 +727,7 @@
   position: fixed; inset: 0;
   background: rgba(0,0,0,0.6);
 
-        backdrop-filter: blur(8px);
+        backdrop-filter: blur(4px);
   z-index: 200;
         
   display: flex;
@@ -743,10 +743,10 @@
 .detail-sheet {
   position: relative;
   width: min(80%, 700px);   /* ← 가로 폭 여기서 조절 */
-  height: 70vh;  /* ← 세로 최대 높이 */
-  max-height: 85vh;
+  height: 80vh;  /* ← 세로 최대 높이 */
+  max-height: 80vh;
   background: rgba(20,20,20,0.55);
-  backdrop-filter: blur(10px);
+  
     
   border: 1px solid var(--border-gold2);
   border-radius: var(--radius-panel);   /* 위에서 내려오는 느낌 */
