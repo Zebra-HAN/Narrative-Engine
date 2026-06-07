@@ -1327,12 +1327,13 @@
 
 /* 마름모 버튼 속 이미지 — 45도 회전된 부모를 역보정해서 정방향으로 */
 .diamond-img {
-  width: 142%;
-  height: 142%;
+  width: 150%;
+  height: 150%;
   object-fit: cover;
   display: block;
   pointer-events: none;      /* ← 이미지 드래그/저장 차단 */
   -webkit-user-drag: none;   /* ← Safari 드래그 차단 */
+    flex-shrink: 0;
 }
 
 /* 카드 이미지 — 카드 상단 꽉 채움 */
