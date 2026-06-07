@@ -1343,3 +1343,8 @@ function cancelLongPress() {
 }
 
 
+/* ════════════════════════════════════════════════
+   컨텍스트 메뉴 / 텍스트 선택 차단 (앱처럼)  꾸욱 눌렀을때 전체선택되며뜨는거 차단
+════════════════════════════════════════════════ */
+document.addEventListener('contextmenu', (e) => e.preventDefault());
+document.addEventListener('selectstart', (e) => e.preventDefault());
