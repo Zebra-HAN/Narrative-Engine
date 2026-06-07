@@ -596,9 +596,9 @@
       background: linear-gradient(135deg, var(--bg-panel2), var(--bg-panel));
       transition: background 0.25s, border-color 0.25s, box-shadow 0.25s;
       box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      overflow: hidden;
     }
-  overflow: hidden;
-  position: relative;
+
 
     .diamond-btn-icon {
       transform: rotate(-45deg);
