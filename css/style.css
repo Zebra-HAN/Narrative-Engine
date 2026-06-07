@@ -1325,11 +1325,9 @@
   height: 142%;
   object-fit: cover;
   transform: rotate(-45deg);
-  border-radius: 4px;
   display: block;
   pointer-events: none;      /* ← 이미지 드래그/저장 차단 */
   -webkit-user-drag: none;   /* ← Safari 드래그 차단 */
-  overflow: hidden;
 }
 
 /* 카드 이미지 — 카드 상단 꽉 채움 */
