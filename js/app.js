@@ -494,10 +494,10 @@ function renderSubnav(navId, animate) {
 
     item.innerHTML = `
       <div class="diamond-btn" style="animation-delay:${animate ? i*0.08 : 0}s">  
-        <span class="diamond-btn-icon">${renderIcon(sub.icon, sub.img, 'diamond-img')}</span>
-        ${count > 0 ? `<div class="selection-badge">${count}</div>` : ''}
-      </div>
-      <div class="subnav-label">${sub.label}</div>
+    <span class="diamond-btn-icon">${renderIcon(sub.icon, sub.img, 'diamond-img')}</span>
+  </div>
+  ${count > 0 ? `<div class="selection-badge">${count}</div>` : ''}
+  <div class="subnav-label">${sub.label}</div>
     `;
     scroll.appendChild(item);
   });
