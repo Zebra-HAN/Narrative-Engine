@@ -742,11 +742,11 @@
 
 .detail-sheet {
   position: relative;
-  width: min(80%, 700px);   /* ← 가로 폭 여기서 조절 */
-  height: 90vh;  /* ← 세로 최대 높이 */
-  max-height: 90vh;
-  background: rgba(20,20,20,0.55);
-  
+  width: min(77%, 600px);   /* ← 가로 폭 여기서 조절 */
+  height: 83vh;  /* ← 세로 최대 높이 */
+  max-height: 83vh;
+  background: rgba(20,20,20,0.65);
+    backdrop-filter: blur(7px);
     
   border: 1px solid var(--border-gold2);
   border-radius: var(--radius-panel);   /* 위에서 내려오는 느낌 */
