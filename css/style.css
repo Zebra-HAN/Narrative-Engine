@@ -4,41 +4,41 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg-deepest:    #080a0f;
-      --bg-dark:       #0d1017;
-      --bg-panel:      #111520;
-      --bg-panel2:     #161c2a;
-      --bg-bar:        #0a0d14;
+      --bg-deepest:    #f0ebe0;
+  --bg-dark:       #f5f0e8;
+  --bg-panel:      #faf7f2;
+  --bg-panel2:     #fff8f0;
+  --bg-bar:        #ede8de;
 
-      --gold-dim:      #8a7340;
-      --gold-mid:      #c9a84c;
-      --gold-bright:   #e8c96a;
-      --gold-glow:     #f5d98a;
-      --bronze:        #a0693a;
-      --ivory:         #f0e8d5;
-      --ivory-dim:     #c8bfa8;
-      --lavender:      #9b8ec4;
-      --lavender-dim:  #6b5e8a;
+  --gold-dim:      #b8923a;
+  --gold-mid:      #c9a84c;
+  --gold-bright:   #b07a20;
+  --gold-glow:     #8a5e10;
+  --bronze:        #a0693a;
+  --ivory:         #3a2a10;
+  --ivory-dim:     #5a4020;
+  --lavender:      #8a6a30;
+  --lavender-dim:  #6b5020;
 
-      --text-primary:  #e8dfc8;
-      --text-secondary:#a09070;
-      --text-muted:    #5a5040;
+  --text-primary:  #2a1e08;
+  --text-secondary:#7a5a30;
+  --text-muted:    #b09060;
 
-      --border-gold:   rgba(180, 145, 60, 0.35);
-      --border-gold2:  rgba(200, 165, 70, 0.6);
-      --shadow-gold:   0 0 20px rgba(180,145,50,0.15);
-      --shadow-deep:   0 8px 32px rgba(0,0,0,0.7);
+  --border-gold:   rgba(180, 145, 60, 0.4);
+  --border-gold2:  rgba(180, 145, 60, 0.7);
+  --shadow-gold:   0 0 20px rgba(180,145,50,0.12);
+  --shadow-deep:   0 8px 32px rgba(100,80,30,0.12);
 
-      --radius-card:   10px;
-      --radius-btn:    8px;
-      --radius-panel:  12px;
+  --radius-card:   10px;
+  --radius-btn:    8px;
+  --radius-panel:  12px;
 
-      --transition-smooth: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-      --transition-fast:   0.18s cubic-bezier(0.4, 0, 0.2, 1);
-    }
+  --transition-smooth: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast:   0.18s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
     html {
-      background: #080a0f;
+      background: #f0ebe0;
     }
 
     html, body {
@@ -74,7 +74,7 @@
        OPENING SCREEN
     ═══════════════════════════════════════════════ */
     #screen-opening {
-      background: #000;
+      background: #f0ebe0;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -156,7 +156,7 @@
        HOME SCREEN
     ═══════════════════════════════════════════════ */
     #screen-home {
-      background: linear-gradient(165deg, #0c0e16 0%, #0a0d14 35%, #080a0f 70%, #060810 100%);
+      background: linear-gradient(165deg, #ede8de 0%, #f0ebe0 35%, #f5f0e8 70%, #faf7f2 100%););
       display: flex;
       align-items: center;
       justify-content: center;
@@ -545,13 +545,11 @@
     }
 
 
-    /* ── SUBNAVIGATION (bar-style, horizontal scroll) ── */
+    /* ── 서브 네비  SUBNAVIGATION (bar-style, horizontal scroll) ── */
     .subnav-panel {
       flex-shrink: 0;
-      background:
-        linear-gradient(180deg, rgba(38, 48, 72, 0.22) 0%, rgba(38, 48, 72, 0) 45%),
-        linear-gradient(180deg, #101828 0%, #0c1220 48%, #080c14 100%);
-      border-top: 1px solid rgba(90, 110, 150, 0.18);
+      background: linear-gradient(180deg, #ede8de 0%, #f0ebe0 100%);
+  border-top: 1px solid rgba(180, 145, 60, 0.2);
       border-bottom: 1px solid var(--border-gold);
       padding: 0 10px;
       overflow: hidden;
@@ -618,7 +616,7 @@
       font-family: 'Noto Sans KR', sans-serif;
     }
     .subnav-item.active .diamond-btn {
-      background: linear-gradient(135deg, #1e1a08, #2a2210);
+      background: linear-gradient(135deg, #fff3d0, #ffe8a0);
       border-color: var(--gold-bright);
       box-shadow: 0 0 12px rgba(200,170,70,0.4), 0 2px 8px rgba(0,0,0,0.5);
     }
@@ -745,7 +743,7 @@
   width: min(80%, 600px);   /* ← 가로 폭 여기서 조절 */
   height: 80vh;  /* ← 세로 최대 높이 */
   max-height: 80vh;
-  background: rgba(20,20,20,0.45);
+  background: rgba(255,252,245,0.95);
     backdrop-filter: blur(1px);
     
   border: 1px solid var(--border-gold2);
@@ -873,19 +871,19 @@ opacity: 0;
     }
 .nav-tab .nav-label {
   font-size: 0.58rem;
-  color: rgba(80,130,220,0.5);
+  color: rgba(160,120,60,0.6);
   font-family: 'Noto Sans KR', sans-serif;
   transition: color 0.35s ease;
 }
 .nav-tab.active .nav-label {
-  color: #6aa3f5;
+  color: #b07a20;
 }
 .nav-tab .nav-svg {
-  color: rgba(80,130,220,0.5);
+  color: rgba(160,120,60,0.6);
   transition: color 0.35s ease;
 }
 .nav-tab.active .nav-svg {
-  color: #6aa3f5;
+  color: #b07a20;
 }
 
 
