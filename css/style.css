@@ -5,41 +5,40 @@
 
     :root {
       /* ── 배경 계열: 따뜻한 크림 화이트 ── */
-      --bg-deepest:    #f7f4ef;
---bg-dark:       #faf8f4;
---bg-panel:      #ffffff;
---bg-panel2:     #fcfbf9;
---bg-bar:        #f4efe8;
+      --bg-deepest:    #f2ede4;
+      --bg-dark:       #f7f3ec;
+      --bg-panel:      #fdfaf5;
+      --bg-panel2:     #fffcf7;
+      --bg-bar:        #ede7db;
 
       /* ── 골드 계열 ── */
-      --gold-dim:      #b89a68;
---gold-mid:      #c7a76f;
---gold-bright:   #a88043;
---gold-glow:     #d8bf8a;
---bronze:        #b8925d;
+      --gold-dim:      #c49a3c;
+      --gold-mid:      #d4a843;
+      --gold-bright:   #c8922a;
+      --gold-glow:     #b8801a;
+      --bronze:        #c07848;
 
       /* ── 로즈골드 계열 ── */
-      --rose-gold:         #d2b7a0;
---rose-gold-light:   #ead8ca;
---rose-gold-border:  rgba(190,160,130,0.35);
+      --rose-gold:         #c9957a;
+      --rose-gold-light:   #e8b8a0;
+      --rose-gold-border:  rgba(210, 155, 120, 0.65);
 
       /* ── 텍스트 ── */
-      --ivory:         #6f5735;
---ivory-dim:     #8a704d;
---text-primary:  #6f5735;
---text-secondary:#9a7d54;
---text-muted:    #c0ac8c;
+      --ivory:         #2c1e0a;
+      --ivory-dim:     #4a3418;
+      --text-primary:  #1e1408;
+      --text-secondary:#7a5c30;
+      --text-muted:    #a08860;
 
       /* ── 테두리/그림자 ── */
-      --border-gold:   rgba(184,154,104,0.35);
---border-gold2:  rgba(199,167,111,0.45);
-
---shadow-gold:   0 2px 8px rgba(184,154,104,0.12);
---shadow-deep:   0 4px 16px rgba(120,90,40,0.08);
+      --border-gold:   rgba(196, 154, 60, 0.5);
+      --border-gold2:  rgba(210, 168, 67, 0.8);
+      --shadow-gold:   0 0 18px rgba(196,154,60,0.18);
+      --shadow-deep:   0 6px 24px rgba(80,50,10,0.10);
 
       /* ── 기타 (호환용 — 기존 lavender 참조 유지) ── */
-      --lavender:      #a88043;
---lavender-dim:  #8f6b35;
+      --lavender:      #c8922a;
+      --lavender-dim:  #a07020;
 
       --radius-card:   10px;
       --radius-btn:    8px;
@@ -447,9 +446,7 @@
       border: 1.5px solid var(--border-gold2);
       border-radius: 10px;
       background: linear-gradient(160deg, #fff8ee, #fdf0de);
-      box-shadow:
-0 1px 0 rgba(255,255,255,0.9) inset,
-0 2px 6px rgba(140,110,70,0.12);
+      box-shadow: var(--shadow-gold);
     }
     .info-text-wrap {
       flex: 1;
@@ -489,9 +486,7 @@
   font-size: 0.75rem;
   font-weight: 500;
   cursor: pointer;
-  box-shadow:
-0 1px 0 rgba(255,255,255,0.9) inset,
-0 2px 6px rgba(140,110,70,0.12);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
     .info-btn-select {
       padding: 6px 18px;
@@ -502,9 +497,7 @@
   font-size: 0.75rem;
   font-weight: 500;
   cursor: pointer;
-  box-shadow:
-0 1px 0 rgba(255,255,255,0.9) inset,
-0 2px 6px rgba(140,110,70,0.12);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
     .info-btn-select.is-selected {
       background: linear-gradient(135deg, #e8d090 0%, #d4b868 50%, #c8a840 100%);
@@ -541,9 +534,7 @@
   white-space: nowrap;
   flex: 1;
   min-width: 0;
-  box-shadow:
-0 1px 0 rgba(255,255,255,0.9) inset,
-0 2px 6px rgba(140,110,70,0.12);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   transition: background 0.2s, color 0.2s, transform 0.12s ease, filter 0.12s ease;
   -webkit-tap-highlight-color: transparent;
 }
@@ -607,9 +598,7 @@
       border-radius: 4px;
       background: linear-gradient(135deg, #fffcf5 0%, #fdf5e0 50%, #faeec8 100%);
       transition: background 0.25s, border-color 0.25s, box-shadow 0.25s;
-      box-shadow:
-0 1px 0 rgba(255,255,255,0.9) inset,
-0 2px 6px rgba(140,110,70,0.12);
+      box-shadow: 3px 3px 8px rgba(140,100,40,0.22);
       overflow: hidden;
     }
 
@@ -631,16 +620,7 @@
   color: var(--text-secondary);
 }
     .subnav-item.active .diamond-btn {
-      background: linear-gradient(
-180deg,
-#ffffff 0%,
-#faf9f7 100%
-);
-           border-image: none;
-
-border:
-2px solid #bfa16e;
-           
+      background: linear-gradient(135deg, #fff8d8, #faeeb0, #f0de80);
       border-color: #d4a843;
       box-shadow: 3px 3px 10px rgba(140,100,40,0.28), 0 0 12px rgba(212,168,67,0.35);
     }
@@ -696,7 +676,7 @@ border:
       aspect-ratio: 0.72;
       border: 1.5px solid var(--rose-gold-border);
       border-radius: var(--radius-card);
-      background: linear-gradient(180deg,#ffffff 0%,#fcfbfa 100%);
+      background: linear-gradient(170deg, #fffcf7 0%, #fdf8f0 60%, #faf3e8 100%);
       cursor: pointer;
       display: flex;
       flex-direction: column;
@@ -1265,7 +1245,7 @@ opacity: 0;
 /* 아이디어 통합 — 중앙 대형 버튼 */
 .ctrl-btn-idea {
   flex: 1;
-  background: linear-gradient(180deg,#f3e4aa 0%,#ecd78f 100%
+  background: linear-gradient(135deg, #f5e6b0 0%, #edcf80 40%, #e8c868 70%, #f0d888 100%);
   border: 1.5px solid var(--gold-mid);
   border-radius: var(--radius-btn);
   color: #3a2408;
@@ -1442,9 +1422,7 @@ opacity: 0;
   font-family: 'Noto Sans KR', sans-serif;
   cursor: pointer;
   text-align: left;
-  box-shadow:
-0 1px 0 rgba(255,255,255,0.9) inset,
-0 2px 6px rgba(140,110,70,0.12);
+  box-shadow: 0 2px 10px rgba(180,130,50,0.10);
   opacity: 0;
   animation: groupBtnAppear 0.35s ease forwards;
 }
