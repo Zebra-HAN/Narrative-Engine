@@ -478,33 +478,26 @@
       margin-top: auto;
     }
     .info-btn-detail {
-      padding: 7px 12px;
-      border: 1.5px solid var(--rose-gold-border);
-      border-radius: var(--radius-btn);
-      background: linear-gradient(135deg, #fff8f4 0%, #fdeee6 100%);
-      color: #9a5a3a;
-      font-size: 0.68rem;
-      font-family: 'Noto Sans KR', sans-serif;
-      cursor: pointer;
-      white-space: nowrap;
-      box-shadow: 0 2px 8px rgba(200,140,100,0.15);
-      transition: background 0.2s, color 0.2s, transform 0.12s ease, filter 0.12s ease;
-      -webkit-tap-highlight-color: transparent;
+      padding: 6px 14px;
+  border: 1px solid var(--gold-dim);
+  border-radius: 10px; /* 라운딩 곡률 최적화 */
+  background: linear-gradient(180deg, #ffffff 0%, var(--bg-panel) 100%); /* 깔끔한 화이트 베이스 */
+  color: var(--text-primary);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
     .info-btn-select {
-      padding: 9px 28px;
-      border: 1.5px solid var(--gold-mid);
-      border-radius: var(--radius-btn);
-      background: linear-gradient(135deg, #f5e6b8 0%, #edd898 50%, #e8cc88 100%);
-      color: #5a3c0a;
-      font-size: 0.82rem;
-      font-weight: 700;
-      font-family: 'Noto Sans KR', sans-serif;
-      cursor: pointer;
-      white-space: nowrap;
-      box-shadow: 0 2px 12px rgba(196,154,60,0.28), inset 0 1px 0 rgba(255,248,220,0.6);
-      transition: background 0.2s, border-color 0.2s, transform 0.12s ease, filter 0.12s ease;
-      -webkit-tap-highlight-color: transparent;
+      padding: 6px 18px;
+  border: 1px solid var(--gold-bright);
+  border-radius: 10px;
+  background: linear-gradient(180deg, #ffffff 0%, var(--bg-panel) 100%);
+  color: var(--text-primary);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
     .info-btn-select.is-selected {
       background: linear-gradient(135deg, #e8d090 0%, #d4b868 50%, #c8a840 100%);
@@ -526,25 +519,25 @@
       border-bottom: 1.5px solid var(--border-gold2);
     }
     .ctrl-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 3px;
-      padding: 5px 6px;
-      border: 1.5px solid var(--rose-gold-border);
-      border-radius: 5px;
-      background: linear-gradient(135deg, #fff8f4 0%, #fdeee6 100%);
-      color: #7a4a2a;
-      font-size: 0.58rem;
-      font-family: 'Noto Sans KR', sans-serif;
-      cursor: pointer;
-      white-space: nowrap;
-      flex: 1;
-      min-width: 0;
-      box-shadow: 0 2px 6px rgba(200,140,100,0.12);
-      transition: background 0.2s, color 0.2s, transform 0.12s ease, filter 0.12s ease;
-      -webkit-tap-highlight-color: transparent;
-    }
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 5px 6px;
+  border: 1px solid var(--gold-dim); /* 과한 로즈골드 대신 부드러운 골드로 */
+  border-radius: 8px; /* 마음에 들어한 버튼 모양 */
+  background: linear-gradient(180deg, #ffffff 0%, var(--bg-panel) 100%);
+  color: var(--text-primary);
+  font-size: 0.7rem;
+  font-family: 'Noto Sans KR', sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  transition: background 0.2s, color 0.2s, transform 0.12s ease, filter 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
+}
     .ctrl-btn:active {
       color: var(--gold-bright);
     }
@@ -562,14 +555,11 @@
     /* ── SUBNAVIGATION (bar-style, horizontal scroll) ── */
     .subnav-panel {
       flex-shrink: 0;
-      background: linear-gradient(180deg, #faf6ee 0%, #f2ece0 100%);
-      border-top: 1.5px solid var(--border-gold2);
-      border-bottom: 1.5px solid var(--border-gold);
-      padding: 0 10px;
-      overflow: hidden;
-      position: relative;
-      height: 80px;
-    }
+  background: #ffffff; /* 깔끔한 흰색 배경 유지 */
+  border-top: 1px solid rgba(190, 156, 90, 0.3);
+  padding: 6px 0;
+  height: 82px;
+}
 
     .subnav-scroll {
       display: flex;
@@ -625,11 +615,10 @@
     }
 
     .subnav-label {
-      font-size: 0.6rem;
-      color: var(--text-secondary);
-      letter-spacing: 0.05em;
-      font-family: 'Noto Sans KR', sans-serif;
-    }
+      font-size: 0.7rem; /* 딱 보기 좋았던 폰트 크기 고정 font-family: 'Noto Sans KR', sans-serif;*/
+  font-weight: 500;
+  color: var(--text-secondary);
+}
     .subnav-item.active .diamond-btn {
       background: linear-gradient(135deg, #fff8d8, #faeeb0, #f0de80);
       border-color: #d4a843;
@@ -1120,19 +1109,18 @@ opacity: 0;
     }
     .app-dialog-btn {
       flex: 1;
-      padding: 10px 14px;
-      border-radius: var(--radius-btn);
-      font-size: 0.78rem;
-      font-family: 'Noto Sans KR', sans-serif;
-      cursor: pointer;
-      border: 1px solid var(--border-gold);
-      transition: background 0.2s, transform 0.12s ease, filter 0.12s ease;
-      -webkit-tap-highlight-color: transparent;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.78rem;
+  font-family: 'Noto Sans KR', sans-serif;
+  cursor: pointer;
+  border: none !important; /* 테두리를 아예 없애서 깔끔하게 원하던 무드로 지정 */
+  transition: background 0.2s, transform 0.12s ease, filter 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
     }
     .app-dialog-btn-cancel {
-      background: linear-gradient(135deg, #fff8f4, #fdeee6);
-      color: #7a4a2a;
-      border-color: var(--rose-gold-border);
+      background: linear-gradient(180deg, #ffffff 0%, var(--bg-panel) 100%);
+  color: var(--text-primary);
     }
     .app-dialog-btn-confirm {
       background: linear-gradient(135deg, #f5e6b0 0%, #edcf80 50%, #e8c868 100%);
