@@ -582,6 +582,11 @@ const grpCount = grp.cards.reduce((sum, _, cIdx) => {
 
   page.innerHTML = html;
   area.appendChild(page);
+
+  // group-deal 애니메이션 끝난 뒤 클래스 제거 → pressable 눌림효과 항상 작동
+  page.querySelectorAll('.group-deal').forEach(btn => {
+    btn.addEventListener('animationend', () => btn.classList.remove('group-deal'), { once: true });
+  });
 }
 
 /* ════════════════════════════════════════════════
@@ -631,6 +636,11 @@ function showGroupCards(subId, groupIdx) {
   html += '</div>';
   page.innerHTML = html;
   area.appendChild(page);
+
+  // card-deal 애니메이션 끝난 뒤 클래스 제거 → pressable 눌림효과 항상 작동
+  page.querySelectorAll('.card-deal').forEach(card => {
+    card.addEventListener('animationend', () => card.classList.remove('card-deal'), { once: true });
+  });
 }
 
 /* 그룹 카드 클릭 — info 패널 업데이트 */
@@ -755,12 +765,16 @@ function showCardPage(subId, animate = true) {
   html += '</div>';
   page.innerHTML = html;
   area.appendChild(page);
+
+  // card-deal 애니메이션 끝난 뒤 클래스 제거 → pressable 눌림효과 항상 작동
+  page.querySelectorAll('.card-deal').forEach(card => {
+    card.addEventListener('animationend', () => card.classList.remove('card-deal'), { once: true });
+  });
 }
 
 
 
 /* ════════════════════════════════════════════════
-   CARD INTERACTION & INFO PANEL
 ════════════════════════════════════════════════ */
 function cardClick(subId, idx) {
   const card = CARD_DATA[subId][idx];
@@ -1073,6 +1087,15 @@ function showAppDialog(msg, buttons) {
       actions.appendChild(btn);
     });
     overlay.classList.add('active');
+
+    // 외부(오버레이 배경) 클릭시 취소(false)로 닫기
+    function onOverlayClick(e) {
+      if (e.target === overlay) {
+        overlay.removeEventListener('click', onOverlayClick);
+        closeAppDialog(false);
+      }
+    }
+    overlay.addEventListener('click', onOverlayClick);
   });
 }
 
@@ -1354,5 +1377,3 @@ document.addEventListener('touchmove', (e) => {
     if (Math.abs(dx) > 8 || Math.abs(dy) > 8) cancelLongPress();
   }
 }, { passive: true });
-
-
