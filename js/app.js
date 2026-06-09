@@ -933,13 +933,19 @@ function updateInfoPanel() {
     const isSelected = selectedCards[focusedCard.subId] && selectedCards[focusedCard.subId].has(focusedCard.idx);
     selectBtn.textContent = isSelected ? '취소' : '선택';
     selectBtn.classList.toggle('is-selected', isSelected);
+    // 카드 선택 시 버튼 다시 표시
+    const cardActions = document.querySelector('.info-slide-card .info-actions');
+    if (cardActions) cardActions.classList.remove('info-actions-hidden');
     setInfoSlide(false);
   } else {
-    document.getElementById('info-card-icon').innerHTML = '·';
+    document.getElementById('info-card-icon').innerHTML = '?';
     document.getElementById('info-card-name').textContent = '카드 미선택';
     document.getElementById('info-card-desc').textContent = '카드를 탭하면 이곳에 항목 설명이 표시됩니다.';
     selectBtn.textContent = '선택';
     selectBtn.classList.remove('is-selected');
+    // 카드 미선택 시 버튼 숨김
+    const cardActions = document.querySelector('.info-slide-card .info-actions');
+    if (cardActions) cardActions.classList.add('info-actions-hidden');
     setInfoSlide(true);
   }
 
@@ -999,6 +1005,10 @@ function openDetailSheet(mode) {
   if (mode === 'card' && !focusedCard) return;
   if (mode === 'category' && !currentSubId) return;
   document.getElementById('detail-overlay').classList.add('active');
+  attachSwipeToClose(
+    document.querySelector('.detail-sheet'),
+    () => document.getElementById('detail-overlay').classList.remove('active')
+  );
 }
 
 function closeDetailSheet(e) {
@@ -1012,6 +1022,10 @@ function closeDetailSheet(e) {
 function openStatusOverlay() {
   renderStatusContent();
   document.getElementById('status-overlay').classList.add('active');
+  attachSwipeToClose(
+    document.querySelector('.status-panel'),
+    () => document.getElementById('status-overlay').classList.remove('active')
+  );
 }
 
 function closeStatusOverlay(e) {
@@ -1021,14 +1035,17 @@ function closeStatusOverlay(e) {
 
 function renderStatusContent() {
   const body = document.getElementById('status-body');
-  let html = '';
 
-  Object.keys(NAV_DATA).forEach(navKey => {
+  // 제목 변경
+  const titleEl = document.getElementById('status-title');
+  if (titleEl) titleEl.textContent = '아이디어 통합';
+
+  // 각 nav 섹션 렌더링 헬퍼
+  function renderSection(navKey) {
     const nav = NAV_DATA[navKey];
-    html += `<div class="status-section"><div class="status-section-title">${nav.label}</div>`;
-
-    let hasAny = false;
+    if (!nav) return '';
     let itemsHtml = '';
+    let hasAny = false;
 
     nav.subs.forEach(sub => {
       const set = selectedCards[sub.id];
@@ -1040,7 +1057,6 @@ function renderStatusContent() {
       set.forEach(globalIdx => {
         let card = null;
         if (data && data.groups) {
-          // 그룹 타입: globalIdx = groupIdx * 1000 + cardIdx
           const groupIdx = Math.floor(globalIdx / 1000);
           const cardIdx = globalIdx % 1000;
           card = data.groups[groupIdx]?.cards[cardIdx];
@@ -1055,11 +1071,23 @@ function renderStatusContent() {
       itemsHtml += '</div></div>';
     });
 
-    html += hasAny ? itemsHtml : '<div class="status-empty">선택 없음</div>';
-    html += '</div>';
-  });
+    const content = hasAny ? itemsHtml : '<div class="status-empty">선택 없음</div>';
+    return `<div class="status-section"><div class="status-section-title">${nav.label}</div>${content}</div>`;
+  }
 
-  body.innerHTML = html;
+  // 2컬럼: 왼쪽 = 캐릭터 + 세계관 / 오른쪽 = 스토리 + 나침반
+  body.innerHTML = `
+    <div class="status-two-col">
+      <div class="status-col status-col-left">
+        ${renderSection('character')}
+        ${renderSection('world')}
+      </div>
+      <div class="status-col status-col-right">
+        ${renderSection('narrative2')}
+        ${renderSection('compass')}
+      </div>
+    </div>
+  `;
 }
 
 function shareStatus() {
@@ -1377,3 +1405,81 @@ document.addEventListener('touchmove', (e) => {
     if (Math.abs(dx) > 8 || Math.abs(dy) > 8) cancelLongPress();
   }
 }, { passive: true });
+
+/* ════════════════════════════════════════════════
+   SWIPE TO CLOSE (왼쪽 스와이프로 패널 닫기)
+════════════════════════════════════════════════ */
+function attachSwipeToClose(panelEl, closeFn) {
+  if (!panelEl) return;
+
+  // 이전에 붙인 리스너 제거 (중복 방지)
+  if (panelEl._swipeCleanup) panelEl._swipeCleanup();
+
+  let startX = null;
+  let startY = null;
+  let isDragging = false;
+
+  function onTouchStart(e) {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    isDragging = false;
+    panelEl.style.transition = 'none';
+  }
+
+  function onTouchMove(e) {
+    if (startX === null) return;
+    const dx = e.touches[0].clientX - startX;
+    const dy = e.touches[0].clientY - startY;
+
+    // 수평 스와이프 판정 (세로 스크롤과 구분)
+    if (!isDragging && Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 8) {
+      isDragging = true;
+    }
+    if (isDragging && dx < 0) {
+      // 왼쪽으로만 이동 (오른쪽은 무시)
+      panelEl.style.transform = `translateX(${dx}px)`;
+      panelEl.style.opacity = String(Math.max(0, 1 + dx / 200));
+    }
+  }
+
+  function onTouchEnd(e) {
+    if (!isDragging) {
+      panelEl.style.transition = '';
+      panelEl.style.transform = '';
+      panelEl.style.opacity = '';
+      startX = null;
+      return;
+    }
+    const dx = e.changedTouches[0].clientX - startX;
+    if (dx < -80) {
+      // 80px 이상 왼쪽으로 밀었으면 닫기
+      panelEl.style.transition = 'transform 0.22s ease, opacity 0.22s ease';
+      panelEl.style.transform = 'translateX(-110%)';
+      panelEl.style.opacity = '0';
+      setTimeout(() => {
+        closeFn();
+        panelEl.style.transition = '';
+        panelEl.style.transform = '';
+        panelEl.style.opacity = '';
+      }, 220);
+    } else {
+      // 복원
+      panelEl.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+      panelEl.style.transform = '';
+      panelEl.style.opacity = '';
+      setTimeout(() => { panelEl.style.transition = ''; }, 200);
+    }
+    startX = null;
+    isDragging = false;
+  }
+
+  panelEl.addEventListener('touchstart', onTouchStart, { passive: true });
+  panelEl.addEventListener('touchmove',  onTouchMove,  { passive: true });
+  panelEl.addEventListener('touchend',   onTouchEnd,   { passive: true });
+
+  panelEl._swipeCleanup = () => {
+    panelEl.removeEventListener('touchstart', onTouchStart);
+    panelEl.removeEventListener('touchmove',  onTouchMove);
+    panelEl.removeEventListener('touchend',   onTouchEnd);
+  };
+}
