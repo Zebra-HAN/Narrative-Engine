@@ -628,7 +628,7 @@ function showGroupCards(subId, groupIdx) {
     onmouseup="cancelLongPress()" ontouchend="cancelLongPress()"
     onmouseleave="cancelLongPress()" ontouchcancel="cancelLongPress()">
         
-        <div class="card-icon-area">${renderIcon(card.icon, card.img, 'card-img')}</div>
+        <div class="card-img-frame">${renderIcon(card.icon, card.img, 'card-img')}</div>
         <div class="card-name">${card.name}</div>
       </div>
     `;
@@ -756,7 +756,7 @@ function showCardPage(subId, animate = true) {
     onmouseup="cancelLongPress()"  ontouchend="cancelLongPress()"
     onmouseleave="cancelLongPress()" ontouchcancel="cancelLongPress()">
     
-        <div class="card-icon-area">${renderIcon(card.icon, card.img, 'card-img')}</div>
+        <div class="card-img-frame">${renderIcon(card.icon, card.img, 'card-img')}</div>
         <div class="card-name">${card.name}</div>
       </div>
     `;
