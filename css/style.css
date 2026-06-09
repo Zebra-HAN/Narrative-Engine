@@ -1037,6 +1037,26 @@ opacity: 0;
       font-family: 'Noto Sans KR', sans-serif;
     }
 
+    /* 2컬럼 레이아웃 */
+    .status-two-col {
+      display: flex;
+      gap: 12px;
+    }
+    .status-col {
+      flex: 1;
+      min-width: 0;
+    }
+    .status-col .status-section {
+      margin-bottom: 14px;
+    }
+
+    /* 카드 미선택 시 버튼 숨김 */
+    .info-actions.info-actions-hidden {
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+
 
     /* ═══════════════════════════════════════════════
        EMPTY STATE
