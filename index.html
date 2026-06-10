@@ -234,10 +234,16 @@
 
   <!-- 상세 정보 시트 -->
   <div class="detail-overlay" id="detail-overlay" onclick="closeDetailSheet(event)">
-    <div class="detail-sheet">
-      <button type="button" class="detail-close pressable" onclick="closeDetailSheet()">✕</button>
-      <div class="detail-placeholder">다음 업데이트 예정</div>
-    </div>
+<div class="detail-sheet">
+  <button type="button" class="detail-close pressable" onclick="closeDetailSheet()">✕</button>
+  <div class="detail-content" id="detail-content">
+    <div class="detail-icon" id="detail-icon"></div>
+    <div class="detail-name" id="detail-name"></div>
+    <div class="detail-desc" id="detail-desc"></div>
+    <div class="detail-divider" id="detail-divider"></div>
+    <div class="detail-body" id="detail-body"></div>
+  </div>
+</div>
   </div>
 
 </div>
