@@ -20,7 +20,7 @@ const CHARACTER_NAV = {
 
 const CHARACTER_CARDS = {
   archetype: [
-    { icon:'⚔', img:'images/Giant_Elf.png', name:'영웅' },
+    { icon:'⚔', img:'images/Giant_Elf.png', name:'영웅임' },
     { icon:'🧙', name:'현자'         }, { icon:'😈', name:'악당'       },
     { icon:'🃏', name:'트릭스터'     }, { icon:'👼', name:'수호자'     }, { icon:'🔮', name:'예언자'     },
     { icon:'⚔', name:'전사'         }, { icon:'💀', name:'파멸자'     }, { icon:'🌹', name:'연인'       },
