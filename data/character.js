@@ -20,7 +20,7 @@ const CHARACTER_NAV = {
 
 const CHARACTER_CARDS = {
   archetype: [
-    { icon:'⚔', img:'images/Giant_Elf.png', name:'영웅임' },
+    { icon:'⚔', img:'images/Giant_Elf.png', name:'영웅임',desc:'시련을 통해 성장하고 세계를 구하는 존재. 결핍과 각성, 희생의 구조를 가진 서사의 중심축 },
     { icon:'🧙', name:'현자'         }, { icon:'😈', name:'악당'       },
     { icon:'🃏', name:'트릭스터'     }, { icon:'👼', name:'수호자'     }, { icon:'🔮', name:'예언자'     },
     { icon:'⚔', name:'전사'         }, { icon:'💀', name:'파멸자'     }, { icon:'🌹', name:'연인'       },
