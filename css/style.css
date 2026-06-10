@@ -1580,9 +1580,87 @@ opacity: 0;
   white-space: pre-line;
 }
 
+/* ── Detail Check Button ── */
+.detail-line-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 3px 0;
+}
+
+.detail-check-btn {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1.5px solid rgba(58,125,90,0.35);
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.12s ease, filter 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
+  filter: grayscale(1) opacity(0.35);
+  padding: 0;
+  line-height: 1;
+}
+
+.detail-check-btn.checked {
+  background: #e6f7ee;
+  border-color: var(--gold-mid);
+  filter: grayscale(0) opacity(1);
+}
+
+.detail-line-text {
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  line-height: 1.7;
+  white-space: pre-wrap;
+  flex: 1;
+}
+
+.detail-line-empty {
+  height: 0.6em;
+}
+
+/* ── 아이디어 통합 창 — 세부정보 표시 ── */
+.status-chip-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.status-chip-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 3px 6px 3px 10px;
+  border-left: 2px solid rgba(58,125,90,0.3);
+  margin-left: 4px;
+}
+
+.status-chip-detail-line {
+  font-size: 0.6rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+/* ── status-chips wrap 대응 ── */
+.status-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: flex-start;
+}
+
+
+
+
 /* PC에서도 모바일처럼 좁게 표시 */
 body {
   max-width: 430px;
   margin: 0 auto;
 }
-
