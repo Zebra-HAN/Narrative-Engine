@@ -1545,10 +1545,10 @@ opacity: 0;
 }
 
 .detail-card-img {
-  width: 64px;
-  height: 64px;
-  object-fit: cover;
-  border-radius: 50%;
+  width: 70%;
+  height: auto;
+  object-fit: contain;
+  border-radius: 12px;
   display: block;
   margin: 0 auto;
 }
