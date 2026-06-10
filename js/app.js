@@ -440,6 +440,15 @@ function goToNarrative() {
   switchScreen('screen-narrative', null, true);
 }
 function goToCreate() {
+  // 메뉴 패널 상태 초기화
+  extraMenuOpen = false;
+  const panel = document.getElementById('extra-menu-panel');
+  const btn   = document.getElementById('btn-extra-menu');
+  const icon  = document.getElementById('extra-menu-icon');
+  if (panel) panel.classList.remove('open');
+  if (btn)   btn.classList.remove('open');
+  if (icon)  icon.textContent = '☰';
+
   switchScreen('screen-create', () => {
     const create = document.getElementById('screen-create');
     create.classList.remove('entering');
