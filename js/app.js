@@ -696,6 +696,41 @@ function toggleCardSelect(subId, idx) {
 function openDetailSheet(mode) {
   if (mode === 'card' && !focusedCard) return;
   if (mode === 'category' && !currentSubId) return;
+
+  const iconEl   = document.getElementById('detail-icon');
+  const nameEl   = document.getElementById('detail-name');
+  const descEl   = document.getElementById('detail-desc');
+  const divEl    = document.getElementById('detail-divider');
+  const bodyEl   = document.getElementById('detail-body');
+
+  if (mode === 'card' && focusedCard) {
+    // 카드 데이터 꺼내기
+    const data = CARD_DATA[focusedCard.subId];
+    let card = null;
+    if (data && data.groups) {
+      const groupIdx = Math.floor(focusedCard.idx / 1000);
+      const cardIdx  = focusedCard.idx % 1000;
+      card = data.groups[groupIdx]?.cards[cardIdx];
+    } else if (Array.isArray(data)) {
+      card = data[focusedCard.idx];
+    }
+
+    iconEl.innerHTML  = renderIcon(focusedCard.icon, focusedCard.img, 'detail-card-img');
+    nameEl.textContent = focusedCard.name;
+    descEl.textContent = card?.desc || '';
+    divEl.style.display = card?.detail ? '' : 'none';
+    bodyEl.textContent  = card?.detail || '';
+
+  } else if (mode === 'category') {
+    const navInfo = Object.values(NAV_DATA).find(n => n.subs.find(s => s.id === currentSubId));
+    const sub = navInfo ? navInfo.subs.find(s => s.id === currentSubId) : null;
+    iconEl.innerHTML   = sub ? renderIcon(sub.icon, sub.img, 'detail-card-img') : '✦';
+    nameEl.textContent = sub ? sub.label : currentSubId;
+    descEl.textContent = getSubDescription(currentSubId);
+    divEl.style.display = 'none';
+    bodyEl.textContent  = '';
+  }
+
   document.getElementById('detail-overlay').classList.add('active');
   attachSwipeToClose(
     document.querySelector('.detail-sheet'),
