@@ -517,6 +517,7 @@
       background: linear-gradient(180deg, #ffffff 0%, #f5f5f5 100%);
       border-top: 1.5px solid var(--border-gold2);
       border-bottom: 1.5px solid var(--border-gold2);
+           position: relative;  /* ←이거만 추가 메뉴버튼과함께 뒷배경이 딸려오던거 수정*/
     }
     .ctrl-btn {
   display: inline-flex;
