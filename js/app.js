@@ -57,6 +57,7 @@ function getSubDescription(subId) {
   // 검은 화면의 시간 300 에서 100으로 줄임 다시300
 const FADE_MS = 150;
 
+/* 개발 중 오프닝 비활성화 를 위해 주석 처리
 window.addEventListener('load', () => {
   const content = document.getElementById('opening-content');
   const divider = document.getElementById('opening-divider');
@@ -75,6 +76,14 @@ window.addEventListener('load', () => {
     switchScreen('screen-home', null, true);
   }, 1300);
 });
+*/
+
+// 개발중에는 홈 직행. 오프닝 복구할땐 아래 2줄은 삭제하면 됨 
+window.addEventListener('load', () => {
+  switchScreen('screen-home', null, false);
+});
+
+
 
 initInfoSliderSwipe();
 
