@@ -446,7 +446,6 @@
       border: 1.5px solid var(--border-gold2);
       border-radius: 10px;
       background: linear-gradient(160deg, #f0f7f3, #e4f0ea);
-      box-shadow: var(--shadow-gold);
     }
     .info-text-wrap {
       flex: 1;
@@ -494,6 +493,10 @@
       outline: none;
       box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
+    .info-btn-detail:active {
+      outline: none;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
     .info-btn-select {
       padding: 6px 18px;
   border: 1px solid var(--gold-bright);
@@ -508,6 +511,10 @@
     }
     .info-btn-select:focus,
     .info-btn-select:focus-visible {
+      outline: none;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .info-btn-select:active {
       outline: none;
       box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
@@ -725,6 +732,7 @@
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
+      box-shadow: none;
     }
 
     /* 이미지 없을 때 이모지 아이콘 영역 */
@@ -1551,6 +1559,10 @@ opacity: 0;
   border-radius: 12px;
   display: block;
   margin: 0 auto;
+  pointer-events: none;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+  user-select: none;
 }
 
 .detail-name {
