@@ -779,25 +779,38 @@
 
 .detail-sheet {
   position: relative;
-  width: min(80%, 600px);   /* ← 가로 폭 여기서 조절 */
-  height: 80vh;  /* ← 세로 최대 높이 */
+  width: min(80%, 600px);
+  height: 80vh;
   max-height: 80vh;
-  background: rgba(255,255,255,0.97);
-    backdrop-filter: blur(1px);
-    
+  background: linear-gradient(170deg, #ffffff 0%, #f7fbf9 50%, #f2f8f5 100%);
+  backdrop-filter: blur(1px);
+
   border: 1px solid var(--border-gold2);
-  border-radius: var(--radius-panel);   /* 위에서 내려오는 느낌 */
+  border-radius: var(--radius-panel);
   padding: 20px 18px 28px;
 
-  /* 내용이 넘치면 내부 스크롤 */
   overflow-y: auto;
-  box-shadow: var(--shadow-deep);
+  box-shadow:
+    0 8px 32px rgba(58,125,90,0.12),
+    0 2px 8px rgba(0,0,0,0.06),
+    inset 0 1px 0 rgba(255,255,255,0.9);
 
   transform: scale(0.95);
-opacity: 0;
+  opacity: 0;
   transition:
-  transform 0.22s ease,
-  opacity 0.22s ease;
+    transform 0.22s ease,
+    opacity 0.22s ease;
+}
+
+/* 상단 그린 포인트 라인 */
+.detail-sheet::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--gold-dim), #5aaa7a, var(--gold-dim), transparent);
+  border-radius: var(--radius-panel) var(--radius-panel) 0 0;
+  pointer-events: none;
 }
 
 .detail-overlay.active .detail-sheet {
@@ -1553,43 +1566,69 @@ opacity: 0;
 }
 
 .detail-card-img {
-  width: 70%;
+  width: 65%;
   height: auto;
   object-fit: contain;
-  border-radius: 12px;
+  border-radius: 14px;
   display: block;
-  margin: 0 auto;
+  margin: 0 auto 4px;
   pointer-events: none;
   -webkit-user-drag: none;
   -webkit-touch-callout: none;
   user-select: none;
+  border: 1.5px solid rgba(58,125,90,0.2);
+  box-shadow:
+    0 6px 20px rgba(58,125,90,0.15),
+    0 2px 6px rgba(0,0,0,0.08);
 }
 
 .detail-name {
   font-size: 1.25rem;
-  font-weight: 600;
+  font-weight: 700;
   text-align: center;
-  color: var(--text-primary);
+  color: var(--gold-bright);
+  font-family: 'Noto Serif KR', serif;
+  letter-spacing: 0.04em;
+  padding-bottom: 10px;
+  position: relative;
+}
+
+.detail-name::after {
+  content: '';
+  display: block;
+  width: 48px;
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+  margin: 8px auto 0;
+  border-radius: 2px;
 }
 
 .detail-desc {
   font-size: 0.82rem;
   color: var(--text-secondary);
   text-align: center;
-  line-height: 1.55;
+  line-height: 1.6;
+  background: linear-gradient(135deg, #f0f7f3, #e8f2ed);
+  border: 1px solid rgba(58,125,90,0.15);
+  border-radius: 10px;
+  padding: 10px 14px;
 }
 
 .detail-divider {
   height: 1px;
-  background: var(--border);
-  margin: 8px 0;
+  background: linear-gradient(90deg, transparent, rgba(58,125,90,0.3), transparent);
+  margin: 10px 0;
 }
 
 .detail-body {
   font-size: 0.85rem;
   color: var(--text-primary);
-  line-height: 1.7;
+  line-height: 1.75;
   white-space: pre-line;
+  padding: 10px 12px;
+  background: rgba(245,250,247,0.7);
+  border-radius: 8px;
+  border-left: 3px solid rgba(58,125,90,0.4);
 }
 
 /* ── Detail Check Button ── */
