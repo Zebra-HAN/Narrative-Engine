@@ -480,17 +480,6 @@
     .info-btn-detail {
       padding: 6px 14px;
   border: 1px solid var(--gold-dim);
-  border-radius: 10px; /* 라운딩 곡률 최적화 */
-  background: linear-gradient(180deg, #ffffff 0%, var(--bg-panel) 100%); /* 깔끔한 화이트 베이스 */
-  color: var(--text-primary);
-  font-size: 0.75rem;
-  font-weight: 500;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    .info-btn-select {
-      padding: 6px 18px;
-  border: 1px solid var(--gold-bright);
   border-radius: 10px;
   background: linear-gradient(180deg, #ffffff 0%, var(--bg-panel) 100%);
   color: var(--text-primary);
@@ -498,12 +487,35 @@
   font-weight: 500;
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  outline: none;
+    }
+    .info-btn-detail:focus,
+    .info-btn-detail:focus-visible {
+      outline: none;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .info-btn-select {
+      padding: 6px 18px;
+  border: 1px solid var(--gold-bright);
+  border-radius: 10px;
+  background: linear-gradient(135deg, #4a9a70 0%, #2e6b4a 50%, #245c3d 100%);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  outline: none;
+    }
+    .info-btn-select:focus,
+    .info-btn-select:focus-visible {
+      outline: none;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
     .info-btn-select.is-selected {
-      background: linear-gradient(135deg, #4a9a70 0%, #2e6b4a 50%, #245c3d 100%);
-      border-color: var(--gold-bright);
-      color: #ffffff;
-      box-shadow: 0 2px 16px rgba(58,125,90,0.35), inset 0 1px 0 rgba(255,255,255,0.2);
+      background: linear-gradient(180deg, #ffffff 0%, var(--bg-panel) 100%);
+      border-color: var(--gold-dim);
+      color: var(--text-primary);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
 
     .ctrl-btn {
@@ -525,7 +537,13 @@
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   transition: background 0.2s, color 0.2s, transform 0.12s ease, filter 0.12s ease;
   -webkit-tap-highlight-color: transparent;
+  outline: none;
 }
+    .ctrl-btn:focus,
+    .ctrl-btn:focus-visible {
+      outline: none;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
     .ctrl-btn:active {
       color: var(--gold-bright);
     }
