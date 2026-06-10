@@ -20,7 +20,9 @@ const CHARACTER_NAV = {
 
 const CHARACTER_CARDS = {
   archetype: [
-    { icon:'⚔', img:'images/Giant_Elf.png', name:'영웅임',desc:'시련을 통해 성장하고 세계를 구하는 존재. 결핍과 각성, 희생의 구조를 가진 서사의 중심축.' },
+    { icon:'⚔', img:'images/Giant_Elf.png', name:'영웅임',
+  desc:'시련을 통해 성장하고 세계를 구하는 존재. 결핍과 각성, 희생의 구조를 가진 서사의 중심축.',
+  detail:'【서사 포지션】주인공 고정\n【핵심 갈등】내면의 결핍 vs 외부의 시련\n【변화 축】각성 → 희생 → 재탄생\n\n활용 팁: 결말부의 희생 장면에서 이 원형의 설득력이 가장 강해진다.' },
     { icon:'🧙', name:'현자'         }, { icon:'😈', name:'악당'       },
     { icon:'🃏', name:'트릭스터'     }, { icon:'👼', name:'수호자'     }, { icon:'🔮', name:'예언자'     },
     { icon:'⚔', name:'전사'         }, { icon:'💀', name:'파멸자'     }, { icon:'🌹', name:'연인'       },
