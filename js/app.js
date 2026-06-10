@@ -23,6 +23,7 @@ const CARD_DATA = {
 let currentNav   = 'character';
 let currentSubId = null;
 let selectedCards = {};   // { subId: Set<idx> }
+let selectedDetails = {}; // { "subId__globalIdx": Set<detailLineIdx> }
 let focusedCard  = null;  // { subId, idx, name, icon }
 let infoSlideCategory = false; // false=카드, true=카테고리
 
@@ -718,8 +719,36 @@ function openDetailSheet(mode) {
     iconEl.innerHTML  = renderIcon(focusedCard.icon, focusedCard.img, 'detail-card-img');
     nameEl.textContent = focusedCard.name;
     descEl.textContent = card?.desc || '';
-    divEl.style.display = card?.detail ? '' : 'none';
-    bodyEl.textContent  = card?.detail || '';
+
+    // 세부정보(detail) 파싱 및 체크 버튼 렌더
+    if (card?.detail) {
+      divEl.style.display = '';
+      const detailKey = `${focusedCard.subId}__${focusedCard.idx}`;
+      const checkedSet = selectedDetails[detailKey] || new Set();
+
+      const lines = card.detail.split('\n');
+      let bodyHtml = '';
+      lines.forEach((line, lineIdx) => {
+        if (line.trim() === '') {
+          bodyHtml += `<div class="detail-line-empty"></div>`;
+        } else {
+          const isChecked = checkedSet.has(lineIdx);
+          bodyHtml += `
+            <div class="detail-line-row">
+              <button
+                type="button"
+                class="detail-check-btn pressable${isChecked ? ' checked' : ''}"
+                onclick="toggleDetailCheck('${focusedCard.subId}', ${focusedCard.idx}, ${lineIdx})"
+              >✅</button>
+              <span class="detail-line-text">${line}</span>
+            </div>`;
+        }
+      });
+      bodyEl.innerHTML = bodyHtml;
+    } else {
+      divEl.style.display = 'none';
+      bodyEl.innerHTML = '';
+    }
 
   } else if (mode === 'category') {
     const navInfo = Object.values(NAV_DATA).find(n => n.subs.find(s => s.id === currentSubId));
@@ -736,6 +765,74 @@ function openDetailSheet(mode) {
     document.querySelector('.detail-sheet'),
     () => document.getElementById('detail-overlay').classList.remove('active')
   );
+}
+
+function toggleDetailCheck(subId, globalIdx, lineIdx) {
+  const detailKey = `${subId}__${globalIdx}`;
+
+  // selectedDetails 초기화
+  if (!selectedDetails[detailKey]) selectedDetails[detailKey] = new Set();
+  const set = selectedDetails[detailKey];
+
+  if (set.has(lineIdx)) {
+    set.delete(lineIdx);
+  } else {
+    set.add(lineIdx);
+    // 카드도 자동 선택 상태로
+    if (!selectedCards[subId]) selectedCards[subId] = new Set();
+    selectedCards[subId].add(globalIdx);
+    // DOM 카드 selected 상태 반영
+    _syncCardSelectedDOM(subId, globalIdx);
+    renderSubnav(currentNav, false);
+    const el = document.querySelector(`[data-sub-id="${subId}"]`);
+    if (el) el.classList.add('active');
+    updateNavBadges();
+  }
+
+  // 체크 버튼 UI 토글
+  const btn = document.querySelector(
+    `.detail-check-btn[onclick*="toggleDetailCheck('${subId}', ${globalIdx}, ${lineIdx})"]`
+  );
+  if (btn) btn.classList.toggle('checked', set.has(lineIdx));
+
+  // 세부정보가 하나도 없으면 selectedDetails 키 삭제
+  if (set.size === 0) delete selectedDetails[detailKey];
+
+  // 아이디어 통합 창 갱신
+  refreshStatusIfOpen();
+}
+
+function _syncCardSelectedDOM(subId, globalIdx) {
+  // 일반 카드 페이지
+  const page = document.getElementById('page-' + subId);
+  if (page) {
+    const cards = page.querySelectorAll('.data-card');
+    const data = CARD_DATA[subId];
+    if (data && data.groups) {
+      const groupIdx = Math.floor(globalIdx / 1000);
+      const cardIdx  = globalIdx % 1000;
+      const grp = data.groups[groupIdx];
+      if (grp) {
+        const grpPage = document.getElementById('page-' + subId + '_' + grp.id);
+        if (grpPage) {
+          const grpCards = grpPage.querySelectorAll('.data-card');
+          if (grpCards[cardIdx]) {
+            grpCards[cardIdx].classList.remove('card-deal');
+            grpCards[cardIdx].classList.add('selected');
+          }
+        }
+      }
+    } else {
+      if (cards[globalIdx]) {
+        cards[globalIdx].classList.remove('card-deal');
+        cards[globalIdx].classList.add('selected');
+      }
+    }
+  }
+  // info 패널 선택 버튼도 갱신
+  if (focusedCard && focusedCard.subId === subId && focusedCard.idx === globalIdx) {
+    updateInfoPanel();
+  }
 }
 
 function closeDetailSheet(e) {
@@ -791,7 +888,21 @@ function renderStatusContent() {
           card = data[globalIdx];
         }
         if (card) {
-          itemsHtml += `<span class="status-chip">${card.icon} ${card.name}</span>`;
+          // 선택된 세부정보 줄 수집
+          const detailKey = `${sub.id}__${globalIdx}`;
+          const checkedLines = selectedDetails[detailKey];
+          let detailHtml = '';
+          if (checkedLines && checkedLines.size > 0 && card.detail) {
+            const lines = card.detail.split('\n');
+            const picked = [];
+            checkedLines.forEach(li => {
+              if (lines[li] && lines[li].trim()) picked.push(lines[li].trim());
+            });
+            if (picked.length > 0) {
+              detailHtml = `<div class="status-chip-details">${picked.map(l => `<span class="status-chip-detail-line">· ${l}</span>`).join('')}</div>`;
+            }
+          }
+          itemsHtml += `<div class="status-chip-wrap"><span class="status-chip">${card.icon} ${card.name}</span>${detailHtml}</div>`;
         }
       });
 
@@ -891,7 +1002,13 @@ async function partialReset() {
   const ok = await showAppConfirm(`${label} 탭의 선택을 모두 초기화할까요?`);
   if (!ok) return;
   const subs = NAV_DATA[currentNav].subs;
-  subs.forEach(sub => { delete selectedCards[sub.id]; });
+  subs.forEach(sub => {
+    delete selectedCards[sub.id];
+    // 해당 서브의 세부정보도 초기화
+    Object.keys(selectedDetails).forEach(key => {
+      if (key.startsWith(sub.id + '__')) delete selectedDetails[key];
+    });
+  });
   if (currentSubId) showCardPage(currentSubId, false);
   renderSubnav(currentNav, false);
   if (currentSubId) {
@@ -907,6 +1024,7 @@ async function fullReset() {
   const ok = await showAppConfirm('모든 선택을 초기화할까요?');
   if (!ok) return;
   selectedCards = {};
+  selectedDetails = {};
   if (currentSubId) showCardPage(currentSubId, false);
   renderSubnav(currentNav, false);
   if (currentSubId) {
