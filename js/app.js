@@ -18,7 +18,7 @@ const CARD_DATA = {
 
 
 /* ════════════════════════════════════════════════
-   STATE
+   STATE  
 ════════════════════════════════════════════════ */
 let currentNav   = 'character';
 let currentSubId = null;
@@ -26,8 +26,21 @@ let selectedCards = {};   // { subId: Set<idx> }
 let focusedCard  = null;  // { subId, idx, name, icon }
 let infoSlideCategory = false; // false=카드, true=카테고리
 
+
 function getCardDescription(name) {
-  return `[${name}] 항목의 상세 설명이 여기에 표시됩니다. 추후 각 항목별 설명과 서사적 활용 예시가 추가될 예정입니다.`;
+  if (focusedCard) {
+    const data = CARD_DATA[focusedCard.subId];
+    let card = null;
+    if (data && data.groups) {
+      const groupIdx = Math.floor(focusedCard.idx / 1000);
+      const cardIdx  = focusedCard.idx % 1000;
+      card = data.groups[groupIdx]?.cards[cardIdx];
+    } else if (Array.isArray(data)) {
+      card = data[focusedCard.idx];
+    }
+    if (card && card.desc) return card.desc;
+  }
+  return `${name} — 설명&서사적 활용 예시 준비중`;
 }
 
 function getSubDescription(subId) {
