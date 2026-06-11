@@ -487,6 +487,8 @@
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   outline: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
     }
     .info-btn-detail:focus,
     .info-btn-detail:focus-visible {
@@ -495,7 +497,8 @@
     }
     .info-btn-detail:active {
       outline: none;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      transform: scale(0.93);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     }
     .info-btn-select {
       padding: 6px 18px;
@@ -508,6 +511,8 @@
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   outline: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
     }
     .info-btn-select:focus,
     .info-btn-select:focus-visible {
@@ -516,7 +521,8 @@
     }
     .info-btn-select:active {
       outline: none;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      transform: scale(0.93);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     }
     .info-btn-select.is-selected {
       background: linear-gradient(180deg, #ffffff 0%, var(--bg-panel) 100%);
@@ -542,7 +548,7 @@
   flex: 1;
   min-width: 0;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  transition: background 0.2s, color 0.2s, transform 0.12s ease, filter 0.12s ease;
+  transition: background 0.2s, color 0.2s, transform 0.12s ease, box-shadow 0.12s ease;
   -webkit-tap-highlight-color: transparent;
   outline: none;
 }
@@ -552,7 +558,8 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
     .ctrl-btn:active {
-      color: var(--gold-bright);
+      transform: scale(0.93);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
     }
     .ctrl-icon {
       font-size: 0.65rem;
@@ -1228,8 +1235,11 @@
   font-family: 'Noto Sans KR', sans-serif;
   cursor: pointer;
   border: none !important; /* 테두리를 아예 없애서 깔끔하게 원하던 무드로 지정 */
-  transition: background 0.2s, transform 0.12s ease, filter 0.12s ease;
   -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s, transform 0.12s ease, box-shadow 0.12s ease;
+    }
+    .app-dialog-btn:active {
+      transform: scale(0.94);
     }
     .app-dialog-btn-cancel {
       background: linear-gradient(180deg, #ffffff 0%, var(--bg-panel) 100%);
@@ -1351,6 +1361,11 @@
   max-width: 55px;
   box-shadow: 0 2px 6px rgba(58,125,90,0.10);
   -webkit-tap-highlight-color: transparent;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.ctrl-btn-back:active {
+  transform: scale(0.93);
+  box-shadow: 0 1px 3px rgba(58,125,90,0.08);
 }
 .ctrl-btn-back .ctrl-icon { font-size: 0.85rem; line-height: 1; }
 .ctrl-btn-back .ctrl-label { font-family: 'Noto Sans KR', sans-serif; }
@@ -1391,7 +1406,11 @@
   max-width: 55px;
   box-shadow: 0 2px 6px rgba(58,125,90,0.10);
   -webkit-tap-highlight-color: transparent;
-  transition: color 0.2s, background 0.2s, transform 0.12s, filter 0.12s;
+  transition: color 0.2s, background 0.2s, transform 0.12s, box-shadow 0.12s;
+}
+.ctrl-btn-menu:active {
+  transform: scale(0.93);
+  box-shadow: 0 1px 3px rgba(58,125,90,0.08);
 }
 .ctrl-menu-icon {
   font-size: 1.4rem;
@@ -1447,7 +1466,11 @@
   text-align: center;
   box-shadow: 0 2px 6px rgba(58,125,90,0.08);
   -webkit-tap-highlight-color: transparent;
-  transition: background 0.2s, color 0.2s, transform 0.12s, filter 0.12s;
+  transition: background 0.2s, color 0.2s, transform 0.12s, box-shadow 0.12s;
+}
+.extra-btn:active {
+  transform: scale(0.93);
+  box-shadow: 0 1px 3px rgba(58,125,90,0.06);
 }
 .extra-btn-danger {
   color: rgba(200,60,50,0.9);
@@ -1567,6 +1590,13 @@
      이미지 모서리 클리핑은 .group-btn-icon:has(.group-btn-img) 에서 처리 */
   overflow: visible;
   position: relative;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.group-select-btn:active {
+  transform: scale(0.96);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
 
 .group-layout-two .group-select-btn {
