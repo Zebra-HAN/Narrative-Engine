@@ -1502,6 +1502,41 @@ subs.forEach(sub => {
   document.addEventListener('touchcancel',onTouchEnd,   { passive: true });
 })();
 
+/* ════════════════════════════════════════════════
+   그룹 버튼 눌림 효과 — 동적 생성 버튼 전용
+   innerHTML로 생성된 .group-select-btn 에
+   직접 touch/mouse 이벤트를 붙여 scale 애니메이션 적용
+════════════════════════════════════════════════ */
+function attachGroupBtnPress(containerEl) {
+  containerEl.querySelectorAll('.group-select-btn').forEach(btn => {
+    // 중복 방지
+    if (btn._pressAttached) return;
+    btn._pressAttached = true;
+
+    function press() {
+      btn.style.transition = 'transform 0.10s ease, box-shadow 0.10s ease';
+      btn.style.transform  = 'scale(0.95)';
+      btn.style.boxShadow  = '0 1px 4px rgba(0,0,0,0.08)';
+    }
+    function release() {
+      btn.style.transform  = 'scale(1)';
+      btn.style.boxShadow  = '';
+      // 튀어오르는 느낌의 spring 커브
+      btn.style.transition = 'transform 0.18s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.18s ease';
+      setTimeout(() => { btn.style.transition = ''; }, 200);
+    }
+
+    btn.addEventListener('touchstart',  press,   { passive: true });
+    btn.addEventListener('touchend',    release, { passive: true });
+    btn.addEventListener('touchcancel', release, { passive: true });
+
+    // PC 마우스 지원
+    btn.addEventListener('mousedown', press);
+    btn.addEventListener('mouseup',   release);
+    btn.addEventListener('mouseleave',release);
+  });
+}
+
 
 /* ════════════════════════════════════════════════
    LONG PRESS → 상세 정보 열기
