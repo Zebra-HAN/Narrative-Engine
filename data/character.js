@@ -183,7 +183,7 @@ const CHARACTER_CARDS = {
       },
    {
         id: 'attribute_6',
-        label: '속성 6',
+        label: '속성 6번',
         icon: '🐾',  img:'images/Peep.png',
         cards: [
     { icon:'🏴', name:'해적'      }, { icon:'🐾', name:'사냥꾼'      }, { icon:'💰', name:'상인'     },
