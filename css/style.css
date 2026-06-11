@@ -1597,17 +1597,7 @@
   overflow: visible;
   position: relative;
   -webkit-tap-highlight-color: transparent;
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
-
-.group-select-btn:active,
-.group-select-btn.is-pressing {
-  transform: scale(0.94) !important;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-transition: transform 0.08s ease, box-shadow 0.08s ease;
-}
-
-/* is-popping 제거 — 다른 버튼과 동일한 눌림 효과로 통일 */
 
 .group-layout-two .group-select-btn {
   height: 100%;
