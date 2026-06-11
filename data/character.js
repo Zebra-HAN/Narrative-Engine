@@ -75,15 +75,42 @@ const CHARACTER_CARDS = {
     ]
   },
 
-  job: [
-    { icon:'⚔', name:'검사'      }, { icon:'🏹', name:'궁수'       }, { icon:'🧙', name:'마법사'   },
+
+     job: {
+    groups: [
+      {
+        id: 'job_1',
+        label: '직업1',
+        icon: '👤',
+        cards: [
+   { icon:'⚔', name:'검사'      }, { icon:'🏹', name:'궁수'       }, { icon:'🧙', name:'마법사'   },
     { icon:'🛡', name:'기사'      }, { icon:'🗡', name:'암살자'      }, { icon:'🎵', name:'음유시인' },
     { icon:'⚕', name:'치유사'    }, { icon:'🔧', name:'장인'        }, { icon:'📜', name:'학자'     },
+        ]
+      },
+      {
+        id: 'job_2',
+        label: '직업2',
+        icon: '🐾',
+        cards: [
     { icon:'🏴', name:'해적'      }, { icon:'🐾', name:'사냥꾼'      }, { icon:'💰', name:'상인'     },
     { icon:'👑', name:'귀족'      }, { icon:'🌿', name:'드루이드'    }, { icon:'🎭', name:'배우'     },
     { icon:'🔮', name:'점술사'    }, { icon:'🌑', name:'네크로맨서'  }, { icon:'🐉', name:'용기사'   },
-    { icon:'⚗', name:'연금술사'  }, { icon:'🕵', name:'첩보원'      },
-  ],
+        ]
+      },
+      {
+        id: 'job_3',
+        label: '직업3',
+        icon: '✨',
+        cards: [
+              { icon:'⚗', name:'연금술사'  },
+              { icon:'🕵', name:'첩보원'      },
+        ]
+      },
+    ]
+  },
+
+   
 
   personality: [
     { icon:'🔥', name:'열정적'   }, { icon:'❄',  name:'냉정한'    }, { icon:'🌊', name:'유연한'   },
