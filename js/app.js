@@ -294,7 +294,7 @@ function showGroupPage(subId, animate = true) {
 
    html += `
       <button
-        type="button"
+      type="button"
         class="group-select-btn pressable group-deal"
         ${delay}
         data-group-action="${grp.subgroups ? 'subgroups' : 'cards'}"
@@ -348,7 +348,7 @@ function showSubgroupPage(subId, groupIdx) {
      
     html += `
       <button
-        type="button"
+      type="button"
         class="group-select-btn pressable group-deal"
         ${delay}
         data-group-action="subgroup-cards"
@@ -366,7 +366,7 @@ function showSubgroupPage(subId, groupIdx) {
 
   page.innerHTML = html;
   area.appendChild(page);
-   
+
   setupGroupButtonPress(page);
 }
 
@@ -1505,7 +1505,8 @@ subs.forEach(sub => {
    ─ 동적으로 생성되는 그룹 버튼도 실제 페이지 전환 전에
      눌림 → 튀어오름 애니메이션을 끝까지 보여준다.
 ════════════════════════════════════════════════ */
-const GROUP_RELEASE_NAV_DELAY_MS = 90;
+const GROUP_PRESS_DOWN_MS = 70;
+const GROUP_PRESS_TOTAL_MS = 210;
 
 function setupGroupButtonPress(containerEl) {
   containerEl.querySelectorAll('.group-select-btn').forEach(btn => {
@@ -1517,24 +1518,32 @@ function setupGroupButtonPress(containerEl) {
     }, { once: true });
 
     btn.addEventListener('pointerdown', () => {
-      btn.classList.remove('group-deal');
+      btn.classList.remove('group-deal', 'is-popping');
       btn.classList.add('is-pressing');
     });
 
-    ['pointerup', 'pointercancel', 'pointerleave'].forEach(eventName => {
+    ['pointercancel', 'pointerleave'].forEach(eventName => {
       btn.addEventListener(eventName, () => {
         btn.classList.remove('is-pressing');
       });
     });
 
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
       if (btn.dataset.pressLocked === 'true') return;
       btn.dataset.pressLocked = 'true';
-      btn.classList.remove('is-pressing');
+
+    btn.classList.remove('group-deal', 'is-popping');
+      btn.classList.add('is-pressing');
 
     window.setTimeout(() => {
+        btn.classList.remove('is-pressing');
+        btn.classList.add('is-popping');
+      }, GROUP_PRESS_DOWN_MS);
+
+      window.setTimeout(() => {
         runGroupButtonAction(btn);
-      }, GROUP_RELEASE_NAV_DELAY_MS);
+      }, GROUP_PRESS_TOTAL_MS);
     });
   });
 }
