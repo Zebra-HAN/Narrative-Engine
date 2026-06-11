@@ -33,13 +33,19 @@ function getCardDescription(name) {
     const data = CARD_DATA[focusedCard.subId];
     let card = null;
     if (data && data.groups) {
-      const groupIdx = Math.floor(focusedCard.idx / 1000);
-      const cardIdx  = focusedCard.idx % 1000;
-      card = data.groups[groupIdx]?.cards[cardIdx];
+      if (focusedCard.idx >= 1000000) {
+        const groupIdx = Math.floor(focusedCard.idx / 1000000);
+        const sgIdx    = Math.floor((focusedCard.idx % 1000000) / 1000);
+        const cardIdx  = focusedCard.idx % 1000;
+        card = data.groups[groupIdx]?.subgroups?.[sgIdx]?.cards[cardIdx];
+      } else {
+        const groupIdx = Math.floor(focusedCard.idx / 1000);
+        const cardIdx  = focusedCard.idx % 1000;
+        card = data.groups[groupIdx]?.cards[cardIdx];
+      }
     } else if (Array.isArray(data)) {
       card = data[focusedCard.idx];
     }
-    if (card && card.desc) return card.desc;
   }
   return `${name} — 설명&서사적 활용 예시 준비중`;
 }
@@ -244,12 +250,12 @@ function showDefaultCenter() {
 /* ════════════════════════════════════════════════
    그룹 선택 화면 렌더
    ─ type:'group' 인 카테고리를 클릭했을 때 열리는 화면
-   ─ 버튼 수를 늘리려면 CARD_DATA 의 groups 배열에 항목 추가만 하면 됨
+   ─ groups 배열에 항목 추가만 하면 버튼 자동 생성
+   ─ 그룹 안에 subgroups 배열이 있으면 → 2단계(서브그룹) 구조로 동작
 ════════════════════════════════════════════════ */
 function showGroupPage(subId, animate = true) {
   const area = document.getElementById('center-area');
 
-  // 기존 페이지 제거
   document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
 
   const data = CARD_DATA[subId];
@@ -259,40 +265,230 @@ function showGroupPage(subId, animate = true) {
   page.className = 'center-page active';
   page.id = 'page-' + subId;
 
-  // 그룹 버튼들을 세로로 나열 (3x1, 6x1 등 groups 배열 길이에 따라 자동)
   let html = '<div class="group-select-wrap">';
   data.groups.forEach((grp, i) => {
     const delay = animate ? `style="animation-delay:${i * 0.08}s"` : '';
-const grpCount = grp.cards.reduce((sum, _, cIdx) => {
-      return sum + (selectedCards[subId]?.has(i * 1000 + cIdx) ? 1 : 0);
-    }, 0);
+
+    // 배지 카운트 — subgroups 있으면 하위 모든 카드, 없으면 직속 카드
+    let grpCount = 0;
+    if (grp.subgroups) {
+      grp.subgroups.forEach((sg, sgIdx) => {
+        sg.cards.forEach((_, cIdx) => {
+          const globalIdx = i * 1000000 + sgIdx * 1000 + cIdx;
+          if (selectedCards[subId]?.has(globalIdx)) grpCount++;
+        });
+      });
+    } else if (grp.cards) {
+      grp.cards.forEach((_, cIdx) => {
+        if (selectedCards[subId]?.has(i * 1000 + cIdx)) grpCount++;
+      });
+    }
+
+    // subgroups 있으면 showSubgroupPage 호출, 없으면 바로 카드 목록
+    const clickFn = grp.subgroups
+      ? `showSubgroupPage('${subId}', ${i})`
+      : `showGroupCards('${subId}', ${i})`;
+
     html += `
       <button
         class="group-select-btn pressable group-deal"
         ${delay}
-        onclick="showGroupCards('${subId}', ${i})"
+        onclick="${clickFn}"
       >
         <span class="group-btn-icon">${renderIcon(grp.icon, grp.img, 'group-btn-img')}</span>
         <span class="group-btn-label">${grp.label}</span>
         ${grpCount > 0 ? `<div class="group-badge">${grpCount}</div>` : ''}
       </button>
     `;
-    // ↑ 버튼 하나당 이 블록 하나.
-    // groups 배열에 항목 추가하면 버튼 자동으로 늘어남
   });
   html += '</div>';
 
   page.innerHTML = html;
   area.appendChild(page);
 
-  // group-deal 애니메이션 끝난 뒤 클래스 제거 → pressable 눌림효과 항상 작동
   page.querySelectorAll('.group-deal').forEach(btn => {
     btn.addEventListener('animationend', () => btn.classList.remove('group-deal'), { once: true });
   });
 }
 
 /* ════════════════════════════════════════════════
-   그룹 버튼 클릭 → 해당 그룹의 카드 목록 열기
+   서브그룹 선택 화면 렌더 (2단계)
+   ─ 그룹 안에 subgroups 배열이 있을 때 그룹 버튼 클릭 시 열림
+════════════════════════════════════════════════ */
+function showSubgroupPage(subId, groupIdx) {
+  const area = document.getElementById('center-area');
+  const data = CARD_DATA[subId];
+  if (!data || !data.groups) return;
+
+  const grp = data.groups[groupIdx];
+  if (!grp || !grp.subgroups) return;
+
+  document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
+
+  const page = document.createElement('div');
+  page.className = 'center-page active';
+  page.id = 'page-' + subId + '_sg_' + grp.id;
+
+  let html = `<div class="section-label">${formatLabel(grp.label, grp.icon)}</div>`;
+  html += '<div class="group-select-wrap">';
+
+  grp.subgroups.forEach((sg, sgIdx) => {
+    // 서브그룹 배지: globalIdx = groupIdx * 1000000 + sgIdx * 1000 + cIdx
+    let sgCount = 0;
+    sg.cards.forEach((_, cIdx) => {
+      if (selectedCards[subId]?.has(groupIdx * 1000000 + sgIdx * 1000 + cIdx)) sgCount++;
+    });
+
+    html += `
+      <button
+        class="group-select-btn pressable group-deal"
+        onclick="showSubgroupCards('${subId}', ${groupIdx}, ${sgIdx})"
+      >
+        <span class="group-btn-icon">${renderIcon(sg.icon, sg.img, 'group-btn-img')}</span>
+        <span class="group-btn-label">${sg.label}</span>
+        ${sgCount > 0 ? `<div class="group-badge">${sgCount}</div>` : ''}
+      </button>
+    `;
+  });
+  html += '</div>';
+
+  page.innerHTML = html;
+  area.appendChild(page);
+
+  page.querySelectorAll('.group-deal').forEach(btn => {
+    btn.addEventListener('animationend', () => btn.classList.remove('group-deal'), { once: true });
+  });
+}
+
+/* ════════════════════════════════════════════════
+   서브그룹 카드 목록 렌더 (2단계 → 카드)
+════════════════════════════════════════════════ */
+function showSubgroupCards(subId, groupIdx, sgIdx) {
+  const area = document.getElementById('center-area');
+  const data = CARD_DATA[subId];
+  if (!data || !data.groups) return;
+
+  const grp = data.groups[groupIdx];
+  if (!grp || !grp.subgroups) return;
+
+  const sg = grp.subgroups[sgIdx];
+  if (!sg) return;
+
+  document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
+
+  const page = document.createElement('div');
+  page.className = 'center-page active';
+  page.id = `page-${subId}_sgc_${grp.id}_${sg.id}`;
+
+  if (!selectedCards[subId]) selectedCards[subId] = new Set();
+
+  let html = `<div class="section-label">${formatLabel(sg.label, sg.icon)}</div>`;
+  html += '<div class="card-grid">';
+
+  sg.cards.forEach((card, idx) => {
+    // globalIdx = groupIdx * 1000000 + sgIdx * 1000 + idx
+    const globalIdx = groupIdx * 1000000 + sgIdx * 1000 + idx;
+    const sel = selectedCards[subId].has(globalIdx) ? ' selected' : '';
+    html += `
+      <div class="data-card pressable card-deal${sel}"
+        style="animation-delay:${idx * 0.04}s"
+        onclick="subgroupCardClick('${subId}', ${groupIdx}, ${sgIdx}, ${idx})"
+        ondblclick="subgroupCardDblClick('${subId}', ${groupIdx}, ${sgIdx}, ${idx})"
+        onmousedown="startLongPress(this,'subgroup','${subId}',${groupIdx},${sgIdx},${idx})"
+        ontouchstart="startLongPress(this,'subgroup','${subId}',${groupIdx},${sgIdx},${idx})"
+        onmouseup="cancelLongPress()" ontouchend="cancelLongPress()"
+        onmouseleave="cancelLongPress()" ontouchcancel="cancelLongPress()">
+        <div class="card-img-frame">${renderIcon(card.icon, card.img, 'card-img')}</div>
+        <div class="card-name">${card.name}</div>
+      </div>
+    `;
+  });
+  html += '</div>';
+
+  page.innerHTML = html;
+  area.appendChild(page);
+
+  page.querySelectorAll('.card-deal').forEach(card => {
+    card.addEventListener('animationend', () => card.classList.remove('card-deal'), { once: true });
+  });
+}
+
+/* 서브그룹 카드 클릭 — info 패널 */
+function subgroupCardClick(subId, groupIdx, sgIdx, idx) {
+  const sg = CARD_DATA[subId].groups[groupIdx].subgroups[sgIdx];
+  const card = sg.cards[idx];
+  const globalIdx = groupIdx * 1000000 + sgIdx * 1000 + idx;
+  focusedCard = { subId, idx: globalIdx, name: card.name, icon: card.icon, img: card.img };
+  setInfoSlide(false);
+  updateInfoPanel();
+}
+
+/* 서브그룹 카드 더블클릭 — 선택/해제 */
+function subgroupCardDblClick(subId, groupIdx, sgIdx, idx) {
+  const globalIdx = groupIdx * 1000000 + sgIdx * 1000 + idx;
+  if (!selectedCards[subId]) selectedCards[subId] = new Set();
+
+  if (selectedCards[subId].has(globalIdx)) {
+    selectedCards[subId].delete(globalIdx);
+  } else {
+    selectedCards[subId].add(globalIdx);
+  }
+
+  const grp = CARD_DATA[subId].groups[groupIdx];
+  const sg  = grp.subgroups[sgIdx];
+  const pageEl = document.getElementById(`page-${subId}_sgc_${grp.id}_${sg.id}`);
+  if (pageEl) {
+    const cards = pageEl.querySelectorAll('.data-card');
+    if (cards[idx]) {
+      cards[idx].classList.remove('card-deal');
+      cards[idx].classList.toggle('selected', selectedCards[subId].has(globalIdx));
+    }
+  }
+
+  // 서브그룹 페이지 배지 갱신
+  const sgPageEl = document.getElementById('page-' + subId + '_sg_' + grp.id);
+  if (sgPageEl) updateSubgroupBadges(subId, groupIdx);
+
+  // 그룹 페이지 배지 갱신
+  const groupPageEl = document.getElementById('page-' + subId);
+  if (groupPageEl) updateGroupBadges(subId);
+
+  subgroupCardClick(subId, groupIdx, sgIdx, idx);
+
+  renderSubnav(currentNav, false);
+  const el = document.querySelector(`[data-sub-id="${subId}"]`);
+  if (el) el.classList.add('active');
+  updateNavBadges();
+  refreshStatusIfOpen();
+}
+
+/* 서브그룹 페이지 배지 갱신 */
+function updateSubgroupBadges(subId, groupIdx) {
+  const grp = CARD_DATA[subId]?.groups[groupIdx];
+  if (!grp || !grp.subgroups) return;
+
+  const pageEl = document.getElementById('page-' + subId + '_sg_' + grp.id);
+  if (!pageEl) return;
+
+  grp.subgroups.forEach((sg, sgIdx) => {
+    const btn = pageEl.querySelectorAll('.group-select-btn')[sgIdx];
+    if (!btn) return;
+    let count = 0;
+    sg.cards.forEach((_, cIdx) => {
+      if (selectedCards[subId]?.has(groupIdx * 1000000 + sgIdx * 1000 + cIdx)) count++;
+    });
+    let badge = btn.querySelector('.group-badge');
+    if (count > 0) {
+      if (!badge) { badge = document.createElement('div'); badge.className = 'group-badge'; btn.appendChild(badge); }
+      badge.textContent = count;
+    } else {
+      if (badge) badge.remove();
+    }
+  });
+}
+
+/* ════════════════════════════════════════════════
+   그룹 버튼 클릭 → 해당 그룹의 카드 목록 열기 (1단계 그룹용)
 ════════════════════════════════════════════════ */
 function showGroupCards(subId, groupIdx) {
   const area = document.getElementById('center-area');
@@ -302,17 +498,15 @@ function showGroupCards(subId, groupIdx) {
   const grp = data.groups[groupIdx];
   if (!grp) return;
 
-  // 기존 페이지 제거
   document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
 
   const page = document.createElement('div');
   page.className = 'center-page active';
   page.id = 'page-' + subId + '_' + grp.id;
 
-  // storeKey = subId (종족 전체로 통합)
   if (!selectedCards[subId]) selectedCards[subId] = new Set();
 
-  // 카드 idx = groupIdx * 1000 + cardIdx (그룹 구분용 오프셋)
+  // 카드 idx = groupIdx * 1000 + cardIdx
   const offset = groupIdx * 1000;
 
   let html = `<div class="section-label">${formatLabel(grp.label, grp.icon)}</div>`;
@@ -329,7 +523,6 @@ function showGroupCards(subId, groupIdx) {
     ontouchstart="startLongPress(this,'group','${subId}',${groupIdx},${idx})"
     onmouseup="cancelLongPress()" ontouchend="cancelLongPress()"
     onmouseleave="cancelLongPress()" ontouchcancel="cancelLongPress()">
-        
         <div class="card-img-frame">${renderIcon(card.icon, card.img, 'card-img')}</div>
         <div class="card-name">${card.name}</div>
       </div>
@@ -339,7 +532,6 @@ function showGroupCards(subId, groupIdx) {
   page.innerHTML = html;
   area.appendChild(page);
 
-  // card-deal 애니메이션 끝난 뒤 클래스 제거 → pressable 눌림효과 항상 작동
   page.querySelectorAll('.card-deal').forEach(card => {
     card.addEventListener('animationend', () => card.classList.remove('card-deal'), { once: true });
   });
@@ -365,7 +557,6 @@ function groupCardDblClick(subId, groupIdx, idx) {
     selectedCards[subId].add(globalIdx);
   }
 
-  // 카드 DOM 토글 (애니메이션 재발생 없음, 더블클릭 후 카드 뒤집는 모션 오류 수정한듯)
   const page = document.getElementById('page-' + subId + '_' + CARD_DATA[subId].groups[groupIdx].id);
   if (page) {
     const cards = page.querySelectorAll('.data-card');
@@ -375,14 +566,11 @@ function groupCardDblClick(subId, groupIdx, idx) {
     }
   }
 
-// 그룹 페이지가 현재 열려있으면 배지 갱신, 없으면 패스 (showGroupPage 호출 시 자동 반영)
   const groupPageEl = document.getElementById('page-' + subId);
   if (groupPageEl) updateGroupBadges(subId);
 
-  // focusedCard 동기화
   groupCardClick(subId, groupIdx, idx);
 
-  // 배지 & 상태 갱신
   renderSubnav(currentNav, false);
   const el = document.querySelector(`[data-sub-id="${subId}"]`);
   if (el) el.classList.add('active');
@@ -396,9 +584,22 @@ function updateGroupBadges(subId) {
   data.groups.forEach((grp, gIdx) => {
     const btn = document.querySelector(`#page-${subId} .group-select-btn:nth-child(${gIdx + 1})`);
     if (!btn) return;
-    const count = grp.cards.reduce((sum, _, cIdx) => {
-      return sum + (selectedCards[subId]?.has(gIdx * 1000 + cIdx) ? 1 : 0);
-    }, 0);
+
+    let count = 0;
+    if (grp.subgroups) {
+      // 서브그룹 구조: globalIdx = gIdx * 1000000 + sgIdx * 1000 + cIdx
+      grp.subgroups.forEach((sg, sgIdx) => {
+        sg.cards.forEach((_, cIdx) => {
+          if (selectedCards[subId]?.has(gIdx * 1000000 + sgIdx * 1000 + cIdx)) count++;
+        });
+      });
+    } else if (grp.cards) {
+      // 일반 그룹: globalIdx = gIdx * 1000 + cIdx
+      grp.cards.forEach((_, cIdx) => {
+        if (selectedCards[subId]?.has(gIdx * 1000 + cIdx)) count++;
+      });
+    }
+
     let badge = btn.querySelector('.group-badge');
     if (count > 0) {
       if (!badge) {
@@ -657,13 +858,19 @@ function updateInfoPanel() {
 
 function selectCurrentCard() {
   if (!focusedCard) return;
-  // 그룹 타입 카드인지 판별 (globalIdx >= 0, subId에 groups가 있으면)
   const data = CARD_DATA[focusedCard.subId];
   if (data && data.groups) {
-    // globalIdx에서 groupIdx, cardIdx 역산
-    const groupIdx = Math.floor(focusedCard.idx / 1000);
-    const cardIdx = focusedCard.idx % 1000;
-    groupCardDblClick(focusedCard.subId, groupIdx, cardIdx);
+    // globalIdx >= 1000000 이면 서브그룹 구조
+    if (focusedCard.idx >= 1000000) {
+      const groupIdx = Math.floor(focusedCard.idx / 1000000);
+      const sgIdx    = Math.floor((focusedCard.idx % 1000000) / 1000);
+      const cardIdx  = focusedCard.idx % 1000;
+      subgroupCardDblClick(focusedCard.subId, groupIdx, sgIdx, cardIdx);
+    } else {
+      const groupIdx = Math.floor(focusedCard.idx / 1000);
+      const cardIdx = focusedCard.idx % 1000;
+      groupCardDblClick(focusedCard.subId, groupIdx, cardIdx);
+    }
   } else {
     toggleCardSelect(focusedCard.subId, focusedCard.idx);
   }
@@ -718,14 +925,19 @@ function openDetailSheet(mode) {
     const data = CARD_DATA[focusedCard.subId];
     let card = null;
     if (data && data.groups) {
-      const groupIdx = Math.floor(focusedCard.idx / 1000);
-      const cardIdx  = focusedCard.idx % 1000;
-      card = data.groups[groupIdx]?.cards[cardIdx];
+      if (focusedCard.idx >= 1000000) {
+        const groupIdx = Math.floor(focusedCard.idx / 1000000);
+        const sgIdx    = Math.floor((focusedCard.idx % 1000000) / 1000);
+        const cardIdx  = focusedCard.idx % 1000;
+        card = data.groups[groupIdx]?.subgroups?.[sgIdx]?.cards[cardIdx];
+      } else {
+        const groupIdx = Math.floor(focusedCard.idx / 1000);
+        const cardIdx  = focusedCard.idx % 1000;
+        card = data.groups[groupIdx]?.cards[cardIdx];
+      }
     } else if (Array.isArray(data)) {
       card = data[focusedCard.idx];
     }
-
-    iconEl.innerHTML  = renderIcon(focusedCard.icon, focusedCard.img, 'detail-card-img');
     nameEl.textContent = focusedCard.name;
     descEl.textContent = card?.desc || '';
 
@@ -812,12 +1024,27 @@ function toggleDetailCheck(subId, globalIdx, lineIdx) {
 }
 
 function _syncCardSelectedDOM(subId, globalIdx) {
-  // 일반 카드 페이지
-  const page = document.getElementById('page-' + subId);
-  if (page) {
-    const cards = page.querySelectorAll('.data-card');
-    const data = CARD_DATA[subId];
-    if (data && data.groups) {
+  const data = CARD_DATA[subId];
+  if (data && data.groups) {
+    if (globalIdx >= 1000000) {
+      // 서브그룹 구조
+      const groupIdx = Math.floor(globalIdx / 1000000);
+      const sgIdx    = Math.floor((globalIdx % 1000000) / 1000);
+      const cardIdx  = globalIdx % 1000;
+      const grp = data.groups[groupIdx];
+      const sg  = grp?.subgroups?.[sgIdx];
+      if (sg) {
+        const sgPage = document.getElementById(`page-${subId}_sgc_${grp.id}_${sg.id}`);
+        if (sgPage) {
+          const cards = sgPage.querySelectorAll('.data-card');
+          if (cards[cardIdx]) {
+            cards[cardIdx].classList.remove('card-deal');
+            cards[cardIdx].classList.add('selected');
+          }
+        }
+      }
+    } else {
+      // 일반 그룹 구조
       const groupIdx = Math.floor(globalIdx / 1000);
       const cardIdx  = globalIdx % 1000;
       const grp = data.groups[groupIdx];
@@ -831,14 +1058,17 @@ function _syncCardSelectedDOM(subId, globalIdx) {
           }
         }
       }
-    } else {
+    }
+  } else {
+    const page = document.getElementById('page-' + subId);
+    if (page) {
+      const cards = page.querySelectorAll('.data-card');
       if (cards[globalIdx]) {
         cards[globalIdx].classList.remove('card-deal');
         cards[globalIdx].classList.add('selected');
       }
     }
   }
-  // info 패널 선택 버튼도 갱신
   if (focusedCard && focusedCard.subId === subId && focusedCard.idx === globalIdx) {
     updateInfoPanel();
   }
@@ -890,9 +1120,16 @@ function renderStatusContent() {
       set.forEach(globalIdx => {
         let card = null;
         if (data && data.groups) {
-          const groupIdx = Math.floor(globalIdx / 1000);
-          const cardIdx = globalIdx % 1000;
-          card = data.groups[groupIdx]?.cards[cardIdx];
+          if (globalIdx >= 1000000) {
+            const gIdx2  = Math.floor(globalIdx / 1000000);
+            const sgIdx  = Math.floor((globalIdx % 1000000) / 1000);
+            const cIdx   = globalIdx % 1000;
+            card = data.groups[gIdx2]?.subgroups?.[sgIdx]?.cards[cIdx];
+          } else {
+            const groupIdx = Math.floor(globalIdx / 1000);
+            const cardIdx = globalIdx % 1000;
+            card = data.groups[groupIdx]?.cards[cardIdx];
+          }
         } else if (Array.isArray(data)) {
           card = data[globalIdx];
         }
@@ -1146,13 +1383,20 @@ async function randomSelectCurrent() {
 
    
 const data = CARD_DATA[currentSubId];
-  // group 타입 처리
   let allCards = [];
   if (data && data.groups) {
     data.groups.forEach((grp, gIdx) => {
-      grp.cards.forEach((card, cIdx) => {
-        allCards.push({ globalIdx: gIdx * 1000 + cIdx, ...card });
-      });
+      if (grp.subgroups) {
+        grp.subgroups.forEach((sg, sgIdx) => {
+          sg.cards.forEach((card, cIdx) => {
+            allCards.push({ globalIdx: gIdx * 1000000 + sgIdx * 1000 + cIdx, ...card });
+          });
+        });
+      } else if (grp.cards) {
+        grp.cards.forEach((card, cIdx) => {
+          allCards.push({ globalIdx: gIdx * 1000 + cIdx, ...card });
+        });
+      }
     });
   } else if (Array.isArray(data)) {
     allCards = data.map((card, idx) => ({ globalIdx: idx, ...card }));
@@ -1188,9 +1432,17 @@ subs.forEach(sub => {
   let allCards = [];
   if (data && data.groups) {
     data.groups.forEach((grp, gIdx) => {
-      grp.cards.forEach((card, cIdx) => {
-        allCards.push({ globalIdx: gIdx * 1000 + cIdx });
-      });
+      if (grp.subgroups) {
+        grp.subgroups.forEach((sg, sgIdx) => {
+          sg.cards.forEach((_, cIdx) => {
+            allCards.push({ globalIdx: gIdx * 1000000 + sgIdx * 1000 + cIdx });
+          });
+        });
+      } else if (grp.cards) {
+        grp.cards.forEach((_, cIdx) => {
+          allCards.push({ globalIdx: gIdx * 1000 + cIdx });
+        });
+      }
     });
   } else if (Array.isArray(data)) {
     allCards = data.map((_, idx) => ({ globalIdx: idx }));
@@ -1247,14 +1499,15 @@ let _lpStartX = 0;
 let _lpStartY = 0;
 const LONG_PRESS_MS = 480; // 꾹 누르는 시간 (ms)
 
-function startLongPress(el, type, subId, a, b) {
+function startLongPress(el, type, subId, a, b, c) {
   cancelLongPress();
   _lpStartX = event.touches ? event.touches[0].clientX : event.clientX;
   _lpStartY = event.touches ? event.touches[0].clientY : event.clientY;
 
   _lpTimer = setTimeout(() => {
     _lpTimer = null;
-    if (type === 'group') groupCardClick(subId, a, b);
+    if (type === 'subgroup') subgroupCardClick(subId, a, b, c);
+    else if (type === 'group') groupCardClick(subId, a, b);
     else cardClick(subId, a);
     openDetailSheet('card');
   }, LONG_PRESS_MS);
