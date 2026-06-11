@@ -1508,7 +1508,11 @@ subs.forEach(sub => {
 
 function setupGroupButtonActions(containerEl) {
   containerEl.querySelectorAll('.group-select-btn').forEach(btn => {
-      if (btn._groupActionAttached) return;
+     btn.addEventListener('animationend', () => {
+      btn.classList.add('group-appear-done');
+    }, { once: true });
+
+    if (btn._groupActionAttached) return;
     btn._groupActionAttached = true;
 
      btn.addEventListener('click', (e) => {
