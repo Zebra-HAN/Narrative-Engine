@@ -10,7 +10,7 @@ const CHARACTER_NAV = {
   subs: [
     { id:'archetype',   label:'원형', img:'images/Giant_Elf.png' },
     { id:'race',        label:'종족', icon:'🐉', type:'group'    },
-    { id:'job',         label:'직업', icon:'⚒',  type:'group'    },
+    { id:'job',         label:'직업', img:'images/golem.png',  type:'group'    },
     { id:'personality', label:'성격', icon:'💫'                   },
     { id:'attribute',   label:'속성', icon:'⚡'                   },
     { id:'ability',     label:'능력', icon:'✨'                   },
@@ -19,7 +19,11 @@ const CHARACTER_NAV = {
 };
 
 const CHARACTER_CARDS = {
-  archetype: [
+
+ /* ════════════════════════════════════════════════
+   캐릭터 - 원형 
+   ════════════════════════════════════════════════ */  
+   archetype: [
     { icon:'⚔', img:'images/Giant_Elf.png', name:'영웅임',
   desc:'시련을 통해 성장하고 세계를 구하는 존재. 결핍과 각성, 희생의 구조를 가진 서사의 중심축.',
   detail:'【서사 포지션】주인공 고정\n【핵심 갈등】내면의 결핍 vs 외부의 시련\n【변화 축】각성 → 희생 → 재탄생\n\n활용 팁: 결말부의 희생 장면에서 이 원형의 설득력이 가장 강해진다.' },
@@ -37,9 +41,13 @@ const CHARACTER_CARDS = {
     { icon:'🌙', name:'어둠의 자'    }, { icon:'☀',  name:'빛의 자'   },
   ],
 
+   
   // ── type:'group' 구조 ──
   // groups 배열 안에 그룹 하나씩 추가하면 돼
-  race: {
+ /* ════════════════════════════════════════════════
+   캐릭터 - 종족족 
+   ════════════════════════════════════════════════ */  
+  race: {  　 /* 카테고리 */
     groups: [
       {
         id: 'race_human',
@@ -75,7 +83,10 @@ const CHARACTER_CARDS = {
     ]
   },
 
-
+   
+ /* ════════════════════════════════════════════════
+   캐릭터 - 직업 
+   ════════════════════════════════════════════════ */  
      job: {
     groups: [
       {
@@ -111,7 +122,9 @@ const CHARACTER_CARDS = {
   },
 
    
-
+ /* ════════════════════════════════════════════════
+   캐릭터 - 성격
+   ════════════════════════════════════════════════ */  
   personality: [
     { icon:'🔥', name:'열정적'   }, { icon:'❄',  name:'냉정한'    }, { icon:'🌊', name:'유연한'   },
     { icon:'🪨', name:'완고한'   }, { icon:'🌟', name:'낙관적'     }, { icon:'🌑', name:'비관적'   },
@@ -122,16 +135,79 @@ const CHARACTER_CARDS = {
     { icon:'👤', name:'고독한'   }, { icon:'✨', name:'신비로운'    },
   ],
 
-  attribute: [
-    { icon:'🔥', name:'화염'     }, { icon:'❄',  name:'빙결'      }, { icon:'⚡', name:'번개'     },
-    { icon:'🌊', name:'물'       }, { icon:'🌿', name:'자연'       }, { icon:'💨', name:'바람'     },
-    { icon:'🪨', name:'대지'     }, { icon:'✨', name:'빛'         }, { icon:'🌑', name:'어둠'     },
-    { icon:'🌀', name:'공허'     }, { icon:'☠',  name:'독'        }, { icon:'⚙', name:'기계'     },
-    { icon:'🧿', name:'마법'     }, { icon:'💫', name:'성스러움'   }, { icon:'💀', name:'죽음'     },
-    { icon:'🌙', name:'달'       }, { icon:'☀',  name:'태양'      }, { icon:'🌌', name:'우주'     },
-    { icon:'🩸', name:'피'       }, { icon:'🎭', name:'환상'       },
-  ],
+   
+ /* ════════════════════════════════════════════════
+   캐릭터 - 속성
+   ════════════════════════════════════════════════ */  
 
+ attribute: {　 /* 속성  카테고리 */
+    groups: [
+      {
+        id: 'attribute_1',
+        label: '속성 1',　 /*그룹 이름*/
+        icon: '👤',
+        cards: [
+   { icon:'⚔', name:'검사'      }, { icon:'🏹', name:'궁수'       }, { icon:'🧙', name:'마법사'   },
+    { icon:'🛡', name:'기사'      }, { icon:'🗡', name:'암살자'      }, { icon:'🎵', name:'음유시인' },
+    { icon:'⚕', name:'치유사'    }, { icon:'🔧', name:'장인'        }, { icon:'📜', name:'학자'     },
+        ]
+      },
+      {
+        id: 'attribute_2',
+        label: '속성 2',
+        icon: '🐾',
+        cards: [
+    { icon:'🏴', name:'해적'      }, { icon:'🐾', name:'사냥꾼'      }, { icon:'💰', name:'상인'     },
+    { icon:'👑', name:'귀족'      }, { icon:'🌿', name:'드루이드'    }, { icon:'🎭', name:'배우'     },
+    { icon:'🔮', name:'점술사'    }, { icon:'🌑', name:'네크로맨서'  }, { icon:'🐉', name:'용기사'   },
+        ]
+      },
+      {
+        id: 'attribute_3',
+        label: '속성 3',
+        icon: '✨',
+        cards: [
+              { icon:'⚗', name:'연금술사'  },
+              { icon:'🕵', name:'첩보원'      },
+        ]
+      },
+   {
+        id: 'attribute_4',
+        label: '속성 4',
+        icon: '🐾',
+        cards: [
+    { icon:'🏴', name:'해적'      }, { icon:'🐾', name:'사냥꾼'      }, { icon:'💰', name:'상인'     },
+    { icon:'👑', name:'귀족'      }, { icon:'🌿', name:'드루이드'    }, { icon:'🎭', name:'배우'     },
+    { icon:'🔮', name:'점술사'    }, { icon:'🌑', name:'네크로맨서'  }, { icon:'🐉', name:'용기사'   },
+        ]
+      },
+      {
+        id: 'attribute_5',
+        label: '속성 5',
+        icon: '✨',
+        cards: [
+              { icon:'⚗', name:'연금술사'  },
+              { icon:'🕵', name:'첩보원'      },
+        ]
+      },
+   {
+        id: 'attribute_6',
+        label: '속성 6',
+        icon: '🐾',
+        cards: [
+    { icon:'🏴', name:'해적'      }, { icon:'🐾', name:'사냥꾼'      }, { icon:'💰', name:'상인'     },
+    { icon:'👑', name:'귀족'      }, { icon:'🌿', name:'드루이드'    }, { icon:'🎭', name:'배우'     },
+    { icon:'🔮', name:'점술사'    }, { icon:'🌑', name:'네크로맨서'  }, { icon:'🐉', name:'용기사'   },
+        ]
+      },
+    ]
+  },
+
+
+
+ /* ════════════════════════════════════════════════
+   캐릭터 - 능력
+   ════════════════════════════════════════════════ */  
   ability: [
     { icon:'🔮', name:'예지'     }, { icon:'🌀', name:'공간이동'   }, { icon:'⏳', name:'시간조작' },
     { icon:'🔗', name:'결박'     }, { icon:'🌊', name:'소환'       }, { icon:'💥', name:'폭발'     },
@@ -142,6 +218,10 @@ const CHARACTER_CARDS = {
     { icon:'⚔', name:'검기'     }, { icon:'🌌', name:'절대영역'    },
   ],
 
+   
+ /* ════════════════════════════════════════════════
+   캐릭터 - 관계
+   ════════════════════════════════════════════════ */  
   relation: [
     { icon:'👥', name:'동료'         }, { icon:'❤',  name:'연인'           }, { icon:'🤝', name:'동맹'         },
     { icon:'⚔', name:'라이벌'       }, { icon:'🐍', name:'배신자'          }, { icon:'🛡', name:'보호자'       },
