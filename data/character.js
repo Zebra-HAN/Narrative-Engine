@@ -184,7 +184,7 @@ const CHARACTER_CARDS = {
    {
         id: 'attribute_6',
         label: '속성 6',
-        icon: '🐾',
+        icon: '🐾',  img:'images/Peep.png',
         cards: [
     { icon:'🏴', name:'해적'      }, { icon:'🐾', name:'사냥꾼'      }, { icon:'💰', name:'상인'     },
     { icon:'👑', name:'귀족'      }, { icon:'🌿', name:'드루이드'    }, { icon:'🎭', name:'배우'     },
