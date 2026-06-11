@@ -1521,13 +1521,28 @@
 /* ── 그룹 선택 화면 ── */
 .group-select-wrap {
   display: flex;
-  flex-direction: column;   /* 세로로 나열 */
+  flex-direction: column;   /* 3~5개 기본: 세로로 나열 */
   gap: 12px;
   padding: 20px 16px;
 }
 
+.group-layout-two {
+  min-height: calc(100% - 40px);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+}
+
+.group-layout-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+  gap: 12px;
+}
+
 .group-select-btn {
   width: 100%;
+  min-height: 0;
   padding: 18px 20px;
   display: flex;
   align-items: center;
@@ -1545,8 +1560,29 @@
   animation: groupBtnAppear 0.35s ease forwards;
 }
 
+.group-layout-two .group-select-btn {
+  height: 100%;
+  min-height: 220px;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  gap: 18px;
+}
+
+.group-layout-grid .group-select-btn {
+  aspect-ratio: 1 / 1;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  padding: 12px 8px;
+  gap: 10px;
+}
+
 .group-btn-icon { font-size: 1.4rem; }
+.group-layout-two .group-btn-icon { font-size: 2rem; }
+.group-layout-grid .group-btn-icon { font-size: 1.55rem; }
 .group-btn-label { font-size: 0.9rem; color: var(--ivory); letter-spacing: 0.05em; }
+.group-layout-grid .group-btn-label { font-size: 0.78rem; line-height: 1.25; }
 
 @keyframes groupBtnAppear {
   from { opacity: 0; transform: translateY(12px); }
