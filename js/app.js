@@ -1511,6 +1511,8 @@ function setupGroupButtonActions(containerEl) {
       if (btn._groupActionAttached) return;
     btn._groupActionAttached = true;
 
+     btn.addEventListener('click', (e) => {
+      e.preventDefault();
     runGroupButtonAction(btn);
     });
   });
