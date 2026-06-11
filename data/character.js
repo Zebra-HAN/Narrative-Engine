@@ -10,7 +10,7 @@ const CHARACTER_NAV = {
   subs: [
     { id:'archetype',   label:'원형', img:'images/Giant_Elf.png' },
     { id:'race',        label:'종족', icon:'🐉', type:'group'    },
-    { id:'job',         label:'직업', icon:'⚒'                   },
+    { id:'job',         label:'직업', icon:'⚒',  type:'group'    },
     { id:'personality', label:'성격', icon:'💫'                   },
     { id:'attribute',   label:'속성', icon:'⚡'                   },
     { id:'ability',     label:'능력', icon:'✨'                   },
