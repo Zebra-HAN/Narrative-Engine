@@ -1274,6 +1274,16 @@
       transform: scale(0.94);
     }
 
+    /*
+      그룹 버튼은 등장 애니메이션도 transform을 사용한다.
+      CSS animation의 transform이 공통 .pressable transform보다 우선되어
+      눌림 스케일이 묻히지 않도록 그룹 버튼에만 명시적으로 덮어쓴다.
+    */
+    .group-select-btn.pressable:active,
+    .group-select-btn.pressable.is-pressing {
+      transform: scale(0.94) !important;
+    }
+
     /* 서브메뉴 페이드인 */
     @keyframes subnavReveal {
       0%   { opacity: 0; transform: scale(0.65) rotate(45deg); }
@@ -1600,6 +1610,10 @@
   transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 
+.group-select-btn.group-appear-done {
+  opacity: 1;
+  animation: none;
+}
 
 .group-layout-two .group-select-btn {
   height: 100%;
