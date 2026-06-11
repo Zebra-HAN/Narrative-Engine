@@ -9,7 +9,7 @@ const CHARACTER_NAV = {
   resetLabel: '캐릭터 초기화',
   subs: [
     { id:'archetype',   label:'원형', img:'images/Giant_Elf.png' },
-    { id:'race',        label:'종족', icon:'🐉', type:'group'    },
+    { id:'race',        label:'종족', icon:'🐉', type:'subgroup'    },
     { id:'job',         label:'직업', img:'images/golem.png',  type:'group'    },
     { id:'personality', label:'성격', icon:'💫'                   },
     { id:'attribute',   label:'속성', icon:'⚡'  ,type:'group'  },
