@@ -1502,25 +1502,48 @@ subs.forEach(sub => {
 
 /* ════════════════════════════════════════════════
    그룹/서브그룹 버튼 눌림 효과
-   ─ 다른 버튼들(pressable)과 동일한 방식으로 통일
-   ─ 튕김(popping) 제거, 즉시 액션 실행
+   ─ 동적으로 생성되는 그룹 버튼도 실제 페이지 전환 전에
+     눌림 → 튀어오름 애니메이션을 끝까지 보여준다.
 ════════════════════════════════════════════════ */
+const GROUP_PRESS_DOWN_MS = 70;
+const GROUP_PRESS_TOTAL_MS = 210;
+
 function setupGroupButtonPress(containerEl) {
   containerEl.querySelectorAll('.group-select-btn').forEach(btn => {
-    if (btn._groupPressAttached) return;
+     if (btn._groupPressAttached) return;
     btn._groupPressAttached = true;
 
-    // 등장 애니메이션 종료 후 group-deal 클래스 정리
     btn.addEventListener('animationend', () => {
       btn.classList.remove('group-deal');
     }, { once: true });
 
-    // 클릭 → 즉시 액션 (딜레이 없음, 다른 버튼과 동일)
-    btn.addEventListener('click', () => {
+    btn.addEventListener('pointerdown', () => {
+      btn.classList.remove('group-deal', 'is-popping');
+      btn.classList.add('is-pressing');
+    });
+
+    ['pointercancel', 'pointerleave'].forEach(eventName => {
+      btn.addEventListener(eventName, () => {
+        btn.classList.remove('is-pressing');
+      });
+    });
+
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
       if (btn.dataset.pressLocked === 'true') return;
       btn.dataset.pressLocked = 'true';
-      setTimeout(() => { btn.dataset.pressLocked = 'false'; }, 400);
-      runGroupButtonAction(btn);
+
+    btn.classList.remove('group-deal', 'is-popping');
+      btn.classList.add('is-pressing');
+
+    window.setTimeout(() => {
+        btn.classList.remove('is-pressing');
+        btn.classList.add('is-popping');
+      }, GROUP_PRESS_DOWN_MS);
+
+      window.setTimeout(() => {
+        runGroupButtonAction(btn);
+      }, GROUP_PRESS_TOTAL_MS);
     });
   });
 }
