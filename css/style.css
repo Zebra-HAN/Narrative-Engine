@@ -1084,10 +1084,10 @@
       width: 100%;
     }
 
-    /* 칩 내부 이미지 — 원본 비율 유지, 작게 */
+    /* 아이디어통합 칩 내부 이미지 — 원본 비율 유지, 작게 */
     .status-chip-img {
       flex-shrink: 0;
-      width: 32px;
+      width: 40px;
       height: auto;
       max-height: 44px;
       object-fit: contain;
