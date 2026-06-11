@@ -272,7 +272,7 @@ const grpCount = grp.cards.reduce((sum, _, cIdx) => {
         ${delay}
         onclick="showGroupCards('${subId}', ${i})"
       >
-        <span class="group-btn-icon">${grp.icon}</span>
+        <span class="group-btn-icon">${renderIcon(grp.icon, grp.img, 'group-btn-img')}</span>
         <span class="group-btn-label">${grp.label}</span>
         ${grpCount > 0 ? `<div class="group-badge">${grpCount}</div>` : ''}
       </button>
@@ -315,7 +315,7 @@ function showGroupCards(subId, groupIdx) {
   // 카드 idx = groupIdx * 1000 + cardIdx (그룹 구분용 오프셋)
   const offset = groupIdx * 1000;
 
-  let html = `<div class="section-label">${grp.icon} ${grp.label}</div>`;
+  let html = `<div class="section-label">${formatLabel(grp.label, grp.icon)}</div>`;
   html += '<div class="card-grid">';
   grp.cards.forEach((card, idx) => {
     const globalIdx = offset + idx;
@@ -921,7 +921,7 @@ function renderStatusContent() {
             <div class="status-chip">
               ${chipImgHtml}
               <div class="status-chip-text">
-                <span class="status-chip-name">${card.icon} ${card.name}</span>
+                <span class="status-chip-name">${formatLabel(card.name, card.icon)}</span>
                 ${chipDescHtml}
               </div>
             </div>
@@ -1098,6 +1098,10 @@ function renderIcon(icon, img, className) {
     return `<img src="${img}" class="${className}" alt="">`;
   }
   return icon || '';
+}
+
+function formatLabel(label, icon) {
+  return [icon, label].filter(value => value !== undefined && value !== null && value !== '').join(' ');
 }
 
 /* ════════════════════════════════════════════════
