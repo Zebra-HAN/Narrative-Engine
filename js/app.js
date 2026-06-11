@@ -911,7 +911,22 @@ function renderStatusContent() {
               detailHtml = `<div class="status-chip-details">${picked.map(l => `<span class="status-chip-detail-line">· ${l}</span>`).join('')}</div>`;
             }
           }
-          itemsHtml += `<div class="status-chip-wrap"><span class="status-chip">${card.icon} ${card.name}</span>${detailHtml}</div>`;
+          const chipImgHtml = card.img
+            ? `<img class="status-chip-img" src="${card.img}" alt="" draggable="false">`
+            : '';
+          const chipDescHtml = card.desc
+            ? `<span class="status-chip-desc">${card.desc}</span>`
+            : '';
+          itemsHtml += `<div class="status-chip-wrap">
+            <div class="status-chip">
+              ${chipImgHtml}
+              <div class="status-chip-text">
+                <span class="status-chip-name">${card.icon} ${card.name}</span>
+                ${chipDescHtml}
+              </div>
+            </div>
+            ${detailHtml}
+          </div>`;
         }
       });
 
