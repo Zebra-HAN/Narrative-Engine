@@ -1304,7 +1304,7 @@
   align-items: center;
   justify-content: center;
   pointer-events: none;
-  z-index: 2;
+  z-index: 10;  /* 이미지 레이어(z-index:0) 보다 확실히 위 */
   box-shadow: 0 0 6px rgba(100,190,240,0.4);
 }
 
@@ -1563,7 +1563,9 @@
   box-shadow: 0 2px 10px rgba(180,130,50,0.10);
   opacity: 0;
   animation: groupBtnAppear 0.35s ease forwards;
-  overflow: hidden;  /* 이미지가 버튼 모서리 밖으로 안 나가도록 */
+  /* overflow: hidden 제거 — 배지가 버튼 밖으로 나와야 하기 때문
+     이미지 모서리 클리핑은 .group-btn-icon:has(.group-btn-img) 에서 처리 */
+  overflow: visible;
   position: relative;
 }
 
@@ -1574,7 +1576,7 @@
   justify-content: center;
   text-align: center;
   gap: 18px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .group-layout-grid .group-select-btn {
@@ -1584,7 +1586,7 @@
   text-align: center;
   padding: 12px 8px;
   gap: 10px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* ── group-btn-icon: 이모지 아이콘 OR 이미지 배경 레이어 ──────
@@ -1847,8 +1849,6 @@
   flex-direction: column;
   gap: 5px;
 }
-
-
 
 
 /* PC에서도 모바일처럼 좁게 표시 */
