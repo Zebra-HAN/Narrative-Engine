@@ -292,16 +292,14 @@ function showGroupPage(subId, animate = true) {
       });
     }
 
-    // subgroups 있으면 showSubgroupPage 호출, 없으면 바로 카드 목록
-    const clickFn = grp.subgroups
-      ? `showSubgroupPage('${subId}', ${i})`
-      : `showGroupCards('${subId}', ${i})`;
-
-    html += `
+   html += `
       <button
+      type="button"
         class="group-select-btn pressable group-deal"
         ${delay}
-        onclick="${clickFn}"
+        data-group-action="${grp.subgroups ? 'subgroups' : 'cards'}"
+        data-sub-id="${subId}"
+        data-group-idx="${i}"
       >
         <span class="group-btn-icon">${renderIcon(grp.icon, grp.img, 'group-btn-img')}</span>
         <span class="group-btn-label">${grp.label}</span>
@@ -314,9 +312,7 @@ function showGroupPage(subId, animate = true) {
   page.innerHTML = html;
   area.appendChild(page);
 
-  page.querySelectorAll('.group-deal').forEach(btn => {
-    btn.addEventListener('animationend', () => btn.classList.remove('group-deal'), { once: true });
-  });
+ setupGroupButtonPress(page);
 }
 
 /* ════════════════════════════════════════════════
@@ -352,9 +348,13 @@ function showSubgroupPage(subId, groupIdx) {
      
     html += `
       <button
+      type="button"
         class="group-select-btn pressable group-deal"
         ${delay}
-        onclick="showSubgroupCards('${subId}', ${groupIdx}, ${sgIdx})"
+        data-group-action="subgroup-cards"
+        data-sub-id="${subId}"
+        data-group-idx="${groupIdx}"
+        data-subgroup-idx="${sgIdx}"
       >
         <span class="group-btn-icon">${renderIcon(sg.icon, sg.img, 'group-btn-img')}</span>
         <span class="group-btn-label">${sg.label}</span>
@@ -367,9 +367,7 @@ function showSubgroupPage(subId, groupIdx) {
   page.innerHTML = html;
   area.appendChild(page);
 
-  page.querySelectorAll('.group-deal').forEach(btn => {
-    btn.addEventListener('animationend', () => btn.classList.remove('group-deal'), { once: true });
-  });
+  setupGroupButtonPress(page);
 }
 
 /* ════════════════════════════════════════════════
@@ -1503,39 +1501,71 @@ subs.forEach(sub => {
 })();
 
 /* ════════════════════════════════════════════════
-   그룹 버튼 눌림 효과 — 동적 생성 버튼 전용
-   innerHTML로 생성된 .group-select-btn 에
-   직접 touch/mouse 이벤트를 붙여 scale 애니메이션 적용
+   그룹/서브그룹 버튼 눌림 효과
+   ─ 동적으로 생성되는 그룹 버튼도 실제 페이지 전환 전에
+     눌림 → 튀어오름 애니메이션을 끝까지 보여준다.
 ════════════════════════════════════════════════ */
-function attachGroupBtnPress(containerEl) {
+const GROUP_PRESS_DOWN_MS = 70;
+const GROUP_PRESS_TOTAL_MS = 210;
+
+function setupGroupButtonPress(containerEl) {
   containerEl.querySelectorAll('.group-select-btn').forEach(btn => {
-    // 중복 방지
-    if (btn._pressAttached) return;
-    btn._pressAttached = true;
+     if (btn._groupPressAttached) return;
+    btn._groupPressAttached = true;
 
-    function press() {
-      btn.style.transition = 'transform 0.10s ease, box-shadow 0.10s ease';
-      btn.style.transform  = 'scale(0.95)';
-      btn.style.boxShadow  = '0 1px 4px rgba(0,0,0,0.08)';
-    }
-    function release() {
-      btn.style.transform  = 'scale(1)';
-      btn.style.boxShadow  = '';
-      // 튀어오르는 느낌의 spring 커브
-      btn.style.transition = 'transform 0.18s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.18s ease';
-      setTimeout(() => { btn.style.transition = ''; }, 200);
-    }
+    btn.addEventListener('animationend', () => {
+      btn.classList.remove('group-deal');
+    }, { once: true });
 
-    btn.addEventListener('touchstart',  press,   { passive: true });
-    btn.addEventListener('touchend',    release, { passive: true });
-    btn.addEventListener('touchcancel', release, { passive: true });
+    btn.addEventListener('pointerdown', () => {
+      btn.classList.remove('group-deal', 'is-popping');
+      btn.classList.add('is-pressing');
+    });
 
-    // PC 마우스 지원
-    btn.addEventListener('mousedown', press);
-    btn.addEventListener('mouseup',   release);
-    btn.addEventListener('mouseleave',release);
+    ['pointercancel', 'pointerleave'].forEach(eventName => {
+      btn.addEventListener(eventName, () => {
+        btn.classList.remove('is-pressing');
+      });
+    });
+
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (btn.dataset.pressLocked === 'true') return;
+      btn.dataset.pressLocked = 'true';
+
+    btn.classList.remove('group-deal', 'is-popping');
+      btn.classList.add('is-pressing');
+
+    window.setTimeout(() => {
+        btn.classList.remove('is-pressing');
+        btn.classList.add('is-popping');
+      }, GROUP_PRESS_DOWN_MS);
+
+      window.setTimeout(() => {
+        runGroupButtonAction(btn);
+      }, GROUP_PRESS_TOTAL_MS);
+    });
   });
 }
+
+function runGroupButtonAction(btn) {
+  const subId = btn.dataset.subId;
+  const groupIdx = Number(btn.dataset.groupIdx);
+  const subgroupIdx = Number(btn.dataset.subgroupIdx);
+
+  if (btn.dataset.groupAction === 'subgroups') {
+    showSubgroupPage(subId, groupIdx);
+    return;
+  }
+
+  if (btn.dataset.groupAction === 'subgroup-cards') {
+    showSubgroupCards(subId, groupIdx, subgroupIdx);
+    return;
+  }
+
+  showGroupCards(subId, groupIdx);
+}
+
 
 
 /* ════════════════════════════════════════════════
