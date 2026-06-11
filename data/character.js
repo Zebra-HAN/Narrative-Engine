@@ -47,7 +47,8 @@ const CHARACTER_CARDS = {
  /* ════════════════════════════════════════════════
    캐릭터 - 종족
    ════════════════════════════════════════════════ */  
-  race: {    /* 종족 카테고리 명 */
+
+  race: {    
     groups: [
       // 1. 인간 계열
       {
@@ -59,8 +60,8 @@ const CHARACTER_CARDS = {
           {
             id: 'human_1', label: '1번', icon: '❶',
             cards: [
-              { icon: '👦', name: '소년' },{ icon: '👧', name: '소녀2' },{ icon: '👧', name: '소녀3' },
-              { icon: '👧', name: '소녀4' },{ icon: '👧', name: '소녀5' },
+              { icon: '👦', name: '소년' },
+              { icon: '👧', name: '소녀' },
               { icon: '👨', name: '청년' }
             ]
           },
@@ -76,7 +77,7 @@ const CHARACTER_CARDS = {
             id: 'human_3', label: '3번', icon: '❸',
             cards: [
               { icon: '🧑‍🌾', name: '농부' },
-              { icon: '🧑‍카', name: '상인' },
+              { icon: '💰', name: '상인' }, // 💡 깨진 이모지 수정 완료!
               { icon: '👑', name: '국왕' }
             ]
           },
@@ -181,7 +182,7 @@ const CHARACTER_CARDS = {
         ]
       }
     ]
-  },
+  }, // 💡 다음 카테고리가 있다면 이 쉼표가 꼭 필요해!
 
    
  /* ════════════════════════════════════════════════
