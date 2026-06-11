@@ -247,6 +247,13 @@ function showDefaultCenter() {
 
 
 
+
+function getGroupLayoutClass(count) {
+  if (count === 2) return 'group-layout-two';
+  if (count >= 6) return 'group-layout-grid';
+  return 'group-layout-list';
+}
+
 /* ════════════════════════════════════════════════
    그룹 선택 화면 렌더
    ─ type:'group' 인 카테고리를 클릭했을 때 열리는 화면
@@ -265,7 +272,8 @@ function showGroupPage(subId, animate = true) {
   page.className = 'center-page active';
   page.id = 'page-' + subId;
 
-  let html = '<div class="group-select-wrap">';
+  const groupLayoutClass = getGroupLayoutClass(data.groups.length);
+  let html = `<div class="group-select-wrap ${groupLayoutClass}">`;
   data.groups.forEach((grp, i) => {
     const delay = animate ? `style="animation-delay:${i * 0.08}s"` : '';
 
@@ -329,8 +337,9 @@ function showSubgroupPage(subId, groupIdx) {
   page.className = 'center-page active';
   page.id = 'page-' + subId + '_sg_' + grp.id;
 
+   const subgroupLayoutClass = getGroupLayoutClass(grp.subgroups.length);
   let html = `<div class="section-label">${formatLabel(grp.label, grp.icon)}</div>`;
-  html += '<div class="group-select-wrap">';
+  html += `<div class="group-select-wrap ${subgroupLayoutClass}">`;
 
   grp.subgroups.forEach((sg, sgIdx) => {
     // 서브그룹 배지: globalIdx = groupIdx * 1000000 + sgIdx * 1000 + cIdx
@@ -339,9 +348,12 @@ function showSubgroupPage(subId, groupIdx) {
       if (selectedCards[subId]?.has(groupIdx * 1000000 + sgIdx * 1000 + cIdx)) sgCount++;
     });
 
+     const delay = `style="animation-delay:${sgIdx * 0.08}s"`;
+     
     html += `
       <button
         class="group-select-btn pressable group-deal"
+        ${delay}
         onclick="showSubgroupCards('${subId}', ${groupIdx}, ${sgIdx})"
       >
         <span class="group-btn-icon">${renderIcon(sg.icon, sg.img, 'group-btn-img')}</span>
