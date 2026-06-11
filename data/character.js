@@ -52,7 +52,7 @@ const CHARACTER_CARDS = {
       {
         id: 'race_human',
         label: '인간',
-        icon: '👤',
+        icon: '👤',  img:'images/golem.png', 
         cards: [
           { icon:'👦', name:'소년'  },
           { icon:'👧', name:'소녀'  },
