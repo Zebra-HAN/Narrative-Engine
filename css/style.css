@@ -1542,7 +1542,11 @@
 
 .group-select-btn {
   width: 100%;
-  min-height: 0;
+  /* ┌─────────────────────────────────────────────────┐
+     │  ▶ 3~5개 버튼 세로 두께 조절 → min-height 값 수정  │
+     │    현재: 116px  /  기본 패딩도 같이 조절 가능      │
+     └─────────────────────────────────────────────────┘ */
+  min-height: 116px;
   padding: 18px 20px;
   display: flex;
   align-items: center;
@@ -1558,6 +1562,8 @@
   box-shadow: 0 2px 10px rgba(180,130,50,0.10);
   opacity: 0;
   animation: groupBtnAppear 0.35s ease forwards;
+  overflow: hidden; /* 이미지가 버튼 밖으로 튀어나오지 않도록 */
+  position: relative;
 }
 
 .group-layout-two .group-select-btn {
@@ -1567,6 +1573,7 @@
   justify-content: center;
   text-align: center;
   gap: 18px;
+  overflow: hidden;
 }
 
 .group-layout-grid .group-select-btn {
@@ -1576,6 +1583,51 @@
   text-align: center;
   padding: 12px 8px;
   gap: 10px;
+  overflow: hidden;
+}
+
+/* ── 그룹 버튼 전용 이미지 ──────────────────────────────────
+   이미지가 버튼 내부에 꽉 차도록 → object-fit: cover
+   버튼 크기는 이미지와 무관하게 고정됨
+
+   ▶ 세로 나열(3~5개) 이미지 크기 조절 → width / height 수정
+   ▶ 2분할 / 그리드는 아래 각 레이아웃별 클래스에서 따로 조절 가능
+   ──────────────────────────────────────────────────────── */
+.group-btn-img {
+  /* ┌─────────────────────────────────────────────────────┐
+     │  ▶ 3~5개 버튼 이미지 크기 조절 → width / height 수정  │
+     │    현재: 80px × 80px                                 │
+     └─────────────────────────────────────────────────────┘ */
+  width: 80px;
+  height: 80px;
+  object-fit: cover;       /* 이미지가 틀 안에 꽉 참, 잘림 허용 */
+  border-radius: 8px;
+  flex-shrink: 0;           /* 버튼 크기 변해도 이미지 크기 고정 */
+  display: block;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+/* 2분할(좌우) 레이아웃 이미지 */
+.group-layout-two .group-btn-img {
+  /* ┌──────────────────────────────────────────────────┐
+     │  ▶ 2분할 버튼 이미지 크기 → width / height 수정   │
+     │    현재: 100% × 140px  (버튼 가로폭 꽉 채움)       │
+     └──────────────────────────────────────────────────┘ */
+  width: 100%;
+  height: 140px;
+  border-radius: 8px 8px 0 0;
+}
+
+/* 3×3 그리드 레이아웃 이미지 */
+.group-layout-grid .group-btn-img {
+  /* ┌──────────────────────────────────────────────────┐
+     │  ▶ 그리드 버튼 이미지 크기 → width / height 수정  │
+     │    현재: 100% × 60%  (버튼 안에 꽉 채움)           │
+     └──────────────────────────────────────────────────┘ */
+  width: 100%;
+  height: 60%;
+  border-radius: 6px;
 }
 
 .group-btn-icon { font-size: 1.4rem; }
