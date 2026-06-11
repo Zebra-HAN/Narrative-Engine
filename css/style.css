@@ -1524,6 +1524,7 @@
   flex-direction: column;   /* 3~5개 기본: 세로로 나열 */
   gap: 12px;
   padding: 20px 16px;
+  overflow: visible;        /* 배지가 버튼 바깥으로 튀어나올 수 있도록 */
 }
 
 .group-layout-two {
@@ -1562,7 +1563,7 @@
   box-shadow: 0 2px 10px rgba(180,130,50,0.10);
   opacity: 0;
   animation: groupBtnAppear 0.35s ease forwards;
-  overflow: hidden; /* 이미지가 버튼 밖으로 튀어나오지 않도록 */
+  overflow: hidden;  /* 이미지가 버튼 모서리 밖으로 안 나가도록 */
   position: relative;
 }
 
@@ -1586,53 +1587,61 @@
   overflow: hidden;
 }
 
-/* ── 그룹 버튼 전용 이미지 ──────────────────────────────────
-   이미지가 버튼 내부에 꽉 차도록 → object-fit: cover
-   버튼 크기는 이미지와 무관하게 고정됨
+/* ── group-btn-icon: 이모지 아이콘 OR 이미지 배경 레이어 ──────
+   이미지 없을 때 → 이모지를 버튼 왼쪽에 표시 (기본 flex 흐름)
+   이미지 있을 때 → 버튼 전체를 덮는 absolute 배경으로 전환됨
+     (JS 에서 img 가 있으면 group-btn-icon 이 absolute 레이어가 됨,
+      CSS 만으로도 img 가 있을 때 자동으로 꽉 채워지도록 아래 처리)
+   ─────────────────────────────────────────────────────────── */
+.group-btn-icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* 이모지 전용 기본 크기 (이미지 없을 때) */
+  width: 2.2rem;
+  height: 2.2rem;
+}
 
-   ▶ 세로 나열(3~5개) 이미지 크기 조절 → width / height 수정
-   ▶ 2분할 / 그리드는 아래 각 레이아웃별 클래스에서 따로 조절 가능
-   ──────────────────────────────────────────────────────── */
+/* 이미지가 들어왔을 때:
+   span 이 버튼 전체를 덮는 absolute 레이어가 되도록 */
+.group-btn-icon:has(.group-btn-img) {
+  position: absolute;
+  inset: 0;           /* 버튼 전체 꽉 채움 */
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  overflow: hidden;
+  z-index: 0;         /* 배지(z-index:2) 보다 아래에 깔림 */
+}
+
+.group-layout-two .group-btn-icon { font-size: 2rem; }
+.group-layout-grid .group-btn-icon { font-size: 1.55rem; }
+
+/* ── group-btn-img: span 안의 img → 버튼 전체를 꽉 채움 ── */
 .group-btn-img {
-  /* ┌─────────────────────────────────────────────────────┐
-     │  ▶ 3~5개 버튼 이미지 크기 조절 → width / height 수정  │
-     │    현재: 80px × 80px                                 │
-     └─────────────────────────────────────────────────────┘ */
-  width: 80px;
-  height: 80px;
-  object-fit: cover;       /* 이미지가 틀 안에 꽉 참, 잘림 허용 */
-  border-radius: 8px;
-  flex-shrink: 0;           /* 버튼 크기 변해도 이미지 크기 고정 */
+  width: 100%;
+  height: 100%;
+  object-fit: cover;       /* 비율 유지하며 꽉 채움, 넘치는 부분 잘림 */
   display: block;
   pointer-events: none;
   -webkit-user-drag: none;
 }
 
-/* 2분할(좌우) 레이아웃 이미지 */
-.group-layout-two .group-btn-img {
-  /* ┌──────────────────────────────────────────────────┐
-     │  ▶ 2분할 버튼 이미지 크기 → width / height 수정   │
-     │    현재: 100% × 140px  (버튼 가로폭 꽉 채움)       │
-     └──────────────────────────────────────────────────┘ */
-  width: 100%;
-  height: 140px;
-  border-radius: 8px 8px 0 0;
+/* 이미지 있을 때 텍스트 라벨은 이미지 위에 오버레이 */
+.group-btn-icon:has(.group-btn-img) ~ .group-btn-label {
+  position: relative;
+  z-index: 1;
+  /* 라벨이 이미지 위에서 잘 보이도록 */
+  color: #ffffff;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.7), 0 0 12px rgba(0,0,0,0.5);
+  font-weight: 700;
+  background: rgba(0,0,0,0.18);
+  border-radius: 4px;
+  padding: 2px 6px;
 }
 
-/* 3×3 그리드 레이아웃 이미지 */
-.group-layout-grid .group-btn-img {
-  /* ┌──────────────────────────────────────────────────┐
-     │  ▶ 그리드 버튼 이미지 크기 → width / height 수정  │
-     │    현재: 100% × 60%  (버튼 안에 꽉 채움)           │
-     └──────────────────────────────────────────────────┘ */
-  width: 100%;
-  height: 60%;
-  border-radius: 6px;
-}
-
-.group-btn-icon { font-size: 1.4rem; }
-.group-layout-two .group-btn-icon { font-size: 2rem; }
-.group-layout-grid .group-btn-icon { font-size: 1.55rem; }
 .group-btn-label { font-size: 0.9rem; color: var(--ivory); letter-spacing: 0.05em; }
 .group-layout-grid .group-btn-label { font-size: 0.78rem; line-height: 1.25; }
 
