@@ -1607,10 +1607,7 @@
 transition: transform 0.08s ease, box-shadow 0.08s ease;
 }
 
-.group-select-btn.is-popping {
-  opacity: 1;
-  animation: groupBtnPop 0.14s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-}
+/* is-popping 제거 — 다른 버튼과 동일한 눌림 효과로 통일 */
 
 .group-layout-two .group-select-btn {
   height: 100%;
@@ -1695,11 +1692,7 @@ transition: transform 0.08s ease, box-shadow 0.08s ease;
   to   { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes groupBtnPop {
-  0%   { opacity: 1; transform: scale(0.94); }
-  70%  { opacity: 1; transform: scale(1.045); }
-  100% { opacity: 1; transform: scale(1); }
-}
+/* groupBtnPop 제거 — 다른 버튼과 동일하게 통일 */
 
 /* ── info-slider-track: classList 방식 제거 → transform 방식 ── */
 .info-slider-track {
