@@ -787,13 +787,13 @@
 .detail-sheet {
   position: relative;
        
-  /* 1. 너비를 화면에 꽉 차게 수정 */
-  width: 95vw;          /* 원래 코드: width: min(80%, 600px); */
-  max-width: 1200px;    /* PC 화면에서 너무 옆으로 퍼지는 걸 막기 위한 안전장치 (원하는 대로 조절 가능) */
+  /* 1. 상세 정보창 너비를 화면에 꽉 차게 수정 */
+  width: 90vw;          /* 원래 코드: width: min(80%, 600px); */
+  max-width: 600px;    /* PC넓이 안전장치 */
   
   /* 2. 높이를 화면에 꽉 차게 수정 */
-  height: 95vh;         /* 원래 코드: height: 80vh; */
-  max-height: 95vh;     /* 원래 코드 총3줄 : max-height: 80vh;  */
+  height: 85vh;         /* 원래 코드: height: 80vh; */
+  max-height: 85vh;     /* 원래 코드 총3줄 : max-height: 80vh;  */
        
   background: linear-gradient(170deg, #ffffff 0%, #f7fbf9 50%, #f2f8f5 100%);
   backdrop-filter: blur(1px);
