@@ -47,41 +47,141 @@ const CHARACTER_CARDS = {
  /* ════════════════════════════════════════════════
    캐릭터 - 종족
    ════════════════════════════════════════════════ */  
-  race: {  　 /* 카테고리 */
+  race: {    /* 종족 카테고리 명 */
     groups: [
+      // 1. 인간 계열
       {
         id: 'race_human',
-        label: '인간',
-        icon: '👤',  img:'images/golem.png', 
-        cards: [
-          { icon:'👦', name:'소년'  },
-          { icon:'👧', name:'소녀'  },
-          { icon:'👨', name:'청년'  },
-          { icon:'🤖', name:'AI'    },
+        label: '인간 계열',
+        icon: '👤',
+        img: 'images/golem.png', 
+        subgroups: [
+          {
+            id: 'human_1', label: '1번', icon: '❶',
+            cards: [
+              { icon: '👦', name: '소년' },{ icon: '👧', name: '소녀2' },{ icon: '👧', name: '소녀3' },
+              { icon: '👧', name: '소녀4' },{ icon: '👧', name: '소녀5' },
+              { icon: '👨', name: '청년' }
+            ]
+          },
+          {
+            id: 'human_2', label: '2번', icon: '❷',
+            cards: [
+              { icon: '🥷', name: '닌자' },
+              { icon: '🧙', name: '마법사' },
+              { icon: '🛡️', name: '기사' }
+            ]
+          },
+          {
+            id: 'human_3', label: '3번', icon: '❸',
+            cards: [
+              { icon: '🧑‍🌾', name: '농부' },
+              { icon: '🧑‍카', name: '상인' },
+              { icon: '👑', name: '국왕' }
+            ]
+          },
+          {
+            id: 'human_4', label: '4번', icon: '❹',
+            cards: [
+              { icon: '🤖', name: 'AI' },
+              { icon: '🦹', name: '악당' },
+              { icon: '🕵️', name: '탐정' }
+            ]
+          }
         ]
       },
+
+      // 2. 의인화 계열
       {
-        id: 'race_animal',
-        label: '의인화',
+        id: 'race_anthropomorphism',
+        label: '의인화 계열',
         icon: '🐾',
-        cards: [
-          { icon:'🐺', name:'늑대인간'   },
-          { icon:'🦊', name:'여우인간'   },
-          { icon:'🐱', name:'고양이인간' },
+        subgroups: [
+          {
+            id: 'anthro_animal', label: '동물', icon: '🐺',
+            cards: [
+              { icon: '🐺', name: '늑대인간' },
+              { icon: '🦊', name: '여우인간' },
+              { icon: '🐱', name: '고양이인간' }
+            ]
+          },
+          {
+            id: 'anthro_marine', label: '바다 생물', icon: '🐬',
+            cards: [
+              { icon: '🧜‍♀️', name: '인어' },
+              { icon: '🦈', name: '상어인간' },
+              { icon: '🐙', name: '문어인간' }
+            ]
+          },
+          {
+            id: 'anthro_insect', label: '곤충', icon: '🦋',
+            cards: [
+              { icon: '🦋', name: '나비요정' },
+              { icon: '🐝', name: '벌인간' },
+              { icon: '🐜', name: '개미병정' }
+            ]
+          },
+          {
+            id: 'anthro_plant', label: '식물', icon: '🌱',
+            cards: [
+              { icon: '🌵', name: '선인장맨' },
+              { icon: '🌹', name: '장미장인' },
+              { icon: '🌲', name: '나무정령' }
+            ]
+          }
         ]
       },
+
+      // 3. 판타지 계열
       {
         id: 'race_fantasy',
-        label: '판타지',
+        label: '판타지 계열',
         icon: '✨',
-        cards: [
-          { icon:'🧝', name:'엘프'     },
-          { icon:'🧟', name:'언데드'   },
-          { icon:'🐉', name:'드래곤족' },
+        subgroups: [
+          {
+            id: 'fantasy_sub1', label: '신성/정령', icon: '👼',
+            cards: [
+              { icon: '🧝', name: '엘프' },
+              { icon: '🧚', name: '요정' },
+              { icon: '👼', name: '천사' }
+            ]
+          },
+          {
+            id: 'fantasy_sub2', label: '마족/언데드', icon: '😈',
+            cards: [
+              { icon: '🧟', name: '언데드' },
+              { icon: '😈', name: '악마' },
+              { icon: '🧛', name: '흡혈귀' }
+            ]
+          },
+          {
+            id: 'fantasy_sub3', label: '용족/수인', icon: '🐉',
+            cards: [
+              { icon: '🐉', name: '드래곤족' },
+              { icon: '🦎', name: '리자드맨' },
+              { icon: '🐯', name: '호인족' }
+            ]
+          },
+          {
+            id: 'fantasy_sub4', label: '신화/고대', icon: '🏛️',
+            cards: [
+              { icon: '🧜‍♂️', name: '포세이돈' },
+              { icon: '⚡', name: '제우스' },
+              { icon: '👹', name: '도깨비' }
+            ]
+          },
+          {
+            id: 'fantasy_sub5', label: '이계/기타', icon: '🌌',
+            cards: [
+              { icon: '👽', name: '외계인' },
+              { icon: '👻', name: '유령' },
+              { icon: '🔮', name: '환영' }
+            ]
+          }
         ]
-      },
+      }
     ]
-  },
+  }
 
    
  /* ════════════════════════════════════════════════
