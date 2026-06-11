@@ -1516,8 +1516,7 @@ function setupGroupButtonPress(containerEl) {
     }, { once: true });
 
     // 클릭 → 즉시 액션 (딜레이 없음, 다른 버튼과 동일)
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
+    btn.addEventListener('click', () => {
       if (btn.dataset.pressLocked === 'true') return;
       btn.dataset.pressLocked = 'true';
       setTimeout(() => { btn.dataset.pressLocked = 'false'; }, 400);
