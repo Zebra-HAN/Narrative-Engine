@@ -13,7 +13,7 @@ const CHARACTER_NAV = {
     { id:'job',         label:'직업', img:'images/golem.png',  type:'group'    },
     { id:'personality', label:'성격', icon:'💫'  ,type:'group'  },
     { id:'attribute',   label:'속성', icon:'⚡'  ,type:'group'  },
-    { id:'ability',     label:'능력', type:'group'  },
+    { id:'ability',     label:'능력',   },
     { id:'relation',    label:'관계', icon:'🔗'  ,type:'group'  },
   ]
 };
