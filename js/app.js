@@ -1128,17 +1128,20 @@ function renderStatusContent() {
   // 각 nav 섹션 렌더링 헬퍼
   function renderSection(navKey) {
     const nav = NAV_DATA[navKey];
-    if (!nav) return '';
-    let itemsHtml = '';
-    let hasAny = false;
-
-    nav.subs.forEach(sub => {
-      const set = selectedCards[sub.id];
-      if (!set || set.size === 0) return;
-      hasAny = true;
-      itemsHtml += `<div class="status-sub"><div class="status-sub-label">${sub.label}</div><div class="status-chips">`;
-
-      const data = CARD_DATA[sub.id];
+    if (globalIdx >= 1000000) {
+  const gIdx2  = Math.floor(globalIdx / 1000000);
+  const sgIdx  = Math.floor((globalIdx % 1000000) / 1000);
+  const cIdx   = globalIdx % 1000;
+  card = data.groups[gIdx2]?.subgroups?.[sgIdx]?.cards[cIdx];
+} else if (data.groups[Math.floor(globalIdx / 1000)]?.subgroups) {
+  const sgIdx  = Math.floor(globalIdx / 1000);
+  const cIdx   = globalIdx % 1000;
+  card = data.groups[0]?.subgroups?.[sgIdx]?.cards[cIdx];
+} else {
+  const groupIdx = Math.floor(globalIdx / 1000);
+  const cardIdx  = globalIdx % 1000;
+  card = data.groups[groupIdx]?.cards[cardIdx];
+}
       set.forEach(globalIdx => {
         let card = null;
         if (data && data.groups) {
