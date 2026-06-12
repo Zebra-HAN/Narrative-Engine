@@ -939,25 +939,24 @@ function openDetailSheet(mode) {
     const data = CARD_DATA[focusedCard.subId];
     let card = null;
     if (data && data.groups) {
-  if (focusedCard.idx >= 1000000) {
-    // 서브그룹 구조 (groupIdx >= 1)
-    const groupIdx = Math.floor(focusedCard.idx / 1000000);
-    const sgIdx    = Math.floor((focusedCard.idx % 1000000) / 1000);
-    const cardIdx  = focusedCard.idx % 1000;
-    card = data.groups[groupIdx]?.subgroups?.[sgIdx]?.cards[cardIdx];
-  } else if (data.groups[Math.floor(focusedCard.idx / 1000)]?.subgroups) {
-    // group0의 서브그룹 구조 (globalIdx < 1000000)
-    const sgIdx   = Math.floor(focusedCard.idx / 1000);
-    const cardIdx = focusedCard.idx % 1000;
-    card = data.groups[0]?.subgroups?.[sgIdx]?.cards[cardIdx];
-  } else {
-    // 일반 그룹 구조
-    const groupIdx = Math.floor(focusedCard.idx / 1000);
-    const cardIdx  = focusedCard.idx % 1000;
-    card = data.groups[groupIdx]?.cards[cardIdx];
-  }
-}
-    else if (Array.isArray(data)) {
+      if (focusedCard.idx >= 1000000) {
+        // 서브그룹 구조 (groupIdx >= 1)
+        const groupIdx = Math.floor(focusedCard.idx / 1000000);
+        const sgIdx    = Math.floor((focusedCard.idx % 1000000) / 1000);
+        const cardIdx  = focusedCard.idx % 1000;
+        card = data.groups[groupIdx]?.subgroups?.[sgIdx]?.cards[cardIdx];
+      } else if (data.groups[Math.floor(focusedCard.idx / 1000)]?.subgroups) {
+        // group0의 서브그룹 구조 (globalIdx < 1000000)
+        const sgIdx   = Math.floor(focusedCard.idx / 1000);
+        const cardIdx = focusedCard.idx % 1000;
+        card = data.groups[0]?.subgroups?.[sgIdx]?.cards[cardIdx];
+      } else {
+        // 일반 그룹 구조
+        const groupIdx = Math.floor(focusedCard.idx / 1000);
+        const cardIdx  = focusedCard.idx % 1000;
+        card = data.groups[groupIdx]?.cards[cardIdx];
+      }
+    } else if (Array.isArray(data)) {
       card = data[focusedCard.idx];
     }
     nameEl.textContent = focusedCard.name;
@@ -1128,9 +1127,18 @@ function renderStatusContent() {
   // 각 nav 섹션 렌더링 헬퍼
   function renderSection(navKey) {
     const nav = NAV_DATA[navKey];
-   
+    if (!nav) return '';
+    let itemsHtml = '';
+    let hasAny = false;
+
+    nav.subs.forEach(sub => {
+      const set = selectedCards[sub.id];
+      if (!set || set.size === 0) return;
+      hasAny = true;
+      itemsHtml += `<div class="status-sub"><div class="status-sub-label">${sub.label}</div><div class="status-chips">`;
+
+      const data = CARD_DATA[sub.id];
       set.forEach(globalIdx => {
-         
         let card = null;
         if (data && data.groups) {
           if (globalIdx >= 1000000) {
@@ -1138,8 +1146,7 @@ function renderStatusContent() {
             const sgIdx  = Math.floor((globalIdx % 1000000) / 1000);
             const cIdx   = globalIdx % 1000;
             card = data.groups[gIdx2]?.subgroups?.[sgIdx]?.cards[cIdx];
-
-} else if (data.groups[Math.floor(globalIdx / 1000)]?.subgroups) {
+          } else if (data.groups[Math.floor(globalIdx / 1000)]?.subgroups) {
             const sgIdx  = Math.floor(globalIdx / 1000);
             const cIdx   = globalIdx % 1000;
             card = data.groups[0]?.subgroups?.[sgIdx]?.cards[cIdx];
@@ -1148,8 +1155,6 @@ function renderStatusContent() {
             const cardIdx  = globalIdx % 1000;
             card = data.groups[groupIdx]?.cards[cardIdx];
           }
-
-             
         } else if (Array.isArray(data)) {
           card = data[globalIdx];
         }
