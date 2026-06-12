@@ -29,25 +29,25 @@ let infoSlideCategory = false; // false=카드, true=카테고리
 
 
 function getCardDescription(name) {
-  if (focusedCard) {
-    const data = CARD_DATA[focusedCard.subId];
-    let card = null;
-    if (data && data.groups) {
-      if (focusedCard.idx >= 1000000) {
-        const groupIdx = Math.floor(focusedCard.idx / 1000000);
-        const sgIdx    = Math.floor((focusedCard.idx % 1000000) / 1000);
-        const cardIdx  = focusedCard.idx % 1000;
-        card = data.groups[groupIdx]?.subgroups?.[sgIdx]?.cards[cardIdx];
-      } else {
-        const groupIdx = Math.floor(focusedCard.idx / 1000);
-        const cardIdx  = focusedCard.idx % 1000;
-        card = data.groups[groupIdx]?.cards[cardIdx];
-      }
-    } else if (Array.isArray(data)) {
-      card = data[focusedCard.idx];
-    }
+  if (data && data.groups) {
+  if (focusedCard.idx >= 1000000) {
+    // 서브그룹 구조 (groupIdx >= 1)
+    const groupIdx = Math.floor(focusedCard.idx / 1000000);
+    const sgIdx    = Math.floor((focusedCard.idx % 1000000) / 1000);
+    const cardIdx  = focusedCard.idx % 1000;
+    card = data.groups[groupIdx]?.subgroups?.[sgIdx]?.cards[cardIdx];
+  } else if (data.groups[Math.floor(focusedCard.idx / 1000)]?.subgroups) {
+    // group0의 서브그룹 구조 (globalIdx < 1000000)
+    const sgIdx   = Math.floor(focusedCard.idx / 1000);
+    const cardIdx = focusedCard.idx % 1000;
+    card = data.groups[0]?.subgroups?.[sgIdx]?.cards[cardIdx];
+  } else {
+    // 일반 그룹 구조
+    const groupIdx = Math.floor(focusedCard.idx / 1000);
+    const cardIdx  = focusedCard.idx % 1000;
+    card = data.groups[groupIdx]?.cards[cardIdx];
   }
-  return `${name} — 설명&서사적 활용 예시 준비중`;
+}
 }
 
 function getSubDescription(subId) {
