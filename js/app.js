@@ -959,6 +959,12 @@ function openDetailSheet(mode) {
     } else if (Array.isArray(data)) {
       card = data[focusedCard.idx];
     }
+    // 아이콘 / 이미지 렌더링
+    if (focusedCard.img) {
+      iconEl.innerHTML = `<img class="detail-card-img" src="${focusedCard.img}" alt="${focusedCard.name}">`;
+    } else {
+      iconEl.innerHTML = `<div style="font-size:2.4rem;text-align:center;">${focusedCard.icon || '✦'}</div>`;
+    }
     nameEl.textContent = focusedCard.name;
     descEl.textContent = card?.desc || '';
 
