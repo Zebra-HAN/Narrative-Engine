@@ -59,20 +59,18 @@ const CHARACTER_CARDS = {
       img: 'images/golem.png',
       subgroups: [
         {
-          id: 'race_human_skin',   /* 🟥🟥🟥🟥🟥🟥🟥 소그룹 1 🟥🟥🟥🟥🟥🟥🟥 */
+          id: 'race_human_skin',   /* 🟥🟥🟥🟥🟥🟥🟥 소그룹  1 🟥🟥🟥🟥🟥🟥🟥 */
           label: '피부',
           icon: '🟫',
           cards: [         /* ─────[ ⬇️ 카드 ⬇️ ]───── */
-            { icon: '⬜', name: '백색 피부',   
-             desc:'내용ㅇ' ,   
-             detail:'【상ㅇ세】 정보\n【상세】\n\n내용 '}, 
-            { icon: '🟫', name: '갈색 피부',   desc:'내ㅇ용' ,   detail:'【상세】 ㄴ정보\n【상세】\n\n내용 '}, 
+            { icon: '⬜', name: '백색 피부',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '🟫', name: '갈색 피부',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
             { icon: '⬛', name: '흑색 피부',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
             { icon: '🔵', name: '이색 피부',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
-          ]  /* 🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥 카드1 🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥 */
+          ]  /* ───────────────── 카드1 ───────────────── */
         },
         {
-          id: 'race_human_hair',     /* 🟧🟧🟧🟧🟧🟧🟧 소그룹 2 🟧🟧🟧🟧🟧🟧🟧 */
+          id: 'race_human_hair',     /* 🟧🟧🟧🟧🟧🟧🟧 소그룹  2 🟧🟧🟧🟧🟧🟧🟧 */
           label: '모발',
           icon: '💇',
           cards: [        /* ─────[ ⬇️ 카드 ⬇️ ]───── */
@@ -80,10 +78,10 @@ const CHARACTER_CARDS = {
             { icon: '⬛', name: '흑발',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
             { icon: '🔴', name: '적발',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
             { icon: '⬜', name: '백발',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
-          ]  /* 🟧🟧🟧🟧🟧🟧🟧🟧🟧🟧🟧🟧 카드2 🟧🟧🟧🟧🟧🟧🟧🟧🟧🟧🟧🟧 */
+          ]  /* ───────────────── 카드2 ───────────────── */
         },
         {
-          id: 'race_human_eye',    /* 🟨🟨🟨🟨🟨🟨🟨  소그룹 3  🟨🟨🟨🟨🟨🟨🟨 */
+          id: 'race_human_eye',    /* 🟨🟨🟨🟨🟨🟨🟨  소그룹  3  🟨🟨🟨🟨🟨🟨🟨 */
           label: '눈',
           icon: '👁',
           cards: [         /* ─────[ ⬇️ 카드 ⬇️ ]───── */
@@ -91,7 +89,7 @@ const CHARACTER_CARDS = {
             { icon: '🟤', name: '갈안',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
             { icon: '🔴', name: '홍안',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
             { icon: '💜', name: '자안',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
-          ]  /* 🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨 카드3 🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨 */
+          ]   /* ───────────────── 카드3 ───────────────── */
         },
         {
           id: 'race_human_body',   /* 🟩🟩🟩🟩🟩🟩🟩 소그룹  4  🟩🟩🟩🟩🟩🟩🟩 */
@@ -102,7 +100,7 @@ const CHARACTER_CARDS = {
             { icon: '🪶', name: '날렵한',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
             { icon: '🧸', name: '통통한',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
             { icon: '📏', name: '장신형',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
-          ]  /* 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 카드4 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 */
+          ]  /* ───────────────── 카드4 ───────────────── */
         },
       ]
     },
