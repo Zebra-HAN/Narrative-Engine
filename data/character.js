@@ -47,41 +47,193 @@ const CHARACTER_CARDS = {
  /* ════════════════════════════════════════════════
    캐릭터 - 종족
    ════════════════════════════════════════════════ */  
-  race: {  　 /* 카테고리 */
-    groups: [
-      {
-        id: 'race_human',
-        label: '인간',
-        icon: '👤',  img:'images/golem.png', 
-        cards: [
-          { icon:'👦', name:'소년'  },
-          { icon:'👧', name:'소녀'  },
-          { icon:'👨', name:'청년'  },
-          { icon:'🤖', name:'AI'    },
-        ]
-      },
-      {
-        id: 'race_animal',
-        label: '의인화',
-        icon: '🐾',
-        cards: [
-          { icon:'🐺', name:'늑대인간'   },
-          { icon:'🦊', name:'여우인간'   },
-          { icon:'🐱', name:'고양이인간' },
-        ]
-      },
-      {
-        id: 'race_fantasy',
-        label: '판타지',
-        icon: '✨',
-        cards: [
-          { icon:'🧝', name:'엘프'     },
-          { icon:'🧟', name:'언데드'   },
-          { icon:'🐉', name:'드래곤족' },
-        ]
-      },
-    ]
-  },
+  race: {
+  groups: [
+
+    /* ── 인간 계열 ── */
+    {
+      id: 'race_human',
+      label: '인간 계열',
+      icon: '👤',
+      img: 'images/golem.png',
+      subgroups: [
+        {
+          id: 'race_human_skin',
+          label: '피부',
+          icon: '🟫',
+          cards: [
+            { icon: '⬜', name: '백색 피부' },
+            { icon: '🟫', name: '갈색 피부' },
+            { icon: '⬛', name: '흑색 피부' },
+            { icon: '🔵', name: '이색 피부' },
+          ]
+        },
+        {
+          id: 'race_human_hair',
+          label: '모발',
+          icon: '💇',
+          cards: [
+            { icon: '🟡', name: '금발' },
+            { icon: '⬛', name: '흑발' },
+            { icon: '🔴', name: '적발' },
+            { icon: '⬜', name: '백발' },
+          ]
+        },
+        {
+          id: 'race_human_eye',
+          label: '눈',
+          icon: '👁',
+          cards: [
+            { icon: '🔵', name: '청안' },
+            { icon: '🟤', name: '갈안' },
+            { icon: '🔴', name: '홍안' },
+            { icon: '💜', name: '자안' },
+          ]
+        },
+        {
+          id: 'race_human_body',
+          label: '신체',
+          icon: '💪',
+          cards: [
+            { icon: '💪', name: '근육질' },
+            { icon: '🪶', name: '날렵한' },
+            { icon: '🧸', name: '통통한' },
+            { icon: '📏', name: '장신' },
+          ]
+        },
+      ]
+    },
+
+    /* ── 의인화 계열 ── */
+    {
+      id: 'race_animal',
+      label: '의인화 계열',
+      icon: '🐾',
+      subgroups: [
+        {
+          id: 'race_animal_land',
+          label: '육지 동물',
+          icon: '🐺',
+          cards: [
+            { icon: '🐺', name: '늑대인간' },
+            { icon: '🦊', name: '여우인간' },
+            { icon: '🐱', name: '고양이인간' },
+            { icon: '🐻', name: '곰인간' },
+          ]
+        },
+        {
+          id: 'race_animal_sea',
+          label: '바다 어류',
+          icon: '🐟',
+          cards: [
+            { icon: '🐟', name: '어인족' },
+            { icon: '🦈', name: '상어인간' },
+            { icon: '🐙', name: '문어인간' },
+            { icon: '🦑', name: '오징어인간' },
+          ]
+        },
+        {
+          id: 'race_animal_insect',
+          label: '곤충',
+          icon: '🐛',
+          cards: [
+            { icon: '🐝', name: '벌인간' },
+            { icon: '🦋', name: '나비인간' },
+            { icon: '🐜', name: '개미인간' },
+            { icon: '🕷', name: '거미인간' },
+          ]
+        },
+        {
+          id: 'race_animal_plant',
+          label: '식물',
+          icon: '🌿',
+          cards: [
+            { icon: '🌿', name: '덩굴인간' },
+            { icon: '🌵', name: '선인장인간' },
+            { icon: '🍄', name: '버섯인간' },
+            { icon: '🌸', name: '꽃인간' },
+          ]
+        },
+      ]
+    },
+
+    /* ── 판타지 계열 ── */
+    {
+      id: 'race_fantasy',
+      label: '판타지 계열',
+      icon: '✨',
+      subgroups: [
+        {
+          id: 'race_fantasy_demi',
+          label: '아인종',
+          icon: '🧝',
+          cards: [
+            { icon: '🧝', name: '엘프' },
+            { icon: '🧔', name: '드워프' },
+            { icon: '🧌', name: '오크' },
+            { icon: '🐉', name: '드래곤족' },
+          ]
+        },
+        {
+          id: 'race_fantasy_undead',
+          label: '언데드',
+          icon: '🧟',
+          cards: [
+            { icon: '🧟', name: '좀비' },
+            { icon: '🧛', name: '뱀파이어' },
+            { icon: '💀', name: '스켈레톤' },
+            { icon: '👻', name: '유령' },
+          ]
+        },
+        {
+          id: 'race_fantasy_beastman',
+          label: '수인종',
+          icon: '🦁',
+          cards: [
+            { icon: '🦁', name: '사자인' },
+            { icon: '🐯', name: '호랑이인' },
+            { icon: '🦅', name: '독수리인' },
+            { icon: '🐊', name: '악어인' },
+          ]
+        },
+        {
+          id: 'race_fantasy_yokai',
+          label: '요괴',
+          icon: '👹',
+          cards: [
+            { icon: '👹', name: '오니' },
+            { icon: '🦊', name: '구미호' },
+            { icon: '🐍', name: '뱀요괴' },
+            { icon: '👺', name: '텐구' },
+          ]
+        },
+        {
+          id: 'race_fantasy_divine',
+          label: '천사와 악마',
+          icon: '😇',
+          cards: [
+            { icon: '😇', name: '천사' },
+            { icon: '😈', name: '악마' },
+            { icon: '🌟', name: '세라핌' },
+            { icon: '🌑', name: '타락천사' },
+          ]
+        },
+        {
+          id: 'race_fantasy_other',
+          label: '판타지',
+          icon: '🔮',
+          cards: [
+            { icon: '🔮', name: '마인' },
+            { icon: '🌊', name: '정령족' },
+            { icon: '🤖', name: '골렘족' },
+            { icon: '🌌', name: '성간존재' },
+          ]
+        },
+      ]
+    },
+
+  ]
+},
 
    
  /* ════════════════════════════════════════════════
