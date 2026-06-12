@@ -1128,11 +1128,8 @@ function renderStatusContent() {
   // 각 nav 섹션 렌더링 헬퍼
   function renderSection(navKey) {
     const nav = NAV_DATA[navKey];
-    if (globalIdx >= 1000000) {
-  const gIdx2  = Math.floor(globalIdx / 1000000);
-  const sgIdx  = Math.floor((globalIdx % 1000000) / 1000);
-  const cIdx   = globalIdx % 1000;
-  card = data.groups[gIdx2]?.subgroups?.[sgIdx]?.cards[cIdx];
+
+       
 } else if (data.groups[Math.floor(globalIdx / 1000)]?.subgroups) {
   const sgIdx  = Math.floor(globalIdx / 1000);
   const cIdx   = globalIdx % 1000;
@@ -1142,6 +1139,7 @@ function renderStatusContent() {
   const cardIdx  = globalIdx % 1000;
   card = data.groups[groupIdx]?.cards[cardIdx];
 }
+   
       set.forEach(globalIdx => {
         let card = null;
         if (data && data.groups) {
