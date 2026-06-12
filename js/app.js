@@ -1128,19 +1128,9 @@ function renderStatusContent() {
   // 각 nav 섹션 렌더링 헬퍼
   function renderSection(navKey) {
     const nav = NAV_DATA[navKey];
-
-       
-} else if (data.groups[Math.floor(globalIdx / 1000)]?.subgroups) {
-  const sgIdx  = Math.floor(globalIdx / 1000);
-  const cIdx   = globalIdx % 1000;
-  card = data.groups[0]?.subgroups?.[sgIdx]?.cards[cIdx];
-} else {
-  const groupIdx = Math.floor(globalIdx / 1000);
-  const cardIdx  = globalIdx % 1000;
-  card = data.groups[groupIdx]?.cards[cardIdx];
-}
    
       set.forEach(globalIdx => {
+         
         let card = null;
         if (data && data.groups) {
           if (globalIdx >= 1000000) {
@@ -1148,11 +1138,18 @@ function renderStatusContent() {
             const sgIdx  = Math.floor((globalIdx % 1000000) / 1000);
             const cIdx   = globalIdx % 1000;
             card = data.groups[gIdx2]?.subgroups?.[sgIdx]?.cards[cIdx];
+
+} else if (data.groups[Math.floor(globalIdx / 1000)]?.subgroups) {
+            const sgIdx  = Math.floor(globalIdx / 1000);
+            const cIdx   = globalIdx % 1000;
+            card = data.groups[0]?.subgroups?.[sgIdx]?.cards[cIdx];
           } else {
             const groupIdx = Math.floor(globalIdx / 1000);
-            const cardIdx = globalIdx % 1000;
+            const cardIdx  = globalIdx % 1000;
             card = data.groups[groupIdx]?.cards[cardIdx];
           }
+
+             
         } else if (Array.isArray(data)) {
           card = data[globalIdx];
         }
