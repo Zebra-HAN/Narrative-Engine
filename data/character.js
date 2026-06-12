@@ -63,10 +63,10 @@ const CHARACTER_CARDS = {
           label: '피부',
           icon: '🟫',
           cards: [         /* ─────[ ⬇️ 카드 ⬇️ ]───── */
-            { icon: '⬜', name: '백색 피부'   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
-            { icon: '🟫', name: '갈색 피부'   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
-            { icon: '⬛', name: '흑색 피부'   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
-            { icon: '🔵', name: '이색 피부'   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '⬜', name: '백색 피부',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '🟫', name: '갈색 피부',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '⬛', name: '흑색 피부',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '🔵', name: '이색 피부',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
           ]  /* 🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥 카드1 🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥 */
         },
         {
@@ -74,10 +74,10 @@ const CHARACTER_CARDS = {
           label: '모발',
           icon: '💇',
           cards: [        /* ─────[ ⬇️ 카드 ⬇️ ]───── */
-            { icon: '🟡', name: '금발'   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
-            { icon: '⬛', name: '흑발'   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
-            { icon: '🔴', name: '적발'   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
-            { icon: '⬜', name: '백발'   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '🟡', name: '금발',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '⬛', name: '흑발',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '🔴', name: '적발',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '⬜', name: '백발',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
           ]  /* 🟧🟧🟧🟧🟧🟧🟧🟧🟧🟧🟧🟧 카드2 🟧🟧🟧🟧🟧🟧🟧🟧🟧🟧🟧🟧 */
         },
         {
@@ -85,10 +85,10 @@ const CHARACTER_CARDS = {
           label: '눈',
           icon: '👁',
           cards: [         /* ─────[ ⬇️ 카드 ⬇️ ]───── */
-            { icon: '🔵', name: '청안'   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
-            { icon: '🟤', name: '갈안'   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
-            { icon: '🔴', name: '홍안'   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
-            { icon: '💜', name: '자안'   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '🔵', name: '청안',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '🟤', name: '갈안',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '🔴', name: '홍안',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '💜', name: '자안',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
           ]  /* 🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨 카드3 🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨 */
         },
         {
@@ -96,19 +96,14 @@ const CHARACTER_CARDS = {
           label: '신체',
           icon: '💪',
           cards: [         /* ─────[ ⬇️ 카드 ⬇️ ]───── */
-            { icon: '💪', name: '근육질'   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
-            { icon: '🪶', name: '날렵한'   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
-            { icon: '🧸', name: '통통한'   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
-            { icon: '📏', name: '장신형'   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '💪', name: '근육질',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '🪶', name: '날렵한',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '🧸', name: '통통한',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '📏', name: '장신형',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
           ]  /* 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 카드4 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 */
         },
       ]
     },
-
-
-
-
-
 
 
     /* ── 의인화 계열 ── */
