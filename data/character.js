@@ -44,65 +44,72 @@ const CHARACTER_CARDS = {
    
   // ── type:'group' 구조 ──
   // groups 배열 안에 그룹 하나씩 추가하면 돼
+   
  /* ════════════════════════════════════════════════
    캐릭터 - 종족
    ════════════════════════════════════════════════ */  
-  race: {
+ race: {   /* ═══  [종족]  ═══ */
   groups: [
 
-    /* ── 인간 계열 ── */
+    /* ────────   인간형   ──────── */
     {
-      id: 'race_human',
-      label: '인간형',
+      id: 'race_human',     /* ─  메인 메뉴 ─ */
+      label: '인간형', 
       icon: '👤',
       img: 'images/golem.png',
       subgroups: [
         {
-          id: 'race_human_skin',
+          id: 'race_human_skin',   /* 🟥🟥🟥🟥🟥🟥🟥 소그룹 1 🟥🟥🟥🟥🟥🟥🟥 */
           label: '피부',
           icon: '🟫',
-          cards: [
-            { icon: '⬜', name: '백색 피부' },
-            { icon: '🟫', name: '갈색 피부' },
-            { icon: '⬛', name: '흑색 피부' },
-            { icon: '🔵', name: '이색 피부' },
-          ]
+          cards: [         /* ─────[ ⬇️ 카드 ⬇️ ]───── */
+            { icon: '⬜', name: '백색 피부'   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '🟫', name: '갈색 피부'   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '⬛', name: '흑색 피부'   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '🔵', name: '이색 피부'   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+          ]  /* 🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥 카드1 🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥 */
         },
         {
-          id: 'race_human_hair',
+          id: 'race_human_hair',     /* 🟧🟧🟧🟧🟧🟧🟧 소그룹 2 🟧🟧🟧🟧🟧🟧🟧 */
           label: '모발',
           icon: '💇',
-          cards: [
-            { icon: '🟡', name: '금발' },
-            { icon: '⬛', name: '흑발' },
-            { icon: '🔴', name: '적발' },
-            { icon: '⬜', name: '백발' },
-          ]
+          cards: [        /* ─────[ ⬇️ 카드 ⬇️ ]───── */
+            { icon: '🟡', name: '금발'   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '⬛', name: '흑발'   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '🔴', name: '적발'   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '⬜', name: '백발'   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+          ]  /* 🟧🟧🟧🟧🟧🟧🟧🟧🟧🟧🟧🟧 카드2 🟧🟧🟧🟧🟧🟧🟧🟧🟧🟧🟧🟧 */
         },
         {
-          id: 'race_human_eye',
+          id: 'race_human_eye',    /* 🟨🟨🟨🟨🟨🟨🟨  소그룹 3  🟨🟨🟨🟨🟨🟨🟨 */
           label: '눈',
           icon: '👁',
-          cards: [
-            { icon: '🔵', name: '청안' },
-            { icon: '🟤', name: '갈안' },
-            { icon: '🔴', name: '홍안' },
-            { icon: '💜', name: '자안' },
-          ]
+          cards: [         /* ─────[ ⬇️ 카드 ⬇️ ]───── */
+            { icon: '🔵', name: '청안'   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '🟤', name: '갈안'   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '🔴', name: '홍안'   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '💜', name: '자안'   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+          ]  /* 🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨 카드3 🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨 */
         },
         {
-          id: 'race_human_body',
+          id: 'race_human_body',   /* 🟩🟩🟩🟩🟩🟩🟩 소그룹  4  🟩🟩🟩🟩🟩🟩🟩 */
           label: '신체',
           icon: '💪',
-          cards: [
-            { icon: '💪', name: '근육질' },
-            { icon: '🪶', name: '날렵한' },
-            { icon: '🧸', name: '통통한' },
-            { icon: '📏', name: '장신' },
-          ]
+          cards: [         /* ─────[ ⬇️ 카드 ⬇️ ]───── */
+            { icon: '💪', name: '근육질'   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '🪶', name: '날렵한'   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '🧸', name: '통통한'   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '📏', name: '장신형'   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+          ]  /* 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 카드4 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 */
         },
       ]
     },
+
+
+
+
+
+
 
     /* ── 의인화 계열 ── */
     {
@@ -232,6 +239,7 @@ const CHARACTER_CARDS = {
       ]
     },
 
+     
   ]
 },
 
