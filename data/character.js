@@ -53,7 +53,7 @@ const CHARACTER_CARDS = {
     /* ── 인간 계열 ── */
     {
       id: 'race_human',
-      label: '인간 계열',
+      label: '인간형',
       icon: '👤',
       img: 'images/golem.png',
       subgroups: [
@@ -107,7 +107,7 @@ const CHARACTER_CARDS = {
     /* ── 의인화 계열 ── */
     {
       id: 'race_animal',
-      label: '의인화 계열',
+      label: '의인화',
       icon: '🐾',
       subgroups: [
         {
@@ -160,7 +160,7 @@ const CHARACTER_CARDS = {
     /* ── 판타지 계열 ── */
     {
       id: 'race_fantasy',
-      label: '판타지 계열',
+      label: '판타지',
       icon: '✨',
       subgroups: [
         {
