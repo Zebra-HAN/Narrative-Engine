@@ -1064,6 +1064,22 @@ function _syncCardSelectedDOM(subId, globalIdx) {
           }
         }
       }
+    } else if (data.groups[Math.floor(globalIdx / 1000)]?.subgroups) {
+      // group0의 서브그룹 구조 (globalIdx < 1000000)
+      const sgIdx   = Math.floor(globalIdx / 1000);
+      const cardIdx = globalIdx % 1000;
+      const grp = data.groups[0];
+      const sg  = grp?.subgroups?.[sgIdx];
+      if (sg) {
+        const sgPage = document.getElementById(`page-${subId}_sgc_${grp.id}_${sg.id}`);
+        if (sgPage) {
+          const cards = sgPage.querySelectorAll('.data-card');
+          if (cards[cardIdx]) {
+            cards[cardIdx].classList.remove('card-deal');
+            cards[cardIdx].classList.add('selected');
+          }
+        }
+      }
     } else {
       // 일반 그룹 구조
       const groupIdx = Math.floor(globalIdx / 1000);
