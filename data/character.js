@@ -63,8 +63,10 @@ const CHARACTER_CARDS = {
           label: '피부',
           icon: '🟫',
           cards: [         /* ─────[ ⬇️ 카드 ⬇️ ]───── */
-            { icon: '⬜', name: '백색 피부',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
-            { icon: '🟫', name: '갈색 피부',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '⬜', name: '백색 피부',   
+             desc:'내용ㅇ' ,   
+             detail:'【상ㅇ세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '🟫', name: '갈색 피부',   desc:'내ㅇ용' ,   detail:'【상세】 ㄴ정보\n【상세】\n\n내용 '}, 
             { icon: '⬛', name: '흑색 피부',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
             { icon: '🔵', name: '이색 피부',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
           ]  /* 🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥 카드1 🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥 */
