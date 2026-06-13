@@ -439,7 +439,7 @@ function subgroupCardClick(subId, groupIdx, sgIdx, idx) {
   const sg = CARD_DATA[subId].groups[groupIdx].subgroups[sgIdx];
   const card = sg.cards[idx];
   const globalIdx = groupIdx * 1000000 + sgIdx * 1000 + idx;
-  focusedCard = { subId, idx: globalIdx, name: card.name, icon: card.icon, img: card.img };
+  focusedCard = { subId, idx: globalIdx, name: card.name, icon: card.icon, img: card.img, desc: card.desc };
   setInfoSlide(false);
   updateInfoPanel();
 }
@@ -570,7 +570,7 @@ function groupCardClick(subId, groupIdx, idx) {
   const grp = CARD_DATA[subId].groups[groupIdx];
   const card = grp.cards[idx];
   const globalIdx = groupIdx * 1000 + idx;
-  focusedCard = { subId, idx: globalIdx, name: card.name, icon: card.icon, img: card.img };
+  focusedCard = { subId, idx: globalIdx, name: card.name, icon: card.icon, img: card.img, desc: card.desc };
   setInfoSlide(false);
   updateInfoPanel();
 }
@@ -716,7 +716,7 @@ function showCardPage(subId, animate = true) {
 ════════════════════════════════════════════════ */
 function cardClick(subId, idx) {
   const card = CARD_DATA[subId][idx];
-  focusedCard = { subId, idx, name: card.name, icon: card.icon, img: card.img };
+  focusedCard = { subId, idx, name: card.name, icon: card.icon, img: card.img, desc: card.desc };
   setInfoSlide(false);
   updateInfoPanel();
 }
@@ -867,7 +867,7 @@ function updateInfoPanel() {
   if (focusedCard && focusedCard.subId === currentSubId) {
     document.getElementById('info-card-icon').innerHTML = renderIcon(focusedCard.icon, focusedCard.img, 'info-icon-img');
     document.getElementById('info-card-name').textContent = focusedCard.name;
-    document.getElementById('info-card-desc').textContent = getCardDescription(focusedCard.name);
+    document.getElementById('info-card-desc').textContent = focusedCard.desc || '설명 없음';
     const isSelected = selectedCards[focusedCard.subId] && selectedCards[focusedCard.subId].has(focusedCard.idx);
     selectBtn.textContent = isSelected ? '취소' : '선택';
     selectBtn.classList.toggle('is-selected', isSelected);
