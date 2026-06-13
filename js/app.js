@@ -1148,7 +1148,7 @@ function renderStatusContent() {
 
   // 제목 변경
   const titleEl = document.getElementById('status-title');
-  if (titleEl) titleEl.textContent = '아이디어 통합';
+  if (titleEl) titleEl.textContent = '선택된 아이디어';
 
   // 각 nav 섹션 렌더링 헬퍼
   function renderSection(navKey) {
@@ -1178,7 +1178,7 @@ function renderStatusContent() {
               if (lines[li] && lines[li].trim()) picked.push(lines[li].trim());
             });
             if (picked.length > 0) {
-              detailHtml = `<div class="status-chip-details">${picked.map(l => `<span class="status-chip-detail-line">· ${l}</span>`).join('')}</div>`;
+              detailHtml = `<div class="status-chip-details">${picked.map(l => `<span class="status-chip-detail-line">${l}</span>`).join('')}</div>`;
             }
           }
           const chipImgHtml = card.img
@@ -1618,15 +1618,36 @@ function attachSwipeToClose(panelEl, closeFn) {
   // 이전에 붙인 리스너 제거 (중복 방지)
   if (panelEl._swipeCleanup) panelEl._swipeCleanup();
 
+   const overlayEl = panelEl.parentElement;
+  const CLOSE_THRESHOLD = 80;
+  const FADE_DISTANCE = 220;
+  const CLOSE_DURATION = 220;
   let startX = null;
   let startY = null;
   let isDragging = false;
+
+   function setOverlayDragOpacity(progress) {
+    if (!overlayEl) return;
+    overlayEl.style.transition = 'none';
+    overlayEl.style.opacity = String(Math.max(0, 1 - progress));
+  }
+
+  function resetInlineStyles() {
+    panelEl.style.transition = '';
+    panelEl.style.transform = '';
+    panelEl.style.opacity = '';
+    if (overlayEl) {
+      overlayEl.style.transition = '';
+      overlayEl.style.opacity = '';
+    }
+  }
 
   function onTouchStart(e) {
     startX = e.touches[0].clientX;
     startY = e.touches[0].clientY;
     isDragging = false;
     panelEl.style.transition = 'none';
+     if (overlayEl) overlayEl.style.transition = 'none';
   }
 
   function onTouchMove(e) {
@@ -1638,39 +1659,50 @@ function attachSwipeToClose(panelEl, closeFn) {
     if (!isDragging && Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 8) {
       isDragging = true;
     }
-    if (isDragging && dx < 0) {
-      // 왼쪽으로만 이동 (오른쪽은 무시)
+    if (isDragging) {
+      const distance = Math.abs(dx);
+      const progress = Math.min(1, distance / FADE_DISTANCE);
       panelEl.style.transform = `translateX(${dx}px)`;
-      panelEl.style.opacity = String(Math.max(0, 1 + dx / 200));
+      panelEl.style.opacity = String(Math.max(0, 1 - progress));
+      setOverlayDragOpacity(progress);
     }
   }
 
   function onTouchEnd(e) {
     if (!isDragging) {
-      panelEl.style.transition = '';
-      panelEl.style.transform = '';
-      panelEl.style.opacity = '';
+      resetInlineStyles();
       startX = null;
       return;
     }
+     
     const dx = e.changedTouches[0].clientX - startX;
-    if (dx < -80) {
-      // 80px 이상 왼쪽으로 밀었으면 닫기
-      panelEl.style.transition = 'transform 0.22s ease, opacity 0.22s ease';
-      panelEl.style.transform = 'translateX(-110%)';
+    const shouldClose = Math.abs(dx) > CLOSE_THRESHOLD;
+    const closeDirection = dx < 0 ? -1 : 1;
+
+    if (shouldClose) {
+      // 충분히 밀었으면 스와이프 방향 그대로 닫기
+      panelEl.style.transition = `transform ${CLOSE_DURATION}ms ease, opacity ${CLOSE_DURATION}ms ease`;
+      panelEl.style.transform = `translateX(${closeDirection * 110}%)`;
       panelEl.style.opacity = '0';
+       if (overlayEl) {
+        overlayEl.style.transition = `opacity ${CLOSE_DURATION}ms ease`;
+        overlayEl.style.opacity = '0';
+      }
       setTimeout(() => {
         closeFn();
-        panelEl.style.transition = '';
-        panelEl.style.transform = '';
-        panelEl.style.opacity = '';
-      }, 220);
+        // 닫힌 상태에서 inline 값을 지워 다음 열림 때 잔상이 되돌아오지 않게 함
+        requestAnimationFrame(resetInlineStyles);
+      }, CLOSE_DURATION);
     } else {
       // 복원
       panelEl.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
       panelEl.style.transform = '';
       panelEl.style.opacity = '';
-      setTimeout(() => { panelEl.style.transition = ''; }, 200);
+       if (overlayEl) {
+        overlayEl.style.transition = 'opacity 0.2s ease';
+        overlayEl.style.opacity = '';
+      }
+      setTimeout(resetInlineStyles, 200);
     }
     startX = null;
     isDragging = false;
