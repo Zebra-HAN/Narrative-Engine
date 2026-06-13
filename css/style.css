@@ -677,6 +677,24 @@
       padding-left: 8px;
     }
 
+    /* 카드 섹션 구분 헤더 */
+    .card-section-header {
+      grid-column: 1 / -1;
+      width: 100%;
+      margin-top: 20px;
+      margin-bottom: 6px;
+      padding: 4px 8px;
+      font-family: 'Noto Serif KR', serif;
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--gold-mid);
+      border-left: 2px solid var(--gold-dim);
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
     /* 카드 그리드 */
     .card-grid {
       display: grid;
