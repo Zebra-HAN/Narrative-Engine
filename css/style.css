@@ -1771,7 +1771,7 @@
 }
 
 .detail-card-img {
-  width: 95%;
+  width: 95%;       /*── 상세 정보창 내부 이미지 너비 고정값 ──*/
   height: auto;
   object-fit: contain;
   border-radius: 14px;
