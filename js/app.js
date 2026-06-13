@@ -1082,10 +1082,10 @@ function _syncCardSelectedDOM(subId, globalIdx) {
       if (sg) {
         const sgPage = document.getElementById(`page-${subId}_sgc_${grp.id}_${sg.id}`);
         if (sgPage) {
-          const cards = sgPage.querySelectorAll('.data-card');
-          if (cards[cardIdx]) {
-            cards[cardIdx].classList.remove('card-deal');
-            cards[cardIdx].classList.add('selected');
+          const cardEl = sgPage.querySelector(`.data-card[onclick*=",${sgIdx},${cardIdx})"]`);
+          if (cardEl) {
+            cardEl.classList.remove('card-deal');
+            cardEl.classList.add('selected');
           }
         }
       }
@@ -1113,10 +1113,10 @@ function _syncCardSelectedDOM(subId, globalIdx) {
       if (grp) {
         const grpPage = document.getElementById('page-' + subId + '_' + grp.id);
         if (grpPage) {
-          const grpCards = grpPage.querySelectorAll('.data-card');
-          if (grpCards[cardIdx]) {
-            grpCards[cardIdx].classList.remove('card-deal');
-            grpCards[cardIdx].classList.add('selected');
+          const cardEl = grpPage.querySelector(`.data-card[onclick*=",${groupIdx},${cardIdx})"]`);
+          if (cardEl) {
+            cardEl.classList.remove('card-deal');
+            cardEl.classList.add('selected');
           }
         }
       }
