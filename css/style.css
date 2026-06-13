@@ -677,7 +677,7 @@
       padding-left: 8px;
     }
 
-    /* 카드 섹션 구분 헤더 */
+    /* 카드 섹션 구분 헤더  - 카드끼리 타이틀에 묶어두는 용도 */
     .card-section-header {
       grid-column: 1 / -1;
       width: 100%;
@@ -690,9 +690,6 @@
       color: var(--gold-mid);
       border-left: 2px solid var(--gold-dim);
       letter-spacing: 0.08em;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
     /* 카드 그리드 */
