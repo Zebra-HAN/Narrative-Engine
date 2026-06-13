@@ -25,6 +25,7 @@ const CHARACTER_CARDS = {
    캐릭터 - 원형 
    ════════════════════════════════════════════════ */  
    archetype: [ 
+      
 { type: 'section' ,  label: ' 헤더 — 추가 내용 ' },  
      { icon:'⚔', img:'images/Giant_Elf.jpg', name:'영웅이름이 쫌 긴데 괜춘함?',
   desc:'시련을 통해 성장하고 세계를 구하는 존재. 결핍과 각성, 희생의 구조를 가진 서사의 중심축.',
