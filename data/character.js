@@ -267,8 +267,17 @@ const CHARACTER_CARDS = {
         icon: '👤',
         cards: [
    { icon:'⚔', name:'검사'      }, { icon:'🏹', name:'궁수'       }, { icon:'🧙', name:'마법사'   },
-    { icon:'🛡', name:'기사'      }, { icon:'🗡', name:'암살자'      }, { icon:'🎵', name:'음유시인' },
-    { icon:'⚕', name:'치유사'    }, { icon:'🔧', name:'장인'        }, { icon:'📜', name:'학자'     },
+
+           
+ { type: 'section' ,  label: ' 헤더 — 추가 내용 ' },  
+    { icon:'🛡', name:'기사'  ,  desc:'내용' ,  detail:'【상세】 정보\n【상세】\n\n내용'    },
+    { icon:'🗡', name:'암살자',  desc:'내용' ,  detail:'【상세】 정보\n【상세】\n\n내용'  }, 
+           
+           
+ { type: 'section' ,  label: ' 헤더 — 추가 내용 ' },  
+           { icon:'🎵', name:'음유시인' },
+    { icon:'⚕', name:'치유사' ,  desc:'내용' ,  detail:'【상세】 정보\n【상세】\n\n내용'   }, 
+    { icon:'🔧', name:'장인'  ,  desc:'내용' ,  detail:'【상세】 정보\n【상세】\n\n내용'      }, { icon:'📜', name:'학자'     },
         ]
       },
 
