@@ -459,10 +459,10 @@ function subgroupCardDblClick(subId, groupIdx, sgIdx, idx) {
   const sg  = grp.subgroups[sgIdx];
   const pageEl = document.getElementById(`page-${subId}_sgc_${grp.id}_${sg.id}`);
   if (pageEl) {
-    const cards = pageEl.querySelectorAll('.data-card');
-    if (cards[idx]) {
-      cards[idx].classList.remove('card-deal');
-      cards[idx].classList.toggle('selected', selectedCards[subId].has(globalIdx));
+    const cardEl = pageEl.querySelector(`.data-card[onclick*=",${sgIdx},${idx})"]`);
+    if (cardEl) {
+      cardEl.classList.remove('card-deal');
+      cardEl.classList.toggle('selected', selectedCards[subId].has(globalIdx));
     }
   }
 
@@ -587,10 +587,10 @@ function groupCardDblClick(subId, groupIdx, idx) {
 
   const page = document.getElementById('page-' + subId + '_' + CARD_DATA[subId].groups[groupIdx].id);
   if (page) {
-    const cards = page.querySelectorAll('.data-card');
-    if (cards[idx]) {
-      cards[idx].classList.remove('card-deal');
-      cards[idx].classList.toggle('selected', selectedCards[subId].has(globalIdx));
+    const cardEl = page.querySelector(`.data-card[onclick*=",${groupIdx},${idx})"]`);
+    if (cardEl) {
+      cardEl.classList.remove('card-deal');
+      cardEl.classList.toggle('selected', selectedCards[subId].has(globalIdx));
     }
   }
 
