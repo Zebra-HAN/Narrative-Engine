@@ -613,9 +613,8 @@
       position: relative;
       display: flex; align-items: center; justify-content: center;
       transform: rotate(45deg);
-      border: 2px solid;
-      border-image: linear-gradient(135deg, #7abf9a, #3a7d5a, #2e6b4a, #5aaa7a) 1;
-      border-radius: 4px;
+      border: 2px solid #5aaa7a;
+      border-radius: 12px;
       background: linear-gradient(135deg, #f4faf7 0%, #e8f5ee 50%, #d8eee3 100%);
       transition: background 0.25s, border-color 0.25s, box-shadow 0.25s;
       box-shadow: 3px 3px 8px rgba(40,100,65,0.15);
@@ -1772,7 +1771,7 @@
 }
 
 .detail-card-img {
-  width: 65%;
+  width: 85%;
   height: auto;
   object-fit: contain;
   border-radius: 14px;
