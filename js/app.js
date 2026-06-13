@@ -922,12 +922,10 @@ function toggleCardSelect(subId, idx) {
   // 카드 UI 업데이트
   const page = document.getElementById('page-' + subId);
   if (page) {
-    const cards = page.querySelectorAll('.data-card');
-    cards.forEach((card, i) => {
-      if (i === idx) {
-        card.classList.toggle('selected', selectedCards[subId].has(idx));
-      }
-    });
+    const cardEl = page.querySelector(`.data-card[onclick*="cardClick('${subId}', ${idx})"]`);
+    if (cardEl) {
+      cardEl.classList.toggle('selected', selectedCards[subId].has(idx));
+    }
   }
 
   // 서브메뉴 배지 업데이트
@@ -1126,10 +1124,10 @@ function _syncCardSelectedDOM(subId, globalIdx) {
   } else {
     const page = document.getElementById('page-' + subId);
     if (page) {
-      const cards = page.querySelectorAll('.data-card');
-      if (cards[globalIdx]) {
-        cards[globalIdx].classList.remove('card-deal');
-        cards[globalIdx].classList.add('selected');
+      const cardEl = page.querySelector(`.data-card[onclick*="cardClick('${subId}', ${globalIdx})"]`);
+      if (cardEl) {
+        cardEl.classList.remove('card-deal');
+        cardEl.classList.add('selected');
       }
     }
   }
