@@ -1165,25 +1165,7 @@ function renderStatusContent() {
 
       const data = CARD_DATA[sub.id];
       set.forEach(globalIdx => {
-        let card = null;
-        if (data && data.groups) {
-          if (globalIdx >= 1000000) {
-            const gIdx2  = Math.floor(globalIdx / 1000000);
-            const sgIdx  = Math.floor((globalIdx % 1000000) / 1000);
-            const cIdx   = globalIdx % 1000;
-            card = data.groups[gIdx2]?.subgroups?.[sgIdx]?.cards[cIdx];
-          } else if (data.groups[Math.floor(globalIdx / 1000)]?.subgroups) {
-            const sgIdx  = Math.floor(globalIdx / 1000);
-            const cIdx   = globalIdx % 1000;
-            card = data.groups[0]?.subgroups?.[sgIdx]?.cards[cIdx];
-          } else {
-            const groupIdx = Math.floor(globalIdx / 1000);
-            const cardIdx  = globalIdx % 1000;
-            card = data.groups[groupIdx]?.cards[cardIdx];
-          }
-        } else if (Array.isArray(data)) {
-          card = data[globalIdx];
-        }
+       const card = getCardByGlobalIdx(sub.id, globalIdx);
         if (card) {
           // 선택된 세부정보 줄 수집
           const detailKey = `${sub.id}__${globalIdx}`;
@@ -1440,17 +1422,19 @@ const data = CARD_DATA[currentSubId];
       if (grp.subgroups) {
         grp.subgroups.forEach((sg, sgIdx) => {
           sg.cards.forEach((card, cIdx) => {
-            allCards.push({ globalIdx: gIdx * 1000000 + sgIdx * 1000 + cIdx, ...card });
+           if (isSectionItem(card)) return;
+            allCards.push({ globalIdx: getSubgroupCardGlobalIdx(gIdx, sgIdx, cIdx), path: { type: 'subgroup', groupIdx: gIdx, sgIdx, cardIdx: cIdx }, ...card });
           });
         });
       } else if (grp.cards) {
         grp.cards.forEach((card, cIdx) => {
-          allCards.push({ globalIdx: gIdx * 1000 + cIdx, ...card });
+          if (isSectionItem(card)) return;
+          allCards.push({ globalIdx: getGroupCardGlobalIdx(gIdx, cIdx), path: { type: 'group', groupIdx: gIdx, cardIdx: cIdx }, ...card });
         });
       }
     });
   } else if (Array.isArray(data)) {
-    allCards = data.map((card, idx) => ({ globalIdx: idx, ...card }));
+    allCards = data.map((card, idx) => isSectionItem(card) ? null : ({ globalIdx: idx, ...card })).filter(Boolean);
   }
   if (allCards.length === 0) return;
 
@@ -1465,7 +1449,7 @@ const data = CARD_DATA[currentSubId];
   if (el) el.classList.add('active');
 
   // 설명창 갱신
-  focusedCard = { subId: currentSubId, idx: pick.globalIdx, name: pick.name, icon: pick.icon, img: pick.img };
+  focusedCard = { subId: currentSubId, idx: pick.globalIdx, path: pick.path, name: pick.name, icon: pick.icon, img: pick.img };
   updateInfoPanel();
   refreshStatusIfOpen();
    updateNavBadges();  // ← 여기 추가,  선택한 총량 표시 배지 추가
@@ -1485,18 +1469,20 @@ subs.forEach(sub => {
     data.groups.forEach((grp, gIdx) => {
       if (grp.subgroups) {
         grp.subgroups.forEach((sg, sgIdx) => {
-          sg.cards.forEach((_, cIdx) => {
-            allCards.push({ globalIdx: gIdx * 1000000 + sgIdx * 1000 + cIdx });
+          sg.cards.forEach((card, cIdx) => {
+            if (isSectionItem(card)) return;
+            allCards.push({ globalIdx: getSubgroupCardGlobalIdx(gIdx, sgIdx, cIdx) });
           });
         });
       } else if (grp.cards) {
-        grp.cards.forEach((_, cIdx) => {
-          allCards.push({ globalIdx: gIdx * 1000 + cIdx });
+        grp.cards.forEach((card, cIdx) => {
+          if (isSectionItem(card)) return;
+          allCards.push({ globalIdx: getGroupCardGlobalIdx(gIdx, cIdx) });
         });
       }
     });
   } else if (Array.isArray(data)) {
-    allCards = data.map((_, idx) => ({ globalIdx: idx }));
+    allCards = data.map((card, idx) => isSectionItem(card) ? null : ({ globalIdx: idx })).filter(Boolean);
   }
   if (allCards.length === 0) return;
   const pick = allCards[Math.floor(Math.random() * allCards.length)];
