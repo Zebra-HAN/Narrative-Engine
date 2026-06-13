@@ -399,20 +399,20 @@ function showSubgroupCards(subId, groupIdx, sgIdx) {
   let html = `<div class="section-label">${formatLabel(sg.label, sg.icon)}</div>`;
   html += '<div class="card-grid">';
 
-  let sgCardRealIdx = 0; // section 제외 실제 카드 인덱스
-  sg.cards.forEach((card) => {
-    // ── section 구분자 처리 ──
+  let sgCardRealIdx = 0;
+  sg.cards.forEach((card, rawIdx) => {
     if (card.type === 'section') {
       html += `</div><div class="card-section-header">${card.label}</div><div class="card-grid">`;
       return;
     }
-    const idx = sgCardRealIdx++;
+    const idx = rawIdx;
+    const animIdx = sgCardRealIdx++;
     // globalIdx = groupIdx * 1000000 + sgIdx * 1000 + idx
     const globalIdx = groupIdx * 1000000 + sgIdx * 1000 + idx;
     const sel = selectedCards[subId].has(globalIdx) ? ' selected' : '';
     html += `
       <div class="data-card pressable card-deal${sel}"
-        style="animation-delay:${idx * 0.04}s"
+        style="animation-delay:${animIdx * 0.04}s"
         onclick="subgroupCardClick('${subId}', ${groupIdx}, ${sgIdx}, ${idx})"
         ondblclick="subgroupCardDblClick('${subId}', ${groupIdx}, ${sgIdx}, ${idx})"
         onmousedown="startLongPress(this,'subgroup','${subId}',${groupIdx},${sgIdx},${idx})"
@@ -532,19 +532,19 @@ function showGroupCards(subId, groupIdx) {
 
   let html = `<div class="section-label">${formatLabel(grp.label, grp.icon)}</div>`;
   html += '<div class="card-grid">';
-  let grpCardRealIdx = 0; // section 제외 실제 카드 인덱스
-  grp.cards.forEach((card) => {
-    // ── section 구분자 처리 ──
+  let grpCardRealIdx = 0;
+  grp.cards.forEach((card, rawIdx) => {
     if (card.type === 'section') {
       html += `</div><div class="card-section-header">${card.label}</div><div class="card-grid">`;
       return;
     }
-    const idx = grpCardRealIdx++;
+    const idx = rawIdx;
+    const animIdx = grpCardRealIdx++;
     const globalIdx = offset + idx;
     const sel = selectedCards[subId].has(globalIdx) ? ' selected' : '';
     html += `
   <div class="data-card pressable card-deal${sel}"
-    style="animation-delay:${idx * 0.04}s"
+    style="animation-delay:${animIdx * 0.04}s"
     onclick="groupCardClick('${subId}', ${groupIdx}, ${idx})"
     ondblclick="groupCardDblClick('${subId}', ${groupIdx}, ${idx})"
     onmousedown="startLongPress(this,'group','${subId}',${groupIdx},${idx})"
@@ -674,17 +674,17 @@ function showCardPage(subId, animate = true) {
 
   if (!selectedCards[subId]) selectedCards[subId] = new Set();
 
-  let cardRealIdx = 0; // section을 제외한 실제 카드 인덱스
-  cards.forEach((card) => {
-    // ── section 구분자 처리 ──
+  let cardRealIdx = 0;
+  cards.forEach((card, rawIdx) => {
     if (card.type === 'section') {
       html += `</div><div class="card-section-header">${card.label}</div><div class="card-grid">`;
       return;
     }
-    const idx = cardRealIdx++;
+    const idx = rawIdx;       // ← 배열 원본 인덱스
+    const animIdx = cardRealIdx++;  // 애니메이션 딜레이용
     const sel = selectedCards[subId].has(idx) ? ' selected' : '';
     const deal = animate ? ' card-deal' : '';
-    const delay = animate ? ` style="animation-delay:${idx * 0.04}s"` : '';
+    const delay = animate ? ` style="animation-delay:${animIdx * 0.04}s"` : '';
    html += `
   <div class="data-card pressable${sel}${deal}"${delay}
     onclick="cardClick('${subId}', ${idx})"
