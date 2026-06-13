@@ -35,11 +35,13 @@ const CHARACTER_CARDS = {
  
      { icon:'😈', img:'images/Peep.png',name:'악당'       },
     { icon:'🃏', name:'트릭스터1'     }, { icon:'👼', name:'수호자'     },
+
       
      { type: 'section' ,  label: ' 헤더 — 추가 내용 ' },  
    { icon:'🔮', name:'예언자'     },
     { icon:'⚔', name:'전사'         }, { icon:'💀', name:'파멸자'     }, { icon:'🌹', name:'연인'       },
 
+           { type: 'section' ,  label: ' 　 ' },  
       { type: 'section' ,  label: ' 헤더 — 추가 내용 ' },  
     { icon:'👑', name:'통치자'       }, { icon:'🌿', name:'치유자'     }, { icon:'🕵', name:'탐정'       },
     { icon:'🐺', name:'이방인'       }, { icon:'🌟', name:'선택받은 자'}, { icon:'🦊', name:'교활한 자'  },
