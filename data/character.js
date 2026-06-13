@@ -25,7 +25,7 @@ const CHARACTER_CARDS = {
    캐릭터 - 원형 
    ════════════════════════════════════════════════ */  
    archetype: [
-    { icon:'⚔', img:'images/Giant_Elf.png', name:'영웅12-2341',
+{ icon:'⚔', img:'images/Giant_Elf.png', name:'영웅12-2341',
   desc:'시련을 통해 성장하고 세계를 구하는 존재. 결핍과 각성, 희생의 구조를 가진 서사의 중심축.',
   detail:'【서사 포지션】주인공 고정\n【핵심 갈등】내면의 결핍 vs 외부의 시련\n【변화 축】각성 → 희생 → 재탄생\n\n활용 팁: 결말부의 희생 장면에서 이 원형의 설득력이 가장 강해진다.' },
   
@@ -33,16 +33,14 @@ const CHARACTER_CARDS = {
   desc:'시련을 통해 성장하고 세계를 구하는 존재. 결핍과 각성, 희생의 구조를 가진 서사의 중심축.',
   detail:'【서사 포지션】주인공 고정\n【핵심 갈등】내면의 결핍 vs 외부의 시련\n【변화 축】각성 → 희생 → 재탄생\n\n활용 팁: 결말부의 희생 장면에서 이 원형의 설득력이 가장 강해진다.'},
  
-     { icon:'😈', img:'images/Peep.png',name:'악당'       },
+    { icon:'😈', img:'images/Peep.png',name:'악당'       },
     { icon:'🃏', name:'트릭스터1'     }, { icon:'👼', name:'수호자'     },
 
-      
-     { type: 'section' ,  label: ' 헤더 — 추가 내용 ' },  
-   { icon:'🔮', name:'예언자'     },
+{ type: 'section' ,  label: ' 헤더 — 추가 내용 ' },  
+    { icon:'🔮', name:'예언자'     },
     { icon:'⚔', name:'전사'         }, { icon:'💀', name:'파멸자'     }, { icon:'🌹', name:'연인'       },
 
-           { type: 'section' ,  label: ' 　 ' },  
-      { type: 'section' ,  label: ' 헤더 — 추가 내용 ' },  
+{ type: 'section' ,  label: ' 헤더 — 추가 내용 ' },  
     { icon:'👑', name:'통치자'       }, { icon:'🌿', name:'치유자'     }, { icon:'🕵', name:'탐정'       },
     { icon:'🐺', name:'이방인'       }, { icon:'🌟', name:'선택받은 자'}, { icon:'🦊', name:'교활한 자'  },
     { icon:'🔗', name:'속박된 자'    }, { icon:'🌊', name:'방랑자'     }, { icon:'⚖', name:'심판자'     },
