@@ -8,7 +8,7 @@ const CHARACTER_NAV = {
   label: '캐릭터',
   resetLabel: '캐릭터 초기화',
   subs: [
-    { id:'archetype',   label:'원형', img:'images/Giant_Elf.png' },
+    { id:'archetype',   label:'원형', img:'images/Giant_Elf.jpg' },
     { id:'race',        label:'종족', icon:'🐉', type:'group'    },
     { id:'job',         label:'직업', img:'images/golem.png',  type:'group'    },
     { id:'personality', label:'성격', icon:'💫'  ,type:'group'  },
@@ -25,7 +25,9 @@ const CHARACTER_CARDS = {
    캐릭터 - 원형 
    ════════════════════════════════════════════════ */  
    archetype: [
-{ icon:'⚔', img:'images/Giant_Elf.png', name:'영웅12-2341',
+{ type: 'section' ,  label: ' 헤더 — 추가 내용 ' },  
+
+      { icon:'⚔', img:'images/Giant_Elf.jpg', name:'영웅이름이 쫌 긴데 괜춘함?',
   desc:'시련을 통해 성장하고 세계를 구하는 존재. 결핍과 각성, 희생의 구조를 가진 서사의 중심축.',
   detail:'【서사 포지션】주인공 고정\n【핵심 갈등】내면의 결핍 vs 외부의 시련\n【변화 축】각성 → 희생 → 재탄생\n\n활용 팁: 결말부의 희생 장면에서 이 원형의 설득력이 가장 강해진다.' },
   
@@ -40,10 +42,11 @@ const CHARACTER_CARDS = {
     { icon:'🔮', name:'예언자'     },
     { icon:'⚔', name:'전사'         }, { icon:'💀', name:'파멸자'     }, { icon:'🌹', name:'연인'       },
 
-{ type: 'section' ,  label: ' 헤더 — 추가 내용 ' },  
+
     { icon:'👑', name:'통치자'       }, { icon:'🌿', name:'치유자'     }, { icon:'🕵', name:'탐정'       },
     { icon:'🐺', name:'이방인'       }, { icon:'🌟', name:'선택받은 자'}, { icon:'🦊', name:'교활한 자'  },
     { icon:'🔗', name:'속박된 자'    }, { icon:'🌊', name:'방랑자'     }, { icon:'⚖', name:'심판자'     },
+{ type: 'section' ,  label: ' 헤더 — 추가 내용 ' },  
     { icon:'🌙', name:'어둠의 자'    }, { icon:'☀',  name:'빛의 자'   },
   ],
 
