@@ -1098,10 +1098,10 @@ function _syncCardSelectedDOM(subId, globalIdx) {
       if (sg) {
         const sgPage = document.getElementById(`page-${subId}_sgc_${grp.id}_${sg.id}`);
         if (sgPage) {
-          const cards = sgPage.querySelectorAll('.data-card');
-          if (cards[cardIdx]) {
-            cards[cardIdx].classList.remove('card-deal');
-            cards[cardIdx].classList.add('selected');
+          const cardEl = sgPage.querySelector(`.data-card[onclick*=",${sgIdx},${cardIdx})"]`);
+          if (cardEl) {
+            cardEl.classList.remove('card-deal');
+            cardEl.classList.add('selected');
           }
         }
       }
