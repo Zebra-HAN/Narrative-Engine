@@ -11,7 +11,7 @@ const CHARACTER_NAV = {
     { id:'archetype',   label:'원형', img:'images/Giant_Elf.jpg' },
     { id:'race',        label:'종족', icon:'🐉', type:'group'    },
     { id:'job',         label:'직업', img:'images/golem.png',  type:'group'    },
-    { id:'personality', label:'성격', icon:'💫'  ,type:'group'  },
+    { id:'personality', label:'성격', icon:'💫'   },
     { id:'attribute',   label:'속성', icon:'⚡'  ,type:'group'  },
     { id:'ability',     label:'능력',   },
     { id:'relation',    label:'관계', icon:'🔗'  ,type:'group'  },
@@ -33,19 +33,21 @@ const CHARACTER_CARDS = {
   desc:'시련을 통해 성장하고 세계를 구하는 존재. 결핍과 각성, 희생의 구조를 가진 서사의 중심축.',
   detail:'【서사 포지션】주인공 고정\n【핵심 갈등】내면의 결핍 vs 외부의 시련\n【변화 축】각성 → 희생 → 재탄생\n\n활용 팁: 결말부의 희생 장면에서 이 원형의 설득력이 가장 강해진다.'},
  
-    { icon:'😈', img:'images/Peep.png',name:'악당'       },
+    { icon:'😈', img:'images/Peep.png',name:'악당'  ,   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
     { icon:'🃏', name:'트릭스터1'     }, { icon:'👼', name:'수호자'     },
 
 { type: 'section' ,  label: ' 헤더 — 추가 내용 ' },  
-    { icon:'🔮', name:'예언자'     },
-    { icon:'⚔', name:'전사'         }, { icon:'💀', name:'파멸자'     }, { icon:'🌹', name:'연인'       },
+    { icon:'🔮', name:'예언자' ,   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용' },
+    { icon:'⚔', name:'전사' ,   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'}, 
+    { icon:'💀', name:'파멸자'     }, { icon:'🌹', name:'연인'       },
     { icon:'👑', name:'통치자'       }, { icon:'🌿', name:'치유자'     }, { icon:'🕵', name:'탐정'       },
     { icon:'🐺', name:'이방인'       }, { icon:'🌟', name:'선택받은 자'}, { icon:'🦊', name:'교활한 자'  },
     { icon:'🔗', name:'속박된 자'    }, { icon:'🌊', name:'방랑자'     },
       
  { type: 'section' ,  label: ' 헤더 — 추가 내용 ' },  
-    { icon:'⚖', name:'심판자'     },
-    { icon:'🌙', name:'어둠의 자'    }, { icon:'☀',  name:'빛의 자'   },
+    { icon:'⚖', name:'심판자' ,     desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
+    { icon:'🌙', name:'어둠의 자',  desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
+    { icon:'☀',  name:'빛의 자' ,   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
   ],
 
    
@@ -74,7 +76,7 @@ const CHARACTER_CARDS = {
             { icon: '🟡', name: '금발',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
             { icon: '⬛', name: '흑발',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
             { icon: '🔴', name: '적발',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
-            { icon: '⬜', name: '백발',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '⬜', name: '백발',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'}, 
              
               { type: 'section' ,  label: ' 헤더 — 추가 내용 ' }, 
             { icon: '🟫', name: '갈색 피부',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
@@ -319,8 +321,12 @@ const CHARACTER_CARDS = {
         label: '속성 1',　 /*그룹 이름*/
         icon: '👤',
         cards: [
-   { icon:'⚔', name:'검사'      }, { icon:'🏹', name:'궁수'       }, { icon:'🧙', name:'마법사'   },
-    { icon:'🛡', name:'기사'      }, { icon:'🗡', name:'암살자'      }, { icon:'🎵', name:'음유시인' },
+   { icon:'⚔', name:'검사' ,     desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용' },
+   { icon:'🏹', name:'궁수'   ,  desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
+   { icon:'🧙', name:'마법사',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
+   { icon:'🛡', name:'기사' ,   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
+   { icon:'🗡', name:'암살자' ,  desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'}, 
+   { icon:'🎵', name:'음유시인',  desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용' },
     { icon:'⚕', name:'치유사'    }, { icon:'🔧', name:'장인'        }, { icon:'📜', name:'학자'     },
         ]
       },
@@ -381,8 +387,13 @@ const CHARACTER_CARDS = {
    캐릭터 - 능력
    ════════════════════════════════════════════════ */  
   ability: [
-    { icon:'🔮', name:'예지'     }, { icon:'🌀', name:'공간이동'   }, { icon:'⏳', name:'시간조작' },
-    { icon:'🔗', name:'결박'     }, { icon:'🌊', name:'소환'       }, { icon:'💥', name:'폭발'     },
+    { icon:'🔮', name:'예지',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'}, 
+    { icon:'🌀', name:'공간이동',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
+     { type: 'section' ,  label: ' 헤더 — 추가 내용 ' }, 
+    { icon:'⏳', name:'시간조작',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
+    { icon:'🔗', name:'결박' ,     desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
+    { icon:'🌊', name:'소환'  ,   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
+    { icon:'💥', name:'폭발'  ,   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
     { icon:'🛡', name:'방벽'     }, { icon:'👁',  name:'투시'      }, { icon:'🎭', name:'변신'     },
     { icon:'💀', name:'부활'     }, { icon:'⚡', name:'가속'        }, { icon:'🌿', name:'치유'     },
     { icon:'🔥', name:'소각'     }, { icon:'❄',  name:'동결'       }, { icon:'💫', name:'정화'     },
@@ -395,7 +406,10 @@ const CHARACTER_CARDS = {
    캐릭터 - 관계
    ════════════════════════════════════════════════ */  
   relation: [
-    { icon:'👥', name:'동료'         }, { icon:'❤',  name:'연인'           }, { icon:'🤝', name:'동맹'         },
+    { icon:'👥', name:'동료',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
+     { type: 'section' ,  label: ' 헤더 — 추가 내용 ' }, 
+     { icon:'❤',  name:'연인' ,   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용' },
+     { icon:'🤝', name:'동맹'  ,   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
     { icon:'⚔', name:'라이벌'       }, { icon:'🐍', name:'배신자'          }, { icon:'🛡', name:'보호자'       },
     { icon:'👑', name:'주종'         }, { icon:'🎭', name:'쌍둥이'          }, { icon:'💀', name:'숙적'         },
     { icon:'🌹', name:'짝사랑'       }, { icon:'🔗', name:'운명적 인연'     }, { icon:'🌙', name:'비밀결사'     },
