@@ -72,8 +72,6 @@ const CHARACTER_CARDS = {
           cards: [         /* ─────[ ⬇️ 카드 ⬇️ ]───── */
             { icon: '⬜', name: '백색 2015 헤더 에러',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
             { icon: '🟫', name: '갈색 피부',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
-
-{ type: 'section' ,  label: ' 헤더 — 추가 내용 ' },  
             { icon: '⬛', name: '흑색 피부',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
             { icon: '🔵', name: '이색 피부',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
           ]  /* ───────────────── 카드1 ───────────────── */
