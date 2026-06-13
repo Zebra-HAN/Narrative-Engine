@@ -1112,6 +1112,7 @@
       background: linear-gradient(135deg, #f4faf7, #e8f5ee);
       font-family: 'Noto Sans KR', sans-serif;
       width: 100%;
+      min-width: 0;
     }
 
     /* 아이디어통합 칩 내부 이미지 — 원본 비율 유지, 넉넉하게 */
@@ -1144,9 +1145,9 @@
       font-weight: 600;
       color: #2e6b4a;
       line-height: 1.3;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+       white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: keep-all;
     }
 
     /* desc — 이름 바로 아래 2순위 정보 */
@@ -1886,6 +1887,8 @@
   display: flex;
   flex-direction: column;
   gap: 3px;
+       width: 100%;
+  min-width: 0;
 }
 
 .status-chip-details {
@@ -1902,6 +1905,8 @@
   color: var(--text-secondary);
   line-height: 1.5;
   font-family: 'Noto Sans KR', sans-serif;
+       overflow-wrap: anywhere;
+  word-break: keep-all;
 }
 
 /* ── status-chips wrap 대응 ── */
