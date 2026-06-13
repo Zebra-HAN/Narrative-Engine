@@ -399,7 +399,14 @@ function showSubgroupCards(subId, groupIdx, sgIdx) {
   let html = `<div class="section-label">${formatLabel(sg.label, sg.icon)}</div>`;
   html += '<div class="card-grid">';
 
-  sg.cards.forEach((card, idx) => {
+  let sgCardRealIdx = 0; // section 제외 실제 카드 인덱스
+  sg.cards.forEach((card) => {
+    // ── section 구분자 처리 ──
+    if (card.type === 'section') {
+      html += `</div><div class="card-section-header">${card.label}</div><div class="card-grid">`;
+      return;
+    }
+    const idx = sgCardRealIdx++;
     // globalIdx = groupIdx * 1000000 + sgIdx * 1000 + idx
     const globalIdx = groupIdx * 1000000 + sgIdx * 1000 + idx;
     const sel = selectedCards[subId].has(globalIdx) ? ' selected' : '';
@@ -525,7 +532,14 @@ function showGroupCards(subId, groupIdx) {
 
   let html = `<div class="section-label">${formatLabel(grp.label, grp.icon)}</div>`;
   html += '<div class="card-grid">';
-  grp.cards.forEach((card, idx) => {
+  let grpCardRealIdx = 0; // section 제외 실제 카드 인덱스
+  grp.cards.forEach((card) => {
+    // ── section 구분자 처리 ──
+    if (card.type === 'section') {
+      html += `</div><div class="card-section-header">${card.label}</div><div class="card-grid">`;
+      return;
+    }
+    const idx = grpCardRealIdx++;
     const globalIdx = offset + idx;
     const sel = selectedCards[subId].has(globalIdx) ? ' selected' : '';
     html += `
@@ -660,7 +674,14 @@ function showCardPage(subId, animate = true) {
 
   if (!selectedCards[subId]) selectedCards[subId] = new Set();
 
-  cards.forEach((card, idx) => {
+  let cardRealIdx = 0; // section을 제외한 실제 카드 인덱스
+  cards.forEach((card) => {
+    // ── section 구분자 처리 ──
+    if (card.type === 'section') {
+      html += `</div><div class="card-section-header">${card.label}</div><div class="card-grid">`;
+      return;
+    }
+    const idx = cardRealIdx++;
     const sel = selectedCards[subId].has(idx) ? ' selected' : '';
     const deal = animate ? ' card-deal' : '';
     const delay = animate ? ` style="animation-delay:${idx * 0.04}s"` : '';
