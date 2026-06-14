@@ -37,7 +37,7 @@ const CHARACTER_CARDS = {
     { icon:'🃏', name:'트릭스터1'     }, { icon:'👼', name:'수호자'     },
 
 { type: 'section' ,  label: ' 헤더 — 추가 내용 ' },  
-    { icon:'🔮', name:'예언자' ,   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용' },
+    { icon:'🔮', name:'이름이몇개까지가능할까요' ,   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용' },
     { icon:'⚔', name:'전사' ,   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'}, 
     { icon:'💀', name:'파멸자'     }, { icon:'🌹', name:'연인'       },
     { icon:'👑', name:'통치자'       }, { icon:'🌿', name:'치유자'     }, { icon:'🕵', name:'탐정'       },
