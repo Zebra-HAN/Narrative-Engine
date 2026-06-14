@@ -605,6 +605,7 @@
       -webkit-tap-highlight-color: transparent;
       position: relative;
       padding: 1px 4px 0;
+           isolation: isolate;
       transition: transform 0.12s ease, filter 0.12s ease;
     }
     /* 마름모 (다이아몬드) 버튼 */
@@ -619,6 +620,7 @@
       transition: background 0.25s, border-color 0.25s, box-shadow 0.25s;
       box-shadow: 3px 3px 8px rgba(40,100,65,0.15);
       overflow: hidden;
+            z-index: 1;
     }
 
 
@@ -639,6 +641,15 @@
            line-height: 1;
   margin-top: -3px;
   color: var(--text-secondary);
+             position: relative;
+  z-index: 3;
+  -webkit-text-stroke: 0.25px rgba(255, 255, 255, 0.9);
+  text-shadow:
+    0 1px 2px rgba(255, 255, 255, 0.95),
+    0 -1px 2px rgba(255, 255, 255, 0.9),
+    1px 0 2px rgba(255, 255, 255, 0.9),
+    -1px 0 2px rgba(255, 255, 255, 0.9),
+    0 0 4px rgba(255, 255, 255, 0.85);
 }
     .subnav-item.active .diamond-btn {
       background: linear-gradient(135deg, #c8e8d8, #8ac8a8, #5aaa7a);
@@ -881,7 +892,7 @@
       border-top: 2px solid var(--border-gold2);
       display: flex;
       align-items: stretch;
-      height: 64px;
+      height: 83px;        /* ── 네비게이션 메인 버튼 높이 조절 이거인듯? 가장작은게64였음 ── */
       position: relative;
       z-index: 30;
     }
@@ -908,7 +919,7 @@
       border: none;
       cursor: pointer;
       border-right: 1.5px solid rgba(196,154,60,0.3);
-      padding: 7px 2px 5px;
+      padding: 9px 2px 7px;
       position: relative;
       -webkit-tap-highlight-color: transparent;
       transition: background 0.35s ease, transform 0.12s ease, filter 0.12s ease;
@@ -967,6 +978,8 @@
   text-shadow: 0 0 10px rgba(255,255,255,0.8), 0 0 4px rgba(200,240,220,0.6);
 }
 .nav-tab .nav-svg {
+       width: 29px;
+  height: 29px;
   color: rgba(100,100,100,0.7);
   transition: color 0.35s ease, filter 0.35s ease;
 }
@@ -1535,8 +1548,8 @@
 
 /* 마름모 버튼 속 이미지 — 45도 회전된 부모를 역보정해서 정방향으로 */
 .diamond-img {
-  width: 150%;
-  height: 150%;
+  width: 132%;
+  height: 132%;
   object-fit: cover;
   display: block;
   pointer-events: none;      /* ← 이미지 드래그/저장 차단 */
