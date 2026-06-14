@@ -138,18 +138,33 @@
 <!-- ③ 컨트롤 바 -->
 <div class="control-bar">
   <div class="extra-menu-panel" id="extra-menu-panel">
-    <button type="button" class="extra-btn extra-btn-danger pressable" onclick="fullReset()">전체 초기화</button>
-    <button type="button" class="extra-btn pressable" id="btn-partial-reset" onclick="partialReset()">캐릭터 초기화</button>
-    <button type="button" class="extra-btn extra-btn-random-all pressable" onclick="randomSelectAll()">전체 랜덤 선택</button>
-    <button type="button" class="extra-btn extra-btn-random pressable" onclick="randomSelectCurrent()">랜덤 선택</button>
+    <button type="button" class="extra-btn extra-btn-danger pressable" onclick="fullReset()">
+      <!-- 버튼 이미지 경로는 아래 img src에 적으세요. 예: images/menu/full-reset.png -->
+      <img class="extra-btn-img" src="" alt="" aria-hidden="true" />
+      <span class="extra-btn-label">전체 초기화</span>
+    </button>
+    <button type="button" class="extra-btn pressable" id="btn-partial-reset" onclick="partialReset()">
+      <!-- 버튼 이미지 경로는 아래 img src에 적으세요. 예: images/menu/nav-reset.png -->
+      <img class="extra-btn-img" src="" alt="" aria-hidden="true" />
+      <span class="extra-btn-label">캐릭터 초기화</span>
+    </button>
+    <button type="button" class="extra-btn extra-btn-home pressable" onclick="goHome()">
+      <!-- 홈 버튼 이미지 경로는 아래 img src에 적으세요. 예: images/menu/home.png -->
+      <img class="extra-btn-img" src="" alt="" aria-hidden="true" />
+      <span class="extra-btn-label">홈</span>
+    </button>
+    <button type="button" class="extra-btn extra-btn-random-all pressable" onclick="randomSelectAll()">
+      <!-- 버튼 이미지 경로는 아래 img src에 적으세요. 예: images/menu/random-all.png -->
+      <img class="extra-btn-img" src="" alt="" aria-hidden="true" />
+      <span class="extra-btn-label">전체 랜덤 선택</span>
+    </button>
+    <button type="button" class="extra-btn extra-btn-random pressable" onclick="randomSelectCurrent()">
+      <!-- 버튼 이미지 경로는 아래 img src에 적으세요. 예: images/menu/random-current.png -->
+      <img class="extra-btn-img" src="" alt="" aria-hidden="true" />
+      <span class="extra-btn-label">랜덤 선택</span>
+    </button>
   </div>
-  <button type="button" class="ctrl-btn ctrl-btn-back pressable" onclick="goHome()">
-    <span class="ctrl-icon">◀</span>
-    <span class="ctrl-label">뒤로가기</span>
-  </button>
-  <button type="button" class="ctrl-btn-idea pressable" onclick="openStatusOverlay()">
-    아이디어 통합
-  </button>
+ <div class="ctrl-address" aria-label="주소창">주소창</div>
   <button type="button" class="ctrl-btn ctrl-btn-menu pressable" id="btn-extra-menu" onclick="toggleExtraMenu()">
     <span class="ctrl-menu-icon" id="extra-menu-icon">☰</span>
   </button>
@@ -164,6 +179,8 @@
   <div class="bottom-nav">
     <button type="button" class="nav-btn nav-tab pressable active" id="nav-character" onclick="switchNav('character')">
       <div class="nav-icon">
+         <!-- 하단 캐릭터 버튼 이미지 경로는 아래 img src에 적으세요. 예: images/nav/character.png -->
+        <img class="nav-img" src="" alt="" aria-hidden="true" />
         <svg class="nav-svg" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <circle cx="11" cy="6.5" r="3.2" stroke="currentColor" stroke-width="1.5"/>
           <path d="M5 19 C5 14.5 7.5 12.5 11 12.5 C14.5 12.5 17 14.5 17 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -175,6 +192,8 @@
     
     <button type="button" class="nav-btn nav-tab pressable" id="nav-narrative2" onclick="switchNav('narrative2')">
       <div class="nav-icon">
+        <!-- 하단 스토리 버튼 이미지 경로는 아래 img src에 적으세요. 예: images/nav/story.png -->
+        <img class="nav-img" src="" alt="" aria-hidden="true" />
         
 <svg class="nav-svg" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
   <line x1="4" y1="6" x2="4" y2="16" stroke="currentColor" stroke-width="1.4"/>
@@ -192,9 +211,20 @@
       <div class="nav-label">스토리</div>
     </button>
 
+       <button type="button" class="nav-btn nav-tab nav-idea-tab pressable" id="nav-idea" onclick="openStatusOverlay()" aria-label="아이디어 통합">
+      <div class="nav-icon">
+        <!-- 하단 통합 버튼 이미지 경로는 아래 img src에 적으세요. 예: images/nav/idea.png -->
+        <img class="nav-img" src="" alt="" aria-hidden="true" />
+        <span class="nav-fallback-icon">✦</span>
+      </div>
+      <div class="nav-label">통합</div>
+    </button>
+
     
     <button type="button" class="nav-btn nav-tab pressable" id="nav-world" onclick="switchNav('world')">
       <div class="nav-icon">
+         <!-- 하단 세계관 버튼 이미지 경로는 아래 img src에 적으세요. 예: images/nav/world.png -->
+        <img class="nav-img" src="" alt="" aria-hidden="true" />
         <svg class="nav-svg" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.5"/>
           <ellipse cx="11" cy="11" rx="3.5" ry="8" stroke="currentColor" stroke-width="1"/>
@@ -209,6 +239,8 @@
     
     <button type="button" class="nav-btn nav-tab pressable" id="nav-compass" onclick="switchNav('compass')">
       <div class="nav-icon">
+         <!-- 하단 나침반 버튼 이미지 경로는 아래 img src에 적으세요. 예: images/nav/compass.png -->
+        <img class="nav-img" src="" alt="" aria-hidden="true" />
         <svg class="nav-svg" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.5"/>
           <path d="M11 4.5 L13 11 L11 12 L9 11 Z" fill="currentColor" opacity="0.95"/>
