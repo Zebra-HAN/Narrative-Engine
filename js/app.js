@@ -467,7 +467,7 @@ function showSubgroupCards(subId, groupIdx, sgIdx) {
         style="animation-delay:${animIdx * 0.04}s"
          data-global-idx="${globalIdx}"
         onclick="subgroupCardClick('${subId}', ${groupIdx}, ${sgIdx}, ${idx})"
-        ondblclick="subgroupCardDblClick('${subId}', ${groupIdx}, ${sgIdx}, ${idx})"
+        ondblclick="openSubgroupCardDetail('${subId}', ${groupIdx}, ${sgIdx}, ${idx})"
         onmousedown="startLongPress(this,'subgroup','${subId}',${groupIdx},${sgIdx},${idx})"
         ontouchstart="startLongPress(this,'subgroup','${subId}',${groupIdx},${sgIdx},${idx})"
         onmouseup="cancelLongPress()" ontouchend="cancelLongPress()"
@@ -497,7 +497,7 @@ function subgroupCardClick(subId, groupIdx, sgIdx, idx) {
   updateInfoPanel();
 }
 
-/* 서브그룹 카드 더블클릭 — 선택/해제 */
+/* 서브그룹 카드 선택/해제 */
 function subgroupCardDblClick(subId, groupIdx, sgIdx, idx) {
   const globalIdx = getSubgroupCardGlobalIdx(groupIdx, sgIdx, idx);
   if (!selectedCards[subId]) selectedCards[subId] = new Set();
@@ -534,6 +534,12 @@ function subgroupCardDblClick(subId, groupIdx, sgIdx, idx) {
   if (el) el.classList.add('active');
   updateNavBadges();
   refreshStatusIfOpen();
+}
+
+/* 서브그룹 카드 더블클릭 — 상세 정보 열기 */
+function openSubgroupCardDetail(subId, groupIdx, sgIdx, idx) {
+  subgroupCardClick(subId, groupIdx, sgIdx, idx);
+  openDetailSheet('card');
 }
 
 /* 서브그룹 페이지 배지 갱신 */
@@ -601,7 +607,7 @@ function showGroupCards(subId, groupIdx) {
     style="animation-delay:${animIdx * 0.04}s"
     data-global-idx="${globalIdx}"
     onclick="groupCardClick('${subId}', ${groupIdx}, ${idx})"
-    ondblclick="groupCardDblClick('${subId}', ${groupIdx}, ${idx})"
+    ondblclick="openGroupCardDetail('${subId}', ${groupIdx}, ${idx})"
     onmousedown="startLongPress(this,'group','${subId}',${groupIdx},${idx})"
     ontouchstart="startLongPress(this,'group','${subId}',${groupIdx},${idx})"
     onmouseup="cancelLongPress()" ontouchend="cancelLongPress()"
@@ -630,7 +636,7 @@ function groupCardClick(subId, groupIdx, idx) {
   updateInfoPanel();
 }
 
-/* 그룹 카드 더블클릭 — 선택/해제 */
+/* 그룹 카드 선택/해제 */
 function groupCardDblClick(subId, groupIdx, idx) {
   const globalIdx = getGroupCardGlobalIdx(groupIdx, idx);
   if (!selectedCards[subId]) selectedCards[subId] = new Set();
@@ -659,6 +665,12 @@ function groupCardDblClick(subId, groupIdx, idx) {
   if (el) el.classList.add('active');
   updateNavBadges();
   refreshStatusIfOpen();
+}
+
+/* 그룹 카드 더블클릭 — 상세 정보 열기 */
+function openGroupCardDetail(subId, groupIdx, idx) {
+  groupCardClick(subId, groupIdx, idx);
+  openDetailSheet('card');
 }
 
 function updateGroupBadges(subId) {
@@ -746,7 +758,7 @@ function showCardPage(subId, animate = true) {
   <div class="data-card pressable${sel}${deal}"${delay}
     data-global-idx="${idx}"
     onclick="cardClick('${subId}', ${idx})"
-    ondblclick="toggleCardSelect('${subId}', ${idx})"
+    ondblclick="openCardDetail('${subId}', ${idx})"
     onmousedown="startLongPress(this,'card','${subId}',${idx})"
     ontouchstart="startLongPress(this,'card','${subId}',${idx})"
     onmouseup="cancelLongPress()"  ontouchend="cancelLongPress()"
@@ -777,6 +789,12 @@ function cardClick(subId, idx) {
   focusedCard = { subId, idx, name: card.name, icon: card.icon, img: card.img, desc: card.desc };
   setInfoSlide(false);
   updateInfoPanel();
+}
+
+/* 일반 카드 더블클릭 — 상세 정보 열기 */
+function openCardDetail(subId, idx) {
+  cardClick(subId, idx);
+  openDetailSheet('card');
 }
 
 function setInfoSlide(showCategory) {
@@ -1575,7 +1593,7 @@ function runGroupButtonAction(btn) {
 
 
 /* ════════════════════════════════════════════════
-   LONG PRESS → 상세 정보 열기
+   LONG PRESS → 카드 선택/취소
 ════════════════════════════════════════════════ */
 let _lpTimer = null;
 let _lpStartX = 0;
@@ -1589,10 +1607,12 @@ function startLongPress(el, type, subId, a, b, c) {
 
   _lpTimer = setTimeout(() => {
     _lpTimer = null;
-    if (type === 'subgroup') subgroupCardClick(subId, a, b, c);
-    else if (type === 'group') groupCardClick(subId, a, b);
-    else cardClick(subId, a);
-    openDetailSheet('card');
+     if (type === 'subgroup') subgroupCardDblClick(subId, a, b, c);
+    else if (type === 'group') groupCardDblClick(subId, a, b);
+    else {
+      cardClick(subId, a);
+      toggleCardSelect(subId, a);
+    }
   }, LONG_PRESS_MS);
 }
 
