@@ -228,7 +228,8 @@ function switchNav(navId, skipAnimation) {
   if (nb) nb.classList.add('active');
 
   // 부분 초기화 버튼 텍스트
-  document.getElementById('btn-partial-reset').textContent = NAV_DATA[navId].resetLabel;
+  const partialResetLabel = document.querySelector('#btn-partial-reset .extra-btn-label');
+  if (partialResetLabel) partialResetLabel.textContent = NAV_DATA[navId].resetLabel;
 
   // 서브 메뉴 렌더
   renderSubnav(navId, !skipAnimation && prev !== navId);
