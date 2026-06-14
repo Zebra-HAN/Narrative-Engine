@@ -70,7 +70,7 @@ const CHARACTER_CARDS = {
         {
           id: 'race_human_skin',   /* 🟥🟥🟥🟥🟥🟥🟥 소그룹  1 🟥🟥🟥🟥🟥🟥🟥 */
           label: '피부',
-          icon: '🟫',
+          icon: '🟫', img: 'images/golem.png',
           cards: [         /* ─────[ ⬇️ 카드 ⬇️ ]───── */
             { icon: '⬜', name: '백색 2015 헤더 에러',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
             { icon: '🟡', name: '금발',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
