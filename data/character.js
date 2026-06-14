@@ -44,9 +44,10 @@ const CHARACTER_CARDS = {
     { icon:'🐺', name:'이방인'       }, { icon:'🌟', name:'선택받은 자'}, { icon:'🦊', name:'교활한 자'  },
     { icon:'🔗', name:'속박된 자'    }, { icon:'🌊', name:'방랑자'     },
       
- { type: 'section' ,  label: ' 헤더 — 추가 내용 ' },  
+ { type: 'section' ,  label: ' 수정 알림이 🚨' },  
     { icon:'⚖', name:'심판자' ,     desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
     { icon:'🌙', name:'어둠의 자',  desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
+    { icon:'☀',  name:'빛의 자' ,   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
     { icon:'☀',  name:'빛의 자' ,   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
   ],
 
