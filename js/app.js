@@ -1047,7 +1047,13 @@ function openDetailSheet(mode) {
                 class="detail-check-btn pressable${isChecked ? ' checked' : ''}"
                 onclick="toggleDetailCheck('${focusedCard.subId}', ${focusedCard.idx}, ${lineIdx})"
               >✅</button>
-              <span class="detail-line-text">${line}</span>
+                           <span
+                class="detail-line-text"
+                role="button"
+                tabindex="0"
+                onclick="toggleDetailCheck('${focusedCard.subId}', ${focusedCard.idx}, ${lineIdx})"
+                onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleDetailCheck('${focusedCard.subId}', ${focusedCard.idx}, ${lineIdx}); }"
+              >${line}</span>
             </div>`;
         }
       });
