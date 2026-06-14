@@ -14,7 +14,7 @@ const CHARACTER_NAV = {
     { id:'personality', label:'성격', icon:'💫'   },
     { id:'attribute',   label:'속성', icon:'⚡'  ,type:'group'  },
     { id:'ability',     label:'능력',   },
-    { id:'relation',    label:'관계', icon:'🔗'  ,type:'group'  },
+    { id:'relation',    label:'관계', icon:'🔗'    },
   ]
 };
 
