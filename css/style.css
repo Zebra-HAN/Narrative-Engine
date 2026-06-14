@@ -2078,3 +2078,62 @@ body {
   max-width: 430px;
   margin: 0 auto;
 }
+
+
+/* ── 요청 버튼 이미지: img src를 넣으면 버튼 전체를 배경처럼 꽉 채움 ── */
+.nav-btn.nav-tab,
+.extra-btn,
+.ctrl-btn-menu {
+  overflow: hidden;
+}
+
+.nav-img,
+.extra-btn-img,
+.ctrl-menu-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  pointer-events: none;
+  -webkit-user-drag: none;
+  z-index: 0;
+}
+
+.nav-img,
+.extra-btn-img,
+.ctrl-menu-img,
+.ctrl-btn-menu.open .ctrl-menu-img-closed,
+.ctrl-btn-menu:not(.open) .ctrl-menu-img-open {
+  display: none;
+}
+
+.nav-img[src]:not([src=""]),
+.extra-btn-img[src]:not([src=""]),
+.ctrl-btn-menu:not(.open) .ctrl-menu-img-closed[src]:not([src=""]),
+.ctrl-btn-menu.open .ctrl-menu-img-open[src]:not([src=""]) {
+  display: block;
+}
+
+.nav-tab .nav-icon,
+.nav-tab .nav-label,
+.extra-btn .extra-btn-label,
+.ctrl-btn-menu .ctrl-menu-icon {
+  position: relative;
+  z-index: 1;
+}
+
+.nav-icon:has(.nav-img[src]:not([src=""])) .nav-svg,
+.nav-icon:has(.nav-img[src]:not([src=""])) .nav-fallback-icon,
+.ctrl-btn-menu:has(.ctrl-menu-img-closed[src]:not([src=""])):not(.open) .ctrl-menu-icon,
+.ctrl-btn-menu:has(.ctrl-menu-img-open[src]:not([src=""])).open .ctrl-menu-icon {
+  display: none;
+}
+
+.nav-tab:has(.nav-img[src]:not([src=""])) .nav-label,
+.extra-btn:has(.extra-btn-img[src]:not([src=""])) .extra-btn-label {
+  color: #ffffff;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.75), 0 0 12px rgba(0,0,0,0.55);
+  font-weight: 700;
+}
