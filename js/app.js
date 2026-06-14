@@ -26,6 +26,7 @@ let selectedCards = {};   // { subId: Set<idx> }
 let selectedDetails = {}; // { "subId__globalIdx": Set<detailLineIdx> }
 let focusedCard  = null;  // { subId, idx, name, icon }
 let infoSlideCategory = false; // false=카드, true=카테고리
+let addressTrail = [];
 
 
 
@@ -108,6 +109,116 @@ function getSubDescription(subId) {
   const sub = navInfo ? navInfo.subs.find(s => s.id === subId) : null;
   const label = sub ? sub.label : subId;
   return `[${label}] 카테고리에 대한 설명이 여기에 표시됩니다. 추후 카테고리별 가이드와 활용 예시가 추가될 예정입니다.`;
+}
+
+function getSubInfo(subId) {
+  for (const nav of Object.values(NAV_DATA)) {
+    const sub = nav.subs.find(s => s.id === subId);
+    if (sub) return sub;
+  }
+  return null;
+}
+
+function setAddressTrail(trail) {
+  addressTrail = trail.filter(item => item && item.label);
+  renderAddressTrail();
+}
+
+function renderAddressTrail() {
+  const address = document.getElementById('ctrl-address');
+  if (!address) return;
+
+  address.innerHTML = '';
+  addressTrail.forEach((item, index) => {
+    const tag = document.createElement('button');
+    tag.type = 'button';
+    tag.className = 'address-tag';
+    tag.textContent = item.label;
+    tag.title = item.label;
+    tag.setAttribute('aria-label', `${item.label} 위치로 이동`);
+    tag.addEventListener('click', () => navigateAddressTag(index));
+    address.appendChild(tag);
+  });
+
+  requestAnimationFrame(() => {
+    address.scrollLeft = address.scrollWidth;
+  });
+}
+
+function navigateAddressTag(index) {
+  const item = addressTrail[index];
+  if (!item) return;
+
+  if (item.type === 'nav') {
+    switchNav(item.navId, false, { force: true });
+    return;
+  }
+
+  if (item.type === 'sub') {
+    selectSub(item.subId, item.navId);
+    return;
+  }
+
+  if (item.type === 'group') {
+    showSubgroupPage(item.subId, item.groupIdx);
+    return;
+  }
+
+  if (item.type === 'groupCards') {
+    showGroupCards(item.subId, item.groupIdx);
+    return;
+  }
+
+  if (item.type === 'subgroup') {
+    showSubgroupCards(item.subId, item.groupIdx, item.sgIdx);
+  }
+}
+
+function buildBaseTrail(navId, subId) {
+  const nav = NAV_DATA[navId];
+  const trail = [];
+  if (nav) trail.push({ type: 'nav', navId, label: nav.label });
+
+  if (subId) {
+    const sub = nav?.subs.find(s => s.id === subId) || getSubInfo(subId);
+    trail.push({ type: 'sub', navId, subId, label: sub?.label || subId });
+  }
+  return trail;
+}
+
+function setNavAddress(navId) {
+  setAddressTrail(buildBaseTrail(navId));
+}
+
+function setSubAddress(subId, navId) {
+  setAddressTrail(buildBaseTrail(navId, subId));
+}
+
+function setGroupAddress(subId, groupIdx, includeCards = false) {
+  const data = CARD_DATA[subId];
+  const grp = data?.groups?.[groupIdx];
+  if (!grp) return;
+
+  const trail = buildBaseTrail(currentNav, subId);
+  trail.push({
+    type: includeCards ? 'groupCards' : 'group',
+    subId,
+    groupIdx,
+    label: grp.label
+  });
+  setAddressTrail(trail);
+}
+
+function setSubgroupAddress(subId, groupIdx, sgIdx) {
+  const data = CARD_DATA[subId];
+  const grp = data?.groups?.[groupIdx];
+  const sg = grp?.subgroups?.[sgIdx];
+  if (!grp || !sg) return;
+
+  const trail = buildBaseTrail(currentNav, subId);
+  trail.push({ type: 'group', subId, groupIdx, label: grp.label });
+  trail.push({ type: 'subgroup', subId, groupIdx, sgIdx, label: sg.label });
+  setAddressTrail(trail);
 }
 
 /* ════════════════════════════════════════════════
@@ -207,15 +318,16 @@ function goToCreate() {
     void create.offsetWidth;
     create.classList.add('entering');
     setTimeout(() => create.classList.remove('entering'), 600);
-    switchNav('character', true);
+    switchNav('character', true, { silentAddress: true });
+    setAddressTrail([]);
   }, true);
 }
 
 /* ════════════════════════════════════════════════
    MAIN NAV SWITCH
 ════════════════════════════════════════════════ */
-function switchNav(navId, skipAnimation) {
-  if (navId === currentNav && !skipAnimation) return;
+function switchNav(navId, skipAnimation, options = {}) {
+  if (navId === currentNav && !skipAnimation && addressTrail.length > 0 && !options.force) return;
 
   const prev = currentNav;
   currentNav = navId;
@@ -238,6 +350,7 @@ function switchNav(navId, skipAnimation) {
   focusedCard = null;
   showDefaultCenter();
   updateInfoPanel();
+   if (!options.silentAddress) setNavAddress(navId);
 }
 
 function renderSubnav(navId, animate) {
@@ -284,6 +397,7 @@ function selectSub(subId, navId) {
 
   showCardPage(subId, !same);
   updateInfoPanel();
+    setSubAddress(subId, navId || currentNav);
 }
 
 /* ════════════════════════════════════════════════
@@ -425,6 +539,7 @@ function showSubgroupPage(subId, groupIdx) {
   area.appendChild(page);
 
   setupGroupButtonActions(page);
+   setGroupAddress(subId, groupIdx);
 }
 
 /* ════════════════════════════════════════════════
@@ -486,6 +601,7 @@ function showSubgroupCards(subId, groupIdx, sgIdx) {
   page.querySelectorAll('.card-deal').forEach(card => {
     card.addEventListener('animationend', () => card.classList.remove('card-deal'), { once: true });
   });
+   setSubgroupAddress(subId, groupIdx, sgIdx);
 }
 
 /* 서브그룹 카드 클릭 — info 패널 */
@@ -625,6 +741,7 @@ function showGroupCards(subId, groupIdx) {
   page.querySelectorAll('.card-deal').forEach(card => {
     card.addEventListener('animationend', () => card.classList.remove('card-deal'), { once: true });
   });
+   setGroupAddress(subId, groupIdx, true);
 }
 
 /* 그룹 카드 클릭 — info 패널 업데이트 */
