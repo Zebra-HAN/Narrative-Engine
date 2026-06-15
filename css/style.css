@@ -1993,11 +1993,12 @@
   word-break: keep-all;
 }
 
+
 /* ① meta 행 — 줄바꿈 제거, 너비 제한 */
 .status-card-meta {
   display: flex;
   align-items: baseline;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 5px;
   width: 100%;
   min-width: 0;
@@ -2043,12 +2044,16 @@
   white-space: nowrap;
 }
 
-/* ② path 전체 — inline-flex 대신 flex, 줄바꿈만 허용 */
+.status-category-name::after {
+  content: ' |';
+  color: var(--rose-gold-light);
+  opacity: 0.8;
+}
+
+/* ② path 전체 — 카테고리명 뒤에 이어지는 주소 텍스트 */
 .status-card-path {         /* 통합창의 카드 주소 */
-  display: flex;            /*  inline-flex → flex */
-  align-items: baseline;    /*  이것도 바꾸란 말이없네 하...이전은 센터였음 center; */
-  flex-wrap: wrap;          /* ← 줄바꿈 허용 */
-  gap: 0;
+  display: block;
+  flex: 1 1 auto;
   min-width: 0;
   max-width: 100%;
   color: var(--rose-gold);
