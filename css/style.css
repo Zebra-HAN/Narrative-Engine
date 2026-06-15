@@ -2025,12 +2025,14 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-size: 0.56rem;               /* ← 폰트 크기 줄이기 (기존보다 작게) */
 }
 
 .status-card-path span {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+  padding: 0 3px;                   /* ← span 양쪽에 여백 줘서 | 와 간격 확보 */
 }
 
 .status-card-path span::before {
