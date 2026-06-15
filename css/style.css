@@ -638,7 +638,7 @@
     .subnav-label {
   font-family: 'Noto Sans KR', 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
   font-size: 0.7rem;   /* 딱 보기 좋았던 폰트 크기 고정  이건폰트종류네 위쪽에써야하는→ font-family: 'Noto Sans KR', sans-serif;*/
-  font-weight: 650;
+  font-weight: 500;    /* 카테고리 폰트 서브네비 텍스트 크기 두께 볼드체 → 650 */
   line-height: 1.08;
   letter-spacing: -0.015em;
   margin-top: -2px;
@@ -666,7 +666,7 @@
     }
      .subnav-item.active .subnav-label {
       color: #ffffff;
-      font-weight: 750;
+      font-weight: 600;  /* 750에서 600(약간 선명)으로 축소 */
       text-shadow:
         0 1px 0 rgba(89, 67, 15, 1),
         1px 0 0 rgba(89, 67, 15, 0.98),
