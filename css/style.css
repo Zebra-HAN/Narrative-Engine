@@ -2066,15 +2066,15 @@
   word-break: keep-all;
 }
 
-.status-card-path::before {
-  content: 'BEFORE ';
-  color: red;
-}
-
-.status-card-path span::after {
+.status-card-path span::before {
   content: ' | ';                      /* ← 닫는 괄호 제거 */
   color: var(--rose-gold-light);    /* ← 구분자는 살짝 연하게 */
   opacity: 0.8;
+}
+
+.status-card-path span::after {
+  content: 'BEFORE ';
+  color: red;
 }
 
 .status-chip-sub-img {
