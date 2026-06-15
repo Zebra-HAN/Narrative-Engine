@@ -1991,13 +1991,15 @@
   word-break: keep-all;
 }
 
-
+/* ① meta 행 — 줄바꿈 제거, 너비 제한 */
 .status-card-meta {
   display: flex;
-  align-items: flex-start;
+  align-items: center;   /* ← flex-start; 이거랑 교체중. 이거는 지금 명령 안받았는데 바껴있길래 일단 센터로 바꿔본다..이상하면 이거탓일지도 */
   flex-wrap: wrap;              /* ← 추가: 넘치면 아래로 줄바꿈 */
   gap: 5px;
   min-width: 0;
+  max-width: 100%;          /* ← 추가 */
+  overflow: hidden;         /* ← 추가 */
   color: var(--gold-dim);
   font-size: 0.62rem;
   line-height: 1.25;
@@ -2037,24 +2039,28 @@
   white-space: nowrap;
 }
 
+/* ② path 전체 — inline-flex 대신 flex, 줄바꿈만 허용 */
 .status-card-path {         /* 통합창의 카드 주소 */
-  display: inline-flex;
-  align-items: center;
-  flex-wrap: wrap;              /* ← 줄바꿈 허용 */
+  display: flex;            /*  inline-flex → flex */
+  align-items: baseline;    /*  이것도 바꾸란 말이없네 하...이전은 센터였음 center; */
+  flex-wrap: wrap;          /* ← 줄바꿈 허용 */
   gap: 0;
   min-width: 0;
   max-width: 100%;              /* ← 부모 너비 초과 금지 */
   color: var(--rose-gold);          /* ← 세이지그린 계열 (#5a9e78) */
-  overflow: visible;            /* ← hidden; 제거 */
-  text-overflow: clip;          /* ← ellipsis;제거 */
+  overflow: hidden;           /*  아씨 이번엔또 히든으로? 뭘 왔다갔따하냐? 이거 맞냐... visible;  */
+  /* text-overflow: clip;    ←얘는 자르는거라네? 왜 또 있는거지? 이번 수정엔 얘는 안보이니까 일단 주석처리해봄     ← ellipsis;제거 이건 점으로 생략시키는 코드임 */
+  font-size: 0.50rem;               /* ← 통합창 주소 폰트 크기  */
   white-space: normal;          /* ← 줄바꿈 허용 */
-  font-size: 0.49rem;               /* ← 통합창 주소 폰트 크기  */
 }
 
+/* ③ span — 자기 자신은 안 깨지되, 전체 흐름 안에서 줄바꿈 허용 */
 .status-card-path span {
-  min-width: 0;
+  /* min-width: 0;
   overflow: visible;     
-  text-overflow: clip;  
+  text-overflow: clip;   일단 이 3줄 모두 주석처리 */
+
+  display: inline;          /* ← 추가  이게 추가됨 */
   white-space: nowrap;          /* ← span 자체는 중간에 안 깨지게 유지 */
   padding: 0 3px;                   /* ← span 양쪽에 여백 줘서 | 와 간격 확보 */
 }
