@@ -1999,7 +1999,7 @@
   display: flex;
   align-items: baseline;
   flex-wrap: nowrap;
-  gap: 5px;
+  gap: 4px;     /* 카드 주소 사이간격 조절, 원래5 */
   width: 100%;
   min-width: 0;
   max-width: 100%;
@@ -2016,6 +2016,7 @@
   transform: rotate(45deg);
   overflow: hidden;
   border: 1px solid rgba(58,125,90,0.35);
+  border-radius: 5px;    /* 이거다!  통합창-마름모 모서리 → 둥글게!! */
   background: #edf7f1;
   display: inline-flex;
   align-items: center;
