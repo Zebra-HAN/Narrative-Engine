@@ -2016,11 +2016,12 @@
   white-space: nowrap;
 }
 
-.status-card-path {
+.status-card-path {         /* 통합창의 카드 주소 */
   display: inline-flex;
-  gap: 4px;
+  align-items: center;
+  gap: 0;
   min-width: 0;
-  color: var(--text-secondary);
+  color: var(--rose-gold);          /* ← 세이지그린 계열 (#5a9e78) */
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2033,11 +2034,13 @@
 }
 
 .status-card-path span::before {
-  content: '(';
+  content: ' | ';
+  color: var(--rose-gold-light);    /* ← 구분자는 살짝 연하게 */
+  opacity: 0.8;
 }
 
 .status-card-path span::after {
-  content: ')';
+  content: '';                      /* ← 닫는 괄호 제거 */
 }
 
 .status-chip-sub-img {
