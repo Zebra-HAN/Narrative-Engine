@@ -636,21 +636,27 @@
     }
 
     .subnav-label {
-  font-size: 0.68rem; /* 딱 보기 좋았던 폰트 크기 고정 font-family: 'Noto Sans KR', sans-serif;*/
-  font-weight: 500;
-  line-height: 1;
-  margin-top: -3px;
-  color: #ffffff;    /* ← 흰색 글자 마름모 카테고리 이름의 폰트색 */
+  font-family: 'Noto Sans KR', 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+  font-size: 0.7rem;   /* 딱 보기 좋았던 폰트 크기 고정  이건폰트종류네 위쪽에써야하는→ font-family: 'Noto Sans KR', sans-serif;*/
+  font-weight: 650;
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+  margin-top: -2px;
+  color: #ffffff;   /* ← 흰색 글자 마름모 카테고리 이름의 폰트색 */
   position: relative;
   z-index: 3;
-
--webkit-text-stroke: 0.25px rgba(34, 68, 34, 0.9);   /* ← 이게 외곽선 */
-text-shadow:
-  0 1px 2px rgba(34, 68, 34, 0.95),
-  0 -1px 2px rgba(34, 68, 34, 0.9),
-  1px 0 2px rgba(34, 68, 34, 0.9),
-  -1px 0 2px rgba(34, 68, 34, 0.9),
-  0 0 4px rgba(34, 68, 34, 0.85);
+           
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+  text-shadow:
+    0 1px 0 rgba(24, 64, 42, 1),
+    1px 0 0 rgba(24, 64, 42, 0.96),
+    0 -1px 0 rgba(24, 64, 42, 0.96),
+    -1px 0 0 rgba(24, 64, 42, 0.96),
+    1px 1px 1px rgba(24, 64, 42, 0.92),
+    -1px 1px 1px rgba(24, 64, 42, 0.9),
+    0 2px 4px rgba(16, 48, 31, 0.72),
+    0 0 7px rgba(46, 107, 74, 0.66);
 
 }
     .subnav-item.active .diamond-btn {
@@ -658,7 +664,19 @@ text-shadow:
       border-color: #2e6b4a;
       box-shadow: 3px 3px 10px rgba(40,100,65,0.25), 0 0 12px rgba(58,125,90,0.3);
     }
-    .subnav-item.active .subnav-label { color: var(--gold-bright); font-weight: 700; }
+     .subnav-item.active .subnav-label {
+      color: #ffffff;
+      font-weight: 750;
+      text-shadow:
+        0 1px 0 rgba(89, 67, 15, 1),
+        1px 0 0 rgba(89, 67, 15, 0.98),
+        0 -1px 0 rgba(89, 67, 15, 0.96),
+        -1px 0 0 rgba(89, 67, 15, 0.96),
+        1px 1px 1px rgba(89, 67, 15, 0.94),
+        -1px 1px 1px rgba(89, 67, 15, 0.9),
+        0 2px 4px rgba(52, 40, 9, 0.72),
+        0 0 8px rgba(255, 213, 94, 0.85);
+    }
 
     /* ── CENTER AREA ── */
     .center-area {
