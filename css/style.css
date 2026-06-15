@@ -1107,12 +1107,7 @@
       margin-bottom: 0;
     }
     .status-sub-label {
-      font-size: 0.65rem;
-      color: var(--gold-dim);
-      letter-spacing: 0.1em;
-      margin-bottom: 6px;
-      padding-left: 8px;
-      border-left: 2px solid var(--gold-dim);
+      display: none;
     }
     .status-chips {
       display: flex;
@@ -1142,7 +1137,7 @@
       object-fit: contain;
       border-radius: 4px;
       border: 1px solid rgba(58,125,90,0.18);
-      background: #fff;
+      background: transparent;
       display: block;
       margin: 0 auto;
       pointer-events: none;
@@ -1932,6 +1927,108 @@
   word-break: keep-all;
 }
 
+
+.status-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  color: var(--gold-dim);
+  font-size: 0.62rem;
+  line-height: 1.25;
+}
+
+.status-category-mark {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  transform: rotate(45deg);
+  overflow: hidden;
+  border: 1px solid rgba(58,125,90,0.35);
+  background: #edf7f1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-category-img {
+  width: 145%;
+  height: 145%;
+  object-fit: cover;
+  transform: rotate(-45deg);
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+.status-category-icon-text {
+  transform: rotate(-45deg);
+  font-size: 0.62rem;
+  line-height: 1;
+}
+
+.status-category-name {
+  font-weight: 700;
+  color: #2e6b4a;
+  white-space: nowrap;
+}
+
+.status-card-path {
+  display: inline-flex;
+  gap: 4px;
+  min-width: 0;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status-card-path span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.status-card-path span::before {
+  content: '(';
+}
+
+.status-card-path span::after {
+  content: ')';
+}
+
+.status-chip-sub-img {
+  width: min(78%, 105px);
+  max-height: 86px;
+  object-fit: contain;
+  border-radius: 6px;
+  border: 1px solid rgba(58,125,90,0.16);
+  background: transparent;
+  display: block;
+  margin: 2px auto 0;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+.detail-sub-image-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(58,125,90,0.24);
+}
+
+.detail-sub-img {
+  width: min(78%, 220px);
+  max-height: 210px;
+  object-fit: contain;
+  border-radius: 12px;
+  border: 1.5px solid rgba(58,125,90,0.2);
+  box-shadow: 0 4px 14px rgba(58,125,90,0.12);
+  cursor: pointer;
+  background: transparent;
+  -webkit-user-drag: none;
+}
 
 /* ── 주소창 + 메뉴 버튼 상단 컨트롤 ── */
 .ctrl-address {
