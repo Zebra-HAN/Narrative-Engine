@@ -2078,13 +2078,13 @@
 }
 
 .status-card-path span::before {
-  content: ' | ';
-  color: var(--rose-gold-light);    /* ← 구분자는 살짝 연하게 */
-  opacity: 0.8;
+  content: '  ';
 }
 
 .status-card-path span::after {
-  content: '';                      /* ← 닫는 괄호 제거 */
+  content: ' | ';                      /* ← 닫는 괄호 제거 */
+  color: var(--rose-gold-light);    /* ← 구분자는 살짝 연하게 */
+  opacity: 0.8;
 }
 
 .status-chip-sub-img {
