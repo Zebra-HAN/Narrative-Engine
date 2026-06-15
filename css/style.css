@@ -1994,7 +1994,8 @@
 
 .status-card-meta {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  flex-wrap: wrap;              /* ← 추가: 넘치면 아래로 줄바꿈 */
   gap: 5px;
   min-width: 0;
   color: var(--gold-dim);
@@ -2042,11 +2043,12 @@
   flex-wrap: wrap;              /* ← 줄바꿈 허용 */
   gap: 0;
   min-width: 0;
+  max-width: 100%;              /* ← 부모 너비 초과 금지 */
   color: var(--rose-gold);          /* ← 세이지그린 계열 (#5a9e78) */
   overflow: visible;            /* ← hidden; 제거 */
   text-overflow: clip;          /* ← ellipsis;제거 */
-  white-space: normal;          /* ← nowrap;  해제 → 줄바꿈 허용 */ 
-  font-size: 0.56rem;               /* ← 폰트 크기 줄이기 (기존보다 작게) */
+  white-space: normal;          /* ← 줄바꿈 허용 */
+  font-size: 0.49rem;               /* ← 통합창 주소 폰트 크기  */
 }
 
 .status-card-path span {
