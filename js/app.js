@@ -388,6 +388,22 @@ function goToCreate() {
   }, true);
 }
 
+function setBottomNavState(navId) {
+  const bottomNav = document.getElementById('bottom-nav');
+  if (bottomNav) bottomNav.dataset.activeNav = navId;
+
+  const activeButtonMap = {
+    character: 'nav-character',
+    narrative2: 'nav-narrative2',
+    idea: 'nav-idea',
+    world: 'nav-world',
+    compass: 'nav-compass'
+  };
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  const activeButton = document.getElementById(activeButtonMap[navId]);
+  if (activeButton) activeButton.classList.add('active');
+}
+
 /* ════════════════════════════════════════════════
    MAIN NAV SWITCH
 ════════════════════════════════════════════════ */
@@ -398,11 +414,8 @@ function switchNav(navId, skipAnimation, options = {}) {
   currentNav = navId;
   currentSubId = null;
 
-  // 버튼 상태 (부드러운 전환 — CSS transition)
-  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
-  const navMap = { character:'nav-character', narrative2:'nav-narrative2', world:'nav-world', compass:'nav-compass' };
-  const nb = document.getElementById(navMap[navId]);
-  if (nb) nb.classList.add('active');
+    // 버튼 상태 (인스타그램식 선택 배경 이동 — CSS transition)
+  setBottomNavState(navId);
 
   // 부분 초기화 버튼 텍스트
   const partialResetLabel = document.querySelector('#btn-partial-reset .extra-btn-label');
@@ -1384,21 +1397,24 @@ function closeDetailSheet(e) {
   document.getElementById('detail-overlay').classList.remove('active');
 }
 
+
 /* ════════════════════════════════════════════════
    STATUS OVERLAY
 ════════════════════════════════════════════════ */
 function openStatusOverlay() {
+  setBottomNavState('idea');
   renderStatusContent();
   document.getElementById('status-overlay').classList.add('active');
   attachSwipeToClose(
     document.querySelector('.status-panel'),
-    () => document.getElementById('status-overlay').classList.remove('active')
+     () => closeStatusOverlay()
   );
 }
 
 function closeStatusOverlay(e) {
   if (e && e.target !== document.getElementById('status-overlay')) return;
   document.getElementById('status-overlay').classList.remove('active');
+    setBottomNavState(currentNav);
 }
 
 function renderStatusContent() {
