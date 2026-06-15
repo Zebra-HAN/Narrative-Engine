@@ -2047,7 +2047,7 @@
 
 /* ② path 전체 — 카테고리명 뒤에 이어지는 주소 텍스트 */
 .status-card-path {         /* 통합창의 카드 주소 */
-  display: block;
+  display: inline;
   flex: 1 1 auto;
   min-width: 0;
   max-width: 100%;
@@ -2059,7 +2059,8 @@
   word-break: keep-all;
 }
 
-   display: inline;
+  .status-card-path span {
+  display: inline;
   white-space: normal;
   padding: 0;
   overflow-wrap: anywhere;
@@ -2067,15 +2068,13 @@
 }
 
 .status-card-path span::before {
-  content: ' | ';                      /* ← 닫는 괄호 제거 */
-  color: var(--rose-gold-light);    /* ← 구분자는 살짝 연하게 */
+  content: ' | ';                   /* 종족 | 그룹명 | 서브그룹명 */
+  color: var(--rose-gold-light);    /* 구분자는 살짝 연하게 */
   opacity: 0.8;
 }
 
 .status-card-path span::after {
- content: ' | ';                      /* ← 닫는 괄호 제거 */
-  color: var(--rose-gold-light);    /* ← 구분자는 살짝 연하게 */
-  opacity: 0.8;
+  content: none;
 }
 
 .status-chip-sub-img {
