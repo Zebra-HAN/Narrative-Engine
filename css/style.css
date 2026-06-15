@@ -905,10 +905,10 @@
       --nav-indicator-width: 13.6%;
       --nav-indicator-height: 64px;
       --nav-indicator-radius: 20px;
-      --nav-label-y: 0px;
-      --nav-img-size: 30px;
-      --nav-img-x: 0px;
-      --nav-img-y: 0px;
+      --nav-label-y: -5px;     /* 음수 값을 주면 Nav버튼 글자 위로 이동 */
+      --nav-img-size: 30px;   /* 메인 버튼 아이콘 이미지가 너무 크면 이 값을 줄이세요 (예: 24px, 20px) */
+      --nav-img-x: 30px;       /* 음수=왼쪽으로, 양수=오른쪽으로 이동 */
+      --nav-img-y: 50px;       /* 음수=위로, 양수=아래로 이동 */
            
       flex-shrink: 0;
       background: linear-gradient(180deg, #ffffff 0%, #f8f8f8 100%);
