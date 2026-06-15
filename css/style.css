@@ -640,9 +640,11 @@
   font-weight: 500;
   line-height: 1;
   margin-top: -3px;
-  color: var(--text-secondary);
+  color: #ffffff;    /* ← 흰색 글자 마름모 카테고리 이름의 폰트색 */
   position: relative;
   z-index: 3;
+  -webkit-text-stroke: 0.6px var(--gold-bright);    /* ← 짙은 그린 외곽선 */
+  text-shadow: none;
 
 }
     .subnav-item.active .diamond-btn {
