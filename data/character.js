@@ -135,7 +135,7 @@ const CHARACTER_CARDS = {
     /* ── 의인화 계열 ── */
     {
       id: 'race_animal',
-      label: '의인화도 테스트중',
+      label: '의인화도 테스트중 이거도 엄청 길게 해봐야겠다',
       icon: '🐾',
       subgroups: [
         {
@@ -188,12 +188,12 @@ const CHARACTER_CARDS = {
     /* ── 판타지 계열 ── */
     {
       id: 'race_fantasy',
-      label: '판타지',
+      label: '판타지도 어쩔 수 없이',
       icon: '✨',
       subgroups: [
         {
           id: 'race_fantasy_demi',
-          label: '아인종',
+          label: '아인종  과 함께 해보는거야 굳',
           icon: '🧝',
           cards: [
             { icon: '🧝', name: '엘프' },
