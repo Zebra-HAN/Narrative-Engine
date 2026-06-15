@@ -97,7 +97,7 @@ const CHARACTER_CARDS = {
         },
         {
           id: 'race_human_hair',     /* 🟧🟧🟧🟧🟧🟧🟧 소그룹  2 🟧🟧🟧🟧🟧🟧🟧 */
-          label: '모발',
+          label: '모발 이름 테스트중 이건 엄청길게 함 해보자',
           icon: '💇',
           cards: [        /* ─────[ ⬇️ 카드 ⬇️ ]───── */
             { icon: '🟡', name: '금발',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
@@ -108,22 +108,22 @@ const CHARACTER_CARDS = {
         },
         {
           id: 'race_human_eye',    /* 🟨🟨🟨🟨🟨🟨🟨  소그룹  3  🟨🟨🟨🟨🟨🟨🟨 */
-          label: '눈',
+          label: '눈 도 한번',
           icon: '👁',
           cards: [         /* ─────[ ⬇️ 카드 ⬇️ ]───── */
-            { icon: '🔵', name: '청안',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
-            { icon: '🟤', name: '갈안',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
-            { icon: '🔴', name: '홍안',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '🔵', name: '청안 길이',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '🟤', name: '갈안 테스트중입니다',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '🔴', name: '홍안 테스트중입니다 아시겠',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
             { icon: '💜', name: '자안',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
           ]   /* ───────────────── 카드3 ───────────────── */
         },
         {
           id: 'race_human_body',   /* 🟩🟩🟩🟩🟩🟩🟩 소그룹  4  🟩🟩🟩🟩🟩🟩🟩 */
-          label: '신체',
+          label: '신체이름 테스트중 길게해',
           icon: '💪',
           cards: [         /* ─────[ ⬇️ 카드 ⬇️ ]───── */
-            { icon: '💪', name: '근육질',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
-            { icon: '🪶', name: '날렵한',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '💪', name: '근육질 이름도 길게 해보자 엄청길게',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '🪶', name: '날렵한 것은 적',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
             { icon: '🧸', name: '통통한',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
             { icon: '📏', name: '장신형',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
           ]  /* ───────────────── 카드4 ───────────────── */
@@ -135,12 +135,12 @@ const CHARACTER_CARDS = {
     /* ── 의인화 계열 ── */
     {
       id: 'race_animal',
-      label: '의인화',
+      label: '의인화도 테스트중',
       icon: '🐾',
       subgroups: [
         {
           id: 'race_animal_land',
-          label: '육지 동물',
+          label: '육지 동물길어지면',
           icon: '🐺',
           cards: [
             { icon: '🐺', name: '늑대인간' },
@@ -162,7 +162,7 @@ const CHARACTER_CARDS = {
         },
         {
           id: 'race_animal_insect',
-          label: '곤충',
+          label: '곤충도 엄청 길어지면 어케될까요?',
           icon: '🐛',
           cards: [
             { icon: '🐝', name: '벌인간' },
@@ -339,7 +339,7 @@ const CHARACTER_CARDS = {
       },
       {
         id: 'attribute_2',
-        label: '속성 2',
+        label: '이쪽도 좀 길게',
         icon: '🐾',
         cards: [
     { icon:'🏴', name:'해적'      }, { icon:'🐾', name:'사냥꾼'      }, { icon:'💰', name:'상인'     },
