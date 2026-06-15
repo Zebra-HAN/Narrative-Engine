@@ -2047,11 +2047,8 @@
 
 /* ② path 전체 — 카테고리명 뒤에 이어지는 주소 텍스트 */
 .status-card-path {         /* 통합창의 카드 주소 */
- display: inline-flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 4px;
-  flex: 0 1 auto;
+  display: block;
+  flex: 1 1 auto;
   min-width: 0;
   max-width: 100%;
   color: var(--rose-gold);
