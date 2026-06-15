@@ -24,11 +24,76 @@ let currentNav   = 'character';
 let currentSubId = null;
 let selectedCards = {};   // { subId: Set<idx> }
 let selectedDetails = {}; // { "subId__globalIdx": Set<detailLineIdx> }
+let selectedSubImages = {}; // { "subId__globalIdx": true }
 let focusedCard  = null;  // { subId, idx, name, icon }
 let infoSlideCategory = false; // false=카드, true=카테고리
 let addressTrail = [];
 
 
+
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function getCardLocationInfo(subId, globalIdx) {
+  const sub = getSubInfo(subId);
+  const data = CARD_DATA[subId];
+  const info = {
+    categoryLabel: sub?.label || subId,
+    categoryIcon: sub?.icon,
+    categoryImg: sub?.img,
+    pathLabels: []
+  };
+
+  if (!data || Array.isArray(data) || !data.groups) return info;
+
+  for (let groupIdx = 0; groupIdx < data.groups.length; groupIdx++) {
+    const grp = data.groups[groupIdx];
+    if (!grp) continue;
+
+    if (grp.subgroups) {
+      for (let sgIdx = 0; sgIdx < grp.subgroups.length; sgIdx++) {
+        const sg = grp.subgroups[sgIdx];
+        const cardIdx = globalIdx - ((groupIdx + 1) * 1000000) - (sgIdx * 1000);
+        if (Number.isInteger(cardIdx) && cardIdx >= 0 && cardIdx < (sg?.cards?.length || 0)) {
+          info.pathLabels = [grp.label, sg.label].filter(Boolean);
+          return info;
+        }
+      }
+      continue;
+    }
+
+    const cardIdx = globalIdx - (groupIdx * 1000);
+    if (Number.isInteger(cardIdx) && cardIdx >= 0 && cardIdx < (grp.cards?.length || 0)) {
+      info.pathLabels = [grp.label].filter(Boolean);
+      return info;
+    }
+  }
+
+  return info;
+}
+
+function renderStatusCategoryMeta(subId, globalIdx) {
+  const info = getCardLocationInfo(subId, globalIdx);
+  const categoryIcon = info.categoryImg
+    ? `<img class="status-category-img" src="${escapeHtml(info.categoryImg)}" alt="" draggable="false">`
+    : `<span class="status-category-icon-text">${escapeHtml(info.categoryIcon || '◆')}</span>`;
+  const pathHtml = info.pathLabels.length > 0
+    ? `<span class="status-card-path">${info.pathLabels.map(label => `<span>${escapeHtml(label)}</span>`).join('')}</span>`
+    : '';
+
+  return `<div class="status-card-meta">
+    <span class="status-category-mark">${categoryIcon}</span>
+    <span class="status-category-name">${escapeHtml(info.categoryLabel)}</span>
+    ${pathHtml}
+  </div>`;
+}
 
 function isSectionItem(item) {
   return item && item.type === 'section';
@@ -564,8 +629,7 @@ function showSubgroupCards(subId, groupIdx, sgIdx) {
 
   if (!selectedCards[subId]) selectedCards[subId] = new Set();
 
-  let html = `<div class="section-label">${formatLabel(sg.label, sg.icon)}</div>`;
-  html += '<div class="card-grid">';
+ let html = '<div class="card-grid">';
 
   let sgCardRealIdx = 0;
   sg.cards.forEach((card, rawIdx) => {
@@ -707,8 +771,7 @@ function showGroupCards(subId, groupIdx) {
   // 카드 idx = groupIdx * 1000 + cardIdx
   const offset = groupIdx * 1000;
 
-  let html = `<div class="section-label">${formatLabel(grp.label, grp.icon)}</div>`;
-  html += '<div class="card-grid">';
+  let html = '<div class="card-grid">';
   let grpCardRealIdx = 0;
   grp.cards.forEach((card, rawIdx) => {
     if (card.type === 'section') {
@@ -857,7 +920,7 @@ function showCardPage(subId, animate = true) {
   const subInfo = navInfo ? navInfo.subs.find(s => s.id === subId) : null;
   const label = subInfo ? subInfo.label : subId;
 
-  let html = `<div class="section-label">${label}</div><div class="card-grid">`;
+  let html = '<div class="card-grid">';
 
   if (!selectedCards[subId]) selectedCards[subId] = new Set();
 
@@ -1193,10 +1256,39 @@ function openDetailSheet(mode) {
             </div>`;
         }
       });
+             if (card?.subImg) {
+        const subImageChecked = !!selectedSubImages[detailKey];
+        bodyHtml += `
+          <div class="detail-sub-image-row">
+            <button
+              type="button"
+              class="detail-check-btn detail-sub-image-check pressable${subImageChecked ? ' checked' : ''}"
+              onclick="toggleSubImageCheck('${focusedCard.subId}', ${focusedCard.idx})"
+            >✅</button>
+            <img
+              class="detail-sub-img"
+              src="${card.subImg}"
+              alt="${focusedCard.name} 서브 이미지"
+              draggable="false"
+              onclick="toggleSubImageCheck('${focusedCard.subId}', ${focusedCard.idx})"
+            >
+          </div>`;
+      }
       bodyEl.innerHTML = bodyHtml;
     } else {
-      divEl.style.display = 'none';
-      bodyEl.innerHTML = '';
+          const detailKey = `${focusedCard.subId}__${focusedCard.idx}`;
+      if (card?.subImg) {
+        divEl.style.display = '';
+        const subImageChecked = !!selectedSubImages[detailKey];
+        bodyEl.innerHTML = `
+          <div class="detail-sub-image-row">
+            <button type="button" class="detail-check-btn detail-sub-image-check pressable${subImageChecked ? ' checked' : ''}" onclick="toggleSubImageCheck('${focusedCard.subId}', ${focusedCard.idx})">✅</button>
+            <img class="detail-sub-img" src="${card.subImg}" alt="${focusedCard.name} 서브 이미지" draggable="false" onclick="toggleSubImageCheck('${focusedCard.subId}', ${focusedCard.idx})">
+          </div>`;
+      } else {
+        divEl.style.display = 'none';
+        bodyEl.innerHTML = '';
+      }
     }
 
   } else if (mode === 'category') {
@@ -1248,6 +1340,30 @@ function toggleDetailCheck(subId, globalIdx, lineIdx) {
   if (set.size === 0) delete selectedDetails[detailKey];
 
   // 아이디어 통합 창 갱신
+  refreshStatusIfOpen();
+}
+
+
+function toggleSubImageCheck(subId, globalIdx) {
+  const detailKey = `${subId}__${globalIdx}`;
+
+  if (selectedSubImages[detailKey]) {
+    delete selectedSubImages[detailKey];
+  } else {
+    selectedSubImages[detailKey] = true;
+    if (!selectedCards[subId]) selectedCards[subId] = new Set();
+    selectedCards[subId].add(globalIdx);
+    _syncCardSelectedDOM(subId, globalIdx);
+    renderSubnav(currentNav, false);
+    const el = document.querySelector(`[data-sub-id="${subId}"]`);
+    if (el) el.classList.add('active');
+    updateNavBadges();
+  }
+
+  document
+    .querySelectorAll(`.detail-sub-image-check[onclick*="toggleSubImageCheck('${subId}', ${globalIdx})"]`)
+    .forEach(btn => btn.classList.toggle('checked', !!selectedSubImages[detailKey]));
+
   refreshStatusIfOpen();
 }
 
@@ -1326,10 +1442,15 @@ function renderStatusContent() {
           const chipImgHtml = card.img
             ? `<img class="status-chip-img" src="${card.img}" alt="" draggable="false">`
             : '';
+                  const subImageHtml = card.subImg && selectedSubImages[detailKey]
+            ? `<img class="status-chip-sub-img" src="${card.subImg}" alt="" draggable="false">`
+            : '';
+          const metaHtml = renderStatusCategoryMeta(sub.id, globalIdx);
           const chipDescHtml = card.desc
             ? `<span class="status-chip-desc">${card.desc}</span>`
             : '';
           itemsHtml += `<div class="status-chip-wrap">
+               ${metaHtml}
             <div class="status-chip">
               ${chipImgHtml}
               <div class="status-chip-text">
@@ -1338,6 +1459,7 @@ function renderStatusContent() {
               </div>
             </div>
             ${detailHtml}
+             ${subImageHtml}
           </div>`;
         }
       });
@@ -1461,6 +1583,7 @@ async function fullReset() {
   if (!ok) return;
   selectedCards = {};
   selectedDetails = {};
+   selectedSubImages = {};
   if (currentSubId) showCardPage(currentSubId, false);
   renderSubnav(currentNav, false);
   if (currentSubId) {
