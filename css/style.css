@@ -2016,7 +2016,7 @@
   transform: rotate(45deg);
   overflow: hidden;
   border: 1px solid rgba(58,125,90,0.35);
-  border-radius: 5px;    /* 이거다!  통합창-마름모 모서리 → 둥글게!! */
+  border-radius: 2.5px;    /* 이거다!  통합창-마름모 모서리 → 둥글게!! */
   background: #edf7f1;
   display: inline-flex;
   align-items: center;
@@ -2059,12 +2059,6 @@
   word-break: keep-all;
 }
 
-/* ③ span — 자기 자신은 안 깨지되, 전체 흐름 안에서 줄바꿈 허용 */
-.status-card-path span {
-  /* min-width: 0;
-  overflow: visible;     
-  text-overflow: clip;   일단 이 3줄 모두 주석처리 */
-
    display: inline;
   white-space: normal;
   padding: 0;
@@ -2073,13 +2067,14 @@
 }
 
 .status-card-path span::before {
-  content: '  ';
-}
-
-.status-card-path span::after {
   content: ' | ';                      /* ← 닫는 괄호 제거 */
   color: var(--rose-gold-light);    /* ← 구분자는 살짝 연하게 */
   opacity: 0.8;
+}
+
+.status-card-path span::after {
+  content: '  ';                      /* ← 닫는 괄호 제거 */
+
 }
 
 .status-chip-sub-img {
