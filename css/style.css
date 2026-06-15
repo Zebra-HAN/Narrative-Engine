@@ -636,20 +636,14 @@
     }
 
     .subnav-label {
-      font-size: 0.68rem; /* 딱 보기 좋았던 폰트 크기 고정 font-family: 'Noto Sans KR', sans-serif;*/
+  font-size: 0.68rem; /* 딱 보기 좋았던 폰트 크기 고정 font-family: 'Noto Sans KR', sans-serif;*/
   font-weight: 500;
-           line-height: 1;
+  line-height: 1;
   margin-top: -3px;
   color: var(--text-secondary);
-             position: relative;
+  position: relative;
   z-index: 3;
-  -webkit-text-stroke: 0.25px rgba(255, 255, 255, 0.9);
-  text-shadow:
-    0 1px 2px rgba(255, 255, 255, 0.95),
-    0 -1px 2px rgba(255, 255, 255, 0.9),
-    1px 0 2px rgba(255, 255, 255, 0.9),
-    -1px 0 2px rgba(255, 255, 255, 0.9),
-    0 0 4px rgba(255, 255, 255, 0.85);
+
 }
     .subnav-item.active .diamond-btn {
       background: linear-gradient(135deg, #c8e8d8, #8ac8a8, #5aaa7a);
