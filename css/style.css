@@ -577,9 +577,8 @@
       flex-shrink: 0;
   background: #ffffff; /* 깔끔한 흰색 배경 유지 */
   border-top: 1px solid rgba(58, 125, 90, 0.15);
-   padding: 4px 0 2px;
-  height: 66px;
-  overflow: hidden;
+  padding: 1px 0 0;
+  height: 58px;
 }
 
     .subnav-scroll {
