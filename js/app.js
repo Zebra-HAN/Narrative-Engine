@@ -1483,7 +1483,7 @@ function renderStatusContent() {
       itemsHtml += '</div></div>';
     });
 
-    const content = hasAny ? itemsHtml : '<div class="status-empty">선택 없음</div>';
+    const content = hasAny ? itemsHtml : '<div class="status-empty">  </div>';  /* 선택 없음 */
     return `<div class="status-section"><div class="status-section-title">${nav.label}</div>${content}</div>`;
   }
 
