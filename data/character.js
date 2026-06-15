@@ -135,7 +135,7 @@ const CHARACTER_CARDS = {
     /* ── 의인화 계열 ── */
     {
       id: 'race_animal',
-      label: '의인화도 테스트중 이거도 엄청 길게 해봐야겠다',
+      label: '의인화도 테스트중 이거도 엄청 길게 해봐야겠다 그치응',
       icon: '🐾',
       subgroups: [
         {
@@ -162,7 +162,7 @@ const CHARACTER_CARDS = {
         },
         {
           id: 'race_animal_insect',
-          label: '곤충도 엄청 길어지면 어케될까요?',
+          label: '곤충도 엄청 길어지면 어케될까요?이거 엄청길게하는거임 모두가 빵빵',
           icon: '🐛',
           cards: [
             { icon: '🐝', name: '벌인간' },
