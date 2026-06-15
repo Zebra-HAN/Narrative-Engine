@@ -12,7 +12,7 @@ const CHARACTER_NAV = {
     { id:'race',        label:'종족', icon:'🐉', type:'group'    },
     { id:'job',         label:'직업', img:'images/golem.png',  type:'group'    },
     { id:'personality', label:'성격', icon:'💫'   },
-    { id:'attribute',   label:'속성의 이름이엄청길어질 예정', icon:'⚡'  ,type:'group'  },
+    { id:'attribute',   label:'속성의 이름으로 테스트중', icon:'⚡'  ,type:'group'  },
     { id:'ability',     label:'능력',   },
     { id:'relation',    label:'관계', icon:'🔗'    },
   ]
@@ -325,7 +325,7 @@ const CHARACTER_CARDS = {
     groups: [
       {
         id: 'attribute_1',
-        label: '속성 1',　 /*그룹 이름*/
+        label: '속성의 이름이 엄청 길어서 어떻게 될지 테스트',　 /*그룹 이름*/
         icon: '👤',
         cards: [
    { icon:'⚔', name:'검사' ,     desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용' },
