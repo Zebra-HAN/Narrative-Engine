@@ -889,6 +889,27 @@
 
     /* ── BOTTOM NAV ── */
     .bottom-nav {
+     /* ── 하단 버튼 애니메이션 조절값 ─────────────────────────
+         --nav-indicator-left   : 초록색 둥근 영역의 시작 위치(왼쪽 여백)
+         --nav-indicator-top    : 초록색 둥근 영역의 위/아래 위치
+         --nav-indicator-width  : 초록색 둥근 영역의 가로 크기
+         --nav-indicator-height : 초록색 둥근 영역의 세로 크기
+         --nav-indicator-radius : 초록색 둥근 영역의 모서리 둥글기
+         --nav-label-y          : 캐릭터/스토리/통합/세계관/나침반 글자 위치(음수면 위로, 양수면 아래로)
+         --nav-img-size         : 버튼에 직접 넣는 이미지 크기
+         --nav-img-x            : 버튼 이미지 좌우 위치(음수면 왼쪽, 양수면 오른쪽)
+         --nav-img-y            : 버튼 이미지 상하 위치(음수면 위쪽, 양수면 아래쪽)
+      ───────────────────────────────────────────────────────── */
+      --nav-indicator-left: 3.2%;
+      --nav-indicator-top: 9px;
+      --nav-indicator-width: 13.6%;
+      --nav-indicator-height: 64px;
+      --nav-indicator-radius: 20px;
+      --nav-label-y: 0px;
+      --nav-img-size: 30px;
+      --nav-img-x: 0px;
+      --nav-img-y: 0px;
+           
       flex-shrink: 0;
       background: linear-gradient(180deg, #ffffff 0%, #f8f8f8 100%);
       border-top: 2px solid var(--border-gold2);
@@ -901,11 +922,11 @@
     }
    .bottom-nav-indicator {
       position: absolute;
-      left: 3.2%;
-      top: 9px;
-      width: 13.6%;
-      height: 64px;
-      border-radius: 20px;
+       left: var(--nav-indicator-left);
+      top: var(--nav-indicator-top);
+      width: var(--nav-indicator-width);
+      height: var(--nav-indicator-height);
+      border-radius: var(--nav-indicator-radius);
       background: linear-gradient(180deg, rgba(58,125,90,0.92), rgba(38,92,62,0.92));
       box-shadow: 0 12px 26px rgba(32, 74, 52, 0.18), inset 0 0 0 1px rgba(255,255,255,0.28);
       pointer-events: none;
@@ -956,10 +977,18 @@
       pointer-events: none;
     }
 .nav-img {
-      max-width: 30px;
-      max-height: 30px;
+      /* 하단 버튼 이미지 크기는 .bottom-nav의 --nav-img-size 값을 수정하세요. */
+      width: var(--nav-img-size);
+      height: var(--nav-img-size);
+      max-width: none;
+      max-height: none;
       object-fit: contain;
       display: block;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      /* 하단 버튼 이미지 위치는 .bottom-nav의 --nav-img-x / --nav-img-y 값을 수정하세요. */
+      transform: translate(calc(-50% + var(--nav-img-x)), calc(-50% + var(--nav-img-y)));
     }
     .nav-img-active {
       position: absolute;
@@ -980,6 +1009,8 @@
       position: relative;
       z-index: 2;
       pointer-events: none;
+            /* 하단 버튼 글자 위치는 .bottom-nav의 --nav-label-y 값을 수정하세요. */
+      transform: translateY(var(--nav-label-y));
     }
 .nav-tab .nav-label {
   font-size: 0.58rem;
