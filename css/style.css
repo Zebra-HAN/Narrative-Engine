@@ -643,8 +643,14 @@
   color: #ffffff;    /* ← 흰색 글자 마름모 카테고리 이름의 폰트색 */
   position: relative;
   z-index: 3;
-  -webkit-text-stroke: 0.6px var(--gold-bright);    /* ← 짙은 그린 외곽선 */
-  text-shadow: none;
+
+-webkit-text-stroke: 0.25px rgba(34, 68, 34, 0.9);   /* ← 이게 외곽선 */
+text-shadow:
+  0 1px 2px rgba(34, 68, 34, 0.95),
+  0 -1px 2px rgba(34, 68, 34, 0.9),
+  1px 0 2px rgba(34, 68, 34, 0.9),
+  -1px 0 2px rgba(34, 68, 34, 0.9),
+  0 0 4px rgba(34, 68, 34, 0.85);
 
 }
     .subnav-item.active .diamond-btn {
