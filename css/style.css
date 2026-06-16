@@ -909,33 +909,24 @@
 
     /* ── BOTTOM NAV ── */
     .bottom-nav {
-     /* ── 하단 버튼 애니메이션 조절값 ─────────────────────────
-         --nav-indicator-left   : 초록색 둥근 영역의 시작 위치(왼쪽 여백)
-         --nav-indicator-top    : 초록색 둥근 영역의 위/아래 위치
-         --nav-indicator-width  : 초록색 둥근 영역의 가로 크기
-         --nav-indicator-height : 초록색 둥근 영역의 세로 크기
-         --nav-indicator-radius : 초록색 둥근 영역의 모서리 둥글기
-         --nav-label-y          : 캐릭터/스토리/통합/세계관/나침반 글자 위치(음수면 위로, 양수면 아래로)
-         --nav-img-size         : 버튼에 직접 넣는 이미지 크기
-         --nav-img-x            : 버튼 이미지 좌우 위치(음수면 왼쪽, 양수면 오른쪽)
-         --nav-img-y            : 버튼 이미지 상하 위치(음수면 위쪽, 양수면 아래쪽)
+     /* ── 하단 버튼 애니메이션 조절값 ───── 인디케이터가 클릭한 곳으로 이동하는 애니 ───────
       ───────────────────────────────────────────────────────── */
-      --nav-indicator-left: 3.2%;
-      --nav-indicator-top: 9px;
-      --nav-indicator-width: 13.6%;
-      --nav-indicator-height: 64px;
-      --nav-indicator-radius: 20px;
-      --nav-label-y: -5px;     /* 음수 값을 주면 Nav버튼 글자 위로 이동 */
-      --nav-img-size: 30px;   /* 메인 버튼 아이콘 이미지가 너무 크면 이 값을 줄이세요 (예: 24px, 20px) */
-      --nav-img-x: 30px;       /* 음수=왼쪽으로, 양수=오른쪽으로 이동 */
-      --nav-img-y: 50px;       /* 음수=위로, 양수=아래로 이동 */
+      --nav-indicator-left: 0.8%;     /* 인디케이터   시작 위치(왼쪽여백) */
+      --nav-indicator-top: 3px;       /* 인디케이터   위쪽에서 9만큼 떨어진 곳에 배치 - 크기 키워도 이 고정값들이 여백을 결정함 */
+      --nav-indicator-width: 17.4%;   /* 인디케이터   가로 크기 */
+      --nav-indicator-height: 67px;   /* 인디케이터   세로 크기 */
+      --nav-indicator-radius: 30px;   /* 인디케이터   모서리 둥글게 */
+      --nav-label-y: -5px;     /* 5개Nav이름 위치 아래위 - 음수=위로,양수=아래 (캐릭터/스토리/통합/세계관/나침반) */
+      --nav-img-size: 30px;   /* Nav버튼아이콘 이미지 크기 조절 (줄이면 작아짐) */
+      --nav-img-x: 30px;       /* 아이콘 위치 좌우 - 음수=왼쪽으로, 양수=오른쪽으로 이동 */
+      --nav-img-y: 50px;       /* 아이콘 위치 상하 - 음수=위로, 양수=아래로 이동 */
            
       flex-shrink: 0;
       background: linear-gradient(180deg, #ffffff 0%, #f8f8f8 100%);
       border-top: 2px solid var(--border-gold2);
       display: flex;
       align-items: stretch;
-      height: 83px;        /* ── 네비게이션 메인 버튼 높이 조절 이거인듯? 가장작은게64였음 ── */
+      height: 83px;        /* ── 네비게이션 메인 버튼 높이 조절 이거인듯? 가장 작은게 64였음 ── */
       position: relative;
       z-index: 30;
            overflow: hidden;
