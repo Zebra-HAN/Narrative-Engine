@@ -936,6 +936,11 @@
       position: absolute;
       left: var(--nav-indicator-left);
       top: var(--nav-indicator-top);
+   /* ─────────────────────────────────────────────────────────
+      👇 원래 가로값에 강제로 1.25배를 곱해주는 수학 공식으로 변경! ( 인디 크기를 고정 )
+      이러면 이동할 때도 절대 크기가 줄어들지 않고 유지돼! 추가내용→ width: calc(var(--nav-indicator-width) * 1.25);
+     ───────────────────────────────────────────────────────── */
+      width: calc(var(--nav-indicator-width) * 1.25);
       width: var(--nav-indicator-width);
       height: var(--nav-indicator-height);
       border-radius: var(--nav-indicator-radius);
@@ -943,10 +948,7 @@
       box-shadow: 0 12px 26px rgba(32, 74, 52, 0.18), inset 0 0 0 1px rgba(255,255,255,0.28);
       pointer-events: none;
       z-index: 0;
-      /* ─────────────────────────────────────────────────────────
-      👇 기존 transform: translateX(0); 을 바꿈! 인디케이터 가로 길이 넓히기 여기가 찐임.
-      ───────────────────────────────────────────────────────── */
-      transform: translateX(0) scaleX(1.25); /* 1.25배 가로로 넓히기 */
+      transform: translateX(0);
       transition: transform 0.48s cubic-bezier(0.22, 1, 0.36, 1), width 0.48s cubic-bezier(0.22, 1, 0.36, 1), left 0.48s cubic-bezier(0.22, 1, 0.36, 1);
       will-change: transform;
     }
