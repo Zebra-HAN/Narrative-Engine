@@ -907,13 +907,14 @@
       letter-spacing: 0.08em;
     }
 
+
     /* ── BOTTOM NAV ── */
     .bottom-nav {
      /* ── 하단 버튼 애니메이션 조절값 ───── 인디케이터가 클릭한 곳으로 이동하는 애니 ───────
       ───────────────────────────────────────────────────────── */
       --nav-indicator-left: 3.2%;     /* 이건 건드리면 안됨! 5개 버튼에 딱맞게한 값임. 인디케이터 시작 위치(왼쪽 여백) */
       --nav-indicator-top: 2px;       /* 인디케이터   위쪽에서 9만큼 떨어진 곳에 배치 - 아래의크기 키워도 이 고정값이 여백을 결정함 */
-      --nav-indicator-width: 16.8%;   /* 인디케이터   가로 크기 */
+      --nav-indicator-width: 13.6%;   /* ⚠️얘도 건들면 안되네...버튼 비율이 달라져서 올바른 위치에 안가게됨 - 가로비율 */
       --nav-indicator-height: 75px;   /* 인디케이터   세로 크기 */
       --nav-indicator-radius: 26px;   /* 인디케이터   모서리 둥글게 */
       --nav-label-y: -5px;     /* 5개Nav이름 위치 아래위 - 음수=위로,양수=아래 (캐릭터/스토리/통합/세계관/나침반) */
@@ -933,7 +934,7 @@
     }
    .bottom-nav-indicator {
       position: absolute;
-       left: var(--nav-indicator-left);
+      left: var(--nav-indicator-left);
       top: var(--nav-indicator-top);
       width: var(--nav-indicator-width);
       height: var(--nav-indicator-height);
@@ -942,7 +943,10 @@
       box-shadow: 0 12px 26px rgba(32, 74, 52, 0.18), inset 0 0 0 1px rgba(255,255,255,0.28);
       pointer-events: none;
       z-index: 0;
-          transform: translateX(0);
+      /* ─────────────────────────────────────────────────────────
+      👇 기존 transform: translateX(0); 을 바꿈! 인디케이터 가로 길이 넓히기 여기가 찐임.
+      ───────────────────────────────────────────────────────── */
+      transform: translateX(0) scaleX(1.25); /* 1.25배 가로로 넓히기 */
       transition: transform 0.48s cubic-bezier(0.22, 1, 0.36, 1), width 0.48s cubic-bezier(0.22, 1, 0.36, 1), left 0.48s cubic-bezier(0.22, 1, 0.36, 1);
       will-change: transform;
     }
