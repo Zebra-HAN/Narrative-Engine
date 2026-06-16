@@ -912,10 +912,10 @@
     .bottom-nav {
      /* ── 하단 버튼 애니메이션 조절값 ───── 인디케이터가 클릭한 곳으로 이동하는 애니 ───────
       ───────────────────────────────────────────────────────── */
-      --nav-indicator-left: 3.2%;     /* 이건 건드리면 안됨! 5개 버튼에 딱맞게한 값임. 인디케이터 시작 위치(왼쪽 여백) */
-      --nav-indicator-top: 2px;       /* 인디케이터   위쪽에서 9만큼 떨어진 곳에 배치 - 아래의크기 키워도 이 고정값이 여백을 결정함 */
-      --nav-indicator-width: 13.6%;   /* ⚠️얘도 건들면 안되네...버튼 비율이 달라져서 올바른 위치에 안가게됨 - 가로비율 */
-      --nav-indicator-height: 75px;   /* 인디케이터   세로 크기 */
+      --nav-indicator-center: 10%;     /* 선택된 버튼의 중앙 위치 - 아래 data-active-nav 규칙에서 자동 변경 */
+      --nav-indicator-top: 2px;        /* 인디케이터 위쪽 여백 */
+      --nav-indicator-width: 18.4%;    /* 인디케이터 최종 가로 크기 - 버튼 중앙 기준으로 좌우 대칭 확장 */
+      --nav-indicator-height: 75px;    /* 인디케이터 세로 크기 */
       --nav-indicator-radius: 26px;   /* 인디케이터   모서리 둥글게 */
       --nav-label-y: -5px;     /* 5개Nav이름 위치 아래위 - 음수=위로,양수=아래 (캐릭터/스토리/통합/세계관/나침반) */
       --nav-img-size: 30px;   /* Nav버튼아이콘 이미지 크기 조절 (줄이면 작아짐) */
@@ -934,13 +934,8 @@
     }
    .bottom-nav-indicator {
       position: absolute;
-      left: var(--nav-indicator-left);
+      left: var(--nav-indicator-center);
       top: var(--nav-indicator-top);
-   /* ─────────────────────────────────────────────────────────
-      👇 원래 가로값에 강제로 1.25배를 곱해주는 수학 공식으로 변경! ( 인디 크기를 고정 ) 추가내용→ width: calc(var(--nav-indicator-width) * 1.25);
-      이동할 때도 크기 유지됨!  1.3=30% 가로확장 ,1.4=40%  
-     ───────────────────────────────────────────────────────── */
-      width: calc(var(--nav-indicator-width) * 1.6)!important;
       width: var(--nav-indicator-width);
       height: var(--nav-indicator-height);
       border-radius: var(--nav-indicator-radius);
@@ -948,14 +943,15 @@
       box-shadow: 0 12px 26px rgba(32, 74, 52, 0.18), inset 0 0 0 1px rgba(255,255,255,0.28);
       pointer-events: none;
       z-index: 0;
-      transform: translateX(0);
-      transition: transform 0.48s cubic-bezier(0.22, 1, 0.36, 1), width 0.48s cubic-bezier(0.22, 1, 0.36, 1), left 0.48s cubic-bezier(0.22, 1, 0.36, 1);
-      will-change: transform;
+      transform: translateX(-50%);
+      transition: left 0.48s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: left;
     }
-    .bottom-nav[data-active-nav="narrative2"] .bottom-nav-indicator { transform: translateX(147.0588%); }
-    .bottom-nav[data-active-nav="idea"] .bottom-nav-indicator { transform: translateX(294.1176%); }
-    .bottom-nav[data-active-nav="world"] .bottom-nav-indicator { transform: translateX(441.1765%); }
-    .bottom-nav[data-active-nav="compass"] .bottom-nav-indicator { transform: translateX(588.2353%); }
+    .bottom-nav[data-active-nav="character"] { --nav-indicator-center: 10%; }
+    .bottom-nav[data-active-nav="narrative2"] { --nav-indicator-center: 30%; }
+    .bottom-nav[data-active-nav="idea"] { --nav-indicator-center: 50%; }
+    .bottom-nav[data-active-nav="world"] { --nav-indicator-center: 70%; }
+    .bottom-nav[data-active-nav="compass"] { --nav-indicator-center: 90%; }
     .nav-btn.nav-tab {
       flex: 1;
       display: flex;
