@@ -917,10 +917,10 @@
       --nav-indicator-width: 18.4%;    /* 인디케이터 최종 가로 크기 - 버튼 중앙 기준으로 좌우 대칭 확장 */
       --nav-indicator-height: 75px;    /* 인디케이터 세로 크기 */
       --nav-indicator-radius: 26px;   /* 인디케이터   모서리 둥글게 */
-      --nav-label-y: -5px;     /* 5개Nav이름 위치 아래위 - 음수=위로,양수=아래 (캐릭터/스토리/통합/세계관/나침반) */
-      --nav-img-size: 30px;   /* Nav버튼아이콘 이미지 크기 조절 (줄이면 작아짐) */
-      --nav-img-x: 30px;       /* 아이콘 위치 좌우 - 음수=왼쪽으로, 양수=오른쪽으로 이동 */
-      --nav-img-y: 50px;       /* 아이콘 위치 상하 - 음수=위로, 양수=아래로 이동 */
+      --nav-label-y: -5px;      /* 5개 Nav 이름 위치 상하 - 음수=위로, 양수=아래로 이동 */
+      --nav-img-size: 30px;    /* [아이콘 크기 조절] 하단 Nav 5개 아이콘 이미지 크기 */
+      --nav-img-x: 0px;        /* [아이콘 위치 조절] 아이콘 좌우 위치 - 음수=왼쪽, 양수=오른쪽 */
+      --nav-img-y: -13px;      /* [아이콘 위치 조절] 아이콘 상하 위치 - 음수=위쪽, 양수=아래쪽 */
            
       flex-shrink: 0;
       background: linear-gradient(180deg, #ffffff 0%, #f8f8f8 100%);
@@ -2211,23 +2211,9 @@
   background: linear-gradient(135deg, #ffffff 0%, #eaf7ef 100%);
 }
 
-/* ── 하단 네비게이션: 5개 탭 동일 비율 + 버튼 전체 이미지 슬롯 ── */
+/* ── 하단 네비게이션: 이미지가 있는 경우 SVG 아이콘만 숨김 ── */
 .nav-idea-tab {
   color: var(--lavender);
-}
-.nav-img {
- position: absolute;
-  inset: 0;
-  z-index: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: none;
-  pointer-events: none;
-  -webkit-user-drag: none;
-}
-.nav-img[src]:not([src=""]) {
-  display: block;
 }
 .nav-img[src]:not([src=""]) + .nav-fallback-icon {
   display: none;
@@ -2237,23 +2223,14 @@
   line-height: 1;
   color: inherit;
 }
-.nav-tab:has(.nav-img[src]:not([src=""])) {
-  overflow: hidden;
-  justify-content: flex-end;
-  padding: 9px 2px 8px;
-}
-.nav-tab:has(.nav-img[src]:not([src=""])) .nav-icon {
-  position: static;
-  flex: 1;
-  min-height: 0;
-}
 .nav-tab:has(.nav-img[src]:not([src=""])) .nav-svg {
   display: none;
 }
-.nav-tab:has(.nav-img[src]:not([src=""])) .nav-label {
-  color: #ffffff;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.9), 0 0 5px rgba(255,255,255,0.55);
-}
+/* 기본/활성 아이콘은 한 번에 한 장만 보이도록 이 블록을 항상 .nav-img 기본값보다 뒤에 둡니다. */
+.nav-tab .nav-img-default:not([src=""]) { display: block; }
+.nav-tab .nav-img-active { display: none; }
+.nav-tab.active .nav-img-default { display: none; }
+.nav-tab.active .nav-img-active:not([src=""]) { display: block; }
 
 /* ── status-chips wrap 대응 ── */
 .status-chips {
