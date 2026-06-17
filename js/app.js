@@ -310,7 +310,7 @@ window.addEventListener('load', () => {
 
   // 디졸브로 홈 화면 전환 (전체 약 2.1초에서 1.2초 변경 1.9초) 
   setTimeout(() => {
-    switchScreen('screen-home', null, true);
+    switchScreen('screen-home', null, true, 'white');
   }, 1300);
 });
 */
@@ -319,7 +319,7 @@ window.addEventListener('load', () => {
 window.addEventListener('load', () => {  
  // 앱 시작 시에는 완전한 흰 화면을 아주 짧게 보여준 뒤 홈으로 넘어갑니다.
   setTimeout(() => {
-    switchScreen('screen-home', null, true);
+    switchScreen('screen-home', null, true, 'white');
   }, 120);
 });
 
@@ -339,7 +339,7 @@ function restartHomeIntro() {
   home.classList.add(HOME_ANIMATE_CLASS);
 }
 
-function switchScreen(targetId, callback, useFade, fadeColor = 'dark') {
+function switchScreen(targetId, callback, useFade, fadeColor = 'white') {
   const screens = document.querySelectorAll('.screen');
   const target = document.getElementById(targetId);
   const useWhiteFade = useFade && fadeColor === 'white';
@@ -369,6 +369,10 @@ function switchScreen(targetId, callback, useFade, fadeColor = 'dark') {
   }
 
   setTimeout(() => {
+      if (useWhiteFade) {
+      screens.forEach(s => s.classList.add('no-transition'));
+    }
+
     screens.forEach(s => s.classList.remove('active'));
     target.classList.add('active');
     if (targetId === 'screen-home') restartHomeIntro();
@@ -377,6 +381,9 @@ function switchScreen(targetId, callback, useFade, fadeColor = 'dark') {
     if (useWhiteFade) {
       requestAnimationFrame(() => {
         document.body.classList.remove(WHITE_FADE_CLASS);
+          requestAnimationFrame(() => {
+          screens.forEach(s => s.classList.remove('no-transition'));
+        });
       });
     }
   }, FADE_MS);
@@ -390,7 +397,7 @@ function goHome() {
   closeStatusOverlay();
   const create = document.getElementById('screen-create');
   if (create) create.classList.remove('entering');
-  switchScreen('screen-home', null, true);
+  switchScreen('screen-home', null, true, 'white');
 }
 function goToNarrative() {
   switchScreen('screen-narrative', null, true, 'white');
