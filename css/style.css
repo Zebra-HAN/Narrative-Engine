@@ -1636,6 +1636,8 @@
 .nav-btn { position: relative; }
 .nav-badge {
   position: absolute; top: 4px; right: 14px;
+  z-index: 5;
+  pointer-events: none;
   min-width: 14px; height: 14px;
   border-radius: 7px;
   background: #f08030;
