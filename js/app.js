@@ -291,6 +291,8 @@ function setSubgroupAddress(subId, groupIdx, sgIdx) {
 ════════════════════════════════════════════════ */
   // 검은 화면의 시간 300 에서 100으로 줄임 다시300
 const FADE_MS = 150;
+const WHITE_FADE_CLASS = 'route-fade-white';
+const HOME_ANIMATE_CLASS = 'home-animate';
 
 /* 개발 중 오프닝 비활성화 를 위해 주석 처리
 window.addEventListener('load', () => {
@@ -313,9 +315,12 @@ window.addEventListener('load', () => {
 });
 */
 
-// 개발중에는 홈 직행. 오프닝 복구할땐 아래 2줄은 삭제하면 됨 
-window.addEventListener('load', () => {
-  switchScreen('screen-home', null, false);
+// 개발중에는 홈 직행. 오프닝 복구할땐 아래 2줄은 삭제하면 됨   (switchScreen('screen-home', null, false); ←흰화면 추가하면서 삭제 명령받음. 아래2줄 삭제하라는 것중 하나임)
+window.addEventListener('load', () => {  
+ // 앱 시작 시에는 완전한 흰 화면을 아주 짧게 보여준 뒤 홈으로 넘어갑니다.
+  setTimeout(() => {
+    switchScreen('screen-home', null, true);
+  }, 120);
 });
 
 
@@ -325,9 +330,24 @@ initInfoSliderSwipe();
 /* ════════════════════════════════════════════════
    SCREEN TRANSITION
 ════════════════════════════════════════════════ */
-function switchScreen(targetId, callback, useFade) {
+function restartHomeIntro() {
+  const home = document.getElementById('screen-home');
+  if (!home) return;
+
+  home.classList.remove(HOME_ANIMATE_CLASS);
+  void home.offsetWidth;
+  home.classList.add(HOME_ANIMATE_CLASS);
+}
+
+function switchScreen(targetId, callback, useFade, fadeColor = 'dark') {
   const screens = document.querySelectorAll('.screen');
   const target = document.getElementById(targetId);
+  const useWhiteFade = useFade && fadeColor === 'white';
+
+  if (useWhiteFade) {
+    document.body.style.setProperty('--route-fade-ms', `${FADE_MS}ms`);
+    document.body.classList.add(WHITE_FADE_CLASS);
+  }
 
   if (!useFade) {
     screens.forEach(s => {
@@ -335,6 +355,7 @@ function switchScreen(targetId, callback, useFade) {
       s.classList.remove('active');
     });
     target.classList.add('active');
+    if (targetId === 'screen-home') restartHomeIntro();
     requestAnimationFrame(() => {
       screens.forEach(s => s.classList.remove('no-transition'));
     });
@@ -350,7 +371,14 @@ function switchScreen(targetId, callback, useFade) {
   setTimeout(() => {
     screens.forEach(s => s.classList.remove('active'));
     target.classList.add('active');
+    if (targetId === 'screen-home') restartHomeIntro();
     if (callback) callback();
+     
+    if (useWhiteFade) {
+      requestAnimationFrame(() => {
+        document.body.classList.remove(WHITE_FADE_CLASS);
+      });
+    }
   }, FADE_MS);
 }
 
@@ -365,7 +393,7 @@ function goHome() {
   switchScreen('screen-home', null, true);
 }
 function goToNarrative() {
-  switchScreen('screen-narrative', null, true);
+  switchScreen('screen-narrative', null, true, 'white');
 }
 function goToCreate() {
   // 메뉴 패널 상태 초기화
@@ -385,7 +413,7 @@ function goToCreate() {
     setTimeout(() => create.classList.remove('entering'), 600);
     switchNav('character', true, { silentAddress: true });
     setAddressTrail([]);
-  }, true);
+  }, true, 'white');
 }
 
 function setBottomNavState(navId) {
