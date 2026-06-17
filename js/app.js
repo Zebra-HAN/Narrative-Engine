@@ -458,13 +458,7 @@ function goHome() {
   });
 }
 function goToNarrative() {
-  switchScreen('screen-narrative', null, {
-    type: 'whiteDissolve',
-    whiteDuration: FADE_MS_FORWARD_WHITE,
-    duration: FADE_MS_FORWARD_SCREEN,
-    easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-    whiteOpacity: 0.82
-  });
+  switchScreen('screen-narrative', null, { type: 'instant' });
 }
 function goToCreate() {
   // 메뉴 패널 상태 초기화
@@ -479,18 +473,9 @@ function goToCreate() {
   switchScreen('screen-create', () => {
     const create = document.getElementById('screen-create');
     create.classList.remove('entering');
-    void create.offsetWidth;
-    create.classList.add('entering');
-    setTimeout(() => create.classList.remove('entering'), 600);
     switchNav('character', true, { silentAddress: true });
     setAddressTrail([]);
-   }, {
-    type: 'whiteDissolve',
-    whiteDuration: FADE_MS_FORWARD_WHITE,
-    duration: FADE_MS_FORWARD_SCREEN,
-    easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-    whiteOpacity: 0.82
-  });
+  }, { type: 'instant' });
 }
 
 function setBottomNavState(navId) {
