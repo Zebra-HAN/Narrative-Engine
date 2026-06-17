@@ -1636,6 +1636,9 @@ body::after {
   opacity: 1;
   padding: 7px 8px;
 }
+.extra-menu-panel.menu-resetting {
+  transition: none !important;
+}
 
 .extra-btn {
   flex: 1;
