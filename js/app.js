@@ -298,6 +298,22 @@ const WHITE_FADE_CLASS = 'route-fade-white';
 const HOME_ANIMATE_CLASS = 'home-animate';
 const TRANSITION_SOURCE_CLASS = 'transition-source';
 const TRANSITION_TARGET_CLASS = 'transition-target';
+let screenTransitionToken = 0;
+const screenTransitionTimers = new Set();
+
+function scheduleScreenTransitionTask(callback, delay) {
+  const timerId = setTimeout(() => {
+    screenTransitionTimers.delete(timerId);
+    callback();
+  }, delay);
+  screenTransitionTimers.add(timerId);
+  return timerId;
+}
+
+function cancelPendingScreenTransitionTasks() {
+  screenTransitionTimers.forEach(timerId => clearTimeout(timerId));
+  screenTransitionTimers.clear();
+}
 
 /* 개발 중 오프닝 비활성화 를 위해 주석 처리
 window.addEventListener('load', () => {
@@ -360,6 +376,8 @@ function clearScreenTransitionState(screens) {
 }
 
 function switchScreen(targetId, callback, options = {}) {
+  const transitionToken = ++screenTransitionToken;
+  cancelPendingScreenTransitionTasks();
   // 이전 호출부 호환: switchScreen(id, cb, true, 'white', 280)
   if (typeof options === 'boolean') {
     const useFade = options;
@@ -386,7 +404,9 @@ function switchScreen(targetId, callback, options = {}) {
     setActiveScreen(target, screens);
     if (targetId === 'screen-home') restartHomeIntro();
     if (callback) callback();
-    requestAnimationFrame(() => clearScreenTransitionState(screens));
+    requestAnimationFrame(() => {
+      if (transitionToken === screenTransitionToken) clearScreenTransitionState(screens);
+    });
     return;
   }
 
@@ -400,8 +420,9 @@ function switchScreen(targetId, callback, options = {}) {
   if (callback) callback();
 
   requestAnimationFrame(() => {
+    if (transitionToken !== screenTransitionToken) return;
     current.classList.remove('active');
-     });
+  });
 
   if (type === 'whiteDissolve') {
     const whiteDuration = options.whiteDuration ?? FADE_MS_FORWARD_WHITE;
@@ -409,13 +430,15 @@ function switchScreen(targetId, callback, options = {}) {
     document.body.style.setProperty('--route-fade-ease', 'cubic-bezier(0.4, 0, 0.2, 1)');
     document.body.style.setProperty('--route-fade-opacity', String(options.whiteOpacity ?? 0.82));
     document.body.classList.add(WHITE_FADE_CLASS);
-    setTimeout(() => {
+    scheduleScreenTransitionTask(() => {
+    if (transitionToken !== screenTransitionToken) return;
       document.body.classList.remove(WHITE_FADE_CLASS);
     }, Math.max(16, whiteDuration * 0.72));
   }
 
-  setTimeout(() => {
-      setActiveScreen(target, screens);
+  scheduleScreenTransitionTask(() => {
+    if (transitionToken !== screenTransitionToken) return;
+    setActiveScreen(target, screens);
     clearScreenTransitionState(screens);
   }, duration + 40);
 }
