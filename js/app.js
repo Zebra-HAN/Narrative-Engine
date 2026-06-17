@@ -449,7 +449,7 @@ function switchScreen(targetId, callback, options = {}) {
 function goHome() {
   closeDetailSheet();
   closeStatusOverlay();
-  const create = document.getElementById('screen-create');
+  closeExtraMenu({ instant: true });
   if (create) create.classList.remove('entering');
     switchScreen('screen-home', null, {
     type: 'dissolve',
@@ -461,14 +461,8 @@ function goToNarrative() {
   switchScreen('screen-narrative', null, { type: 'instant' });
 }
 function goToCreate() {
-  // 메뉴 패널 상태 초기화
-  extraMenuOpen = false;
-  const panel = document.getElementById('extra-menu-panel');
-  const btn   = document.getElementById('btn-extra-menu');
-  const icon  = document.getElementById('extra-menu-icon');
-  if (panel) panel.classList.remove('open');
-  if (btn)   btn.classList.remove('open');
-  if (icon)  icon.textContent = '☰';
+   // 이전 방문에서 열린 메뉴가 닫히는 애니메이션이 첫 프레임에 보이지 않도록 즉시 초기화
+  closeExtraMenu({ instant: true });
 
   switchScreen('screen-create', () => {
     const create = document.getElementById('screen-create');
@@ -1757,17 +1751,34 @@ function escHtml(s) {
 ════════════════════════════════════════════════ */
 let extraMenuOpen = false;
 
+function closeExtraMenu(options = {}) {
+  extraMenuOpen = false;
+  const panel = document.getElementById('extra-menu-panel');
+  const btn   = document.getElementById('btn-extra-menu');
+  const icon  = document.getElementById('extra-menu-icon');
+
+  if (options.instant && panel) panel.classList.add('menu-resetting');
+
+  if (panel) panel.classList.remove('open');
+  if (btn)   btn.classList.remove('open');
+  if (icon)  icon.textContent = '☰';
+
+  if (options.instant && panel) {
+    requestAnimationFrame(() => panel.classList.remove('menu-resetting'));
+  }
+}
+
 function toggleExtraMenu() {
   extraMenuOpen = !extraMenuOpen;
   const panel = document.getElementById('extra-menu-panel');
   const btn   = document.getElementById('btn-extra-menu');
   const icon  = document.getElementById('extra-menu-icon');
 
-  panel.classList.toggle('open', extraMenuOpen);
-  btn.classList.toggle('open', extraMenuOpen);
+  if (panel) panel.classList.toggle('open', extraMenuOpen);
+  if (btn)   btn.classList.toggle('open', extraMenuOpen);
 
   // 닫혀있을때 ☰, 열려있을때 삼각형 ▲
-  icon.textContent = extraMenuOpen ? '▼' : '☰';
+  if (icon) icon.textContent = extraMenuOpen ? '▼' : '☰';
 }
 
 /* ════════════════════════════════════════════════
