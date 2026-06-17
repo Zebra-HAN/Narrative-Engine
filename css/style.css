@@ -279,8 +279,9 @@ body::after {
         7px 7px 0 #050d16;
     }
     #screen-home.home-animate .home-link {
-      /* 배너가 스르륵 멈추는 타이밍(0.5초 뒤)에 맞춰 버튼이 나타나도록 설계된 기존 애니메이션 유지 */
-      animation: homeLinkReveal 0.72s ease 0.5s forwards;
+      /*  창작시작,스토리구조 홈버튼의 등장 타이밍. 기존 애니메이션 유지 */
+      /* 1초 뒤에(1s) 시작해서, 1.2초 동안(1.2s)느긋하게 나타남. 더 부드러운 곡선(ease-in-out)을 줬어 */
+      animation: homeLinkReveal 1.2s ease-in-out 1s forwards;
     }
     @keyframes homeLinkReveal {
       from { opacity: 0; transform: translateY(10px); }
