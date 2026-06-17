@@ -289,41 +289,39 @@ function setSubgroupAddress(subId, groupIdx, sgIdx) {
 /* ════════════════════════════════════════════════
    OPENING ANIMATION   오프닝
 ════════════════════════════════════════════════ */
-  // 검은 화면의 시간 300 에서 100으로 줄임 다시300
-const FADE_MS_LAUNCH = 700;   // 앱 시작: 흰 화면 → 홈 (느긋하게)
-const FADE_MS_FORWARD = 280;  // 홈 → 다음 화면 (조금 느긋하게)
-const FADE_MS_BACK = 280;     // 뒤로 → 홈으로 돌아올 때
-const FADE_MS = 150;          // 그 외 기본값
+const FADE_MS_LAUNCH = 1400;       // 앱 시작: 흰 바탕에서 홈이 느긋하게 페이드인
+const FADE_MS_FORWARD_WHITE = 280; // 홈 → 다음 화면: 흰빛이 빠르게 스쳐 지나가는 시간
+const FADE_MS_FORWARD_SCREEN = 950;// 홈 → 다음 화면: 다음 화면이 부드럽게 완성되는 시간
+const FADE_MS_BACK = 1100;         // 뒤로 → 홈: 흰 화면 없이 직접 디졸브
+const FADE_MS = 300;               // 그 외 기본값
 const WHITE_FADE_CLASS = 'route-fade-white';
 const HOME_ANIMATE_CLASS = 'home-animate';
+const TRANSITION_SOURCE_CLASS = 'transition-source';
+const TRANSITION_TARGET_CLASS = 'transition-target';
 
 /* 개발 중 오프닝 비활성화 를 위해 주석 처리
 window.addEventListener('load', () => {
   const content = document.getElementById('opening-content');
   const divider = document.getElementById('opening-divider');
 
-  // 페이드인 + 선 확장 (동시에, 약 0.5초 분량에서 수정함 100에서 130 )
   setTimeout(() => {
     content.classList.add('visible');
     divider.classList.add('expand');
   }, 130);
 
-  // 짧은 정지 후 페이드 아웃 (페이드인+선확장의 시간과 여기 시간을 빼면 제목표시시간. 1500에서 1100로 수정)
   setTimeout(() => content.classList.add('fade-out'), 1100);
 
-  // 디졸브로 홈 화면 전환 (전체 약 2.1초에서 1.2초 변경 1.9초) 
   setTimeout(() => {
-    switchScreen('screen-home', null, true, 'white');
+    switchScreen('screen-home', null, { type: 'launch', duration: FADE_MS_LAUNCH });
   }, 1300);
 });
 */
 
-// 개발중에는 홈 직행. 오프닝 복구할땐 아래 2줄은 삭제하면 됨   (switchScreen('screen-home', null, false); ←흰화면 추가하면서 삭제 명령받음. 아래2줄 삭제하라는 것중 하나임)
+// 앱 시작: 첫 프레임은 흰색으로 유지하고, 기다림 없이 홈 화면이 부드럽게 떠오르게 한다.
 window.addEventListener('load', () => {
-  // 앱 시작: 흰 화면을 충분히 보여준 뒤 천천히 홈으로 페이드인
   setTimeout(() => {
-    switchScreen('screen-home', null, true, 'white', FADE_MS_LAUNCH);
-  }, 400);
+     switchScreen('screen-home', null, { type: 'launch', duration: FADE_MS_LAUNCH });
+  }, 10);
 });
 
 
@@ -342,54 +340,84 @@ function restartHomeIntro() {
   home.classList.add(HOME_ANIMATE_CLASS);
 }
 
-function switchScreen(targetId, callback, useFade, fadeColor = 'white', fadeMs = FADE_MS) {
-  const screens = document.querySelectorAll('.screen');
-  const target = document.getElementById(targetId);
-  const useWhiteFade = useFade && fadeColor === 'white';
+function clearScreenTransitionState(screens) {
+  document.body.classList.remove(WHITE_FADE_CLASS);
+  document.body.style.removeProperty('--route-fade-ms');
+  document.body.style.removeProperty('--route-fade-ease');
+  document.body.style.removeProperty('--route-fade-opacity');
+  document.body.style.removeProperty('--screen-fade-ms');
+  document.body.style.removeProperty('--screen-fade-ease');
+  screens.forEach(screen => {
+    screen.classList.remove('no-transition', TRANSITION_SOURCE_CLASS, TRANSITION_TARGET_CLASS);
+  });
+}
 
-  if (useWhiteFade) {
-    document.body.style.setProperty('--route-fade-ms', `${fadeMs}ms`);
-    document.body.classList.add(WHITE_FADE_CLASS);
+ function setActiveScreen(target, screens) {
+  screens.forEach(screen => {
+    if (screen === target) screen.classList.add('active');
+    else screen.classList.remove('active');
+  });
+}
+
+function switchScreen(targetId, callback, options = {}) {
+  // 이전 호출부 호환: switchScreen(id, cb, true, 'white', 280)
+  if (typeof options === 'boolean') {
+    const useFade = options;
+    const fadeColor = arguments[3] || 'white';
+    const fadeMs = arguments[4] || FADE_MS;
+    options = useFade
+      ? { type: fadeColor === 'white' ? 'whiteDissolve' : 'dissolve', whiteDuration: fadeMs, duration: fadeMs }
+      : { type: 'instant' };
   }
 
-  if (!useFade) {
-    screens.forEach(s => {
-      s.classList.add('no-transition');
-      s.classList.remove('active');
-    });
-    target.classList.add('active');
+    const screens = Array.from(document.querySelectorAll('.screen'));
+  const target = document.getElementById(targetId);
+  if (!target) return;
+
+  clearScreenTransitionState(screens);
+
+  const current = document.querySelector('.screen.active');
+  const type = options.type || 'dissolve';
+  const duration = options.duration ?? FADE_MS;
+  const easing = options.easing || 'cubic-bezier(0.16, 1, 0.3, 1)';
+
+  if (type === 'instant' || !current || current === target) {
+    screens.forEach(screen => screen.classList.add('no-transition'));
+    setActiveScreen(target, screens);
     if (targetId === 'screen-home') restartHomeIntro();
-    requestAnimationFrame(() => {
-      screens.forEach(s => s.classList.remove('no-transition'));
-    });
     if (callback) callback();
+    requestAnimationFrame(() => clearScreenTransitionState(screens));
     return;
   }
 
-  const current = document.querySelector('.screen.active');
-  if (current && current.id !== targetId) {
+    document.body.style.setProperty('--screen-fade-ms', `${duration}ms`);
+  document.body.style.setProperty('--screen-fade-ease', easing);
+
+  current.classList.add(TRANSITION_SOURCE_CLASS);
+  target.classList.add(TRANSITION_TARGET_CLASS);
+  target.classList.add('active');
+  if (targetId === 'screen-home') restartHomeIntro();
+  if (callback) callback();
+
+  requestAnimationFrame(() => {
     current.classList.remove('active');
+     });
+
+  if (type === 'whiteDissolve') {
+    const whiteDuration = options.whiteDuration ?? FADE_MS_FORWARD_WHITE;
+    document.body.style.setProperty('--route-fade-ms', `${whiteDuration}ms`);
+    document.body.style.setProperty('--route-fade-ease', 'cubic-bezier(0.4, 0, 0.2, 1)');
+    document.body.style.setProperty('--route-fade-opacity', String(options.whiteOpacity ?? 0.82));
+    document.body.classList.add(WHITE_FADE_CLASS);
+    setTimeout(() => {
+      document.body.classList.remove(WHITE_FADE_CLASS);
+    }, Math.max(16, whiteDuration * 0.72));
   }
 
   setTimeout(() => {
-      if (useWhiteFade) {
-      screens.forEach(s => s.classList.add('no-transition'));
-    }
-
-    screens.forEach(s => s.classList.remove('active'));
-    target.classList.add('active');
-    if (targetId === 'screen-home') restartHomeIntro();
-    if (callback) callback();
-     
-    if (useWhiteFade) {
-      requestAnimationFrame(() => {
-        document.body.classList.remove(WHITE_FADE_CLASS);
-          requestAnimationFrame(() => {
-          screens.forEach(s => s.classList.remove('no-transition'));
-        });
-      });
-    }
-  }, fadeMs);
+      setActiveScreen(target, screens);
+    clearScreenTransitionState(screens);
+  }, duration + 40);
 }
 
 /* ════════════════════════════════════════════════
@@ -400,10 +428,20 @@ function goHome() {
   closeStatusOverlay();
   const create = document.getElementById('screen-create');
   if (create) create.classList.remove('entering');
-  switchScreen('screen-home', null, true, 'white', FADE_MS_BACK);
+    switchScreen('screen-home', null, {
+    type: 'dissolve',
+    duration: FADE_MS_BACK,
+    easing: 'cubic-bezier(0.22, 0.61, 0.36, 1)'
+  });
 }
 function goToNarrative() {
-  switchScreen('screen-narrative', null, true, 'white', FADE_MS_FORWARD);
+  switchScreen('screen-narrative', null, {
+    type: 'whiteDissolve',
+    whiteDuration: FADE_MS_FORWARD_WHITE,
+    duration: FADE_MS_FORWARD_SCREEN,
+    easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+    whiteOpacity: 0.82
+  });
 }
 function goToCreate() {
   // 메뉴 패널 상태 초기화
@@ -423,7 +461,13 @@ function goToCreate() {
     setTimeout(() => create.classList.remove('entering'), 600);
     switchNav('character', true, { silentAddress: true });
     setAddressTrail([]);
-  }, true, 'white', FADE_MS_FORWARD);
+   }, {
+    type: 'whiteDissolve',
+    whiteDuration: FADE_MS_FORWARD_WHITE,
+    duration: FADE_MS_FORWARD_SCREEN,
+    easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+    whiteOpacity: 0.82
+  });
 }
 
 function setBottomNavState(navId) {
