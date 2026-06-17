@@ -262,8 +262,7 @@ body::after {
         0 -2px 0 #061a2a,
         4px 4px 0 #122638,
         6px 6px 0 #050d16;
-      opacity: 0;
-      transform: translateY(10px);
+      opacity: 0;     /* 처음엔 안 보이게 투명도만 0으로 유지 */
       transition: transform 0.12s ease, filter 0.18s ease, text-shadow 0.18s ease;
       -webkit-tap-highlight-color: transparent;
     }
@@ -284,8 +283,8 @@ body::after {
       animation: homeLinkReveal 1.2s ease-in-out 0.2s forwards;
     }
     @keyframes homeLinkReveal {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      from { opacity: 0; } /* 시작: 완전히 투명 (안 보임) */
+      to { opacity: 1; }   /* 끝: 완전히 불투명 (선명해짐) */
     }
     .home-link:active {
        transform: translate(2px, 2px) scale(0.98);
