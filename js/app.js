@@ -450,8 +450,11 @@ function goHome() {
   closeDetailSheet();
   closeStatusOverlay();
   closeExtraMenu({ instant: true });
-  if (create) create.classList.remove('entering');
-    switchScreen('screen-home', null, {
+  
+  const createScreen = document.getElementById('screen-create');
+  if (createScreen) createScreen.classList.remove('entering');
+
+  switchScreen('screen-home', null, {
     type: 'dissolve',
     duration: FADE_MS_BACK,
     easing: 'cubic-bezier(0.22, 0.61, 0.36, 1)'
@@ -461,12 +464,12 @@ function goToNarrative() {
   switchScreen('screen-narrative', null, { type: 'instant' });
 }
 function goToCreate() {
-   // 이전 방문에서 열린 메뉴가 닫히는 애니메이션이 첫 프레임에 보이지 않도록 즉시 초기화
+  // 이전 방문에서 열린 메뉴가 닫히는 애니메이션이 첫 프레임에 보이지 않도록 즉시 초기화
   closeExtraMenu({ instant: true });
 
   switchScreen('screen-create', () => {
-    const create = document.getElementById('screen-create');
-    create.classList.remove('entering');
+    const createScreen = document.getElementById('screen-create');
+    if (createScreen) createScreen.classList.remove('entering');
     switchNav('character', true, { silentAddress: true });
     setAddressTrail([]);
   }, { type: 'instant' });
