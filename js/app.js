@@ -290,7 +290,10 @@ function setSubgroupAddress(subId, groupIdx, sgIdx) {
    OPENING ANIMATION   오프닝
 ════════════════════════════════════════════════ */
   // 검은 화면의 시간 300 에서 100으로 줄임 다시300
-const FADE_MS = 150;
+const FADE_MS_LAUNCH = 700;   // 앱 시작: 흰 화면 → 홈 (느긋하게)
+const FADE_MS_FORWARD = 280;  // 홈 → 다음 화면 (조금 느긋하게)
+const FADE_MS_BACK = 280;     // 뒤로 → 홈으로 돌아올 때
+const FADE_MS = 150;          // 그 외 기본값
 const WHITE_FADE_CLASS = 'route-fade-white';
 const HOME_ANIMATE_CLASS = 'home-animate';
 
@@ -316,11 +319,11 @@ window.addEventListener('load', () => {
 */
 
 // 개발중에는 홈 직행. 오프닝 복구할땐 아래 2줄은 삭제하면 됨   (switchScreen('screen-home', null, false); ←흰화면 추가하면서 삭제 명령받음. 아래2줄 삭제하라는 것중 하나임)
-window.addEventListener('load', () => {  
- // 앱 시작 시에는 완전한 흰 화면을 아주 짧게 보여준 뒤 홈으로 넘어갑니다.
+window.addEventListener('load', () => {
+  // 앱 시작: 흰 화면을 충분히 보여준 뒤 천천히 홈으로 페이드인
   setTimeout(() => {
-    switchScreen('screen-home', null, true, 'white');
-  }, 120);
+    switchScreen('screen-home', null, true, 'white', FADE_MS_LAUNCH);
+  }, 400);
 });
 
 
@@ -339,13 +342,13 @@ function restartHomeIntro() {
   home.classList.add(HOME_ANIMATE_CLASS);
 }
 
-function switchScreen(targetId, callback, useFade, fadeColor = 'white') {
+function switchScreen(targetId, callback, useFade, fadeColor = 'white', fadeMs = FADE_MS) {
   const screens = document.querySelectorAll('.screen');
   const target = document.getElementById(targetId);
   const useWhiteFade = useFade && fadeColor === 'white';
 
   if (useWhiteFade) {
-    document.body.style.setProperty('--route-fade-ms', `${FADE_MS}ms`);
+    document.body.style.setProperty('--route-fade-ms', `${fadeMs}ms`);
     document.body.classList.add(WHITE_FADE_CLASS);
   }
 
@@ -386,7 +389,7 @@ function switchScreen(targetId, callback, useFade, fadeColor = 'white') {
         });
       });
     }
-  }, FADE_MS);
+  }, fadeMs);
 }
 
 /* ════════════════════════════════════════════════
@@ -397,10 +400,10 @@ function goHome() {
   closeStatusOverlay();
   const create = document.getElementById('screen-create');
   if (create) create.classList.remove('entering');
-  switchScreen('screen-home', null, true, 'white');
+  switchScreen('screen-home', null, true, 'white', FADE_MS_BACK);
 }
 function goToNarrative() {
-  switchScreen('screen-narrative', null, true, 'white');
+  switchScreen('screen-narrative', null, true, 'white', FADE_MS_FORWARD);
 }
 function goToCreate() {
   // 메뉴 패널 상태 초기화
@@ -420,7 +423,7 @@ function goToCreate() {
     setTimeout(() => create.classList.remove('entering'), 600);
     switchNav('character', true, { silentAddress: true });
     setAddressTrail([]);
-  }, true, 'white');
+  }, true, 'white', FADE_MS_FORWARD);
 }
 
 function setBottomNavState(navId) {
