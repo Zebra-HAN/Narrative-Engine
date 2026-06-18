@@ -2053,11 +2053,23 @@ body::after {
   min-width: 0;
 }
 
+.status-chip-extra {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 7px 8px;
+  border: 1px solid rgba(94, 157, 116, 0.18);
+  border-radius: 7px;
+  background: linear-gradient(135deg, #fbfffc, #f2fbf5);
+}
+
 .status-chip-details {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 3px 0;
+  padding: 0;
   border-left: 0;
   margin-left: 0;
 }
