@@ -1263,10 +1263,11 @@ body::after {
       min-width: 0;
     }
 
-    /* 아이디어통합 칩 내부 이미지 — 원본 비율 유지, 넉넉하게 */
+    /* 아이디어통합 칩 내부 이미지 — 원본 비율 유지, 이미지 실제 크기에 맞춰 테두리도 함께 줄어듦 */
     .status-chip-img {
       flex-shrink: 0;
-      width: min(100%, 150px);
+      width: auto;
+      max-width: min(100%, 150px);
       height: auto;
       max-height: 120px;
       object-fit: contain;
