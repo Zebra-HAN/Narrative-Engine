@@ -1560,6 +1560,9 @@ function renderStatusContent() {
           const chipDescHtml = card.desc
             ? `<span class="status-chip-desc">${card.desc}</span>`
             : '';
+          const extraHtml = (detailHtml || subImageHtml)
+            ? `<div class="status-chip-extra">${detailHtml}${subImageHtml}</div>`
+            : '';
           itemsHtml += `<div class="status-chip-wrap">
                ${metaHtml}
             <div class="status-chip">
@@ -1568,9 +1571,8 @@ function renderStatusContent() {
                 <span class="status-chip-name">${formatLabel(card.name, card.icon)}</span>
                 ${chipDescHtml}
               </div>
+               ${extraHtml}
             </div>
-            ${detailHtml}
-             ${subImageHtml}
           </div>`;
         }
       });
