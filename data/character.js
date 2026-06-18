@@ -2,6 +2,8 @@
    CHARACTER DATA
    - CHARACTER_NAV  : 캐릭터 탭 네비게이션 정의
    - CHARACTER_CARDS: 캐릭터 탭 카드 데이터
+
+{ type: 'section' ,  label: ' 헤더 — 추가 내용 ' },  
 ════════════════════════════════════════════════ */
 
 const CHARACTER_NAV = {
@@ -30,7 +32,8 @@ const CHARACTER_CARDS = {
       // 예: { icon:'⚔', img:'images/main.png', subImg:'images/sub.png', name:'영웅', desc:'...', detail:'...' }
       // subImg가 있는 카드는 상세 정보창의 상세 내용 아래에 작은 선택 이미지로 표시되고, 체크하면 아이디어 통합창에도 작게 표시됩니다.
 
-      
+     
+{ type: 'section' ,  label: '원형 — 에니어그램' },   
     { icon:'⚔', img:'images/Giant_Elf.jpg', subImg:'images/Peep.png', 
      
 name:'영웅의 이름이 엄청길어서 옆으로 튀어나오는 현상이 아이디어 통합 창에서 발견됐는데 이거 어떻게 해결하면 좋을까?',
