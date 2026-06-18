@@ -422,10 +422,10 @@ body::after {
       z-index: 70;
     }
     #screen-create.entering .info-panel {
-      animation: infoPanelEnter 0.55s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      animation: infoPanelEnter 0.72s cubic-bezier(0.16, 1, 0.3, 1) both;
     }
     #screen-create.entering .create-chrome-bottom {
-      animation: chromeBottomEnter 0.55s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      animation: chromeBottomEnter 0.72s cubic-bezier(0.16, 1, 0.3, 1) both;
     }
     @keyframes infoPanelEnter {
       0%   { transform: translateY(-100%); opacity: 0; }
