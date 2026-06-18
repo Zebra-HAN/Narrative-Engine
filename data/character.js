@@ -14,7 +14,7 @@ const CHARACTER_NAV = {
     { id:'race',        label:'종족', icon:'🐉', type:'group'    },
     { id:'job',         label:'직업', img:'images/golem.png',  type:'group'    },
     { id:'personality', label:'성격', icon:'💫'   },
-    { id:'attribute',   label:'속성 빨리 수정좀 테스트중', icon:'⚡'  ,type:'group'  },
+    { id:'attribute',   label:'속성', icon:'⚡'  ,type:'group'  },
     { id:'ability',     label:'능력',   },
     { id:'relation',    label:'관계', icon:'🔗'    },
   ]
