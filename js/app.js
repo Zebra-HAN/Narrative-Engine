@@ -356,6 +356,15 @@ function restartHomeIntro() {
   home.classList.add(HOME_ANIMATE_CLASS);
 }
 
+function restartCreateIntro() {
+  const createScreen = document.getElementById('screen-create');
+  if (!createScreen) return;
+
+  createScreen.classList.remove('entering');
+  void createScreen.offsetWidth;
+  createScreen.classList.add('entering');
+}
+
 function clearScreenTransitionState(screens) {
   document.body.classList.remove(WHITE_FADE_CLASS);
   document.body.style.removeProperty('--route-fade-ms');
@@ -468,10 +477,9 @@ function goToCreate() {
   closeExtraMenu({ instant: true });
 
   switchScreen('screen-create', () => {
-    const createScreen = document.getElementById('screen-create');
-    if (createScreen) createScreen.classList.remove('entering');
     switchNav('character', true, { silentAddress: true });
     setAddressTrail([]);
+    restartCreateIntro();
   }, { type: 'instant' });
 }
 
