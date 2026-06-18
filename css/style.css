@@ -1270,7 +1270,8 @@ body::after {
       max-width: min(100%, 150px);
       height: auto;
       max-height: 120px;
-      object-fit: contain;
+      box-sizing: border-box;
+      object-fit: fill;       /* auto 크기 조정으로 비율은 유지하고 contain의 내부 레터박스 여백은 방지 */
       border-radius: 8px;     /* ← 모서리 둥글기 */
       border: 1px solid rgba(58,125,90,0.18);  /* ← 테두리 두께, solid 선종류, 색상 */
       background: transparent;
