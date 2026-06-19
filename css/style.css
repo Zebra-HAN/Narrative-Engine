@@ -2168,10 +2168,10 @@ body::after {
 }
 
 .status-chip-sub-img {
-  width: 86%;           /* 아이디어 통합창 서브 이미지 — 메인보다 살짝 작은 최대치 */
-  max-width: 86%;
+  width: 95%;           /* 아이디어 통합창 서브 이미지 — 메인보다 살짝 작은 최대치 */
+  max-width: 95%;
   height: auto;         /* 고정 높이 제거 → 이미지 비율 그대로 */
-  max-height: 160px;    /* 통합창에서 너무 길어지지 않도록 최대 높이 제한 */
+  max-height: 120px;    /* 통합창에서 너무 길어지지 않도록 최대 높이 제한 */
   object-fit: contain;
   border-radius: 6px;
   border: 1px solid rgba(58,125,90,0.16);
