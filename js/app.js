@@ -512,9 +512,9 @@ function switchNav(navId, skipAnimation, options = {}) {
     // 버튼 상태 (인스타그램식 선택 배경 이동 — CSS transition)
   setBottomNavState(navId);
 
-  // 부분 초기화 버튼 텍스트
+  // 부분 초기화 버튼은 이미지로만 표시합니다.  텍스트 표기 하려면 NAV부분 추가해야함 →　if → .textContent = NAV_DATA[navId].resetLabel;
   const partialResetLabel = document.querySelector('#btn-partial-reset .extra-btn-label');
-  if (partialResetLabel) partialResetLabel.textContent = NAV_DATA[navId].resetLabel;
+  if (partialResetLabel) partialResetLabel.textContent = '';
 
   // 서브 메뉴 렌더
   renderSubnav(navId, !skipAnimation && prev !== navId);
@@ -1675,9 +1675,12 @@ async function partialReset() {
   const subs = NAV_DATA[currentNav].subs;
   subs.forEach(sub => {
     delete selectedCards[sub.id];
-    // 해당 서브의 세부정보도 초기화
+    // 해당 서브의 세부정보와 서브 이미지 선택도 초기화
     Object.keys(selectedDetails).forEach(key => {
       if (key.startsWith(sub.id + '__')) delete selectedDetails[key];
+    });
+     Object.keys(selectedSubImages).forEach(key => {
+      if (key.startsWith(sub.id + '__')) delete selectedSubImages[key];
     });
   });
   if (currentSubId) showCardPage(currentSubId, false);
