@@ -1470,7 +1470,7 @@ body::after {
     /* 선택된 카운트 배지  -마름모 카테고리에 선택된 카드 숫자 표시  */
     .selection-badge {
   position: absolute; 
-  top: 0px;           /*  top: 4px → -2px (위로 6px 올림) */
+  top: -1px;           /*  top: 4px → -2px ( 4에서-6= -2 마이너스일수록 위로 올림) */
   right: 2px;          /* right: 0px → 5px (왼쪽으로 5px 이동) */
   width: 14px; height: 14px;
   border-radius: 50%;
@@ -1718,7 +1718,7 @@ body::after {
 /* 하단 탭 카운트 배지  네비 메인 버튼에 선택된 갯수 배지 기능 추가  */
 .nav-btn { position: relative; }
 .nav-badge {
-  position: absolute; top: 3px; right: 11px;  /* 음수= 버튼벽 끝으로 가까워짐 바짝붙음 */
+  position: absolute; top: 3px; right: 9px;  /* 음수= 버튼벽 끝으로 가까워짐 바짝붙음 */
   z-index: 22;
   pointer-events: none;
   min-width: 14px; height: 14px;
