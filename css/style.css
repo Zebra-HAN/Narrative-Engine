@@ -1008,7 +1008,7 @@ body::after {
       height: 83px;        /* ── 네비게이션 메인 버튼 높이 조절 이거인듯? 가장 작은게 64였음 ── */
       position: relative;
       z-index: 30;
-           overflow: hidden;
+           overflow: visible;
     }
    .bottom-nav-indicator {
       position: absolute;
@@ -1470,8 +1470,8 @@ body::after {
     /* 선택된 카운트 배지  -카테고리에 선택된 카드 숫자 표시  */
     .selection-badge {
   position: absolute; 
-  top: -2px;           /* 카운트 배지 마름모에 있는거 위치 조절*/
-  right: 5px;
+  top: 0px;           /*  top: 4px → -2px (위로 6px 올림) */
+  right: 2px;          /* right: 0px → 5px (왼쪽으로 5px 이동) */
   width: 14px; height: 14px;
   border-radius: 50%;
   background: #FFC107;
@@ -1719,7 +1719,7 @@ body::after {
 .nav-btn { position: relative; }
 .nav-badge {
   position: absolute; top: 4px; right: 14px;
-  z-index: 5;
+  z-index: 22;
   pointer-events: none;
   min-width: 14px; height: 14px;
   border-radius: 7px;
