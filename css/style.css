@@ -2168,9 +2168,10 @@ body::after {
 }
 
 .status-chip-sub-img {
-  width: min(78%, 105px);
-  max-height: 86px;
-  object-fit: contain;
+   width: 105px;
+  max-width: 78%;
+  height: 86px;        /* 상세 정보창 서브 이미지 */
+  object-fit: cover;
   border-radius: 6px;
   border: 1px solid rgba(58,125,90,0.16);
   background: transparent;
@@ -2190,9 +2191,10 @@ body::after {
 }
 
 .detail-sub-img {
-  width: min(78%, 220px);
-  max-height: 210px;
-  object-fit: contain;
+  width: 220px;
+  max-width: 78%;
+  height: 210px;        /* 상세 정보창 서브 이미지 */
+  object-fit: cover;
   border-radius: 12px;
   border: 1.5px solid rgba(58,125,90,0.2);
   box-shadow: 0 4px 14px rgba(58,125,90,0.12);
@@ -2391,7 +2393,5 @@ body {
 }
 
 .extra-btn:has(.extra-btn-img[src]:not([src=""])) .extra-btn-label {
-  color: #ffffff;
-  text-shadow: 0 1px 6px rgba(0,0,0,0.75), 0 0 12px rgba(0,0,0,0.55);
-  font-weight: 700;
+  display: none;
 }
