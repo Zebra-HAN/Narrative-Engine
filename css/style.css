@@ -203,7 +203,7 @@ body::after {
       left: 50%;
       width: min(100vw, 980px);
       height: min(92vh, 980px);
-      background: url('../images/core-ui-assets/home_royalbanner.webp') top center / contain no-repeat;
+      background: url('../images/core/home/royal-banner.webp') top center / contain no-repeat;
       pointer-events: none;
       z-index: 0;
       transform: translate(-50%, -115%);
