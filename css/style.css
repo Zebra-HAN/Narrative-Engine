@@ -188,7 +188,7 @@ body::after {
     #screen-home {
       background:
         linear-gradient(180deg, rgba(8, 28, 18, 0.08), rgba(8, 28, 18, 0.16)),
-        url('../images/core-ui-assets/home_forestglow.jpg') center center / cover no-repeat;
+        url('../images/core/home/forestglow.jpg') center center / cover no-repeat;
       display: flex;
       align-items: center;
       justify-content: center;
