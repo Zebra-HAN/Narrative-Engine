@@ -2168,10 +2168,11 @@ body::after {
 }
 
 .status-chip-sub-img {
-   width: 105px;
-  max-width: 78%;
-  height: 86px;        /* 상세 정보창 서브 이미지 */
-  object-fit: cover;
+  width: 86%;           /* 아이디어 통합창 서브 이미지 — 메인보다 살짝 작은 최대치 */
+  max-width: 86%;
+  height: auto;         /* 고정 높이 제거 → 이미지 비율 그대로 */
+  max-height: 160px;    /* 통합창에서 너무 길어지지 않도록 최대 높이 제한 */
+  object-fit: contain;
   border-radius: 6px;
   border: 1px solid rgba(58,125,90,0.16);
   background: transparent;
@@ -2191,15 +2192,17 @@ body::after {
 }
 
 .detail-sub-img {
-  width: 220px;
-  max-width: 78%;
-  height: 210px;        /* 상세 정보창 서브 이미지 */
-  object-fit: cover;
+  width: 95%;           /* 상세 정보창 서브 이미지 — 메인 이미지와 동일한 방식 */
+  max-width: 95%;
+  height: auto;         /* 고정 높이 제거 → 이미지 비율 그대로 */
+  object-fit: contain;
   border-radius: 12px;
   border: 1.5px solid rgba(58,125,90,0.2);
   box-shadow: 0 4px 14px rgba(58,125,90,0.12);
   cursor: pointer;
   background: transparent;
+  display: block;
+  margin: 0 auto;
   -webkit-user-drag: none;
 }
 
