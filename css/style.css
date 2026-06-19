@@ -1479,7 +1479,7 @@ body::after {
   font-size: 0.55rem;
   font-weight: 700;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 0 6px 1.5px rgba(255, 130, 0, 0.55);
+  box-shadow: 0 0 8px rgba(255, 193, 7, 0.3);
   z-index: 10;
     }
 
@@ -1502,7 +1502,7 @@ body::after {
   justify-content: center;
   pointer-events: none;
   z-index: 10;  /* 이미지 레이어(z-index:0) 보다 확실히 위 */
-  box-shadow: 0 0 6px 1.5px rgba(255, 130, 0, 0.55);
+  box-shadow: 0 0 7px 0.5px rgba(255, 130, 0, 0.55);
 }
 
 
