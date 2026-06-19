@@ -1470,8 +1470,8 @@ body::after {
     /* 선택된 카운트 배지  -마름모 카테고리에 선택된 카드 숫자 표시  */
     .selection-badge {
   position: absolute; 
-  top: -1px;           /*  top: 4px → -2px ( 4에서-6= -2 마이너스일수록 위로 올림) */
-  right: 2px;          /* right: 0px → 5px (왼쪽으로 5px 이동) */
+  top: -3px;           /*  top: 4px → -2px ( 4에서-6= -2 마이너스일수록 위로 올림) */
+  right: 0px;          /* right: 0px → 5px (왼쪽으로 5px 이동) */
   width: 14px; height: 14px;
   border-radius: 50%;
   background: #FFC107;
@@ -1479,7 +1479,7 @@ body::after {
   font-size: 0.55rem;
   font-weight: 700;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 0 6px 0.2px rgba(255, 130, 0, 0.4);
+  box-shadow: 0 0 7px 0.4px rgba(255, 130, 0, 0.5);  /*  7px=블러, 0.2px=블러확장 rgba괄호속 0.4=투명도 1=100% */
   z-index: 10;
     }
 
@@ -1502,7 +1502,7 @@ body::after {
   justify-content: center;
   pointer-events: none;
   z-index: 10;  /* 이미지 레이어(z-index:0) 보다 확실히 위 */
-  box-shadow: 0 0 7px 0.2px rgba(255, 130, 0, 0.4);
+  box-shadow: 0 0 7px 0.4px rgba(255, 130, 0, 0.5);
 }
 
 
@@ -1729,7 +1729,7 @@ body::after {
   font-weight: 700;
   display: flex; align-items: center; justify-content: center;
   padding: 0 3px;
-  box-shadow: 0 0 7px 0.2px rgba(255, 130, 0, 0.4);  /* 원본 box-shadow: 0 0 6px rgba(240,128,48,0.5); */
+  box-shadow: 0 0 7px 0.4px rgba(255, 130, 0, 0.6);  /* 원본 box-shadow: 0 0 6px rgba(240,128,48,0.5); 7px=블러,0.2px=블러확장 */
 }
 
 
