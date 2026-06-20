@@ -2,20 +2,28 @@
    NARRATIVE DATA
    - NARRATIVE_NAV  : 스토리 탭 네비게이션 정의
    - NARRATIVE_CARDS: 스토리 탭 카드 데이터
+
+   
+섹션 헤더
+{ type: 'section' ,  label: ' 헤더 — 추가 내용 ' },  
+
+카드 코드
+{ icon:'🔮', name:'이름' ,img:'images/Peep.png', subImg:'images/Giant_Elf.jpg',  desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'  },
+
 ════════════════════════════════════════════════ */
 
 const NARRATIVE_NAV = {
   label: '스토리',
   resetLabel: '스토리 초기화',
   subs: [
-    { id:'goal',    label:'목표', icon:'🎯' },
-    { id:'desire',  label:'욕망', icon:'🔥' },
-    { id:'conflict',label:'갈등', icon:'⚔'  },
-    { id:'distort', label:'왜곡', icon:'🌀' },
-    { id:'event',   label:'사건', icon:'💥' },
-    { id:'choice',  label:'선택', icon:'⚖'  },
-    { id:'twist',   label:'반전', icon:'🌊' },
-    { id:'ending',  label:'결말', icon:'🌅' },
+    { id:'goal',    label:'목표', img:'images/core/sub-nav/stry/choice.jpg' },
+    { id:'desire',  label:'욕망', img:'images/core/sub-nav/stry/choice.jpg' },
+    { id:'conflict',label:'갈등', img:'images/core/sub-nav/stry/choice.jpg'  },
+    { id:'distort', label:'왜곡', img:'images/core/sub-nav/stry/choice.jpg' },
+    { id:'event',   label:'사건', img:'images/core/sub-nav/stry/event.jpg' },
+    { id:'choice',  label:'선택', img:'images/core/sub-nav/stry/choice.jpg'  },
+    { id:'twist',   label:'반전', img:'images/core/sub-nav/stry/twist.jpg' },
+    { id:'ending',  label:'결말', img:'images/core/sub-nav/stry/ending.jpg' },
   ]
 };
 
