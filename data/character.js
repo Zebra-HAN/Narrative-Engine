@@ -15,13 +15,13 @@ const CHARACTER_NAV = {
   label: '캐릭터',
   resetLabel: '캐릭터 초기화',
   subs: [
-    { id:'archetype',   label:'원형', img:'images/Giant_Elf.jpg' },
-    { id:'race',        label:'종족', icon:'🐉', type:'group'    },
-    { id:'job',         label:'직업', img:'images/golem.png',  type:'group'    },
-    { id:'personality', label:'성격', icon:'🐉', img:'images/c-personality.jpg'   },
-    { id:'attribute',   label:'속성', img:'images/c-b.jpg'  ,type:'group'   },
-    { id:'ability',     label:'능력',   },
-    { id:'relation',    label:'관계', icon:'🔗'    },
+    { id:'archetype',   label:'원형', img:'images/core/sub-nav/character/c-archetype.png' },
+    { id:'race',        label:'종족', img:'images/core/sub-nav/character/c-race.png', type:'group'    },
+    { id:'job',         label:'직업', img:'images/core/sub-nav/character/c-job.png',  type:'group'    },
+    { id:'personality', label:'성격', img:'images/core/sub-nav/character/c-personality.png'   },
+    { id:'attribute',   label:'속성', img:'images/core/sub-nav/character/c-attribute.png'  ,type:'group'   },
+    { id:'ability',     label:'능력', img:'images/core/sub-nav/character/c-ability.png'   },
+    { id:'relation',    label:'관계', img:'images/core/sub-nav/character/c-relation.png'    },
   ]
 };
 
