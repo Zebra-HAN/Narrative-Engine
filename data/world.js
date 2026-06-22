@@ -16,15 +16,15 @@ const WORLD_NAV = {
   resetLabel: '세계관 초기화',
   subs: [
      
-  { id: 'setting',   label: '배경',      img:'images/core/sub-nav/wrld/setting.jpg' },
-  { id: 'location',  label: '장소',      img:'images/core/sub-nav/wrld/location.jpg' },
-  { id: 'item',      label: '아이템',     img:'images/core/sub-nav/wrld/item.jpg' },
-  { id: 'tool',      label: '도구',      img:'images/core/sub-nav/wrld/tool.jpg' },
-  { id: 'resource',  label: '자원',      img:'images/core/sub-nav/wrld/resource.jpg' },
-  { id: 'tech',      label: '기술',      img:'images/core/sub-nav/wrld/tech.jpg' },
-  { id: 'skill',     label: '스킬',      img:'images/core/sub-nav/wrld/skill.jpg' },
-  { id: 'culture',   label: '문화',      img:'images/core/sub-nav/wrld/culture.jpg' },
-  { id: 'costume',   label: '의상',      img:'images/core/sub-nav/wrld/costume.jpg' },
+  { id: 'setting',  label: '배경',  img:'images/core/sub-nav/wrld/setting.jpg'  },
+  { id: 'location', label: '장소',  img:'images/core/sub-nav/wrld/location.jpg' },
+  { id: 'item',     label: '아이템', img:'images/core/sub-nav/wrld/item.jpg'    },
+  { id: 'tool',     label: '도구',  img:'images/core/sub-nav/wrld/tool.jpg'    },
+  { id: 'resource', label: '자원',  img:'images/core/sub-nav/wrld/resource.jpg'},
+  { id: 'tech',     label: '기술',  img:'images/core/sub-nav/wrld/tech.jpg'    },
+  { id: 'skill',    label: '스킬',  img:'images/core/sub-nav/wrld/skill.jpg'   },
+  { id: 'culture',  label: '문화',  img:'images/core/sub-nav/wrld/culture.jpg' },
+  { id: 'costume',  label: '의상',  img:'images/core/sub-nav/wrld/costume.jpg' },
      
   ]
 };
