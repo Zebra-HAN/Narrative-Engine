@@ -135,7 +135,8 @@ const WORLD_CARDS = {
    
   tech: [
      
-    { icon:'⚙',  name:'증기 기술'  img:'images/Giant_Elf.jpg', subImg:'images/Peep.png'  },  { icon:'💡', name:'전기 문명'   },
+    { icon:'⚙',  name:'증기 기술',  img:'images/Giant_Elf.jpg', subImg:'images/Peep.png'  }, 
+    { icon:'💡', name:'전기 문명'   },
     { icon:'🤖', name:'인공지능'      }, { icon:'🚀', name:'우주 항법'   },
     { icon:'🧬', name:'생체공학'      }, { icon:'🔮', name:'마법 기계'   },
     { icon:'⚗',  name:'연금술'       }, { icon:'📡', name:'통신망'      },
@@ -147,9 +148,6 @@ const WORLD_CARDS = {
     { icon:'🌑', name:'어둠의 기술'   }, { icon:'✨', name:'신성 공학'   },
 
      
-    { icon:'⚙', name:'증기 기술' },
-    { icon:'💡', name:'전기 문명' },
-    { icon:'🤖', name:'인공지능' },
     { icon:'🚀', name:'우주 항법' },
     { icon:'🧬', name:'생체공학' },
     { icon:'🔮', name:'마법 기계' },
