@@ -742,7 +742,7 @@ function showSubgroupCards(subId, groupIdx, sgIdx) {
   let sgCardRealIdx = 0;
   sg.cards.forEach((card, rawIdx) => {
     if (card.type === 'section') {
-      html += `</div><div class="card-section-header">${card.label}</div><div class="card-grid">`;
+      html += `</div><div class="card-section-header">${formatSectionHeaderLabel(card.label)}</div><div class="card-grid">`;
       return;
     }
     const idx = rawIdx;
@@ -883,7 +883,7 @@ function showGroupCards(subId, groupIdx) {
   let grpCardRealIdx = 0;
   grp.cards.forEach((card, rawIdx) => {
     if (card.type === 'section') {
-      html += `</div><div class="card-section-header">${card.label}</div><div class="card-grid">`;
+      html += `</div><div class="card-section-header">${formatSectionHeaderLabel(card.label)}</div><div class="card-grid">`;
       return;
     }
     const idx = rawIdx;
@@ -1035,7 +1035,7 @@ function showCardPage(subId, animate = true) {
   let cardRealIdx = 0;
   cards.forEach((card, rawIdx) => {
     if (card.type === 'section') {
-      html += `</div><div class="card-section-header">${card.label}</div><div class="card-grid">`;
+      html += `</div><div class="card-section-header">${formatSectionHeaderLabel(card.label)}</div><div class="card-grid">`;
       return;
     }
     const idx = rawIdx;       // ← 배열 원본 인덱스
@@ -1754,6 +1754,31 @@ function renderIcon(icon, img, className) {
 function formatLabel(label, icon) {
   return [icon, label].filter(value => value !== undefined && value !== null && value !== '').join(' ');
 }
+
+
+function formatSectionHeaderLabel(label) {
+  const text = String(label ?? '').trim();
+  if (!text) return '';
+
+  const separatorMatch = text.match(/\s*(—|\|)\s*/);
+  if (!separatorMatch) {
+    return `<span class="card-section-title">${escapeHtml(text)}</span>`;
+  }
+
+  const separatorIndex = separatorMatch.index;
+  const title = text.slice(0, separatorIndex).trim();
+  const detail = text.slice(separatorIndex).trim();
+
+  if (!title) {
+    return `<span class="card-section-detail">${escapeHtml(detail)}</span>`;
+  }
+  if (!detail) {
+    return `<span class="card-section-title">${escapeHtml(title)}</span>`;
+  }
+
+  return `<span class="card-section-title">${escapeHtml(title)}</span><span class="card-section-detail">${escapeHtml(detail)}</span>`;
+}
+
 
 /* ════════════════════════════════════════════════
    UTIL
