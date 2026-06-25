@@ -7,7 +7,7 @@
 { type: 'section' ,  label: ' 헤더 — 추가 내용 ' },  
 
 카드 코드
-{ icon:'🔮', name:'이름' ,img:'images/Peep.png', subImg:'images/Giant_Elf.jpg',  desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'  },
+{ name:'이름' ,img:'images/Peep.png', subImg:'images/Giant_Elf.jpg',  desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'  },
 
 ════════════════════════════════════════════════ */
 
