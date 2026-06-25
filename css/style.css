@@ -805,6 +805,21 @@ body::after {
       text-overflow: ellipsis;
     }
 
+    .card-section-title {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--gold-bright);
+      letter-spacing: 0.1em;
+    }
+
+    .card-section-detail {
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--gold-mid);
+      letter-spacing: 0.08em;
+      margin-left: 0.35em;
+    }
+
     /* 카드 그리드 */
     .card-grid {
       display: grid;
