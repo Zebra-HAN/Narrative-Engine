@@ -37,12 +37,12 @@ const COMPASS_CARDS = {
    
   type: [
      
-{ type: 'section' ,  label: ' 헤더 　　　— 추가 내용 ' },  
+{ type: 'section' ,  label: ' 드래곤 종족　　— 추가 내용 샬라샬라 ㅇㅋ1234 ' },  
     { icon:'🌟', name:'영웅 서사'    }, { icon:'💀', name:'비극'         },
 
      
-{ type: 'section' ,  label: ' 드래곤 ' },  
-{ type: 'section' ,  label: '  　— 추가 내용 ' },  
+{ type: 'section' ,  label: ' 👤드래곤 ' },  
+{ type: 'section' ,  label: '　드래곤　— 추가 내용 ' },  
      
     { icon:'🌱', name:'성장담'       }, { icon:'🌊', name:'모험담'        },
     { icon:'❤',  name:'로맨스'      }, { icon:'🕵', name:'추리'          },
