@@ -6,7 +6,6 @@
    
 섹션 헤더
 { type: 'section' ,  label: ' 헤더 — 추가 내용 ' },  
-{ type: 'section' ,  label: ' <strong>헤더</strong> — 추가 내용 ' },  
 
 카드 코드
 { icon:'🔮', name:'이름' ,img:'images/Peep.png', subImg:'images/Giant_Elf.jpg',  desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'  },
@@ -34,12 +33,17 @@ const COMPASS_NAV = {
 
 
 const COMPASS_CARDS = {
+
+   
   type: [
+     
+{ type: 'section' ,  label: ' 헤더    — 추가 내용 ' },  
+    { icon:'🌟', name:'영웅 서사'    }, { icon:'💀', name:'비극'         },
 
      
-{ type: 'section' ,  label: ' <strong>헤더</strong> — 추가 내용 ' },  
-
-    { icon:'🌟', name:'영웅 서사'    }, { icon:'💀', name:'비극'         },
+{ type: 'section' ,  label: ' **드래곤**  —  추가 내용 ' },  
+{ type: 'section' ,  label: '  — 추가 내용 ' },  
+     
     { icon:'🌱', name:'성장담'       }, { icon:'🌊', name:'모험담'        },
     { icon:'❤',  name:'로맨스'      }, { icon:'🕵', name:'추리'          },
     { icon:'🌌', name:'서사시'       }, { icon:'🎭', name:'풍자'          },
