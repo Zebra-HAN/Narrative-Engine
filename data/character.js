@@ -228,6 +228,7 @@ race: {   /* ═══  [종족]  ═══ */
         {
           id: 'race_fantasy_humanoid',
           label: '아인계',
+          img: 'images/Giant_Elf.jpg',
           cards: [
              
 { type: 'section' ,  label: ' 엘프 ' },  
@@ -314,7 +315,7 @@ race: {   /* ═══  [종족]  ═══ */
              소그룹 3 : 환상계 — 소인·서양 민화
            ───────────────────────────────────────── */
         {
-          id: 'race_fantasy_best',
+          id: 'race_fantasy_beast',
           label: '환상계',
           cards: [
 
@@ -435,7 +436,7 @@ race: {   /* ═══  [종족]  ═══ */
              소그룹 5 : 초월
            ───────────────────────────────────────── */
         {
-          id: 'race_fantasy_fairy',
+          id: 'race_fantasy_transcendent',
           label: '요정·정령',
           cards: [
 
