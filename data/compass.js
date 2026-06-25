@@ -18,9 +18,6 @@ const COMPASS_NAV = {
   label: '나침반',
   resetLabel: '나침반 초기화',
   subs: [
-
-     { type: 'section' ,  label: ' <strong>헤더</strong> — 추가 내용 ' },  
-
     { id: 'type',     label: '유형',  img:'images/core/sub-nav/comp/type.jpg'  },
     { id: 'genre',    label: '장르',  img:'images/core/sub-nav/comp/genre.jpg'  },
     { id: 'message',  label: '메시지', img:'images/core/sub-nav/comp/message.jpg'  },
@@ -35,8 +32,13 @@ const COMPASS_NAV = {
 
  /* ════════════════════════════════════════════════      나침반 -     ════════════════════════════════════════════════ */  
 
+
 const COMPASS_CARDS = {
   type: [
+
+     
+{ type: 'section' ,  label: ' <strong>헤더</strong> — 추가 내용 ' },  
+
     { icon:'🌟', name:'영웅 서사'    }, { icon:'💀', name:'비극'         },
     { icon:'🌱', name:'성장담'       }, { icon:'🌊', name:'모험담'        },
     { icon:'❤',  name:'로맨스'      }, { icon:'🕵', name:'추리'          },
