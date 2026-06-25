@@ -775,50 +775,55 @@ body::after {
     .center-page::-webkit-scrollbar { width: 3px; }
     .center-page::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
 
-    /* 섹션 헤더 */
-    .section-label {
-      font-family: 'Noto Serif KR', serif;
-      font-size: 0.7rem;
-      color: var(--gold-dim);
-      letter-spacing: 0.15em;
-      margin-bottom: 8px;
-      padding-left: 4px;
-      border-left: 2px solid var(--gold-dim);
-      padding-left: 8px;
-    }
 
-    /* 카드 섹션 구분 헤더 */
-    .card-section-header {
-      grid-column: 1 / -1;
-      width: 100%;
-      margin-top: 20px;
-      margin-bottom: 6px;
-      padding: 4px 8px;
-      font-family: 'Noto Serif KR', serif;
-      font-size: 0.68rem;
-      font-weight: 600;
-      color: var(--gold-mid);
-      border-left: 2px solid var(--gold-dim);
-      letter-spacing: 0.08em;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+  /* 섹션 헤더 (크기를 키우고 선명하게 강조) */
+.section-label {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 0.9rem;                   /* 기존 0.7rem -> 0.9rem으로 확대 */
+  font-weight: 700;                    /* 더 진하고 굵게 변경 */
+  color: var(--gold-dim);
+  letter-spacing: 0.15em;
+  margin-bottom: 10px;
+  border-left: 3px solid var(--gold-dim); /* 왼쪽 선 두께를 3px로 살짝 두껍게 */
+  padding-left: 10px;                  /* 선과 글자 사이 간격 넓힘 */
+}
 
-    .card-section-title {
-      font-size: 0.78rem;
-      font-weight: 800;
-      color: var(--gold-bright);
-      letter-spacing: 0.1em;
-    }
+/* 카드 섹션 구분 헤더 (전체 컨테이너: 높낮이 정렬) */
+.card-section-header {
+  grid-column: 1 / -1;
+  width: 100%;
+  margin-top: 20px;
+  margin-bottom: 6px;
+  padding: 4px 8px;
+  border-left: 2px solid var(--gold-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  
+  display: flex;                       /* 앞뒤 글자가 나란히 오도록 */
+  align-items: center;                 /* 높낮이를 가운데로 딱 맞춤 */
+}
 
-    .card-section-detail {
-      font-size: 0.68rem;
-      font-weight: 600;
-      color: var(--gold-mid);
-      letter-spacing: 0.08em;
-      margin-left: 0.35em;
-    }
+/* [앞부분] 헤더 타이틀 - 크고 진하게 */
+.card-section-title {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 0.9rem;                   /* 기존 0.78rem -> 0.9rem으로 확대 */
+  font-weight: 800;
+  color: var(--gold-bright);
+  letter-spacing: 0.1em;
+}
+
+/* [뒷부분] 추가 내용 - 깔끔한 스마트폰 스타일 고딕체 */
+.card-section-detail {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', 'Noto Sans KR', sans-serif; /* 깔끔한 고딕체 */
+  font-size: 0.75rem;                  /* 기존 0.68rem -> 0.75rem으로 살짝 확대 */
+  font-weight: 400;                    /* 얇고 깔끔하게 */
+  color: var(--gold-mid);
+  letter-spacing: 0.03em;
+  margin-left: 0.6em;                  /* 앞 글자와의 간격 넓힘 */
+  opacity: 0.8;                        /* 은은하게 투명도 조절 */
+}
+
 
     /* 카드 그리드 */
     .card-grid {
