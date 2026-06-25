@@ -6,6 +6,7 @@
    
 섹션 헤더
 { type: 'section' ,  label: ' 헤더 — 추가 내용 ' },  
+{ type: 'section' ,  label: ' <strong>헤더</strong> — 추가 내용 ' },  
 
 카드 코드
 { icon:'🔮', name:'이름' ,img:'images/Peep.png', subImg:'images/Giant_Elf.jpg',  desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'  },
@@ -17,6 +18,9 @@ const COMPASS_NAV = {
   label: '나침반',
   resetLabel: '나침반 초기화',
   subs: [
+
+     { type: 'section' ,  label: ' <strong>헤더</strong> — 추가 내용 ' },  
+
     { id: 'type',     label: '유형',  img:'images/core/sub-nav/comp/type.jpg'  },
     { id: 'genre',    label: '장르',  img:'images/core/sub-nav/comp/genre.jpg'  },
     { id: 'message',  label: '메시지', img:'images/core/sub-nav/comp/message.jpg'  },
