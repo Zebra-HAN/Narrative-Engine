@@ -816,12 +816,12 @@ body::after {
 /* [뒷부분] 추가 내용 - 깔끔한 스마트폰 스타일 고딕체 */
 .card-section-detail {
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', 'Noto Sans KR', sans-serif; /* 깔끔한 고딕체 */
-  font-size: 0.75rem;                  /* 기존 0.68rem -> 0.75rem으로 살짝 확대 */
+  font-size: 0.68rem;                  /* 기존 0.68rem -> 0.75rem으로 살짝 확대 */
   font-weight: 400;                    /* 얇고 깔끔하게 */
   color: var(--gold-mid);
-  letter-spacing: 0.03em;
-  margin-left: 0.6em;                  /* 앞 글자와의 간격 넓힘 */
-  opacity: 0.8;                        /* 은은하게 투명도 조절 */
+  letter-spacing: 0.04em;              /* 자간  0.08에서 0.04  */
+  margin-left: 0.5em;                  /* 앞 글자와의 간격 넓힘 */
+  opacity: 0.8;                        /* 은은하게 투명도 조절  0.8=불투명도:80% */
 }
 
 
