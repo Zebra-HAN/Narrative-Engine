@@ -9,7 +9,11 @@
 카드 코드
 { name:'이름' ,img:'images/Peep.png', subImg:'images/Giant_Elf.jpg',  desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'  },
 
-════════════════════════════════════════════════ */
+
+그룹 버튼 이미지
+      img: 'images/img/character/group/animal.jpg',     /* ─  그룹 이미지 ─ */
+
+═══════════════════════════════════════════════════════════════════════════════════════════════ */
 
 const CHARACTER_NAV = {
   label: '캐릭터',
@@ -94,7 +98,7 @@ race: {   /* ═══  [종족]  ═══ */
       id: 'race_human',     /* ─  메인 메뉴 ─ */
       label: '인간형', 
       icon: '👤',
-      img: 'images/golem.png',
+      img: 'images/golem.png',   /* ─  그룹 이미지 ─ */
       subgroups: [
         {
           id: 'race_human_skin',   /* 🟥🟥🟥🟥🟥🟥🟥 소그룹  1 🟥🟥🟥🟥🟥🟥🟥 */
@@ -161,7 +165,7 @@ race: {   /* ═══  [종족]  ═══ */
     {
       id: 'race_animal',
       label: '의인화도 테스트중 이거도 엄청 길게 해봐야겠다 그치응',
-      icon: '🐾',
+      img: 'images/img/character/group/animal.jpg',     /* ─  그룹 이미지 ─ */
       subgroups: [
         {
           id: 'race_animal_land',
