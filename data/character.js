@@ -164,7 +164,7 @@ race: {   /* ═══  [종족]  ═══ */
     /* ── 의인화 계열 ── */
     {
       id: 'race_animal',
-      label: '의인화도 테스트중 이거도 엄청 길게 해봐야겠다 그치응',
+      label: '의인화',
       img: 'images/img/character/group/animal.jpg',     /* ─  그룹 이미지 ─ */
       subgroups: [
         {
