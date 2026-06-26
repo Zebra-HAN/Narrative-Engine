@@ -11,9 +11,9 @@
 
 
 그룹 버튼 이미지
-      img: 'images/img/character/group/animal.jpg',     /* ─  그룹 이미지 ─ */
+      img: 'images/img/character/group/animal.jpg',    
 
-═══════════════════════════════════════════════════════════════════════════════════════════════ */
+════════════════════════════════════════════════ */
 
 const CHARACTER_NAV = {
   label: '캐릭터',
