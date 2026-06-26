@@ -2010,19 +2010,21 @@ body::after {
   font-size: 0.74rem;
   color: var(--text-primary);
   line-height: 1.75;
-  white-space: pre-line;
-  padding: 10px 12px;
-  background: rgba(245,250,247,0.7);
-  border-radius: 8px;
-  border-left: 3px solid rgba(58,125,90,0.4);
+  white-space: normal;
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  border-left: 0;
+  width: 100%;
 }
 
 /* ── Detail Check Button ── */
 .detail-line-row {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  padding: 3px 0;
+  gap: 6px;
+  padding: 5px 0;
+  width: 100%;
 }
 
 .detail-check-btn {
@@ -2056,7 +2058,8 @@ body::after {
   line-height: 1.7;
   white-space: pre-wrap;
   flex: 1;
-       cursor: pointer;
+  min-width: 0;
+  cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
 
