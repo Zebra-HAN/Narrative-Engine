@@ -23,7 +23,7 @@ const CARD_DATA = {
 let currentNav   = 'character';
 let currentSubId = null;
 let selectedCards = {};   // { subId: Set<idx> }
-let selectedDetails = {}; // { "subId__globalIdx": Set<detailLineIdx> }
+let selectedDetails = {}; // { "subId__globalIdx": Set<detailItemIdx> }
 let selectedSubImages = {}; // { "subId__globalIdx": true }
 let focusedCard  = null;  // { subId, idx, name, icon }
 let infoSlideCategory = false; // false=카드, true=카테고리
@@ -1312,6 +1312,16 @@ function toggleCardSelect(subId, idx) {
    updateNavBadges();  /* ← 여기 추가, 선택한 카드 총량 표시 추가*/
 }
 
+
+function parseDetailItems(detail) {
+  if (!detail) return [];
+  return String(detail)
+    .replace(/\r\n?/g, '\n')
+    .split(/\n{2,}/)
+    .map(item => item.trim())
+    .filter(Boolean);
+}
+
 function openDetailSheet(mode) {
   if (mode === 'card' && !focusedCard) return;
   if (mode === 'category' && !currentSubId) return;
@@ -1340,29 +1350,25 @@ function openDetailSheet(mode) {
       const detailKey = `${focusedCard.subId}__${focusedCard.idx}`;
       const checkedSet = selectedDetails[detailKey] || new Set();
 
-      const lines = card.detail.split('\n');
+      const detailItems = parseDetailItems(card.detail);
       let bodyHtml = '';
-      lines.forEach((line, lineIdx) => {
-        if (line.trim() === '') {
-          bodyHtml += `<div class="detail-line-empty"></div>`;
-        } else {
-          const isChecked = checkedSet.has(lineIdx);
-          bodyHtml += `
-            <div class="detail-line-row">
-              <button
-                type="button"
-                class="detail-check-btn pressable${isChecked ? ' checked' : ''}"
-                onclick="toggleDetailCheck('${focusedCard.subId}', ${focusedCard.idx}, ${lineIdx})"
-              >✅</button>
-                           <span
-                class="detail-line-text"
-                role="button"
-                tabindex="0"
-                onclick="toggleDetailCheck('${focusedCard.subId}', ${focusedCard.idx}, ${lineIdx})"
-                onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleDetailCheck('${focusedCard.subId}', ${focusedCard.idx}, ${lineIdx}); }"
-              >${line}</span>
-            </div>`;
-        }
+          detailItems.forEach((item, itemIdx) => {
+        const isChecked = checkedSet.has(itemIdx);
+        bodyHtml += `
+          <div class="detail-line-row">
+            <button
+              type="button"
+              class="detail-check-btn pressable${isChecked ? ' checked' : ''}"
+              onclick="toggleDetailCheck('${focusedCard.subId}', ${focusedCard.idx}, ${itemIdx})"
+            >✅</button>
+            <span
+              class="detail-line-text"
+              role="button"
+              tabindex="0"
+              onclick="toggleDetailCheck('${focusedCard.subId}', ${focusedCard.idx}, ${itemIdx})"
+              onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleDetailCheck('${focusedCard.subId}', ${focusedCard.idx}, ${itemIdx}); }"
+            >${escapeHtml(item)}</span>
+          </div>`;
       });
              if (card?.subImg) {
         const subImageChecked = !!selectedSubImages[detailKey];
@@ -1541,13 +1547,13 @@ function renderStatusContent() {
           const checkedLines = selectedDetails[detailKey];
           let detailHtml = '';
           if (checkedLines && checkedLines.size > 0 && card.detail) {
-            const lines = card.detail.split('\n');
+            const detailItems = parseDetailItems(card.detail);
             const picked = [];
-            checkedLines.forEach(li => {
-              if (lines[li] && lines[li].trim()) picked.push(lines[li].trim());
+            checkedLines.forEach(itemIdx => {
+              if (detailItems[itemIdx]) picked.push(detailItems[itemIdx]);
             });
             if (picked.length > 0) {
-              detailHtml = `<div class="status-chip-details">${picked.map(l => `<span class="status-chip-detail-line">${l}</span>`).join('')}</div>`;
+              detailHtml = `<div class="status-chip-details">${picked.map(item => `<span class="status-chip-detail-line">${escapeHtml(item)}</span>`).join('')}</div>`;
             }
           }
           const chipImgHtml = card.img
