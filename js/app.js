@@ -729,7 +729,7 @@ sg.cards.forEach((card, cIdx) => {
         data-group-idx="${i}"
       >
         <span class="group-btn-icon">${renderIcon(grp.icon, grp.img, 'group-btn-img')}</span>
-        <span class="group-btn-label">${grp.label}</span>
+        ${grp.img ? '' : `<span class="group-btn-label">${grp.label}</span>`}
         ${grpCount > 0 ? `<div class="group-badge">${grpCount}</div>` : ''}
       </button>
     `;
@@ -785,7 +785,7 @@ function showSubgroupPage(subId, groupIdx) {
         data-subgroup-idx="${sgIdx}"
       >
         <span class="group-btn-icon">${renderIcon(sg.icon, sg.img, 'group-btn-img')}</span>
-        <span class="group-btn-label">${sg.label}</span>
+        ${sg.img ? '' : `<span class="group-btn-label">${sg.label}</span>`}
         ${sgCount > 0 ? `<div class="group-badge">${sgCount}</div>` : ''}
       </button>
     `;
