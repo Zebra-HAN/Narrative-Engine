@@ -222,7 +222,7 @@ race: {   /* ═══  [종족]  ═══ */
       id: 'race_fantasy',
       label: '판타지',
       icon: '  ',
-      img: 'images/golem.png',
+      img: 'images/img/character/group/fantasy.jpg',
       subgroups: [
 
         /* ─────────────────────────────────────────
