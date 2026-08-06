@@ -210,6 +210,89 @@ function renderAddressTrail() {
   });
 }
 
+
+function canNavigateBackInTrail() {
+  return addressTrail.length > 1;
+}
+
+function navigateAddressBack() {
+  if (!canNavigateBackInTrail()) return false;
+  navigateAddressTag(addressTrail.length - 2);
+  return true;
+}
+
+function initCenterBackSwipe() {
+  const area = document.getElementById('center-area');
+  if (!area) return;
+
+  const BACK_THRESHOLD = 90;
+  const VERTICAL_TOLERANCE = 70;
+  const EDGE_GUARD = 12;
+  let startX = null;
+  let startY = null;
+  let isDragging = false;
+
+  function resetDragStyles() {
+    area.classList.remove('is-back-swiping');
+    area.style.removeProperty('--back-swipe-x');
+  }
+
+  function onTouchStart(e) {
+    if (e.touches.length !== 1 || !canNavigateBackInTrail()) return;
+    const touch = e.touches[0];
+    startX = touch.clientX;
+    startY = touch.clientY;
+    isDragging = false;
+  }
+
+  function onTouchMove(e) {
+    if (startX === null || e.touches.length !== 1) return;
+
+    const touch = e.touches[0];
+    const dx = touch.clientX - startX;
+    const dy = touch.clientY - startY;
+
+    if (!isDragging) {
+      if (Math.abs(dy) > VERTICAL_TOLERANCE) {
+        startX = null;
+        return;
+      }
+      if (dx > EDGE_GUARD && dx > Math.abs(dy) * 1.35) {
+        isDragging = true;
+        area.classList.add('is-back-swiping');
+      }
+    }
+
+    if (isDragging) {
+      e.preventDefault();
+      area.style.setProperty('--back-swipe-x', `${Math.min(dx * 0.35, 42)}px`);
+    }
+  }
+
+  function onTouchEnd(e) {
+    if (startX === null) {
+      resetDragStyles();
+      return;
+    }
+
+    const dx = e.changedTouches[0].clientX - startX;
+    const dy = e.changedTouches[0].clientY - startY;
+    const shouldGoBack = isDragging && dx > BACK_THRESHOLD && Math.abs(dy) < VERTICAL_TOLERANCE;
+
+    resetDragStyles();
+    startX = null;
+    startY = null;
+    isDragging = false;
+
+    if (shouldGoBack) navigateAddressBack();
+  }
+
+  area.addEventListener('touchstart', onTouchStart, { passive: true });
+  area.addEventListener('touchmove', onTouchMove, { passive: false });
+  area.addEventListener('touchend', onTouchEnd, { passive: true });
+  area.addEventListener('touchcancel', onTouchEnd, { passive: true });
+}
+
 function navigateAddressTag(index) {
   const item = addressTrail[index];
   if (!item) return;
@@ -343,6 +426,7 @@ window.addEventListener('load', () => {
 
 
 initInfoSliderSwipe();
+initCenterBackSwipe();
 
 /* ════════════════════════════════════════════════
    SCREEN TRANSITION
