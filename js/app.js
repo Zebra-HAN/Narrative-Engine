@@ -856,8 +856,8 @@ function showSubgroupCards(subId, groupIdx, sgIdx) {
          data-global-idx="${globalIdx}"
         onclick="subgroupCardClick('${subId}', ${groupIdx}, ${sgIdx}, ${idx})"
         ondblclick="openSubgroupCardDetail('${subId}', ${groupIdx}, ${sgIdx}, ${idx})"
-        onmousedown="startLongPress(this,'subgroup','${subId}',${groupIdx},${sgIdx},${idx})"
-        ontouchstart="startLongPress(this,'subgroup','${subId}',${groupIdx},${sgIdx},${idx})"
+        onmousedown="startLongPress(event,this,'subgroup','${subId}',${groupIdx},${sgIdx},${idx})"
+        ontouchstart="startLongPress(event,this,'subgroup','${subId}',${groupIdx},${sgIdx},${idx})"
         onmouseup="cancelLongPress()" ontouchend="cancelLongPress()"
         onmouseleave="cancelLongPress()" ontouchcancel="cancelLongPress()">
         <div class="card-img-frame">${renderIcon(card.icon, card.img, 'card-img')}</div>
@@ -996,8 +996,8 @@ function showGroupCards(subId, groupIdx) {
     data-global-idx="${globalIdx}"
     onclick="groupCardClick('${subId}', ${groupIdx}, ${idx})"
     ondblclick="openGroupCardDetail('${subId}', ${groupIdx}, ${idx})"
-    onmousedown="startLongPress(this,'group','${subId}',${groupIdx},${idx})"
-    ontouchstart="startLongPress(this,'group','${subId}',${groupIdx},${idx})"
+    onmousedown="startLongPress(event,this,'group','${subId}',${groupIdx},${idx})"
+    ontouchstart="startLongPress(event,this,'group','${subId}',${groupIdx},${idx})"
     onmouseup="cancelLongPress()" ontouchend="cancelLongPress()"
     onmouseleave="cancelLongPress()" ontouchcancel="cancelLongPress()">
         <div class="card-img-frame">${renderIcon(card.icon, card.img, 'card-img')}</div>
@@ -1128,14 +1128,14 @@ function showCardPage(subId, animate = true) {
   const subInfo = navInfo ? navInfo.subs.find(s => s.id === subId) : null;
   const label = subInfo ? subInfo.label : subId;
 
-  let html = '<div class="card-grid">';
+  let html = getCardGridOpenTag();
 
   if (!selectedCards[subId]) selectedCards[subId] = new Set();
 
   let cardRealIdx = 0;
   cards.forEach((card, rawIdx) => {
     if (card.type === 'section') {
-      html += `</div><div class="card-section-header">${formatSectionHeaderLabel(card.label)}</div><div class="card-grid">`;
+      html += `</div><div class="card-section-header">${formatSectionHeaderLabel(card.label)}</div>${getCardGridOpenTag()}`;
       return;
     }
     const idx = rawIdx;       // ← 배열 원본 인덱스
@@ -1148,8 +1148,8 @@ function showCardPage(subId, animate = true) {
     data-global-idx="${idx}"
     onclick="cardClick('${subId}', ${idx})"
     ondblclick="openCardDetail('${subId}', ${idx})"
-    onmousedown="startLongPress(this,'card','${subId}',${idx})"
-    ontouchstart="startLongPress(this,'card','${subId}',${idx})"
+    onmousedown="startLongPress(event,this,'card','${subId}',${idx})"
+    ontouchstart="startLongPress(event,this,'card','${subId}',${idx})"
     onmouseup="cancelLongPress()"  ontouchend="cancelLongPress()"
     onmouseleave="cancelLongPress()" ontouchcancel="cancelLongPress()">
     
@@ -2105,10 +2105,11 @@ let _lpStartX = 0;
 let _lpStartY = 0;
 const LONG_PRESS_MS = 480; // 꾹 누르는 시간 (ms)
 
-function startLongPress(el, type, subId, a, b, c) {
+function startLongPress(evt, el, type, subId, a, b, c) {
   cancelLongPress();
-  _lpStartX = event.touches ? event.touches[0].clientX : event.clientX;
-  _lpStartY = event.touches ? event.touches[0].clientY : event.clientY;
+  const point = evt.touches ? evt.touches[0] : evt;
+  _lpStartX = point.clientX;
+  _lpStartY = point.clientY;
 
   _lpTimer = setTimeout(() => {
     _lpTimer = null;
