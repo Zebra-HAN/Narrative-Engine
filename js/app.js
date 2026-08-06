@@ -858,7 +858,7 @@ function showSubgroupCards(subId, groupIdx, sgIdx) {
         ondblclick="openSubgroupCardDetail('${subId}', ${groupIdx}, ${sgIdx}, ${idx})"
         onmousedown="startLongPress(event,this,'subgroup','${subId}',${groupIdx},${sgIdx},${idx})"
         ontouchstart="startLongPress(event,this,'subgroup','${subId}',${groupIdx},${sgIdx},${idx})"
-        onmouseup="cancelLongPress()" ontouchend="cancelLongPress()"
+        onmouseup="cancelLongPress()" ontouchend="handleCardTouchEnd(event,'subgroup','${subId}',${groupIdx},${sgIdx},${idx})"
         onmouseleave="cancelLongPress()" ontouchcancel="cancelLongPress()">
         <div class="card-img-frame">${renderIcon(card.icon, card.img, 'card-img')}</div>
         <div class="card-name">${card.name}</div>
@@ -998,7 +998,7 @@ function showGroupCards(subId, groupIdx) {
     ondblclick="openGroupCardDetail('${subId}', ${groupIdx}, ${idx})"
     onmousedown="startLongPress(event,this,'group','${subId}',${groupIdx},${idx})"
     ontouchstart="startLongPress(event,this,'group','${subId}',${groupIdx},${idx})"
-    onmouseup="cancelLongPress()" ontouchend="cancelLongPress()"
+    onmouseup="cancelLongPress()" ontouchend="handleCardTouchEnd(event,'group','${subId}',${groupIdx},${idx})"
     onmouseleave="cancelLongPress()" ontouchcancel="cancelLongPress()">
         <div class="card-img-frame">${renderIcon(card.icon, card.img, 'card-img')}</div>
         <div class="card-name">${card.name}</div>
@@ -1150,7 +1150,7 @@ function showCardPage(subId, animate = true) {
     ondblclick="openCardDetail('${subId}', ${idx})"
     onmousedown="startLongPress(event,this,'card','${subId}',${idx})"
     ontouchstart="startLongPress(event,this,'card','${subId}',${idx})"
-    onmouseup="cancelLongPress()"  ontouchend="cancelLongPress()"
+    onmouseup="cancelLongPress()"  ontouchend="handleCardTouchEnd(event,'card','${subId}',${idx})"
     onmouseleave="cancelLongPress()" ontouchcancel="cancelLongPress()">
     
         <div class="card-img-frame">${renderIcon(card.icon, card.img, 'card-img')}</div>
@@ -2103,16 +2103,21 @@ function runGroupButtonAction(btn) {
 let _lpTimer = null;
 let _lpStartX = 0;
 let _lpStartY = 0;
+let _lpDidFire = false;
+let _lastCardTap = null;
 const LONG_PRESS_MS = 480; // 꾹 누르는 시간 (ms)
+const DOUBLE_TAP_MS = 320; // 모바일 더블터치 인식 시간 (ms)
 
 function startLongPress(evt, el, type, subId, a, b, c) {
   cancelLongPress();
+  _lpDidFire = false;
   const point = evt.touches ? evt.touches[0] : evt;
   _lpStartX = point.clientX;
   _lpStartY = point.clientY;
-
+   
   _lpTimer = setTimeout(() => {
     _lpTimer = null;
+    _lpDidFire = true;
      if (type === 'subgroup') subgroupCardDblClick(subId, a, b, c);
     else if (type === 'group') groupCardDblClick(subId, a, b);
     else {
@@ -2124,6 +2129,31 @@ function startLongPress(evt, el, type, subId, a, b, c) {
 
 function cancelLongPress() {
   if (_lpTimer) { clearTimeout(_lpTimer); _lpTimer = null; }
+}
+
+function handleCardTouchEnd(evt, type, subId, a, b, c) {
+  cancelLongPress();
+  if (_lpDidFire) {
+    _lastCardTap = null;
+    return;
+  }
+
+  const key = [type, subId, a, b, c].filter(value => value !== undefined).join(':');
+  const now = Date.now();
+  const isDoubleTap = _lastCardTap
+    && _lastCardTap.key === key
+    && now - _lastCardTap.time <= DOUBLE_TAP_MS;
+
+  if (isDoubleTap) {
+    evt.preventDefault();
+    _lastCardTap = null;
+    if (type === 'subgroup') openSubgroupCardDetail(subId, a, b, c);
+    else if (type === 'group') openGroupCardDetail(subId, a, b);
+    else openCardDetail(subId, a);
+    return;
+  }
+
+  _lastCardTap = { key, time: now };
 }
 
 /* ════════════════════════════════════════════════
