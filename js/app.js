@@ -95,6 +95,22 @@ function renderStatusCategoryMeta(subId, globalIdx) {
   </div>`;
 }
 
+
+const CARD_GRID_LAYOUT_TYPES = new Set(['A', 'B', 'C', 'D']);
+
+function getCardGridLayoutType(group) {
+  const layoutType = String(group?.layoutType || 'B').toUpperCase();
+  return CARD_GRID_LAYOUT_TYPES.has(layoutType) ? layoutType : 'B';
+}
+
+function getCardGridLayoutClass(group) {
+  return `card-grid-layout-${getCardGridLayoutType(group).toLowerCase()}`;
+}
+
+function getCardGridOpenTag(group) {
+  return `<div class="card-grid ${getCardGridLayoutClass(group)}">`;
+}
+
 function isSectionItem(item) {
   return item && item.type === 'section';
 }
@@ -821,12 +837,12 @@ function showSubgroupCards(subId, groupIdx, sgIdx) {
 
   if (!selectedCards[subId]) selectedCards[subId] = new Set();
 
- let html = '<div class="card-grid">';
+ let html = getCardGridOpenTag(grp);
 
   let sgCardRealIdx = 0;
   sg.cards.forEach((card, rawIdx) => {
     if (card.type === 'section') {
-      html += `</div><div class="card-section-header">${formatSectionHeaderLabel(card.label)}</div><div class="card-grid">`;
+      html += `</div><div class="card-section-header">${formatSectionHeaderLabel(card.label)}</div>${getCardGridOpenTag(grp)}`;
       return;
     }
     const idx = rawIdx;
@@ -963,11 +979,11 @@ function showGroupCards(subId, groupIdx) {
   // 카드 idx = groupIdx * 1000 + cardIdx
   const offset = groupIdx * 1000;
 
-  let html = '<div class="card-grid">';
+  let html = getCardGridOpenTag(grp);
   let grpCardRealIdx = 0;
   grp.cards.forEach((card, rawIdx) => {
     if (card.type === 'section') {
-      html += `</div><div class="card-section-header">${formatSectionHeaderLabel(card.label)}</div><div class="card-grid">`;
+      html += `</div><div class="card-section-header">${formatSectionHeaderLabel(card.label)}</div>${getCardGridOpenTag(grp)}`;
       return;
     }
     const idx = rawIdx;
