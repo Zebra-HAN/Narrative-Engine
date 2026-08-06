@@ -866,12 +866,10 @@ body::after {
       margin-bottom: 16px;
       perspective: 900px;
     }
-    @media (min-width: 500px) {
-      .card-grid { grid-template-columns: repeat(6, 1fr); }
-    }
-    @media (min-width: 700px) {
-      .card-grid { grid-template-columns: repeat(7, 1fr); }
-    }
+   .card-grid.card-grid-layout-a { grid-template-columns: repeat(5, 1fr); }
+    .card-grid.card-grid-layout-b { grid-template-columns: repeat(4, 1fr); }
+    .card-grid.card-grid-layout-c { grid-template-columns: repeat(3, 1fr); }
+    .card-grid.card-grid-layout-d { grid-template-columns: repeat(2, 1fr); }
 
     .data-card {
       aspect-ratio: 0.72;
@@ -891,6 +889,22 @@ body::after {
       -webkit-tap-highlight-color: transparent;
       backface-visibility: hidden;
     }
+
+    .card-grid-layout-b .data-card {
+      padding: 5px 5px 4px;
+    }
+
+    .card-grid-layout-c .data-card {
+      padding: 6px 6px 5px;
+    }
+
+    .card-grid-layout-d .data-card {
+      aspect-ratio: 2.35;
+      padding: 5px;
+      flex-direction: row;
+      gap: 4px;
+    }
+
     .data-card.card-deal {
       opacity: 0;
       animation: cardFlip 0.45s ease forwards;
@@ -923,6 +937,13 @@ body::after {
       box-shadow: none;
     }
 
+
+  .card-grid-layout-d .card-img-frame {
+      width: auto;
+      height: 100%;
+      flex: 0 0 38%;
+    }
+
     /* 이미지 없을 때 이모지 아이콘 영역 */
     .card-icon-area {
       width: 100%;
@@ -947,6 +968,17 @@ body::after {
       padding: 2px 2px 0;
       line-height: 1.3;
       font-family: 'Noto Sans KR', sans-serif;
+    }
+
+
+ .card-grid-layout-b .card-name { font-size: 0.56rem; }
+    .card-grid-layout-c .card-name { font-size: 0.62rem; line-height: 1.35; }
+    .card-grid-layout-d .card-name {
+      font-size: 0.68rem;
+      line-height: 1.35;
+      padding: 2px 4px;
+      justify-content: flex-start;
+      text-align: left;
     }
 
     /* 상세 정보 시트 */
