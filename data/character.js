@@ -101,7 +101,7 @@ race: {   /* ═══  [종족]  ═══ */
       label: '인간형', 
       layoutType: 'C',  /* ← 여기에 'A'/'B'/'C'/'D' 중 원하는 타입을 입력하면 이 그룹 카드 목록에 고정 적용됨 */
       icon: '👤',
-      img: 'images/golem.png',   /* ─  그룹 이미지 ─ */
+      img: 'images/img/character/group/human.jpg',   /* ─  그룹 이미지 ─ */
       subgroups: [
         {
           id: 'race_human_skin',   /* 🟥🟥🟥🟥🟥🟥🟥 소그룹  1 🟥🟥🟥🟥🟥🟥🟥 */
