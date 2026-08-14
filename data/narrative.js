@@ -57,11 +57,13 @@ const NARRATIVE_CARDS = {
       {
         id: 'want_1',
         label: '생존·안전', /*그룹 이름*/
-        layoutType: 'C',
+        layoutType: 'B',
         img: 'images/character/race/elf.jpg',
         cards: [
 
-           
+          
+/* ════════════════════════════════════════════════     🔻 생존 안전 🔻     ════════════════════════════════════════════════ */  
+ 
 { type: 'section' ,  label: ' 생존·안전 — 9 ' },
            
   { name: '살아남고 싶다',    img:'images/character/race/slime.jpg',  
@@ -120,7 +122,9 @@ const NARRATIVE_CARDS = {
       },
       {
 
-         
+     
+/* ════════════════════════════════════════════════     🔻 힘 지배 🔻     ════════════════════════════════════════════════ */  
+     
         id: 'want_2',
         label: '힘·지배',
         layoutType: 'C',
@@ -190,11 +194,13 @@ const NARRATIVE_CARDS = {
       },
       {
 
+/* ════════════════════════════════════════════════     🔻 자유 해방 🔻     ════════════════════════════════════════════════ */  
+ 
          
         id: 'want_3',
         label: '자유·해방',
         layoutType: 'D',
-        img: 'images/character/race/angels.jpg',
+        img: 'images/character/race/succubus.jpg',
         cards: [
 
 
