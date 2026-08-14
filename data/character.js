@@ -110,7 +110,7 @@ race: {   /* ═══  [종족]  ═══ */
           label: '피부',
           icon: '🟫', img: 'images/golem.png',
           cards: [         /* ─────[ ⬇️ 카드 ⬇️ ]───── */
-            { icon: '⬜', name: '백색 2015 헤더 에러',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
+            { icon: '⬜', name: '백색 2015 헤더 에러 이름을 엄청길게하면 어디까지 보이는지 한번 체크해 보아요',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
             { icon: '🟡', name: '금발',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
             { icon: '⬛', name: '흑발',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
             { icon: '🔴', name: '적발',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용 '}, 
