@@ -57,7 +57,7 @@ const NARRATIVE_CARDS = {
       {
         id: 'want_1',
         label: '생존·안전', /*그룹 이름*/
-        img: 'images/character/race/angels.jpg',
+        img: 'images/character/race/elf.jpg',
         cards: [
 
 { type: 'section' ,  label: ' 생존·안전 — 9 ' },
