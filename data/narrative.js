@@ -56,9 +56,10 @@ const NARRATIVE_CARDS = {
     groups: [
       {
         id: 'want_1',
-        label: '속성의 이름이 엄청 길어서 어떻게 될지 테스트', /*그룹 이름*/
-        icon: '👤',
+        label: '생존·안전', /*그룹 이름*/
+        img: 'images/character/race/angels.jpg',
         cards: [
+           
    { icon:'⚔', name:'검사' ,     desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용' },
    { icon:'🏹', name:'궁수'   ,  desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
    { icon:'🧙', name:'마법사',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
@@ -66,12 +67,13 @@ const NARRATIVE_CARDS = {
    { icon:'🗡', name:'암살자' ,  desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'}, 
    { icon:'🎵', name:'음유시인',  desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용' },
     { icon:'⚕', name:'치유사'    }, { icon:'🔧', name:'장인'        }, { icon:'📜', name:'학자'     },
+           
         ]
       },
       {
         id: 'want_2',
-        label: '이쪽도 좀 길게',
-        icon: '🐾',
+        label: '힘·지배',
+        img: 'images/character/race/angels.jpg',
         cards: [
     { icon:'🏴', name:'해적'      }, { icon:'🐾', name:'사냥꾼'      }, { icon:'💰', name:'상인'     },
     { icon:'👑', name:'귀족'      }, { icon:'🌿', name:'드루이드'    }, { icon:'🎭', name:'배우'     },
@@ -80,8 +82,8 @@ const NARRATIVE_CARDS = {
       },
       {
         id: 'want_3',
-        label: '속성 3',
-        icon: '✨',
+        label: '자유·해방',
+        img: 'images/character/race/angels.jpg',
         cards: [
               { icon:'⚗', name:'연금술사'  },
               { icon:'🕵', name:'첩보원'      },
@@ -89,8 +91,8 @@ const NARRATIVE_CARDS = {
       },
    {
         id: 'want_4',
-        label: '속성 4',
-        icon: '🐾',
+        label: '쾌락·경험·향유',
+        img: 'images/character/race/angels.jpg',
         cards: [
     { icon:'🏴', name:'해적'      }, { icon:'🐾', name:'사냥꾼'      }, { icon:'💰', name:'상인'     },
     { icon:'👑', name:'귀족'      }, { icon:'🌿', name:'드루이드'    }, { icon:'🎭', name:'배우'     },
@@ -99,8 +101,8 @@ const NARRATIVE_CARDS = {
       },
       {
         id: 'want_5',
-        label: '속성 5',
-        icon: '✨',
+        label: '사랑·소속',
+        img: 'images/character/race/angels.jpg',
         cards: [
               { icon:'⚗', name:'연금술사'  },
               { icon:'🕵', name:'첩보원'      },
@@ -108,8 +110,8 @@ const NARRATIVE_CARDS = {
       },
    {
         id: 'want_6',
-        label: '속성 6번',
-        icon: '🐾',  img:'images/Peep.png',
+        label: '인정·명예',
+        img: 'images/character/race/angels.jpg',
         cards: [
     { icon:'🏴', name:'해적'      }, { icon:'🐾', name:'사냥꾼'      }, { icon:'💰', name:'상인'     },
     { icon:'👑', name:'귀족'      }, { icon:'🌿', name:'드루이드'    }, { icon:'🎭', name:'배우'     },
@@ -120,8 +122,8 @@ const NARRATIVE_CARDS = {
       },
    {
         id: 'want_7',
-        label: '속성 6번',
-        icon: '🐾',  img:'images/Peep.png',
+        label: '소유·성공',
+        img: 'images/character/race/angels.jpg',
         cards: [
     { icon:'🏴', name:'해적'      }, { icon:'🐾', name:'사냥꾼'      }, { icon:'💰', name:'상인'     },
     { icon:'👑', name:'귀족'      }, { icon:'🌿', name:'드루이드'    }, { icon:'🎭', name:'배우'     },
@@ -132,8 +134,8 @@ const NARRATIVE_CARDS = {
       },
    {
         id: 'want_8',
-        label: '속성 6번',
-        icon: '🐾',  img:'images/Peep.png',
+        label: '성장·자아실현',
+        img: 'images/character/race/angels.jpg',
         cards: [
     { icon:'🏴', name:'해적'      }, { icon:'🐾', name:'사냥꾼'      }, { icon:'💰', name:'상인'     },
     { icon:'👑', name:'귀족'      }, { icon:'🌿', name:'드루이드'    }, { icon:'🎭', name:'배우'     },
@@ -143,8 +145,8 @@ const NARRATIVE_CARDS = {
       },
    {
         id: 'want_9',
-        label: '속성 6번',
-        icon: '🐾',  img:'images/Peep.png',
+        label: '창조·표현',
+        img: 'images/character/group/fantasy.jpg',
         cards: [
     { icon:'🏴', name:'해적'      }, { icon:'🐾', name:'사냥꾼'      }, { icon:'💰', name:'상인'     },
     { icon:'👑', name:'귀족'      }, { icon:'🌿', name:'드루이드'    }, { icon:'🎭', name:'배우'     },
@@ -155,8 +157,8 @@ const NARRATIVE_CARDS = {
       },
    {
         id: 'want_10',
-        label: '속성 6번',
-        icon: '🐾',  img:'images/Peep.png',
+        label: '상실·회복',
+        img: 'images/character/race/angels.jpg',
         cards: [
     { icon:'🏴', name:'해적'      }, { icon:'🐾', name:'사냥꾼'      }, { icon:'💰', name:'상인'     },
     { icon:'👑', name:'귀족'      }, { icon:'🌿', name:'드루이드'    }, { icon:'🎭', name:'배우'     },
@@ -167,8 +169,8 @@ const NARRATIVE_CARDS = {
       },
    {
         id: 'want_11',
-        label: '속성 6번',
-        icon: '🐾',  img:'images/Peep.png',
+        label: '정의·복수',
+        img: 'images/character/race/angels.jpg',
         cards: [
     { icon:'🏴', name:'해적'      }, { icon:'🐾', name:'사냥꾼'      }, { icon:'💰', name:'상인'     },
     { icon:'👑', name:'귀족'      }, { icon:'🌿', name:'드루이드'    }, { icon:'🎭', name:'배우'     },
@@ -180,8 +182,8 @@ const NARRATIVE_CARDS = {
       },
    {
         id: 'want_12',
-        label: '속성 6번',
-        icon: '🐾',  img:'images/Peep.png',
+        label: '진실·수수께끼',
+        img: 'images/character/race/angels.jpg',
         cards: [
     { icon:'🏴', name:'해적'      }, { icon:'🐾', name:'사냥꾼'      }, { icon:'💰', name:'상인'     },
     { icon:'👑', name:'귀족'      }, { icon:'🌿', name:'드루이드'    }, { icon:'🎭', name:'배우'     },
@@ -192,8 +194,8 @@ const NARRATIVE_CARDS = {
       },
    {
         id: 'want_13',
-        label: '속성 6번',
-        icon: '🐾',  img:'images/Peep.png',
+        label: '초월·의미·구원',
+        img: 'images/character/race/angels.jpg',
         cards: [
     { icon:'🏴', name:'해적'      }, { icon:'🐾', name:'사냥꾼'      }, { icon:'💰', name:'상인'     },
     { icon:'👑', name:'귀족'      }, { icon:'🌿', name:'드루이드'    }, { icon:'🎭', name:'배우'     },
@@ -206,6 +208,8 @@ const NARRATIVE_CARDS = {
   },
 
 
+
+   
    
    
 /* ════════════════════════════════════════════════     🔻 왜곡 🔻     ════════════════════════════════════════════════ */  
