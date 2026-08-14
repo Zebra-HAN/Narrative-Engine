@@ -10,6 +10,10 @@
 카드 코드
 { icon:'🔮', name:'이름' ,img:'images/Peep.png', subImg:'images/Giant_Elf.jpg',  desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'  },
 
+
+layoutType: 'C',   ← 여기에 'A'/'B'/'C'/'D' 중 원하는 타입을 입력하면 이 그룹 카드 목록에 고정 적용됨 
+
+
 ════════════════════════════════════════════════ */
 
 const NARRATIVE_NAV = {
@@ -17,7 +21,7 @@ const NARRATIVE_NAV = {
   resetLabel: '스토리 초기화',
   subs: [
     { id:'goal',    label:'목표', img:'images/core/sub-nav/stry/goal.jpg' },
-    { id:'desire',  label:'욕망', img:'images/core/sub-nav/stry/desire.jpg' },
+    { id:'want',  label:'욕망', img:'images/core/sub-nav/stry/desire.jpg',   type:'group'   },
     { id:'conflict',label:'갈등', img:'images/core/sub-nav/stry/conflict.jpg'  },
     { id:'distort', label:'왜곡', img:'images/core/sub-nav/stry/distort.jpg' },
     { id:'event',   label:'사건', img:'images/core/sub-nav/stry/event.jpg' },
@@ -28,6 +32,11 @@ const NARRATIVE_NAV = {
 };
 
 const NARRATIVE_CARDS = {
+
+
+   
+/* ════════════════════════════════════════════════     🔻 목표 goal 🔻     ════════════════════════════════════════════════ */  
+
   goal: [
     { icon:'🏆', name:'최강'       }, { icon:'👑', name:'왕위'       }, { icon:'💎', name:'보물'   },
     { icon:'🔮', name:'진실'       }, { icon:'🌅', name:'평화'       }, { icon:'💀', name:'복수'   },
@@ -38,15 +47,168 @@ const NARRATIVE_CARDS = {
     { icon:'🎭', name:'인정'       }, { icon:'🌱', name:'성장'       },
   ],
 
-  desire: [
-    { icon:'🔥', name:'힘'         }, { icon:'❤',  name:'사랑'      }, { icon:'💎', name:'소유'   },
-    { icon:'👁',  name:'인정'      }, { icon:'🌊', name:'자유'       }, { icon:'💀', name:'복수'   },
-    { icon:'🌿', name:'안식'       }, { icon:'🌟', name:'영광'       }, { icon:'🔮', name:'지식'   },
-    { icon:'💫', name:'신성'       }, { icon:'🌑', name:'망각'       }, { icon:'⚔',  name:'전투'  },
-    { icon:'🌹', name:'아름다움'   }, { icon:'🎭', name:'변신'       }, { icon:'🌙', name:'비밀'   },
-    { icon:'⚖',  name:'균형'      }, { icon:'👑', name:'지배'       }, { icon:'🐾', name:'야성'   },
-    { icon:'🌌', name:'초월'       }, { icon:'🔗', name:'연결'       },
-  ],
+
+      
+/* ════════════════════════════════════════════════     🔻 욕망 want 🔻     ════════════════════════════════════════════════ */  
+
+
+    want: {　 /*  욕망 카테고리  */
+    groups: [
+      {
+        id: 'want_1',
+        label: '속성의 이름이 엄청 길어서 어떻게 될지 테스트', /*그룹 이름*/
+        icon: '👤',
+        cards: [
+   { icon:'⚔', name:'검사' ,     desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용' },
+   { icon:'🏹', name:'궁수'   ,  desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
+   { icon:'🧙', name:'마법사',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
+   { icon:'🛡', name:'기사' ,   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
+   { icon:'🗡', name:'암살자' ,  desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'}, 
+   { icon:'🎵', name:'음유시인',  desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용' },
+    { icon:'⚕', name:'치유사'    }, { icon:'🔧', name:'장인'        }, { icon:'📜', name:'학자'     },
+        ]
+      },
+      {
+        id: 'want_2',
+        label: '이쪽도 좀 길게',
+        icon: '🐾',
+        cards: [
+    { icon:'🏴', name:'해적'      }, { icon:'🐾', name:'사냥꾼'      }, { icon:'💰', name:'상인'     },
+    { icon:'👑', name:'귀족'      }, { icon:'🌿', name:'드루이드'    }, { icon:'🎭', name:'배우'     },
+    { icon:'🔮', name:'점술사'    }, { icon:'🌑', name:'네크로맨서'  }, { icon:'🐉', name:'용기사'   },
+        ]
+      },
+      {
+        id: 'want_3',
+        label: '속성 3',
+        icon: '✨',
+        cards: [
+              { icon:'⚗', name:'연금술사'  },
+              { icon:'🕵', name:'첩보원'      },
+        ]
+      },
+   {
+        id: 'want_4',
+        label: '속성 4',
+        icon: '🐾',
+        cards: [
+    { icon:'🏴', name:'해적'      }, { icon:'🐾', name:'사냥꾼'      }, { icon:'💰', name:'상인'     },
+    { icon:'👑', name:'귀족'      }, { icon:'🌿', name:'드루이드'    }, { icon:'🎭', name:'배우'     },
+    { icon:'🔮', name:'점술사'    }, { icon:'🌑', name:'네크로맨서'  }, { icon:'🐉', name:'용기사'   },
+        ]
+      },
+      {
+        id: 'want_5',
+        label: '속성 5',
+        icon: '✨',
+        cards: [
+              { icon:'⚗', name:'연금술사'  },
+              { icon:'🕵', name:'첩보원'      },
+        ]
+      },
+   {
+        id: 'want_6',
+        label: '속성 6번',
+        icon: '🐾',  img:'images/Peep.png',
+        cards: [
+    { icon:'🏴', name:'해적'      }, { icon:'🐾', name:'사냥꾼'      }, { icon:'💰', name:'상인'     },
+    { icon:'👑', name:'귀족'      }, { icon:'🌿', name:'드루이드'    }, { icon:'🎭', name:'배우'     },
+    { icon:'🔮', name:'점술사'    }, { icon:'🌑', name:'네크로맨서'  }, { icon:'🐉', name:'용기사'   },
+
+
+        ]
+      },
+   {
+        id: 'want_7',
+        label: '속성 6번',
+        icon: '🐾',  img:'images/Peep.png',
+        cards: [
+    { icon:'🏴', name:'해적'      }, { icon:'🐾', name:'사냥꾼'      }, { icon:'💰', name:'상인'     },
+    { icon:'👑', name:'귀족'      }, { icon:'🌿', name:'드루이드'    }, { icon:'🎭', name:'배우'     },
+    { icon:'🔮', name:'점술사'    }, { icon:'🌑', name:'네크로맨서'  }, { icon:'🐉', name:'용기사'   },
+
+
+        ]
+      },
+   {
+        id: 'want_8',
+        label: '속성 6번',
+        icon: '🐾',  img:'images/Peep.png',
+        cards: [
+    { icon:'🏴', name:'해적'      }, { icon:'🐾', name:'사냥꾼'      }, { icon:'💰', name:'상인'     },
+    { icon:'👑', name:'귀족'      }, { icon:'🌿', name:'드루이드'    }, { icon:'🎭', name:'배우'     },
+    { icon:'🔮', name:'점술사'    }, { icon:'🌑', name:'네크로맨서'  }, { icon:'🐉', name:'용기사'   },
+
+       ]
+      },
+   {
+        id: 'want_9',
+        label: '속성 6번',
+        icon: '🐾',  img:'images/Peep.png',
+        cards: [
+    { icon:'🏴', name:'해적'      }, { icon:'🐾', name:'사냥꾼'      }, { icon:'💰', name:'상인'     },
+    { icon:'👑', name:'귀족'      }, { icon:'🌿', name:'드루이드'    }, { icon:'🎭', name:'배우'     },
+    { icon:'🔮', name:'점술사'    }, { icon:'🌑', name:'네크로맨서'  }, { icon:'🐉', name:'용기사'   },
+
+
+        ]
+      },
+   {
+        id: 'want_10',
+        label: '속성 6번',
+        icon: '🐾',  img:'images/Peep.png',
+        cards: [
+    { icon:'🏴', name:'해적'      }, { icon:'🐾', name:'사냥꾼'      }, { icon:'💰', name:'상인'     },
+    { icon:'👑', name:'귀족'      }, { icon:'🌿', name:'드루이드'    }, { icon:'🎭', name:'배우'     },
+    { icon:'🔮', name:'점술사'    }, { icon:'🌑', name:'네크로맨서'  }, { icon:'🐉', name:'용기사'   },
+
+
+        ]
+      },
+   {
+        id: 'want_11',
+        label: '속성 6번',
+        icon: '🐾',  img:'images/Peep.png',
+        cards: [
+    { icon:'🏴', name:'해적'      }, { icon:'🐾', name:'사냥꾼'      }, { icon:'💰', name:'상인'     },
+    { icon:'👑', name:'귀족'      }, { icon:'🌿', name:'드루이드'    }, { icon:'🎭', name:'배우'     },
+    { icon:'🔮', name:'점술사'    }, { icon:'🌑', name:'네크로맨서'  }, { icon:'🐉', name:'용기사'   },
+
+
+
+        ]
+      },
+   {
+        id: 'want_12',
+        label: '속성 6번',
+        icon: '🐾',  img:'images/Peep.png',
+        cards: [
+    { icon:'🏴', name:'해적'      }, { icon:'🐾', name:'사냥꾼'      }, { icon:'💰', name:'상인'     },
+    { icon:'👑', name:'귀족'      }, { icon:'🌿', name:'드루이드'    }, { icon:'🎭', name:'배우'     },
+    { icon:'🔮', name:'점술사'    }, { icon:'🌑', name:'네크로맨서'  }, { icon:'🐉', name:'용기사'   },
+
+
+        ]
+      },
+   {
+        id: 'want_13',
+        label: '속성 6번',
+        icon: '🐾',  img:'images/Peep.png',
+        cards: [
+    { icon:'🏴', name:'해적'      }, { icon:'🐾', name:'사냥꾼'      }, { icon:'💰', name:'상인'     },
+    { icon:'👑', name:'귀족'      }, { icon:'🌿', name:'드루이드'    }, { icon:'🎭', name:'배우'     },
+    { icon:'🔮', name:'점술사'    }, { icon:'🌑', name:'네크로맨서'  }, { icon:'🐉', name:'용기사'   },
+
+           
+        ]
+      },
+    ]
+  },
+
+
+   
+   
+/* ════════════════════════════════════════════════     🔻 왜곡 🔻     ════════════════════════════════════════════════ */  
 
   conflict: [
     { icon:'⚔',  name:'인간 vs 인간'     }, { icon:'🌊', name:'인간 vs 자연'   },
