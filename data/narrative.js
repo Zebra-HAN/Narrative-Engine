@@ -108,9 +108,9 @@ const NARRATIVE_CARDS = {
 
 
 
-{ type: 'section' ,  label: ' 생존·안전 — 9 ㅇㄴㅁㅇㄴㅁ\nㅇㅁㄴㅇㄴㅁㅇㅁㄴㅇㅁㅇㅁㄴㅇㅁㄴㅇㄴㅁㅇㅁㄴㅇ43243\n4324234324234324234234234234234324324' },
+{ type: 'section' ,  label: ' 생존·안전 — 9 ㅇㄴㅁㅇㄴㅁ\nㅇㅁㄴㅇㄴㅁㅇㅁㄴㅇ' },
            
-{ type: 'section' ,  label: ' 생존·안전 — 9 ㅇㄴㅁㅇㄴㅁㅇㅁㄴㅇㄴㅁㅇㅁㄴㅇㅁㅇㅁㄴㅇㅁㄴㅇㄴㅁㅇㅁㄴㅇ4324324324234324234324234234234234234324324' },
+{ type: 'section' ,  label: ' 생존·안전 — 9 ㅇㄴㅁㅇ24' },
            
            
    { icon:'🧙', name:'마법사',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
@@ -135,16 +135,6 @@ const NARRATIVE_CARDS = {
 
 { type: 'section' ,  label: ' 힘·지배 — 9 ' },
 { type: 'section' ,  label: ' 1. 강해지고 싶다 ' },       
-{ type: 'section' ,  label: ' 2. 이기고 싶다' },
-{ type: 'section' ,  label: ' 3. 통제하고 싶다' },
-{ type: 'section' ,  label: ' 4. 정복하고 싶다 ' },
-{ type: 'section' ,  label: ' 5. 정점에 군림하고 싶다 ' },
-{ type: 'section' ,  label: ' 6. 공포로 지배하고 싶다 (두려움의 대상이 되고 싶다) ' },
-{ type: 'section' ,  label: ' 7. 약자가 되지 않기 위해 힘을 원한다 ' },
-{ type: 'section' ,  label: ' 8. 질서를 설계하는 자(규칙을 만드는 자)가 되고 싶다 ' },
-{ type: 'section' ,  label: ' 9. 압도적인 존재가 되어 굴복시키고 싶다 ' },
-                      
-
 
 
 { name: '강해지고 싶다',    img:'images/character/race/slime.jpg',
@@ -259,6 +249,7 @@ const NARRATIVE_CARDS = {
  
         id: 'want_4',
         label: '쾌락·경험·향유',
+        layoutType: 'D',
         icon:'🔮',
         img: '',
         cards: [
