@@ -254,11 +254,10 @@ const NARRATIVE_CARDS = {
  
         id: 'want_4',
         label: '쾌락·경험·향유',
-        img: 'images/character/race/angels.jpg',
+        icon:'🔮',
+        img: '',
         cards: [
-
-
-[
+           
   {
     name: '즐기고 싶다',
     img: 'images/character/race/slime.jpg',
