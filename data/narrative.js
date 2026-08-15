@@ -55,15 +55,18 @@ const NARRATIVE_CARDS = {
     want: { /*  욕망 카테고리  */
     groups: [
       {
+
+                   
+/* ════════════════════════════════════════════════     🔻 생존 안전 🔻     ════════════════════════════════════════════════ */  
+ 
         id: 'want_1',
         label: '생존·안전', /*그룹 이름*/
         layoutType: 'B',
-        img: 'images/character/race/elf.jpg',
+        icon:'🛡️',
+        /*  img: 'images/character/race/elf.jpg', */  
         cards: [
 
-          
-/* ════════════════════════════════════════════════     🔻 생존 안전 🔻     ════════════════════════════════════════════════ */  
- 
+
 { type: 'section' ,  label: ' 생존·안전 — 9 ' },
            
   { name: '살아남고 싶다',    img:'images/character/race/slime.jpg',  
@@ -126,7 +129,7 @@ const NARRATIVE_CARDS = {
         id: 'want_2',
         label: '힘·지배',
         layoutType: 'C',
-        img: 'images/character/race/dark_elf.jpg',
+        icon:'👊',         
         cards: [
 
 
@@ -198,7 +201,7 @@ const NARRATIVE_CARDS = {
         id: 'want_3',
         label: '자유·해방',
         layoutType: 'D',
-        img: 'images/character/race/succubus.jpg',
+        icon:'🕊️',
         cards: [
 
 
