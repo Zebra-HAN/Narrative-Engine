@@ -244,7 +244,9 @@ const NARRATIVE_CARDS = {
 
            
               { icon:'⚗', name:'연금술사'  },
-              { icon:'🕵', name:'첩보원'      },
+              { icon:'🕵', name:'첩보원'     
+              
+              },
         ]
       },
    {
@@ -314,8 +316,7 @@ const NARRATIVE_CARDS = {
   }
 ]
 
-           
-        ]
+        
       },
       {
 
