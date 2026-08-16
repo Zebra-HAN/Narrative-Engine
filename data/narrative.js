@@ -62,8 +62,7 @@ const NARRATIVE_CARDS = {
         id: 'want_1',
         label: '생존·안전', /*그룹 이름*/
         layoutType: 'B',
-        icon:'🛡️',
-        /*  img: 'images/character/race/elf.jpg', */  
+        img: 'images/narrative/group/wamt_01.jpg',   /* ─  그룹 이미지 ─ */
         cards: [
 
 
@@ -129,7 +128,7 @@ const NARRATIVE_CARDS = {
         id: 'want_2',
         label: '힘·지배',
         layoutType: 'C',
-        icon:'👊',         
+        img: 'images/narrative/group/wamt_02.jpg',   /* ─  그룹 이미지 ─ */
         cards: [
 
 
@@ -190,8 +189,8 @@ const NARRATIVE_CARDS = {
          
         id: 'want_3',
         label: '자유·해방',
-        layoutType: 'D',
-        icon:'🕊️',
+        layoutType: 'D',        
+        img: 'images/narrative/group/wamt_03.jpg',   /* ─  그룹 이미지 ─ */
         cards: [
 
 
@@ -250,8 +249,7 @@ const NARRATIVE_CARDS = {
         id: 'want_4',
         label: '쾌락·경험·향유',
         layoutType: 'D',
-        icon:'🔮',
-        img: '',
+        img: 'images/narrative/group/wamt_04.jpg',   /* ─  그룹 이미지 ─ */
         cards: [
            
   {
@@ -320,8 +318,7 @@ const NARRATIVE_CARDS = {
         id: 'want_5',
         label: '사랑·소속',
         layoutType: 'D',
-        icon:'🔮',
-        img: '',
+        img: 'images/narrative/group/wamt_05.jpg',   /* ─  그룹 이미지 ─ */
         cards: [
 
 { name: '사랑받고 싶다', img:'images/character/race/slime.jpg',
@@ -379,8 +376,7 @@ detail: '【방향 태그】 타인 / 미래\n\n【활용법】\n《느와르》
         id: 'want_6',
         label: '인정·명예',
         layoutType: 'D',
-        icon:'🔮',
-        img: '',
+        img: 'images/narrative/group/wamt_06.jpg',   /* ─  그룹 이미지 ─ */
         cards: [
 
 { name: '능력을 인정받고 싶다',   img:'images/character/race/slime.jpg',   
@@ -432,8 +428,7 @@ detail: '【방향 태그】 타인 / 미래\n\n【활용법】\n《느와르》
         id: 'want_7',
         label: '소유·성공',
         layoutType: 'D',
-        icon:'🔮',
-        img: '',
+        img: 'images/narrative/group/wamt_07.jpg',   /* ─  그룹 이미지 ─ */
         cards: [
 
 
@@ -452,8 +447,7 @@ detail: '【방향 태그】 타인 / 미래\n\n【활용법】\n《느와르》
         id: 'want_8',
         label: '성장·자아실현',
         layoutType: 'D',
-        icon:'🔮',
-        img: '',
+        img: 'images/narrative/group/wamt_08.jpg',   /* ─  그룹 이미지 ─ */
         cards: [
 
            
@@ -470,8 +464,7 @@ detail: '【방향 태그】 타인 / 미래\n\n【활용법】\n《느와르》
         id: 'want_9',
         label: '창조·표현',
         layoutType: 'D',
-        icon:'🔮',
-        img: '',
+        img: 'images/narrative/group/wamt_09.jpg',   /* ─  그룹 이미지 ─ */
         cards: [
 
            
@@ -489,8 +482,7 @@ detail: '【방향 태그】 타인 / 미래\n\n【활용법】\n《느와르》
         id: 'want_10',
         label: '상실·회복',
         layoutType: 'D',
-        icon:'🔮',
-        img: '',
+        img: 'images/narrative/group/wamt_10.jpg',   /* ─  그룹 이미지 ─ */
         cards: [
 
            
@@ -508,8 +500,7 @@ detail: '【방향 태그】 타인 / 미래\n\n【활용법】\n《느와르》
         id: 'want_11',
         label: '정의·복수',
         layoutType: 'D',
-        icon:'🔮',
-        img: '',
+        img: 'images/narrative/group/wamt_11.jpg',   /* ─  그룹 이미지 ─ */
         cards: [
 
            
@@ -528,8 +519,7 @@ detail: '【방향 태그】 타인 / 미래\n\n【활용법】\n《느와르》
         id: 'want_12',
         label: '진실·수수께끼',
         layoutType: 'D',
-        icon:'🔮',
-        img: '',
+        img: 'images/narrative/group/wamt_12.jpg',   /* ─  그룹 이미지 ─ */
         cards: [
 
            
@@ -547,8 +537,7 @@ detail: '【방향 태그】 타인 / 미래\n\n【활용법】\n《느와르》
         id: 'want_13',
         label: '초월·의미·구원',
         layoutType: 'D',
-        icon:'🔮',
-        img: '',
+        img: 'images/narrative/group/wamt_13.jpg',   /* ─  그룹 이미지 ─ */
         cards: [
 
            
