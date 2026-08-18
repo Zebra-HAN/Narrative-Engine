@@ -61,7 +61,7 @@ const NARRATIVE_CARDS = {
  
         id: 'want_1',
         label: '생존·안전', /*그룹 이름*/
-        layoutType: 'B',
+        layoutType: 'D',
         img: 'images/narrative/group/want_01.jpg',   /* ─  그룹 이미지 ─ */
         cards: [
 
