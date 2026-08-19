@@ -2097,8 +2097,13 @@ body::after {
 .detail-columns-ab {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 10px;
+  column-gap: 5px;
+  row-gap: 6px;
   align-items: start;
+}
+
+.detail-columns-ab .detail-column {
+  gap: 6px;
 }
 
 .detail-idea-block,
@@ -2123,6 +2128,30 @@ body::after {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   word-break: keep-all;
+}
+
+.detail-columns-ab .detail-idea-block {
+  padding: 7px 6px;
+  font-size: 0.66rem;
+  line-height: 1.55;
+}
+
+@media (max-width: 599px) {
+  .detail-columns-ab {
+    column-gap: 3px;
+    row-gap: 5px;
+  }
+
+  .detail-columns-ab .detail-column {
+    gap: 5px;
+  }
+
+  .detail-columns-ab .detail-idea-block {
+    padding: 6px 4px;
+    font-size: 0.62rem;
+    line-height: 1.48;
+    border-radius: 9px;
+  }
 }
 
 .detail-idea-block:hover,
