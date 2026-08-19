@@ -13,17 +13,12 @@
 layoutType: 'C',   ← 여기에 A/B/C/D 입력하면 됨.  A=5 B=4 C=3 D=2 
 
 
+상세 정보  \n\n 분리, 기본 C 방식은 detail 하나로,  detailLayout/detailMode: 'AB' 
+또는 detailB/detailRight 입력이 있으면 A/B 2열 방식으로 표시. A열은 detailA/detailLeft/detail, B열은 detailB/detailRight로 직접 제어할 수 있습니다.
 
-상세 정보의 기존 \n\n 분리 방식은 유지, 기본 C 방식은 detail 하나로 계속 표시되고 
-detailLayout/detailMode: 'AB' 또는 detailB/detailRight 입력이 있으면 A/B 2열 방식으로 표시되도록 확장했습니다. 
-
-A열은 detailA/detailLeft/detail, B열은 detailB/detailRight로 직접 제어할 수 있습니다.
-
-detailLayout: 'AB',
-
+    detailMode: 'AB',
     detailA: ' ',
     detailB: ' '},
-
 
 
 ════════════════════════════════════════════════ */
