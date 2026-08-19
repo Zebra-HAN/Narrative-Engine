@@ -1833,6 +1833,13 @@ body::after {
   align-items: stretch;
 }
 
+.group-layout-four {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 12px;
+}
+
 .group-layout-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1885,6 +1892,7 @@ body::after {
   overflow: visible;
 }
 
+.group-layout-four .group-select-btn,
 .group-layout-grid .group-select-btn {
   aspect-ratio: 1 / 1;
   flex-direction: column;
@@ -1925,6 +1933,7 @@ body::after {
 }
 
 .group-layout-two .group-btn-icon { font-size: 2rem; }
+.group-layout-four .group-btn-icon { font-size: 1.55rem; }
 .group-layout-grid .group-btn-icon { font-size: 1.55rem; }
 
 /* ── group-btn-img: span 안의 img → 버튼 전체를 꽉 채움 ── */
@@ -1940,6 +1949,7 @@ body::after {
 /* 이미지 그룹 버튼은 JS에서 텍스트 라벨을 렌더링하지 않는다. */
 
 .group-btn-label { font-size: 0.9rem; color: var(--ivory); letter-spacing: 0.05em; }
+.group-layout-four .group-btn-label,
 .group-layout-grid .group-btn-label { font-size: 0.78rem; line-height: 1.25; }
 
 @keyframes groupBtnAppear {
