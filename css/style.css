@@ -2496,8 +2496,3 @@ body {
   display: none;
 }
 
-@media (max-width: 720px) {
-  .detail-columns-ab {
-    grid-template-columns: 1fr;
-  }
-}
