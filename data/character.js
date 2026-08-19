@@ -15,6 +15,12 @@ layoutType: 'C',   ← 여기에 'A'/'B'/'C'/'D' 중 원하는 타입을 입력�
 그룹 버튼 이미지
       img: 'images/character/group/animal.jpg',    
 
+
+    detailMode: 'AB',
+    detailA: ' ',
+    detailB: ' '},
+
+
 ══════════════════════════════════════════════════════════════════════════════════════════ */
 
 const CHARACTER_NAV = {
