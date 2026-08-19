@@ -691,6 +691,7 @@ function showDefaultCenter() {
 
 function getGroupLayoutClass(count) {
   if (count === 2) return 'group-layout-two';
+  if (count === 4) return 'group-layout-four';
   if (count >= 6) return 'group-layout-grid';
   return 'group-layout-list';
 }
