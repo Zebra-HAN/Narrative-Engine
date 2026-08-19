@@ -26,7 +26,7 @@ const CHARACTER_NAV = {
     { id:'job',         label:'직업', img:'images/core/sub-nav/char/c-job.jpg',  type:'group'    },
     { id:'personality', label:'성격', img:'images/core/sub-nav/char/c-personality.jpg'   },
     { id:'attribute',   label:'속성', img:'images/core/sub-nav/char/c-attribute.jpg'  ,type:'group'   },
-    { id:'ability',     label:'능력', img:'images/core/sub-nav/char/c-ability.jpg'   },
+    { id:'ability',     label:'능력', img:'images/core/sub-nav/char/c-ability.jpg' ,type:'group'   },
     { id:'relation',    label:'관계', img:'images/core/sub-nav/char/c-relation.jpg'    },
   ]
 };
@@ -580,20 +580,55 @@ race: {   /* ═══  [종족]  ═══ */
  /* ════════════════════════════════════════════════
    캐릭터 - 능력
    ════════════════════════════════════════════════ */  
-  ability: [
-    { icon:'🔮', name:'예지',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'}, 
-    { icon:'🌀', name:'공간이동',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
-     { type: 'section' ,  label: ' 헤더 — 추가 내용 ' }, 
-    { icon:'⏳', name:'시간조작',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
-    { icon:'🔗', name:'결박' ,     desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
-    { icon:'🌊', name:'소환'  ,   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
-    { icon:'💥', name:'폭발'  ,   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
-    { icon:'🛡', name:'방벽'     }, { icon:'👁',  name:'투시'      }, { icon:'🎭', name:'변신'     },
-    { icon:'💀', name:'부활'     }, { icon:'⚡', name:'가속'        }, { icon:'🌿', name:'치유'     },
-    { icon:'🔥', name:'소각'     }, { icon:'❄',  name:'동결'       }, { icon:'💫', name:'정화'     },
-    { icon:'🌑', name:'잠식'     }, { icon:'🎵', name:'매혹'        }, { icon:'🧠', name:'독심'     },
-    { icon:'⚔', name:'검기'     }, { icon:'🌌', name:'절대영역'    },
-  ],
+
+ ability: {　 /*  능력  카테고리 */
+    groups: [
+      {
+        id: 'attribute_1',
+        label: '속성의 이름이 엄청 길어서 어떻게 될지 테스트', /*그룹 이름*/
+        icon: '👤',
+        cards: [
+   { icon:'⚔', name:'검사' ,     desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용' },
+   { icon:'🏹', name:'궁수'   ,  desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
+   { icon:'🧙', name:'마법사',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
+   { icon:'🛡', name:'기사' ,   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
+   { icon:'🗡', name:'암살자' ,  desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'}, 
+   { icon:'🎵', name:'음유시인',  desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용' },
+    { icon:'⚕', name:'치유사'    }, { icon:'🔧', name:'장인'        }, { icon:'📜', name:'학자'     },
+        ]
+      },
+      {
+        id: 'attribute_2',
+        label: '이쪽도 좀 길게',
+        icon: '🐾',
+        cards: [
+    { icon:'🏴', name:'해적'      }, { icon:'🐾', name:'사냥꾼'      }, { icon:'💰', name:'상인'     },
+    { icon:'👑', name:'귀족'      }, { icon:'🌿', name:'드루이드'    }, { icon:'🎭', name:'배우'     },
+    { icon:'🔮', name:'점술사'    }, { icon:'🌑', name:'네크로맨서'  }, { icon:'🐉', name:'용기사'   },
+        ]
+      },
+      {
+        id: 'attribute_3',
+        label: '속성 3',
+        icon: '✨',
+        cards: [
+              { icon:'⚗', name:'연금술사'  },
+              { icon:'🕵', name:'첩보원'      },
+        ]
+      },
+   {
+        id: 'attribute_4',
+        label: '속성 4',
+        icon: '🐾',
+        cards: [
+
+    { icon:'🏴', name:'해적'      }, { icon:'🐾', name:'사냥꾼'      }, { icon:'💰', name:'상인'     },
+    { icon:'👑', name:'귀족'      }, { icon:'🌿', name:'드루이드'    }, { icon:'🎭', name:'배우'     },
+    { icon:'🔮', name:'점술사'    }, { icon:'🌑', name:'네크로맨서'  }, { icon:'🐉', name:'용기사'   },
+        ]
+      },
+    ]
+  },
 
    
  /* ════════════════════════════════════════════════
