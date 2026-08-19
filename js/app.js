@@ -1423,6 +1423,40 @@ function parseDetailItems(detail) {
     .filter(Boolean);
 }
 
+function getDetailDisplayMode(card) {
+  const mode = String(card?.detailLayout || card?.detailMode || '').toUpperCase();
+  const hasRightColumn = Boolean(card?.detailB || card?.detailRight);
+  return (mode === 'AB' || mode === 'A/B' || hasRightColumn) ? 'AB' : 'C';
+}
+
+function getCardDetailColumns(card) {
+  const mode = getDetailDisplayMode(card);
+  if (mode !== 'AB') {
+    return [{ key: 'c', label: 'C', items: parseDetailItems(card?.detail) }];
+  }
+
+  const leftDetail = card?.detailA ?? card?.detailLeft ?? card?.detail ?? '';
+  const rightDetail = card?.detailB ?? card?.detailRight ?? '';
+  return [
+    { key: 'a', label: 'A', items: parseDetailItems(leftDetail) },
+    { key: 'b', label: 'B', items: parseDetailItems(rightDetail) }
+  ];
+}
+
+function getCardDetailItems(card) {
+  return getCardDetailColumns(card).flatMap(column => column.items);
+}
+
+function renderDetailIdeaBlock(subId, globalIdx, itemIdx, item, isChecked) {
+  return `
+    <button
+      type="button"
+      class="detail-idea-block pressable${isChecked ? ' checked' : ''}"
+      onclick="toggleDetailCheck('${subId}', ${globalIdx}, ${itemIdx})"
+      aria-pressed="${isChecked ? 'true' : 'false'}"
+    >${escapeHtml(item)}</button>`;
+}
+
 function openDetailSheet(mode) {
   if (mode === 'card' && !focusedCard) return;
   if (mode === 'category' && !currentSubId) return;
@@ -1445,65 +1479,62 @@ function openDetailSheet(mode) {
     nameEl.textContent = focusedCard.name;
     descEl.textContent = card?.desc || '';
 
-    // 세부정보(detail) 파싱 및 체크 버튼 렌더
-    if (card?.detail) {
+    // 세부정보(detail) 파싱 및 선택 블록 렌더
+    const detailKey = `${focusedCard.subId}__${focusedCard.idx}`;
+    const detailColumns = getCardDetailColumns(card);
+    const hasDetailItems = detailColumns.some(column => column.items.length > 0);
+    const hasSubImage = Boolean(card?.subImg);
+
+    if (hasDetailItems || hasSubImage) {
       divEl.style.display = '';
-      const detailKey = `${focusedCard.subId}__${focusedCard.idx}`;
       const checkedSet = selectedDetails[detailKey] || new Set();
 
-      const detailItems = parseDetailItems(card.detail);
       let bodyHtml = '';
-          detailItems.forEach((item, itemIdx) => {
-        const isChecked = checkedSet.has(itemIdx);
-        bodyHtml += `
-          <div class="detail-line-row">
-            <button
-              type="button"
-              class="detail-check-btn pressable${isChecked ? ' checked' : ''}"
-              onclick="toggleDetailCheck('${focusedCard.subId}', ${focusedCard.idx}, ${itemIdx})"
-            >✅</button>
-            <span
-              class="detail-line-text"
-              role="button"
-              tabindex="0"
-              onclick="toggleDetailCheck('${focusedCard.subId}', ${focusedCard.idx}, ${itemIdx})"
-              onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleDetailCheck('${focusedCard.subId}', ${focusedCard.idx}, ${itemIdx}); }"
-            >${escapeHtml(item)}</span>
-          </div>`;
-      });
-             if (card?.subImg) {
+let globalItemIdx = 0;
+
+      if (hasDetailItems) {
+        if (getDetailDisplayMode(card) === 'AB') {
+          const columnHtml = detailColumns.map(column => {
+            const itemsHtml = column.items.map(item => {
+              const itemIdx = globalItemIdx;
+              globalItemIdx += 1;
+              return renderDetailIdeaBlock(focusedCard.subId, focusedCard.idx, itemIdx, item, checkedSet.has(itemIdx));
+            }).join('');
+
+            return `<div class="detail-column detail-column-${column.key}" aria-label="${column.label} 열">${itemsHtml}</div>`;
+          }).join('');
+          bodyHtml += `<div class="detail-columns detail-columns-ab">${columnHtml}</div>`;
+        } else {
+          const itemsHtml = detailColumns[0].items.map(item => {
+            const itemIdx = globalItemIdx;
+            globalItemIdx += 1;
+            return renderDetailIdeaBlock(focusedCard.subId, focusedCard.idx, itemIdx, item, checkedSet.has(itemIdx));
+          }).join('');
+          bodyHtml += `<div class="detail-column detail-column-c">${itemsHtml}</div>`;
+        }
+      }
+
+      if (hasSubImage) {
         const subImageChecked = !!selectedSubImages[detailKey];
         bodyHtml += `
-          <div class="detail-sub-image-row">
-            <button
-              type="button"
-              class="detail-check-btn detail-sub-image-check pressable${subImageChecked ? ' checked' : ''}"
-              onclick="toggleSubImageCheck('${focusedCard.subId}', ${focusedCard.idx})"
-            >✅</button>
+          <button
+            type="button"
+            class="detail-sub-image-row pressable${subImageChecked ? ' checked' : ''}"
+            onclick="toggleSubImageCheck('${focusedCard.subId}', ${focusedCard.idx})"
+            aria-pressed="${subImageChecked ? 'true' : 'false'}"
+          >
             <img
               class="detail-sub-img"
               src="${card.subImg}"
               alt="${focusedCard.name} 서브 이미지"
               draggable="false"
-              onclick="toggleSubImageCheck('${focusedCard.subId}', ${focusedCard.idx})"
             >
-          </div>`;
+          </button>`;
       }
       bodyEl.innerHTML = bodyHtml;
     } else {
-          const detailKey = `${focusedCard.subId}__${focusedCard.idx}`;
-      if (card?.subImg) {
-        divEl.style.display = '';
-        const subImageChecked = !!selectedSubImages[detailKey];
-        bodyEl.innerHTML = `
-          <div class="detail-sub-image-row">
-            <button type="button" class="detail-check-btn detail-sub-image-check pressable${subImageChecked ? ' checked' : ''}" onclick="toggleSubImageCheck('${focusedCard.subId}', ${focusedCard.idx})">✅</button>
-            <img class="detail-sub-img" src="${card.subImg}" alt="${focusedCard.name} 서브 이미지" draggable="false" onclick="toggleSubImageCheck('${focusedCard.subId}', ${focusedCard.idx})">
-          </div>`;
-      } else {
-        divEl.style.display = 'none';
-        bodyEl.innerHTML = '';
-      }
+divEl.style.display = 'none';
+      bodyEl.innerHTML = '';
     }
 
   } else if (mode === 'category') {
@@ -1545,11 +1576,15 @@ function toggleDetailCheck(subId, globalIdx, lineIdx) {
     updateNavBadges();
   }
 
-  // 체크 버튼 UI 토글
-  const btn = document.querySelector(
-    `.detail-check-btn[onclick*="toggleDetailCheck('${subId}', ${globalIdx}, ${lineIdx})"]`
+ // 선택 블록 UI 토글
+  const block = document.querySelector(
+    `.detail-idea-block[onclick*="toggleDetailCheck('${subId}', ${globalIdx}, ${lineIdx})"]`
   );
-  if (btn) btn.classList.toggle('checked', set.has(lineIdx));
+  if (block) {
+    const isChecked = set.has(lineIdx);
+    block.classList.toggle('checked', isChecked);
+    block.setAttribute('aria-pressed', isChecked ? 'true' : 'false');
+  }
 
   // 세부정보가 하나도 없으면 selectedDetails 키 삭제
   if (set.size === 0) delete selectedDetails[detailKey];
@@ -1576,8 +1611,12 @@ function toggleSubImageCheck(subId, globalIdx) {
   }
 
   document
-    .querySelectorAll(`.detail-sub-image-check[onclick*="toggleSubImageCheck('${subId}', ${globalIdx})"]`)
-    .forEach(btn => btn.classList.toggle('checked', !!selectedSubImages[detailKey]));
+    .querySelectorAll(`.detail-sub-image-row[onclick*="toggleSubImageCheck('${subId}', ${globalIdx})"]`)
+    .forEach(block => {
+      const isChecked = !!selectedSubImages[detailKey];
+      block.classList.toggle('checked', isChecked);
+      block.setAttribute('aria-pressed', isChecked ? 'true' : 'false');
+    });
 
   refreshStatusIfOpen();
 }
@@ -1647,8 +1686,8 @@ function renderStatusContent() {
           const detailKey = `${sub.id}__${globalIdx}`;
           const checkedLines = selectedDetails[detailKey];
           let detailHtml = '';
-          if (checkedLines && checkedLines.size > 0 && card.detail) {
-            const detailItems = parseDetailItems(card.detail);
+          if (checkedLines && checkedLines.size > 0) {
+            const detailItems = getCardDetailItems(card);
             const picked = [];
             checkedLines.forEach(itemIdx => {
               if (detailItems[itemIdx]) picked.push(detailItems[itemIdx]);
