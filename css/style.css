@@ -2075,10 +2075,12 @@ body::after {
   line-height: 1.75;
   white-space: normal;
   padding: 0;
+  width: calc(100% + 16px);
+  margin-left: -8px;
+  margin-right: -8px;
   background: transparent;
   border-radius: 0;
   border-left: 0;
-  width: 100%;
 }
 
 /* ── Detail Idea Blocks ── */
@@ -2098,12 +2100,12 @@ body::after {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   column-gap: 5px;
-  row-gap: 6px;
+  row-gap: 8px;
   align-items: start;
 }
 
 .detail-columns-ab .detail-column {
-  gap: 6px;
+  gap: 8px;
 }
 
 .detail-idea-block,
@@ -2139,11 +2141,11 @@ body::after {
 @media (max-width: 599px) {
   .detail-columns-ab {
     column-gap: 3px;
-    row-gap: 5px;
+    row-gap: 7px;
   }
 
   .detail-columns-ab .detail-column {
-    gap: 5px;
+    gap: 7px;
   }
 
   .detail-columns-ab .detail-idea-block {
@@ -2524,4 +2526,3 @@ body {
 .extra-btn:has(.extra-btn-img[src]:not([src=""])) .extra-btn-label {
   display: none;
 }
-
