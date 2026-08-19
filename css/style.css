@@ -2091,7 +2091,7 @@ body::after {
 .detail-column {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .detail-columns-ab {
