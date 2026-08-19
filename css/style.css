@@ -2098,7 +2098,7 @@ body::after {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   column-gap: 5px;
-  row-gap: 6px;
+  row-gap: 8px;
   align-items: start;
 }
 
@@ -2139,7 +2139,7 @@ body::after {
 @media (max-width: 599px) {
   .detail-columns-ab {
     column-gap: 3px;
-    row-gap: 5px;
+    row-gap: 8px;
   }
 
   .detail-columns-ab .detail-column {
