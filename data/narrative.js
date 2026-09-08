@@ -10,7 +10,7 @@
 { icon:'🔮', name:'이름' ,img:'images/Peep.png', subImg:'images/Giant_Elf.jpg',  desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'  },
 
 
-layoutType: 'C',   ← 여기에 A/B/C/D 입력하면 됨.  A=5 B=4 C=3 D=2 
+layoutType: 'C',   ← 여기에 A/B/C/D 입력하면 됨.  A=5 B=4 C=3 D=2  카드 가로 갯수,기본=B
 
 
 상세 정보  \n\n 분리, 기본 C 방식은 detail 하나로,  detailLayout/detailMode: 'AB' 
