@@ -1,12 +1,25 @@
 /* ════════════════════════════════════════════════
-   WORLD DATA
-   - WORLD_NAV  : 세계관 탭 네비게이션 정의
-   - WORLD_CARDS: 세계관 탭 카드 데이터
+   NARRATIVE DATA
+   - NARRATIVE_NAV  : 스토리 탭 네비게이션 정의
+   - NARRATIVE_CARDS: 스토리 탭 카드 데이터
+
 섹션 헤더
 { type: 'section' ,  label: ' 헤더 — 추가 내용 ' },  
 
 카드 코드
 { icon:'🔮', name:'이름' ,img:'images/Peep.png', subImg:'images/Giant_Elf.jpg',  desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'  },
+
+
+layoutType: 'C',   ← 여기에 A/B/C/D 입력하면 됨.  A=5 B=4 C=3 D=2  카드 가로 갯수,기본=B
+
+
+상세 정보  \n\n 분리, 기본 C 방식은 detail 하나로,  detailLayout/detailMode: 'AB' 
+또는 detailB/detailRight 입력이 있으면 A/B 2열 방식으로 표시. A열은 detailA/detailLeft/detail, B열은 detailB/detailRight로 직접 제어할 수 있습니다.
+
+    detailMode: 'AB',
+    detailA: ' ',
+    detailB: ' '},
+
 
 ════════════════════════════════════════════════ */
 
