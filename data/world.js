@@ -55,119 +55,275 @@ const WORLD_CARDS = {
 
   obstacle: { /*  장애물 카테고리  */
     groups: [
-                   
-/* ════════════════════════════════════════════════     🔻 장애물 - 사람관계 people 🔻     ════════════════════════════════════════════════ */  
 
-    { /* 그룹 객체 열기 */
-      id: 'obstacle_people',     /* ─  메인 메뉴 ─ */
-      label: '인간·사회', 
+/* ════════════════════════════════════════════════     🔻 장애물 - 그룹1 🔻     ════════════════════════════════════════════════ */
+
+    {
+      id: 'obstacle1',
+      label: '',
       layoutType: 'C',
-      icon: '👤',
-      /* ═══ img: 'images/character/group/human.jpg', ═════ */
-      subgroups: [   /* 서브그룹 전체  */
-        {      /* 서브그룹 객체  */
-           
-          id: 'people',
-          label: '사람·관계',   /*그룹 이름*/
-          layoutType: 'D',
-          img: 'images/narrative/group/want_01.jpg',
-          cards: [
-
-
-            { type: 'section' ,  label: ' 사람·관계의 장애물 ' },
-           
-            { 
-              name: '직접적인 적대·공격',
-              img: 'images/narrative/want/w1/sala.jpg',
-              subImg:'images/narrative/want/w1/salas.jpg',
-              desc: '설명',  
-              detailLayout: 'AB',
-              detailA: '【방향 태그】 자기 자신 / 미래\n\n【활용법】\n《일상·치유물》\n결말\n\n《비틀기3》\n희생적 결말\n\n',
-              detailB: '【방향 태그】 자기 자신 / 미래\n\n【활용법】\n《일상·치유물》\n결말\n\n《비틀기3》\n희생적 결말\n\n' 
-            },
-             
-            { 
-              name: '경쟁·이해관계 충돌',
-              img: 'images/narrative/want/w1/sojung.jpg',
-              desc: '설명',
-              detailMode: 'AB',
-              detail: '【방향 태그】 자기 자신 / 미래\n\n【활용법】\n《일상·치유물》\n결말\n\n《비틀기3》\n희생적 결말\n\n',
-              detailB: '【방향 태그】 자기 자신 / 미래\n\n【활용법】\n《일상·치유물》\n결말\n\n《비틀기3》\n희생적 결말\n\n' 
-            },
-
-
-            { 
-              name: '통제·지배·강요',
-              img: 'images/narrative/want/w1/kiken.jpg',
-              desc: '설명',
-              detail: '【방향 태그】 자기 자신 / 미래\n\n【활용법】\n《일상·치유물》\n결말\n\n《비틀기3》\n희생적 결말\n\n' 
-            },
-
-           
-          ]   /* 카드 배열 닫기 */
-        }     /* subgroup 객체 닫기 */
-      ]       /* subgroups 배열 닫기 */
-    },        /* group 객체 닫기 */
- 
-               
-/* ════════════════════════════════════════════════     🔻 장애물 - 사람관계 people 🔻     ════════════════════════════════════════════════ */  
-
-    {  /* 그룹 객체 열기 */
-      id: 'obstacle_people2',
-      label: '인간·사회', 
-      layoutType: 'C',
-      icon: '👤',
-      /* ═══ img: 'images/character/group/human.jpg', ═════ */
-      subgroups: [  /* 서브그룹 전체 */
-        {    /* 서브그룹 객체  */
-           
-          id: 'people2',
+      subgroups: [
+        {
+          id: 'obstacle1_sub1',
           label: '사람·관계',
           layoutType: 'D',
           img: 'images/narrative/group/want_01.jpg',
           cards: [
-
-
             { type: 'section' ,  label: ' 사람·관계의 장애물 ' },
-           
-            { 
-              name: '직접적인 적대·공격',
-              img: 'images/narrative/want/w1/sala.jpg',
-              subImg:'images/narrative/want/w1/salas.jpg',
-              desc: '설명',  
+            {
+              name: '',
+              img: '',
+              desc: '설명',
               detailLayout: 'AB',
-              detailA: '【방향 태그】 자기 자신 / 미래\n\n【활용법】\n《일상·치유물》\n결말\n\n《비틀기3》\n희생적 결말\n\n',
-              detailB: '【방향 태그】 자기 자신 / 미래\n\n【활용법】\n《일상·치유물》\n결말\n\n《비틀기3》\n희생적 결말\n\n' 
+              detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
+              detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
             },
-             
-            { 
-              name: '경쟁·이해관계 충돌',
-              img: 'images/narrative/want/w1/sojung.jpg',
+          ]
+        },
+        {
+          id: 'obstacle1_sub2',
+          label: '사람·관계',
+          layoutType: 'D',
+          img: 'images/narrative/group/want_01.jpg',
+          cards: [
+            { type: 'section' ,  label: ' 사람·관계의 장애물 ' },
+            {
+              name: '',
+              img: '',
               desc: '설명',
-              detailMode: 'AB',
-              detail: '【방향 태그】 자기 자신 / 미래\n\n【활용법】\n《일상·치유물》\n결말\n\n《비틀기3》\n희생적 결말\n\n',
-              detailB: '【방향 태그】 자기 자신 / 미래\n\n【활용법】\n《일상·치유물》\n결말\n\n《비틀기3》\n희생적 결말\n\n' 
+              detailLayout: 'AB',
+              detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
+              detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
             },
+          ]
+        }
+      ]
+    },
 
+/* ════════════════════════════════════════════════     🔻 장애물 - 그룹2 🔻     ════════════════════════════════════════════════ */
 
-            { 
-              name: '통제·지배·강요',
-              img: 'images/narrative/want/w1/kiken.jpg',
+    {
+      id: 'obstacle2',
+      label: '',
+      layoutType: 'C',
+      subgroups: [
+        {
+          id: 'obstacle2_sub1',
+          label: '사람·관계',
+          layoutType: 'D',
+          img: 'images/narrative/group/want_01.jpg',
+          cards: [
+            { type: 'section' ,  label: ' 사람·관계의 장애물 ' },
+            {
+              name: '',
+              img: '',
               desc: '설명',
-              detail: '【방향 태그】 자기 자신 / 미래\n\n【활용법】\n《일상·치유물》\n결말\n\n《비틀기3》\n희생적 결말\n\n' 
+              detailLayout: 'AB',
+              detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
+              detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
             },
+          ]
+        },
+        {
+          id: 'obstacle2_sub2',
+          label: '사람·관계',
+          layoutType: 'D',
+          img: 'images/narrative/group/want_01.jpg',
+          cards: [
+            { type: 'section' ,  label: ' 사람·관계의 장애물 ' },
+            {
+              name: '',
+              img: '',
+              desc: '설명',
+              detailLayout: 'AB',
+              detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
+              detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
+            },
+          ]
+        }
+      ]
+    },
 
-           
-          ]   /* 카드 배열 닫기 */
-        }     /* subgroup 객체 닫기 */
-      ]       /* subgroups 배열 닫기 */
-    },        /* group 객체 닫기 */
+/* ════════════════════════════════════════════════     🔻 장애물 - 그룹3 🔻     ════════════════════════════════════════════════ */
 
+    {
+      id: 'obstacle3',
+      label: '',
+      layoutType: 'C',
+      subgroups: [
+        {
+          id: 'obstacle3_sub1',
+          label: '사람·관계',
+          layoutType: 'D',
+          img: 'images/narrative/group/want_01.jpg',
+          cards: [
+            { type: 'section' ,  label: ' 사람·관계의 장애물 ' },
+            {
+              name: '',
+              img: '',
+              desc: '설명',
+              detailLayout: 'AB',
+              detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
+              detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
+            },
+          ]
+        },
+        {
+          id: 'obstacle3_sub2',
+          label: '사람·관계',
+          layoutType: 'D',
+          img: 'images/narrative/group/want_01.jpg',
+          cards: [
+            { type: 'section' ,  label: ' 사람·관계의 장애물 ' },
+            {
+              name: '',
+              img: '',
+              desc: '설명',
+              detailLayout: 'AB',
+              detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
+              detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
+            },
+          ]
+        }
+      ]
+    },
+
+/* ════════════════════════════════════════════════     🔻 장애물 - 그룹4 🔻     ════════════════════════════════════════════════ */
+
+    {
+      id: 'obstacle4',
+      label: '',
+      layoutType: 'C',
+      subgroups: [
+        {
+          id: 'obstacle4_sub1',
+          label: '사람·관계',
+          layoutType: 'D',
+          img: 'images/narrative/group/want_01.jpg',
+          cards: [
+            { type: 'section' ,  label: ' 사람·관계의 장애물 ' },
+            {
+              name: '',
+              img: '',
+              desc: '설명',
+              detailLayout: 'AB',
+              detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
+              detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
+            },
+          ]
+        },
+        {
+          id: 'obstacle4_sub2',
+          label: '사람·관계',
+          layoutType: 'D',
+          img: 'images/narrative/group/want_01.jpg',
+          cards: [
+            { type: 'section' ,  label: ' 사람·관계의 장애물 ' },
+            {
+              name: '',
+              img: '',
+              desc: '설명',
+              detailLayout: 'AB',
+              detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
+              detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
+            },
+          ]
+        }
+      ]
+    },
+
+/* ════════════════════════════════════════════════     🔻 장애물 - 그룹5 🔻     ════════════════════════════════════════════════ */
+
+    {
+      id: 'obstacle5',
+      label: '',
+      layoutType: 'C',
+      subgroups: [
+        {
+          id: 'obstacle5_sub1',
+          label: '사람·관계',
+          layoutType: 'D',
+          img: 'images/narrative/group/want_01.jpg',
+          cards: [
+            { type: 'section' ,  label: ' 사람·관계의 장애물 ' },
+            {
+              name: '',
+              img: '',
+              desc: '설명',
+              detailLayout: 'AB',
+              detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
+              detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
+            },
+          ]
+        },
+        {
+          id: 'obstacle5_sub2',
+          label: '사람·관계',
+          layoutType: 'D',
+          img: 'images/narrative/group/want_01.jpg',
+          cards: [
+            { type: 'section' ,  label: ' 사람·관계의 장애물 ' },
+            {
+              name: '',
+              img: '',
+              desc: '설명',
+              detailLayout: 'AB',
+              detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
+              detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
+            },
+          ]
+        }
+      ]
+    },
+
+/* ════════════════════════════════════════════════     🔻 장애물 - 그룹6 🔻     ════════════════════════════════════════════════ */
+
+    {
+      id: 'obstacle6',
+      label: '',
+      layoutType: 'C',
+      subgroups: [
+        {
+          id: 'obstacle6_sub1',
+          label: '사람·관계',
+          layoutType: 'D',
+          img: 'images/narrative/group/want_01.jpg',
+          cards: [
+            { type: 'section' ,  label: ' 사람·관계의 장애물 ' },
+            {
+              name: '',
+              img: '',
+              desc: '설명',
+              detailLayout: 'AB',
+              detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
+              detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
+            },
+          ]
+        },
+        {
+          id: 'obstacle6_sub2',
+          label: '사람·관계',
+          layoutType: 'D',
+          img: 'images/narrative/group/want_01.jpg',
+          cards: [
+            { type: 'section' ,  label: ' 사람·관계의 장애물 ' },
+            {
+              name: '',
+              img: '',
+              desc: '설명',
+              detailLayout: 'AB',
+              detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
+              detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
+            },
+          ]
+        }
+      ]
+    },
 
     ]    /* groups 끝 */
   },     /* 카테고리 끝 */
 
-   
+
 /* ════════════════════════════════════════════════      세팅 = 배경     ════════════════════════════════════════════════ */  
    
   setting: [
