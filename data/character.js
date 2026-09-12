@@ -10,7 +10,8 @@
 { name:'이름' ,img:'images/Peep.png', subImg:'images/Giant_Elf.jpg',  desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'  },
 
 
-layoutType: 'C',   ← 여기에 'A'/'B'/'C'/'D' 중 원하는 타입을 입력하면 이 그룹 카드 목록에 고정 적용됨 
+layoutType: 'C',   ← 여기에 A/B/C/D 그룹 카드 목록에 고정 적용됨.  A=5 B=4 C=3 D=2  카드가로갯수, 기본=B
+
       
 그룹 버튼 이미지
       img: 'images/character/group/animal.jpg',    
