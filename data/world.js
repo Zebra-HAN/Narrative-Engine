@@ -70,12 +70,12 @@ const WORLD_CARDS = {
           id: 'obstacle1_sub1',
           label: '서브1',
           layoutType: 'D',
-          img: 'images/narrative/group/obstacle1_sub1.jpg',
+          img: 'images/core/sub-nav/wrld/setting.jpg',
           cards: [
             { type: 'section' ,  label: ' 서브1의 장애물 ' },
             {
               name: '카드명',
-              img: 'images/narrative/want/obstacle1_sub1_card1.jpg',
+              img: 'images/core/sub-nav/wrld/setting.jpg',
               desc: '설명',
               detailLayout: 'AB',
               detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
@@ -87,12 +87,12 @@ const WORLD_CARDS = {
           id: 'obstacle1_sub2',
           label: '서브2',
           layoutType: 'D',
-          img: 'images/narrative/group/obstacle1_sub2.jpg',
+          img: 'images/core/sub-nav/wrld/setting.jpg',
           cards: [
             { type: 'section' ,  label: ' 서브2의 장애물 ' },
             {
               name: '카드명',
-              img: 'images/narrative/want/obstacle1_sub2_card1.jpg',
+              img: 'images/core/sub-nav/wrld/setting.jpg',
               desc: '설명',
               detailLayout: 'AB',
               detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
