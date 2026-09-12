@@ -64,7 +64,7 @@ const WORLD_CARDS = {
       id: 'obstacle1',
       label: '그룹1',
       layoutType: 'C',
-      img:'images/core/sub-nav/wrld/setting.jpg' 
+      img:'images/core/sub-nav/wrld/setting.jpg' ,
       subgroups: [
         {
           id: 'obstacle1_sub1',
@@ -109,7 +109,7 @@ const WORLD_CARDS = {
       id: 'obstacle2',
       label: '그룹2',
       layoutType: 'C',
-      img:'images/core/sub-nav/wrld/setting.jpg' 
+      img:'images/core/sub-nav/wrld/setting.jpg' ,
       subgroups: [
         {
           id: 'obstacle2_sub1',
@@ -154,7 +154,7 @@ const WORLD_CARDS = {
       id: 'obstacle3',
       label: '그룹3',
       layoutType: 'C',
-      img:'images/core/sub-nav/wrld/setting.jpg'
+      img:'images/core/sub-nav/wrld/setting.jpg',
       subgroups: [
         {
           id: 'obstacle3_sub1',
@@ -199,7 +199,7 @@ const WORLD_CARDS = {
       id: 'obstacle4',
       label: '그룹4',
       layoutType: 'C',
-      img:'images/core/sub-nav/wrld/setting.jpg'
+      img:'images/core/sub-nav/wrld/setting.jpg',
       subgroups: [
         {
           id: 'obstacle4_sub1',
@@ -244,7 +244,7 @@ const WORLD_CARDS = {
       id: 'obstacle5',
       label: '그룹5',
       layoutType: 'C',
-      img:'images/core/sub-nav/wrld/setting.jpg'
+      img:'images/core/sub-nav/wrld/setting.jpg',
       subgroups: [
         {
           id: 'obstacle5_sub1',
@@ -289,7 +289,7 @@ const WORLD_CARDS = {
       id: 'obstacle6',
       label: '그룹6',
       layoutType: 'C',
-      img:'images/core/sub-nav/wrld/setting.jpg'
+      img:'images/core/sub-nav/wrld/setting.jpg',
       subgroups: [
         {
           id: 'obstacle6_sub1',
