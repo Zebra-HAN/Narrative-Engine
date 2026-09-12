@@ -64,12 +64,12 @@ const WORLD_CARDS = {
       id: 'obstacle1',
       label: '그룹1',
       layoutType: 'C',
-      img:'images/core/sub-nav/wrld/setting.jpg' ,
+      img:'images/core/sub-nav/wrld/tech.jpg' ,
       subgroups: [
         {
           id: 'obstacle1_sub1',
           label: '서브1',
-          img: 'images/core/sub-nav/wrld/setting.jpg',
+          img: 'images/core/sub-nav/wrld/tech.jpg',
           cards: [
             { type: 'section' ,  label: ' 서브1의 장애물 ' },
             {
