@@ -53,6 +53,8 @@ const WORLD_CARDS = {
  /* ════════════════════════════════════════════════     🔻 장애물 Obstacle 🔻     ════════════════════════════════════════════════ */  
 
 
+
+
   obstacle: { /*  장애물 카테고리  */
     groups: [
 
@@ -60,19 +62,20 @@ const WORLD_CARDS = {
 
     {
       id: 'obstacle1',
-      label: '',
+      label: '그룹1',
       layoutType: 'C',
+      img:'images/core/sub-nav/wrld/setting.jpg' 
       subgroups: [
         {
           id: 'obstacle1_sub1',
-          label: '사람·관계',
+          label: '서브1',
           layoutType: 'D',
-          img: 'images/narrative/group/want_01.jpg',
+          img: 'images/narrative/group/obstacle1_sub1.jpg',
           cards: [
-            { type: 'section' ,  label: ' 사람·관계의 장애물 ' },
+            { type: 'section' ,  label: ' 서브1의 장애물 ' },
             {
-              name: '',
-              img: '',
+              name: '카드명',
+              img: 'images/narrative/want/obstacle1_sub1_card1.jpg',
               desc: '설명',
               detailLayout: 'AB',
               detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
@@ -82,14 +85,14 @@ const WORLD_CARDS = {
         },
         {
           id: 'obstacle1_sub2',
-          label: '사람·관계',
+          label: '서브2',
           layoutType: 'D',
-          img: 'images/narrative/group/want_01.jpg',
+          img: 'images/narrative/group/obstacle1_sub2.jpg',
           cards: [
-            { type: 'section' ,  label: ' 사람·관계의 장애물 ' },
+            { type: 'section' ,  label: ' 서브2의 장애물 ' },
             {
-              name: '',
-              img: '',
+              name: '카드명',
+              img: 'images/narrative/want/obstacle1_sub2_card1.jpg',
               desc: '설명',
               detailLayout: 'AB',
               detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
@@ -104,19 +107,20 @@ const WORLD_CARDS = {
 
     {
       id: 'obstacle2',
-      label: '',
+      label: '그룹2',
       layoutType: 'C',
+      img:'images/core/sub-nav/wrld/setting.jpg' 
       subgroups: [
         {
           id: 'obstacle2_sub1',
-          label: '사람·관계',
+          label: '서브1',
           layoutType: 'D',
-          img: 'images/narrative/group/want_01.jpg',
+          img: 'images/narrative/group/obstacle2_sub1.jpg',
           cards: [
-            { type: 'section' ,  label: ' 사람·관계의 장애물 ' },
+            { type: 'section' ,  label: ' 서브1의 장애물 ' },
             {
-              name: '',
-              img: '',
+              name: '카드명',
+              img: 'images/narrative/want/obstacle2_sub1_card1.jpg',
               desc: '설명',
               detailLayout: 'AB',
               detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
@@ -126,14 +130,14 @@ const WORLD_CARDS = {
         },
         {
           id: 'obstacle2_sub2',
-          label: '사람·관계',
+          label: '서브2',
           layoutType: 'D',
-          img: 'images/narrative/group/want_01.jpg',
+          img: 'images/narrative/group/obstacle2_sub2.jpg',
           cards: [
-            { type: 'section' ,  label: ' 사람·관계의 장애물 ' },
+            { type: 'section' ,  label: ' 서브2의 장애물 ' },
             {
-              name: '',
-              img: '',
+              name: '카드명',
+              img: 'images/narrative/want/obstacle2_sub2_card1.jpg',
               desc: '설명',
               detailLayout: 'AB',
               detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
@@ -148,19 +152,20 @@ const WORLD_CARDS = {
 
     {
       id: 'obstacle3',
-      label: '',
+      label: '그룹3',
       layoutType: 'C',
+      img:'images/core/sub-nav/wrld/setting.jpg'
       subgroups: [
         {
           id: 'obstacle3_sub1',
-          label: '사람·관계',
+          label: '서브1',
           layoutType: 'D',
-          img: 'images/narrative/group/want_01.jpg',
+          img: 'images/narrative/group/obstacle3_sub1.jpg',
           cards: [
-            { type: 'section' ,  label: ' 사람·관계의 장애물 ' },
+            { type: 'section' ,  label: ' 서브1의 장애물 ' },
             {
-              name: '',
-              img: '',
+              name: '카드명',
+              img: 'images/narrative/want/obstacle3_sub1_card1.jpg',
               desc: '설명',
               detailLayout: 'AB',
               detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
@@ -170,14 +175,14 @@ const WORLD_CARDS = {
         },
         {
           id: 'obstacle3_sub2',
-          label: '사람·관계',
+          label: '서브2',
           layoutType: 'D',
-          img: 'images/narrative/group/want_01.jpg',
+          img: 'images/narrative/group/obstacle3_sub2.jpg',
           cards: [
-            { type: 'section' ,  label: ' 사람·관계의 장애물 ' },
+            { type: 'section' ,  label: ' 서브2의 장애물 ' },
             {
-              name: '',
-              img: '',
+              name: '카드명',
+              img: 'images/narrative/want/obstacle3_sub2_card1.jpg',
               desc: '설명',
               detailLayout: 'AB',
               detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
@@ -192,19 +197,20 @@ const WORLD_CARDS = {
 
     {
       id: 'obstacle4',
-      label: '',
+      label: '그룹4',
       layoutType: 'C',
+      img:'images/core/sub-nav/wrld/setting.jpg'
       subgroups: [
         {
           id: 'obstacle4_sub1',
-          label: '사람·관계',
+          label: '서브1',
           layoutType: 'D',
-          img: 'images/narrative/group/want_01.jpg',
+          img: 'images/narrative/group/obstacle4_sub1.jpg',
           cards: [
-            { type: 'section' ,  label: ' 사람·관계의 장애물 ' },
+            { type: 'section' ,  label: ' 서브1의 장애물 ' },
             {
-              name: '',
-              img: '',
+              name: '카드명',
+              img: 'images/narrative/want/obstacle4_sub1_card1.jpg',
               desc: '설명',
               detailLayout: 'AB',
               detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
@@ -214,14 +220,14 @@ const WORLD_CARDS = {
         },
         {
           id: 'obstacle4_sub2',
-          label: '사람·관계',
+          label: '서브2',
           layoutType: 'D',
-          img: 'images/narrative/group/want_01.jpg',
+          img: 'images/narrative/group/obstacle4_sub2.jpg',
           cards: [
-            { type: 'section' ,  label: ' 사람·관계의 장애물 ' },
+            { type: 'section' ,  label: ' 서브2의 장애물 ' },
             {
-              name: '',
-              img: '',
+              name: '카드명',
+              img: 'images/narrative/want/obstacle4_sub2_card1.jpg',
               desc: '설명',
               detailLayout: 'AB',
               detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
@@ -236,19 +242,20 @@ const WORLD_CARDS = {
 
     {
       id: 'obstacle5',
-      label: '',
+      label: '그룹5',
       layoutType: 'C',
+      img:'images/core/sub-nav/wrld/setting.jpg'
       subgroups: [
         {
           id: 'obstacle5_sub1',
-          label: '사람·관계',
+          label: '서브1',
           layoutType: 'D',
-          img: 'images/narrative/group/want_01.jpg',
+          img: 'images/narrative/group/obstacle5_sub1.jpg',
           cards: [
-            { type: 'section' ,  label: ' 사람·관계의 장애물 ' },
+            { type: 'section' ,  label: ' 서브1의 장애물 ' },
             {
-              name: '',
-              img: '',
+              name: '카드명',
+              img: 'images/narrative/want/obstacle5_sub1_card1.jpg',
               desc: '설명',
               detailLayout: 'AB',
               detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
@@ -258,14 +265,14 @@ const WORLD_CARDS = {
         },
         {
           id: 'obstacle5_sub2',
-          label: '사람·관계',
+          label: '서브2',
           layoutType: 'D',
-          img: 'images/narrative/group/want_01.jpg',
+          img: 'images/narrative/group/obstacle5_sub2.jpg',
           cards: [
-            { type: 'section' ,  label: ' 사람·관계의 장애물 ' },
+            { type: 'section' ,  label: ' 서브2의 장애물 ' },
             {
-              name: '',
-              img: '',
+              name: '카드명',
+              img: 'images/narrative/want/obstacle5_sub2_card1.jpg',
               desc: '설명',
               detailLayout: 'AB',
               detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
@@ -280,19 +287,20 @@ const WORLD_CARDS = {
 
     {
       id: 'obstacle6',
-      label: '',
+      label: '그룹6',
       layoutType: 'C',
+      img:'images/core/sub-nav/wrld/setting.jpg'
       subgroups: [
         {
           id: 'obstacle6_sub1',
-          label: '사람·관계',
+          label: '서브1',
           layoutType: 'D',
-          img: 'images/narrative/group/want_01.jpg',
+          img: 'images/narrative/group/obstacle6_sub1.jpg',
           cards: [
-            { type: 'section' ,  label: ' 사람·관계의 장애물 ' },
+            { type: 'section' ,  label: ' 서브1의 장애물 ' },
             {
-              name: '',
-              img: '',
+              name: '카드명',
+              img: 'images/narrative/want/obstacle6_sub1_card1.jpg',
               desc: '설명',
               detailLayout: 'AB',
               detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
@@ -302,14 +310,14 @@ const WORLD_CARDS = {
         },
         {
           id: 'obstacle6_sub2',
-          label: '사람·관계',
+          label: '서브2',
           layoutType: 'D',
-          img: 'images/narrative/group/want_01.jpg',
+          img: 'images/narrative/group/obstacle6_sub2.jpg',
           cards: [
-            { type: 'section' ,  label: ' 사람·관계의 장애물 ' },
+            { type: 'section' ,  label: ' 서브2의 장애물 ' },
             {
-              name: '',
-              img: '',
+              name: '카드명',
+              img: 'images/narrative/want/obstacle6_sub2_card1.jpg',
               desc: '설명',
               detailLayout: 'AB',
               detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
@@ -324,6 +332,7 @@ const WORLD_CARDS = {
   },     /* 카테고리 끝 */
 
 
+   
 /* ════════════════════════════════════════════════      세팅 = 배경     ════════════════════════════════════════════════ */  
    
   setting: [
