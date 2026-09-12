@@ -8,7 +8,7 @@
 카드 코드  { icon:'🔮', name:'이름' ,img:'images/Peep.png', subImg:'images/Giant_Elf.jpg',  desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'  },
 
 
-layoutType: 'C',   ← A/B/C/D  카드 배열 고정 적용됨.  A=5 B=4 C=3 D=2  카드 가로 갯수, 기본=B
+layoutType: '3',   ← 5/4/3/2 중 하나로 카드 배열 고정 적용됨. 카드 가로 개수, 기본=4
 
 
 상세 정보  \n\n 분리, 기본 C 방식은 detail 하나로,  detailLayout/detailMode: 'AB' 
@@ -63,7 +63,7 @@ const WORLD_CARDS = {
     {
       id: 'obstacle1',
       label: '그룹1',
-      layoutType: 'C',
+      layoutType: '3',
       img:'images/core/sub-nav/wrld/tech.jpg' ,
       subgroups: [
         {
@@ -102,7 +102,7 @@ const WORLD_CARDS = {
     {
       id: 'obstacle2',
       label: '그룹2',
-      layoutType: 'C',
+      layoutType: '3',
       img:'images/core/sub-nav/wrld/setting.jpg' ,
       subgroups: [
         {
@@ -141,7 +141,7 @@ const WORLD_CARDS = {
     {
       id: 'obstacle3',
       label: '그룹3',
-      layoutType: 'C',
+      layoutType: '3',
       img:'images/core/sub-nav/wrld/setting.jpg',
       subgroups: [
         {
@@ -180,7 +180,7 @@ const WORLD_CARDS = {
     {
       id: 'obstacle4',
       label: '그룹4',
-      layoutType: 'C',
+      layoutType: '3',
       img:'images/core/sub-nav/wrld/setting.jpg',
       subgroups: [
         {
@@ -219,7 +219,7 @@ const WORLD_CARDS = {
     {
       id: 'obstacle5',
       label: '그룹5',
-      layoutType: 'C',
+      layoutType: '3',
       img:'images/core/sub-nav/wrld/setting.jpg',
       subgroups: [
         {
@@ -258,7 +258,7 @@ const WORLD_CARDS = {
     {
       id: 'obstacle6',
       label: '그룹6',
-      layoutType: 'C',
+      layoutType: '3',
       img:'images/core/sub-nav/wrld/setting.jpg',
       subgroups: [
         {
