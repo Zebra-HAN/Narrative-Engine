@@ -3,16 +3,12 @@
    - NARRATIVE_NAV  : 스토리 탭 네비게이션 정의
    - NARRATIVE_CARDS: 스토리 탭 카드 데이터
 
-섹션 헤더
+섹션 헤더   { type: 'section' ,  label: ' 헤더 — 추가 내용 ' },  
 
-{ type: 'section' ,  label: ' 헤더 — 추가 내용 ' },  
-
-카드 코드
-
-{ icon:'🔮', name:'이름' ,img:'images/Peep.png', subImg:'images/Giant_Elf.jpg',  desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'  },
+카드 코드  { icon:'🔮', name:'이름' ,img:'images/Peep.png', subImg:'images/Giant_Elf.jpg',  desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'  },
 
 
-layoutType: 'C',   ← 여기에 A/B/C/D 그룹 카드 목록에 고정 적용됨.  A=5 B=4 C=3 D=2  카드 가로 갯수, 기본=B
+layoutType: 'C',   ← A/B/C/D  카드 배열 고정 적용됨.  A=5 B=4 C=3 D=2  카드 가로 갯수, 기본=B
 
 
 상세 정보  \n\n 분리, 기본 C 방식은 detail 하나로,  detailLayout/detailMode: 'AB' 
@@ -22,6 +18,10 @@ layoutType: 'C',   ← 여기에 A/B/C/D 그룹 카드 목록에 고정 적용�
     detailA: ' ',
     detailB: ' '},
 
+
+코딩에서 보기좋게 정리 하려면 
+desc: '설명'+ 
+      '설명'+   ←이렇게  ''+ ←얘네 속에 입력하면 됨. \n\n ←얘네들이 있어도 가능함.
 
 ═══════════════════════════════════════════════════════════════════════ */
 
