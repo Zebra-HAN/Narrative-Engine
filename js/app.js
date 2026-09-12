@@ -96,15 +96,28 @@ function renderStatusCategoryMeta(subId, globalIdx) {
 }
 
 
-const CARD_GRID_LAYOUT_TYPES = new Set(['A', 'B', 'C', 'D']);
+const CARD_GRID_LAYOUT_CLASS_BY_COLUMNS = {
+  5: 'a',
+  4: 'b',
+  3: 'c',
+  2: 'd',
+};
+
+const LEGACY_CARD_GRID_COLUMNS = {
+  A: '5',
+  B: '4',
+  C: '3',
+  D: '2',
+};
 
 function getCardGridLayoutType(group) {
-  const layoutType = String(group?.layoutType || 'B').toUpperCase();
-  return CARD_GRID_LAYOUT_TYPES.has(layoutType) ? layoutType : 'B';
+  const layoutType = String(group?.layoutType ?? '4').toUpperCase();
+  const columns = LEGACY_CARD_GRID_COLUMNS[layoutType] || layoutType;
+  return CARD_GRID_LAYOUT_CLASS_BY_COLUMNS[columns] ? columns : '4';
 }
 
 function getCardGridLayoutClass(group) {
-  return `card-grid-layout-${getCardGridLayoutType(group).toLowerCase()}`;
+  return `card-grid-layout-${CARD_GRID_LAYOUT_CLASS_BY_COLUMNS[getCardGridLayoutType(group)]}`;
 }
 
 function getCardGridOpenTag(group) {

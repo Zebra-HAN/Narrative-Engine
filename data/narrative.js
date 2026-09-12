@@ -10,7 +10,7 @@
 { icon:'🔮', name:'이름' ,img:'images/Peep.png', subImg:'images/Giant_Elf.jpg',  desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'  },
 
 
-layoutType: 'C',   ← 여기에 A/B/C/D 입력하면 됨.  A=5 B=4 C=3 D=2  카드 가로 갯수,기본=B
+layoutType: '3',   ← 여기에 5/4/3/2 중 하나를 입력하면 됨. 카드 가로 개수, 기본=4
 
 
 상세 정보  \n\n 분리, 기본 C 방식은 detail 하나로,  detailLayout/detailMode: 'AB' 
@@ -68,7 +68,7 @@ const NARRATIVE_CARDS = {
  
         id: 'want_1',
         label: '생존·안전', /*그룹 이름*/
-        layoutType: 'D',
+        layoutType: '2',
         img: 'images/narrative/group/want_01.jpg',   /* ─  그룹 이미지 ─ */
         cards: [
 
@@ -129,7 +129,7 @@ const NARRATIVE_CARDS = {
      
         id: 'want_2',
         label: '힘·지배',
-        layoutType: 'D',
+        layoutType: '2',
         img: 'images/narrative/group/want_02.jpg',   /* ─  그룹 이미지 ─ */
         cards: [
 
@@ -184,7 +184,7 @@ const NARRATIVE_CARDS = {
          
         id: 'want_3',
         label: '자유·해방',
-        layoutType: 'D',        
+        layoutType: '2',
         img: 'images/narrative/group/want_03.jpg',   /* ─  그룹 이미지 ─ */
         cards: [
 
@@ -240,7 +240,7 @@ const NARRATIVE_CARDS = {
  
         id: 'want_4',
         label: '쾌락·경험·향유',
-        layoutType: 'D',
+        layoutType: '2',
         img: 'images/narrative/group/want_04.jpg',   /* ─  그룹 이미지 ─ */
         cards: [
            
@@ -309,7 +309,7 @@ const NARRATIVE_CARDS = {
  
         id: 'want_5',
         label: '사랑·소속',
-        layoutType: 'D',
+        layoutType: '2',
         img: 'images/narrative/group/want_05.jpg',   /* ─  그룹 이미지 ─ */
         cards: [
 
@@ -367,7 +367,7 @@ detail: '【방향 태그】 타인 / 미래\n\n【활용법】\n《느와르》
  
         id: 'want_6',
         label: '인정·명예',
-        layoutType: 'D',
+        layoutType: '2',
         img: 'images/narrative/group/want_06.jpg',   /* ─  그룹 이미지 ─ */
         cards: [
 
@@ -419,7 +419,7 @@ detail: '【방향 태그】 타인 / 미래\n\n【활용법】\n《느와르》
  
         id: 'want_7',
         label: '소유·성공',
-        layoutType: 'D',
+        layoutType: '2',
         img: 'images/narrative/group/want_07.jpg',   /* ─  그룹 이미지 ─ */
         cards: [
 
@@ -473,7 +473,7 @@ detail: '【방향 태그】 타인 / 미래\n\n【활용법】\n《느와르》
  
         id: 'want_8',
         label: '성장·자아실현',
-        layoutType: 'D',
+        layoutType: '2',
         img: 'images/narrative/group/want_08.jpg',   /* ─  그룹 이미지 ─ */
         cards: [
 
@@ -564,7 +564,7 @@ detail: '【방향 태그】 타인 / 미래\n\n【활용법】\n《느와르》
  
         id: 'want_9',
         label: '창조·표현',
-        layoutType: 'D',
+        layoutType: '2',
         img: 'images/narrative/group/want_09.jpg',   /* ─  그룹 이미지 ─ */
         cards: [
 
@@ -613,7 +613,7 @@ detail: '【방향 태그】 타인 / 미래\n\n【활용법】\n《느와르》
  
         id: 'want_10',
         label: '상실·회복',
-        layoutType: 'D',
+        layoutType: '2',
         img: 'images/narrative/group/want_10.jpg',   /* ─  그룹 이미지 ─ */
         cards: [
 
@@ -667,7 +667,7 @@ detail: '【방향 태그】 타인 / 미래\n\n【활용법】\n《느와르》
  
         id: 'want_11',
         label: '정의·복수',
-        layoutType: 'D',
+        layoutType: '2',
         img: 'images/narrative/group/want_11.jpg',   /* ─  그룹 이미지 ─ */
         cards: [
 
@@ -740,7 +740,7 @@ detail: '【방향 태그】 타인 / 미래\n\n【활용법】\n《느와르》
  
         id: 'want_12',
         label: '진실·수수께끼',
-        layoutType: 'D',
+        layoutType: '2',
         img: 'images/narrative/group/want_12.jpg',   /* ─  그룹 이미지 ─ */
         cards: [
 
@@ -812,7 +812,7 @@ detail: '【방향 태그】 타인 / 미래\n\n【활용법】\n《느와르》
  
         id: 'want_13',
         label: '초월·의미·구원',
-        layoutType: 'D',
+        layoutType: '2',
         img: 'images/narrative/group/want_13.jpg',   /* ─  그룹 이미지 ─ */
         cards: [
 
