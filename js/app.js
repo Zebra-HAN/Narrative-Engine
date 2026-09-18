@@ -254,12 +254,22 @@ function initCenterBackSwipe() {
   const area = document.getElementById('center-area');
   if (!area) return;
 
-  const BACK_THRESHOLD = 90;
-  const VERTICAL_TOLERANCE = 70;
-  const EDGE_GUARD = 12;
+  // 짧지만 의도가 분명한 동작과 빠른 플릭도 뒤로가기로 인식한다.
+  // 고정된 90px 판정만 사용하던 때보다 손의 크기/숙련도 차이에 덜 민감하다.
+  const DIRECTION_LOCK_DISTANCE = 6;
+  const HORIZONTAL_BIAS = 1.05;
+  const MIN_BACK_DISTANCE = 52;
+  const BACK_DISTANCE_RATIO = 0.14;
+  const FLICK_MIN_DISTANCE = 28;
+  const FLICK_VELOCITY = 0.35;
   let startX = null;
   let startY = null;
+  let startTime = 0;
+  let lastX = null;
+  let lastY = null;
+  let furthestX = 0;
   let isDragging = false;
+  let isVerticalGesture = false;
 
   function resetDragStyles() {
     area.classList.remove('is-back-swiping');
@@ -271,22 +281,33 @@ function initCenterBackSwipe() {
     const touch = e.touches[0];
     startX = touch.clientX;
     startY = touch.clientY;
+    lastX = startX;
+    lastY = startY;
+    startTime = performance.now();
+    furthestX = 0;
     isDragging = false;
+    isVerticalGesture = false;
   }
 
   function onTouchMove(e) {
-    if (startX === null || e.touches.length !== 1) return;
+    if (startX === null || isVerticalGesture || e.touches.length !== 1) return;
 
     const touch = e.touches[0];
     const dx = touch.clientX - startX;
     const dy = touch.clientY - startY;
+    lastX = touch.clientX;
+    lastY = touch.clientY;
+    furthestX = Math.max(furthestX, dx);
 
     if (!isDragging) {
-      if (Math.abs(dy) > VERTICAL_TOLERANCE) {
-        startX = null;
+      if (Math.hypot(dx, dy) < DIRECTION_LOCK_DISTANCE) return;
+
+      if (Math.abs(dy) > Math.abs(dx)) {
+        isVerticalGesture = true;
         return;
       }
-      if (dx > EDGE_GUARD && dx > Math.abs(dy) * 1.35) {
+
+      if (dx > 0 && dx > Math.abs(dy) * HORIZONTAL_BIAS) {
         isDragging = true;
         area.classList.add('is-back-swiping');
       }
@@ -299,27 +320,55 @@ function initCenterBackSwipe() {
   }
 
   function onTouchEnd(e) {
-    if (startX === null) {
+    if (startX === null || isVerticalGesture) {
       resetDragStyles();
+      startX = null;
+      startY = null;
+      isVerticalGesture = false;
       return;
     }
 
-    const dx = e.changedTouches[0].clientX - startX;
-    const dy = e.changedTouches[0].clientY - startY;
-    const shouldGoBack = isDragging && dx > BACK_THRESHOLD && Math.abs(dy) < VERTICAL_TOLERANCE;
+    const endTouch = e.changedTouches?.[0];
+    const endX = endTouch?.clientX ?? lastX ?? startX;
+    const endY = endTouch?.clientY ?? lastY ?? startY;
+    const dy = endY - startY;
+    const elapsed = Math.max(performance.now() - startTime, 1);
+    const distanceThreshold = Math.max(
+      MIN_BACK_DISTANCE,
+      Math.min(80, area.clientWidth * BACK_DISTANCE_RATIO)
+    );
+    const isFastFlick = furthestX >= FLICK_MIN_DISTANCE && furthestX / elapsed >= FLICK_VELOCITY;
+    // 끝에서 손가락이 조금 되돌아와도 사용자가 도달한 최대 이동 거리를 인정한다.
+    const shouldGoBack = isDragging && Math.abs(dy) < furthestX * 1.5 &&
+      (furthestX >= distanceThreshold || isFastFlick);
 
     resetDragStyles();
     startX = null;
     startY = null;
+    lastX = null;
+    lastY = null;
+    furthestX = 0;
     isDragging = false;
+    isVerticalGesture = false;
 
     if (shouldGoBack) navigateAddressBack();
+  }
+
+  function onTouchCancel() {
+    resetDragStyles();
+    startX = null;
+    startY = null;
+    lastX = null;
+    lastY = null;
+    furthestX = 0;
+    isDragging = false;
+    isVerticalGesture = false;
   }
 
   area.addEventListener('touchstart', onTouchStart, { passive: true });
   area.addEventListener('touchmove', onTouchMove, { passive: false });
   area.addEventListener('touchend', onTouchEnd, { passive: true });
-  area.addEventListener('touchcancel', onTouchEnd, { passive: true });
+  area.addEventListener('touchcancel', onTouchCancel, { passive: true });
 }
 
 function navigateAddressTag(index) {
@@ -705,6 +754,7 @@ function showDefaultCenter() {
 function getGroupLayoutClass(count) {
   if (count === 2) return 'group-layout-two';
   if (count === 4) return 'group-layout-four';
+  if (count === 6) return 'group-layout-six';
   if (count >= 6) return 'group-layout-grid';
   return 'group-layout-list';
 }
