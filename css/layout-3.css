@@ -1,0 +1,15 @@
+/* 3열 카드의 최종 비율을 기본 스타일과 분리해 병합 충돌을 방지합니다. */
+.card-grid-layout-c .data-card {
+  aspect-ratio: 1;
+  padding: 2px 6px;
+}
+
+.card-grid-layout-c .card-img-frame {
+  flex-basis: 64%;
+}
+
+.card-grid-layout-c .card-name {
+  font-size: 0.56rem;
+  line-height: 1.15;
+  padding: 0 2px;
+}

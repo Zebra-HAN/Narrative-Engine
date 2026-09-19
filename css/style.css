@@ -894,8 +894,8 @@ body::after {
     }
 
     .card-grid-layout-c .data-card {
-      aspect-ratio: 1;
-      padding: 2px 6px;
+      aspect-ratio: 1.35;
+      padding: 6px 6px 5px;
     }
 
     .card-grid-layout-d .data-card {
@@ -937,9 +937,9 @@ body::after {
       box-shadow: none;
     }
 
-    /* 3열 레이아웃: 가로 폭은 유지하면서 이미지 높이를 약 1.4배 확대 */
+    /* 3열 레이아웃: 넓은 이미지와 여러 줄 제목을 위한 가로형 카드 */
     .card-grid-layout-c .card-img-frame {
-      flex-basis: 64%;
+      flex-basis: 62.5%;
     }
 
 
@@ -977,11 +977,7 @@ body::after {
 
 
  .card-grid-layout-b .card-name { font-size: 0.56rem; }
-    .card-grid-layout-c .card-name {
-      font-size: 0.56rem;
-      line-height: 1.15;
-      padding: 0 2px;
-    }
+    .card-grid-layout-c .card-name { font-size: 0.62rem; line-height: 1.35; }
     .card-grid-layout-d .card-name {
       font-size: 0.68rem;
       line-height: 1.35;
