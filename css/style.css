@@ -894,6 +894,7 @@ body::after {
     }
 
     .card-grid-layout-c .data-card {
+      aspect-ratio: 1.35;
       padding: 6px 6px 5px;
     }
 
@@ -934,6 +935,11 @@ body::after {
       justify-content: center;
       flex-shrink: 0;
       box-shadow: none;
+    }
+
+    /* 3열 레이아웃: 넓은 이미지와 여러 줄 제목을 위한 가로형 카드 */
+    .card-grid-layout-c .card-img-frame {
+      flex-basis: 62.5%;
     }
 
 
