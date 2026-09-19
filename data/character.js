@@ -466,30 +466,46 @@ race: {   /* ═══  [종족]  ═══ */
       {
         id: 'job_1',
         label: '직업1',
+        layoutType: '5',  
         icon: '👤',
         cards: [
    { icon:'⚔', name:'검사'      }, { icon:'🏹', name:'궁수'       }, { icon:'🧙', name:'마법사'   },
+               { icon:'💫', name:'충동적'   }, { icon:'⚖',  name:'신중한'    }, { icon:'🎭', name:'이중적'   },
+    { icon:'🦁', name:'용감한'   }, { icon:'🐇', name:'소심한'     }, { icon:'🦊', name:'교활한'   },
+    { icon:'🕊', name:'온화한'   }, { icon:'🐺', name:'거친'       }, { icon:'🌹', name:'낭만적'   },
 
            
  { type: 'section' ,  label: ' 헤더 — 추가 내용 ' },  
     { icon:'🛡', name:'기사'  ,  desc:'내용' ,  detail:'【상세】 정보\n【상세】\n\n내용'    },
     { icon:'🗡', name:'암살자',  desc:'내용' ,  detail:'【상세】 정보\n【상세】\n\n내용'  }, 
+               { icon:'💫', name:'충동적'   }, { icon:'⚖',  name:'신중한'    }, { icon:'🎭', name:'이중적'   },
+    { icon:'🦁', name:'용감한'   }, { icon:'🐇', name:'소심한'     }, { icon:'🦊', name:'교활한'   },
+    { icon:'🕊', name:'온화한'   }, { icon:'🐺', name:'거친'       }, { icon:'🌹', name:'낭만적'   },
            
            
  { type: 'section' ,  label: ' 헤더 — 추가 내용 ' },  
            { icon:'🎵', name:'음유시인' },
     { icon:'⚕', name:'치유사' ,  desc:'내용' ,  detail:'【상세】 정보\n【상세】\n\n내용'   }, 
     { icon:'🔧', name:'장인'  ,  desc:'내용' ,  detail:'【상세】 정보\n【상세】\n\n내용'      }, { icon:'📜', name:'학자'     },
+           
         ]
       },
 
        {
         id: 'job_3',
         label: '직업3',
+        layoutType: '3',  
         icon: '✨',
         cards: [
               { icon:'⚗', name:'연금술사'  },
-              { icon:'🕵', name:'첩보원'      },
+              { icon:'🕵', name:'첩보원'  },
+               { icon:'🔥', name:'열정적'   }, { icon:'❄',  name:'냉정한'    }, { icon:'🌊', name:'유연한'   },
+    { icon:'🪨', name:'완고한'   }, { icon:'🌟', name:'낙관적'     }, { icon:'🌑', name:'비관적'   },
+    { icon:'💫', name:'충동적'   }, { icon:'⚖',  name:'신중한'    }, { icon:'🎭', name:'이중적'   },
+    { icon:'🦁', name:'용감한'   }, { icon:'🐇', name:'소심한'     }, { icon:'🦊', name:'교활한'   },
+    { icon:'🕊', name:'온화한'   }, { icon:'🐺', name:'거친'       }, { icon:'🌹', name:'낭만적'   },
+    { icon:'🔬', name:'분석적'   }, { icon:'🎨', name:'예술적'     }, { icon:'🤝', name:'친화적'   },
+    { icon:'👤', name:'고독한'   }, { icon:'✨', name:'신비로운'    },
         ]
       },
     ]
