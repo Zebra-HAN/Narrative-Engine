@@ -509,8 +509,9 @@ initScrollResponsiveChrome();
 
 /* ════════════════════════════════════════════════
    SCROLL-RESPONSIVE CREATIVE CHROME
-   빠르고 분명한 탐색 제스처의 이동량에 맞춰 패널과 실제 콘텐츠 영역을 움직인다.
+   빠르고 분명한 탐색 제스처의 이동량에 맞춰 패널만 움직인다.
    wheel/touch를 직접 추적하므로 콘텐츠가 짧아도 같은 방식으로 동작한다.
+   중앙 스크롤 영역의 크기와 위치는 절대 변경하지 않아 카드가 튀거나 늘어나지 않는다.
 ════════════════════════════════════════════════ */
 function initScrollResponsiveChrome() {
   const screen = document.getElementById('screen-create');
@@ -535,8 +536,6 @@ function initScrollResponsiveChrome() {
   let animationFrame = 0;
   let settleTimer = 0;
   let lastDirectInputAt = -Infinity;
-  let topHeight = infoPanel.getBoundingClientRect().height;
-  let bottomHeight = bottomChrome.getBoundingClientRect().height;
 
   area.querySelectorAll('.center-page').forEach(page => {
     scrollPositions.set(page, page.scrollTop);
@@ -552,17 +551,11 @@ function initScrollResponsiveChrome() {
 
   function renderChrome() {
     const difference = targetProgress - renderedProgress;
-    const previousTopSpace = topHeight * (1 - renderedProgress);
     renderedProgress += difference * 0.16;
     if (Math.abs(difference) < 0.001) renderedProgress = targetProgress;
-    const nextTopSpace = topHeight * (1 - renderedProgress);
     screen.style.setProperty('--chrome-progress', renderedProgress.toFixed(4));
-    screen.style.setProperty('--top-chrome-space', `${nextTopSpace}px`);
-    screen.style.setProperty('--bottom-chrome-space', `${bottomHeight * (1 - renderedProgress)}px`);
     screen.style.setProperty('--top-chrome-offset', `${renderedProgress * -100}%`);
     screen.style.setProperty('--bottom-chrome-offset', `${renderedProgress * 100}%`);
-    const activePage = area.querySelector('.center-page.active');
-    if (activePage?.scrollTop > 0) activePage.scrollTop += nextTopSpace - previousTopSpace;
     screen.classList.toggle('chrome-hidden', renderedProgress > 0.98);
     if (renderedProgress !== targetProgress) animationFrame = requestAnimationFrame(renderChrome);
     else animationFrame = 0;
@@ -635,12 +628,10 @@ function initScrollResponsiveChrome() {
   }, { passive: true });
 
   const chromeResizeObserver = new ResizeObserver(() => {
-    topHeight = infoPanel.getBoundingClientRect().height;
-    bottomHeight = bottomChrome.getBoundingClientRect().height;
+    const topHeight = infoPanel.getBoundingClientRect().height;
+    const bottomHeight = bottomChrome.getBoundingClientRect().height;
     screen.style.setProperty('--top-chrome-height', `${topHeight}px`);
     screen.style.setProperty('--bottom-chrome-height', `${bottomHeight}px`);
-    screen.style.setProperty('--top-chrome-space', `${topHeight * (1 - renderedProgress)}px`);
-    screen.style.setProperty('--bottom-chrome-space', `${bottomHeight * (1 - renderedProgress)}px`);
   });
   chromeResizeObserver.observe(infoPanel);
   chromeResizeObserver.observe(bottomChrome);
