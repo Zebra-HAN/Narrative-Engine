@@ -1877,9 +1877,9 @@ body::after {
 }
 
 .group-layout-two {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: start;
+  min-height: 100%;
+  align-items: center;
+  justify-content: center;
 }
 
 .group-layout-four {
@@ -1939,7 +1939,10 @@ body::after {
 }
 
 .group-layout-two .group-select-btn {
-  min-height: 220px;
+  width: min(100%, 680px);
+  min-height: 0;
+  aspect-ratio: 1.8 / 1;
+  align-self: center;
   flex-direction: column;
   justify-content: center;
   text-align: center;

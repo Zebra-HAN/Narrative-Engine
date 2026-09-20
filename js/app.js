@@ -509,7 +509,7 @@ initScrollResponsiveChrome();
 
 /* ════════════════════════════════════════════════
    SCROLL-RESPONSIVE CREATIVE CHROME
-   빠르고 분명한 탐색 제스처의 이동량에 맞춰 패널만 움직인다.
+   빠르고 분명한 탐색 제스처만 받아 패널을 일정한 시간으로 끝까지 움직인다.
    wheel/touch를 직접 추적하므로 콘텐츠가 짧아도 같은 방식으로 동작한다.
    중앙 스크롤 영역의 크기와 위치는 절대 변경하지 않아 카드가 튀거나 늘어나지 않는다.
 ════════════════════════════════════════════════ */
@@ -520,21 +520,21 @@ function initScrollResponsiveChrome() {
   const bottomChrome = document.getElementById('create-chrome-bottom');
   if (!screen || !area || !infoPanel || !bottomChrome) return;
 
-  const INTENT_DISTANCE = 10;
-  const INTENT_VELOCITY = 0.12;
-  const TRAVEL_DISTANCE = 150;
-  const SETTLE_DELAY = 120;
+  const INTENT_DISTANCE = 18;
+  const INTENT_VELOCITY = 0.32;
+  const GESTURE_GAP = 140;
+  const ANIMATION_DURATION = 220;
   const scrollPositions = new WeakMap();
   let gestureDirection = 0;
   let gestureDistance = 0;
   let gestureStartedAt = 0;
   let lastGestureAt = 0;
   let lastTouchY = null;
-  let gestureAccepted = false;
   let targetProgress = 0;
   let renderedProgress = 0;
   let animationFrame = 0;
-  let settleTimer = 0;
+  let animationStartedAt = 0;
+  let animationStartProgress = 0;
   let lastDirectInputAt = -Infinity;
 
   area.querySelectorAll('.center-page').forEach(page => {
@@ -546,55 +546,56 @@ function initScrollResponsiveChrome() {
     gestureDistance = 0;
     gestureStartedAt = 0;
     lastGestureAt = 0;
-    gestureAccepted = false;
   }
 
-  function renderChrome() {
-    const difference = targetProgress - renderedProgress;
-    renderedProgress += difference * 0.16;
-    if (Math.abs(difference) < 0.001) renderedProgress = targetProgress;
+  function renderChrome(timestamp) {
+    const elapsed = timestamp - animationStartedAt;
+    const duration = ANIMATION_DURATION * Math.abs(targetProgress - animationStartProgress);
+    const timeProgress = duration ? Math.min(1, elapsed / duration) : 1;
+    const easedProgress = 1 - Math.pow(1 - timeProgress, 3);
+    renderedProgress = animationStartProgress
+      + (targetProgress - animationStartProgress) * easedProgress;
     screen.style.setProperty('--chrome-progress', renderedProgress.toFixed(4));
     screen.style.setProperty('--top-chrome-offset', `${renderedProgress * -100}%`);
     screen.style.setProperty('--bottom-chrome-offset', `${renderedProgress * 100}%`);
     screen.classList.toggle('chrome-hidden', renderedProgress > 0.98);
-    if (renderedProgress !== targetProgress) animationFrame = requestAnimationFrame(renderChrome);
-    else animationFrame = 0;
+    if (timeProgress < 1) {
+      animationFrame = requestAnimationFrame(renderChrome);
+    } else {
+      renderedProgress = targetProgress;
+      animationFrame = 0;
+    }
   }
 
   function setProgress(progress) {
-    targetProgress = Math.max(0, Math.min(1, progress));
-    if (!animationFrame) animationFrame = requestAnimationFrame(renderChrome);
-  }
-
-  function scheduleSettle(direction) {
-    clearTimeout(settleTimer);
-    settleTimer = setTimeout(() => {
-      setProgress(direction > 0 ? 1 : 0);
-      resetGesture();
-    }, SETTLE_DELAY);
+    const nextProgress = Math.max(0, Math.min(1, progress));
+    if (nextProgress === targetProgress && animationFrame) return;
+    if (nextProgress === renderedProgress && !animationFrame) return;
+    targetProgress = nextProgress;
+    animationStartProgress = renderedProgress;
+    animationStartedAt = performance.now();
+    if (animationFrame) cancelAnimationFrame(animationFrame);
+    animationFrame = requestAnimationFrame(renderChrome);
   }
 
   function trackGesture(delta, timestamp = performance.now()) {
     if (Math.abs(delta) < 0.5) return;
     const direction = Math.sign(delta);
     // 잠시 멈춘 뒤의 움직임은 이전의 느린 이동과 합산하지 않는다.
-    if (direction !== gestureDirection || (lastGestureAt && timestamp - lastGestureAt > 140)) {
+    if (direction !== gestureDirection || (lastGestureAt && timestamp - lastGestureAt > GESTURE_GAP)) {
       gestureDirection = direction;
       gestureDistance = 0;
       gestureStartedAt = timestamp;
-      gestureAccepted = false;
     }
     lastGestureAt = timestamp;
     gestureDistance += Math.abs(delta);
 
     const elapsed = Math.max(16, timestamp - gestureStartedAt);
     const velocity = gestureDistance / elapsed;
-    if (!gestureAccepted && gestureDistance >= INTENT_DISTANCE && velocity >= INTENT_VELOCITY) {
-      gestureAccepted = true;
-    }
-    if (gestureAccepted) {
-      setProgress(targetProgress + delta / TRAVEL_DISTANCE);
-      scheduleSettle(direction);
+    if (gestureDistance >= INTENT_DISTANCE && velocity >= INTENT_VELOCITY) {
+      // 빠른 제스처는 중간 위치를 만들지 않고 항상 한쪽 끝까지 같은 속도로 안착한다.
+      setProgress(direction > 0 ? 1 : 0);
+      resetGesture();
     }
   }
 
@@ -613,7 +614,7 @@ function initScrollResponsiveChrome() {
   area.addEventListener('scroll', onScroll, { capture: true, passive: true });
   area.addEventListener('wheel', event => {
     lastDirectInputAt = performance.now();
-    trackGesture(event.deltaY, event.timeStamp);
+    trackGesture(event.deltaY);
   }, { passive: true });
   area.addEventListener('touchstart', event => {
     lastTouchY = event.touches.length === 1 ? event.touches[0].clientY : null;
@@ -623,7 +624,7 @@ function initScrollResponsiveChrome() {
     if (lastTouchY === null || event.touches.length !== 1) return;
     const currentY = event.touches[0].clientY;
     lastDirectInputAt = performance.now();
-    trackGesture(lastTouchY - currentY, event.timeStamp);
+    trackGesture(lastTouchY - currentY);
     lastTouchY = currentY;
   }, { passive: true });
 
@@ -637,8 +638,7 @@ function initScrollResponsiveChrome() {
   chromeResizeObserver.observe(bottomChrome);
   area.addEventListener('touchend', () => {
     lastTouchY = null;
-    if (gestureAccepted) scheduleSettle(gestureDirection);
-    else resetGesture();
+    resetGesture();
   }, { passive: true });
 
   // 새 카테고리/그룹 페이지는 항상 최상단에서 시작하므로 기본 패널 상태도 복원한다.
