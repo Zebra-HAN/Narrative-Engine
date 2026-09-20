@@ -509,8 +509,8 @@ initScrollResponsiveChrome();
 
 /* ════════════════════════════════════════════════
    SCROLL-RESPONSIVE CREATIVE CHROME
-   빠르고 분명한 탐색 제스처에만 상·하단 패널을 한 번에 전환한다.
-   실제 scrollTop에 의존하지 않아 콘텐츠가 짧아도 동일하게 동작한다.
+   빠르고 분명한 탐색 제스처의 이동량에 맞춰 패널과 실제 콘텐츠 영역을 움직인다.
+   wheel/touch를 직접 추적하므로 콘텐츠가 짧아도 같은 방식으로 동작한다.
 ════════════════════════════════════════════════ */
 function initScrollResponsiveChrome() {
   const screen = document.getElementById('screen-create');
@@ -519,16 +519,24 @@ function initScrollResponsiveChrome() {
   const bottomChrome = document.getElementById('create-chrome-bottom');
   if (!screen || !area || !infoPanel || !bottomChrome) return;
 
-  const MIN_GESTURE_DISTANCE = 22;
-  const MIN_GESTURE_VELOCITY = 0.24;
-  const GESTURE_COOLDOWN = 520;
+  const INTENT_DISTANCE = 10;
+  const INTENT_VELOCITY = 0.12;
+  const TRAVEL_DISTANCE = 150;
+  const SETTLE_DELAY = 120;
   const scrollPositions = new WeakMap();
   let gestureDirection = 0;
   let gestureDistance = 0;
   let gestureStartedAt = 0;
   let lastGestureAt = 0;
-  let lastToggleAt = -Infinity;
   let lastTouchY = null;
+  let gestureAccepted = false;
+  let targetProgress = 0;
+  let renderedProgress = 0;
+  let animationFrame = 0;
+  let settleTimer = 0;
+  let lastDirectInputAt = -Infinity;
+  let topHeight = infoPanel.getBoundingClientRect().height;
+  let bottomHeight = bottomChrome.getBoundingClientRect().height;
 
   area.querySelectorAll('.center-page').forEach(page => {
     scrollPositions.set(page, page.scrollTop);
@@ -539,15 +547,38 @@ function initScrollResponsiveChrome() {
     gestureDistance = 0;
     gestureStartedAt = 0;
     lastGestureAt = 0;
+    gestureAccepted = false;
   }
 
-  function setChromeHidden(hidden) {
-    const now = performance.now();
-    if (now - lastToggleAt < GESTURE_COOLDOWN) return;
-    if (screen.classList.contains('chrome-hidden') === hidden) return;
-    screen.classList.toggle('chrome-hidden', hidden);
-    lastToggleAt = now;
-    resetGesture();
+  function renderChrome() {
+    const difference = targetProgress - renderedProgress;
+    const previousTopSpace = topHeight * (1 - renderedProgress);
+    renderedProgress += difference * 0.16;
+    if (Math.abs(difference) < 0.001) renderedProgress = targetProgress;
+    const nextTopSpace = topHeight * (1 - renderedProgress);
+    screen.style.setProperty('--chrome-progress', renderedProgress.toFixed(4));
+    screen.style.setProperty('--top-chrome-space', `${nextTopSpace}px`);
+    screen.style.setProperty('--bottom-chrome-space', `${bottomHeight * (1 - renderedProgress)}px`);
+    screen.style.setProperty('--top-chrome-offset', `${renderedProgress * -100}%`);
+    screen.style.setProperty('--bottom-chrome-offset', `${renderedProgress * 100}%`);
+    const activePage = area.querySelector('.center-page.active');
+    if (activePage?.scrollTop > 0) activePage.scrollTop += nextTopSpace - previousTopSpace;
+    screen.classList.toggle('chrome-hidden', renderedProgress > 0.98);
+    if (renderedProgress !== targetProgress) animationFrame = requestAnimationFrame(renderChrome);
+    else animationFrame = 0;
+  }
+
+  function setProgress(progress) {
+    targetProgress = Math.max(0, Math.min(1, progress));
+    if (!animationFrame) animationFrame = requestAnimationFrame(renderChrome);
+  }
+
+  function scheduleSettle(direction) {
+    clearTimeout(settleTimer);
+    settleTimer = setTimeout(() => {
+      setProgress(direction > 0 ? 1 : 0);
+      resetGesture();
+    }, SETTLE_DELAY);
   }
 
   function trackGesture(delta, timestamp = performance.now()) {
@@ -558,14 +589,19 @@ function initScrollResponsiveChrome() {
       gestureDirection = direction;
       gestureDistance = 0;
       gestureStartedAt = timestamp;
+      gestureAccepted = false;
     }
     lastGestureAt = timestamp;
     gestureDistance += Math.abs(delta);
 
     const elapsed = Math.max(16, timestamp - gestureStartedAt);
     const velocity = gestureDistance / elapsed;
-    if (gestureDistance >= MIN_GESTURE_DISTANCE && velocity >= MIN_GESTURE_VELOCITY) {
-      setChromeHidden(direction > 0);
+    if (!gestureAccepted && gestureDistance >= INTENT_DISTANCE && velocity >= INTENT_VELOCITY) {
+      gestureAccepted = true;
+    }
+    if (gestureAccepted) {
+      setProgress(targetProgress + delta / TRAVEL_DISTANCE);
+      scheduleSettle(direction);
     }
   }
 
@@ -575,11 +611,17 @@ function initScrollResponsiveChrome() {
     const currentTop = Math.max(0, page.scrollTop);
     const previousTop = scrollPositions.get(page) ?? currentTop;
     scrollPositions.set(page, currentTop);
-    trackGesture(currentTop - previousTop, event.timeStamp);
+    // wheel/touch와 그 결과로 발생한 scroll 이벤트를 중복 계산하지 않는다.
+    if (performance.now() - lastDirectInputAt < 100) return;
+    if (currentTop <= 0) setProgress(0);
+    else trackGesture(currentTop - previousTop, event.timeStamp);
   }
 
   area.addEventListener('scroll', onScroll, { capture: true, passive: true });
-  area.addEventListener('wheel', event => trackGesture(event.deltaY, event.timeStamp), { passive: true });
+  area.addEventListener('wheel', event => {
+    lastDirectInputAt = performance.now();
+    trackGesture(event.deltaY, event.timeStamp);
+  }, { passive: true });
   area.addEventListener('touchstart', event => {
     lastTouchY = event.touches.length === 1 ? event.touches[0].clientY : null;
     resetGesture();
@@ -587,19 +629,32 @@ function initScrollResponsiveChrome() {
   area.addEventListener('touchmove', event => {
     if (lastTouchY === null || event.touches.length !== 1) return;
     const currentY = event.touches[0].clientY;
+    lastDirectInputAt = performance.now();
     trackGesture(lastTouchY - currentY, event.timeStamp);
     lastTouchY = currentY;
   }, { passive: true });
+
+  const chromeResizeObserver = new ResizeObserver(() => {
+    topHeight = infoPanel.getBoundingClientRect().height;
+    bottomHeight = bottomChrome.getBoundingClientRect().height;
+    screen.style.setProperty('--top-chrome-height', `${topHeight}px`);
+    screen.style.setProperty('--bottom-chrome-height', `${bottomHeight}px`);
+    screen.style.setProperty('--top-chrome-space', `${topHeight * (1 - renderedProgress)}px`);
+    screen.style.setProperty('--bottom-chrome-space', `${bottomHeight * (1 - renderedProgress)}px`);
+  });
+  chromeResizeObserver.observe(infoPanel);
+  chromeResizeObserver.observe(bottomChrome);
   area.addEventListener('touchend', () => {
     lastTouchY = null;
-    resetGesture();
+    if (gestureAccepted) scheduleSettle(gestureDirection);
+    else resetGesture();
   }, { passive: true });
 
   // 새 카테고리/그룹 페이지는 항상 최상단에서 시작하므로 기본 패널 상태도 복원한다.
   const pageObserver = new MutationObserver(() => {
     const activePage = area.querySelector('.center-page.active');
     if (activePage) scrollPositions.set(activePage, activePage.scrollTop);
-    screen.classList.remove('chrome-hidden');
+    setProgress(0);
     resetGesture();
   });
   pageObserver.observe(area, { childList: true });
