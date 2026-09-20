@@ -8,7 +8,7 @@
 카드 코드  { icon:'🔮', name:'이름' ,img:'images/Peep.png', subImg:'images/Giant_Elf.jpg',  desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'  },
 
 
-layoutType: '3',   ← 5/4/3/2 중 하나로 카드 배열 고정 적용됨. 카드 가로 개수, 기본=4
+layoutType: '3',   ← 5/4/3/2 중 하나로 카드 배열 고정 적용됨. 카드 가로 개수, 기본=3
 
 
 상세 정보  \n\n 분리, 기본 C 방식은 detail 하나로,  detailLayout/detailMode: 'AB' 

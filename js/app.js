@@ -111,9 +111,9 @@ const LEGACY_CARD_GRID_COLUMNS = {
 };
 
 function getCardGridLayoutType(group) {
-  const layoutType = String(group?.layoutType ?? '4').toUpperCase();
+  const layoutType = String(group?.layoutType ?? '3').toUpperCase();
   const columns = LEGACY_CARD_GRID_COLUMNS[layoutType] || layoutType;
-  return CARD_GRID_LAYOUT_CLASS_BY_COLUMNS[columns] ? columns : '4';
+  return CARD_GRID_LAYOUT_CLASS_BY_COLUMNS[columns] ? columns : '3';
 }
 
 function getCardGridLayoutClass(group) {
