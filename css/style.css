@@ -414,8 +414,6 @@ body::after {
        MAIN CREATIVE PAGE
     ═══════════════════════════════════════════════ */
     #screen-create {
-      --top-chrome-offset: 0px;
-      --bottom-chrome-offset: 0px;
       background: var(--bg-deepest);
       display: flex;
       flex-direction: column;
@@ -441,9 +439,12 @@ body::after {
       flex-shrink: 0;
       display: flex;
       flex-direction: column;
-      translate: 0 var(--bottom-chrome-offset);
-      margin-top: calc(-1 * var(--bottom-chrome-offset));
-      will-change: translate, margin-top;
+      transform: translate3d(0, 0, 0);
+      opacity: 1;
+      transition: transform 620ms cubic-bezier(0.22, 1, 0.36, 1),
+                  opacity 420ms cubic-bezier(0.4, 0, 0.2, 1),
+                  visibility 0s linear 0s;
+      will-change: transform, opacity;
     }
 
     /* ── INFO PANEL (설명창) ── */
@@ -458,9 +459,32 @@ body::after {
       justify-content: center;
       position: relative;
       z-index: 20;
-      translate: 0 calc(-1 * var(--top-chrome-offset));
-      margin-bottom: calc(-1 * var(--top-chrome-offset));
-      will-change: translate, margin-bottom;
+      transform: translate3d(0, 0, 0);
+      opacity: 1;
+      transition: transform 620ms cubic-bezier(0.22, 1, 0.36, 1),
+                  opacity 420ms cubic-bezier(0.4, 0, 0.2, 1),
+                  visibility 0s linear 0s;
+      will-change: transform, opacity;
+    }
+    #screen-create.chrome-hidden .info-panel {
+      transform: translate3d(0, -102%, 0);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition-delay: 0s, 0s, 620ms;
+    }
+    #screen-create.chrome-hidden .create-chrome-bottom {
+      transform: translate3d(0, 102%, 0);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition-delay: 0s, 0s, 620ms;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .info-panel,
+      .create-chrome-bottom {
+        transition-duration: 1ms !important;
+      }
     }
     .info-empty {
       font-family: 'Noto Serif KR', serif;
