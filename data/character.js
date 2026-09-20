@@ -264,6 +264,7 @@ race: {   /* ═══  [종족]  ═══ */
       id: 'race_fantasy',
       label: '판타지',
       icon: '  ',
+      layoutType: '4',
       img: 'images/character/group/fantasy.jpg',
       cards: [
 
