@@ -1507,12 +1507,21 @@ function initInfoSliderSwipe() {
   }
 
   // Touch
-  viewport.addEventListener('touchstart', (e) => onStart(e.touches[0].clientX), { passive: true });
+  viewport.addEventListener('touchstart', (e) => {
+    // Tapping an action button is not a slider gesture.  Keeping it out of
+    // drag setup prevents the detail/select click from being swallowed.
+    if (e.target.closest('button')) return;
+    onStart(e.touches[0].clientX);
+  }, { passive: true });
   viewport.addEventListener('touchmove',  (e) => onMove(e.touches[0].clientX),  { passive: true });
   viewport.addEventListener('touchend',   (e) => onEnd(), { passive: true });
 
   // Mouse
-  viewport.addEventListener('mousedown', (e) => { e.preventDefault(); onStart(e.clientX); });
+  viewport.addEventListener('mousedown', (e) => {
+    if (e.target.closest('button')) return;
+    e.preventDefault();
+    onStart(e.clientX);
+  });
   window.addEventListener('mousemove',   (e) => onMove(e.clientX));
   window.addEventListener('mouseup',     ()  => onEnd());
 }
