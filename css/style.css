@@ -441,6 +441,9 @@ body::after {
     .create-chrome-slot-bottom {
       bottom: 0;
       height: var(--bottom-chrome-height);
+      /* The utility menu opens above the fixed bottom chrome.  It must not be
+         clipped by the animation slot that keeps the chrome out of layout. */
+      overflow: visible;
     }
     #screen-create.entering .info-panel {
       animation: infoPanelEnter 0.72s cubic-bezier(0.16, 1, 0.3, 1) backwards;
@@ -483,6 +486,9 @@ body::after {
       flex-direction: column;
       justify-content: center;
       z-index: 20;
+      /* The slot itself ignores empty-space hits, while the visible panel and
+         all of its buttons/swipe surface remain interactive. */
+      pointer-events: auto;
       transform: translate3d(0, var(--top-chrome-offset), 0);
       opacity: 1;
       will-change: transform, opacity;
@@ -1877,9 +1883,12 @@ body::after {
 }
 
 .group-layout-two {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   min-height: 100%;
   align-items: center;
   justify-content: center;
+  gap: 12px;
 }
 
 .group-layout-four {
@@ -1939,9 +1948,10 @@ body::after {
 }
 
 .group-layout-two .group-select-btn {
-  width: min(100%, 680px);
+  width: 100%;
   min-height: 0;
-  aspect-ratio: 1.8 / 1;
+  /* Two choices are intentionally tall portrait buttons placed side by side. */
+  aspect-ratio: 1 / 1.8;
   align-self: center;
   flex-direction: column;
   justify-content: center;
