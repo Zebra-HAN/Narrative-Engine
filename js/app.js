@@ -509,8 +509,8 @@ initScrollResponsiveChrome();
 
 /* ════════════════════════════════════════════════
    SCROLL-RESPONSIVE CREATIVE CHROME
-   콘텐츠를 위로 탐색하면 상·하단 패널을 스크롤한 거리만큼 밀어 내고,
-   반대 방향에서는 같은 거리만큼 복원한다.
+   빠르고 분명한 탐색 제스처에만 반응하고, 패널과 레이아웃을 같은
+   프레임에서 천천히 이동해 콘텐츠 공간을 실제로 넓힌다.
 ════════════════════════════════════════════════ */
 function initScrollResponsiveChrome() {
   const screen = document.getElementById('screen-create');
@@ -519,85 +519,132 @@ function initScrollResponsiveChrome() {
   const bottomChrome = document.getElementById('create-chrome-bottom');
   if (!screen || !area || !infoPanel || !bottomChrome) return;
 
-  const DIRECTION_THRESHOLD = 6;
+  const MIN_GESTURE_DISTANCE = 18;
+  const MIN_GESTURE_VELOCITY = 0.12;
+  const GESTURE_PAUSE = 160;
+  const ANIMATION_DURATION = 720;
   const scrollPositions = new WeakMap();
+  let gestureDirection = 0;
+  let gestureDistance = 0;
+  let gestureStartedAt = 0;
+  let lastGestureAt = 0;
+  let lastTouchY = null;
   let topOffset = 0;
   let bottomOffset = 0;
-  let pendingDirection = 0;
-  let pendingDistance = 0;
-  let frameId = 0;
+  let animationFrame = 0;
+  let targetHidden = false;
 
   area.querySelectorAll('.center-page').forEach(page => {
     scrollPositions.set(page, page.scrollTop);
   });
 
+  function resetGesture() {
+    gestureDirection = 0;
+    gestureDistance = 0;
+    gestureStartedAt = 0;
+    lastGestureAt = 0;
+  }
+
   function renderOffsets() {
-    frameId = 0;
-    const topLimit = infoPanel.offsetHeight;
-    const bottomLimit = bottomChrome.offsetHeight;
-    topOffset = Math.min(topOffset, topLimit);
-    bottomOffset = Math.min(bottomOffset, bottomLimit);
     screen.style.setProperty('--top-chrome-offset', `${topOffset}px`);
     screen.style.setProperty('--bottom-chrome-offset', `${bottomOffset}px`);
   }
 
-  function scheduleRender() {
-    if (!frameId) frameId = requestAnimationFrame(renderOffsets);
+  function animateChrome(hidden, instant = false) {
+    if (!instant && targetHidden === hidden && animationFrame) return;
+    if (animationFrame) cancelAnimationFrame(animationFrame);
+    targetHidden = hidden;
+    const startTop = topOffset;
+    const startBottom = bottomOffset;
+    const targetTop = hidden ? infoPanel.offsetHeight : 0;
+    const targetBottom = hidden ? bottomChrome.offsetHeight : 0;
+    if (startTop === targetTop && startBottom === targetBottom) return;
+
+    if (instant || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      topOffset = targetTop;
+      bottomOffset = targetBottom;
+      renderOffsets();
+      return;
+    }
+
+    const startedAt = performance.now();
+    function animate(now) {
+      const progress = Math.min(1, (now - startedAt) / ANIMATION_DURATION);
+      // 부드러운 가속과 감속을 대칭으로 적용해 급출발/급정지를 없앤다.
+      const eased = progress * progress * (3 - 2 * progress);
+      topOffset = startTop + (targetTop - startTop) * eased;
+      bottomOffset = startBottom + (targetBottom - startBottom) * eased;
+      renderOffsets();
+      if (progress < 1) animationFrame = requestAnimationFrame(animate);
+      else animationFrame = 0;
+    }
+    animationFrame = requestAnimationFrame(animate);
   }
 
-  function showChrome() {
-    pendingDirection = 0;
-    pendingDistance = 0;
-    topOffset = 0;
-    bottomOffset = 0;
-    scheduleRender();
+  function trackGesture(delta, timestamp = performance.now()) {
+    if (Math.abs(delta) < 0.5) return;
+    const direction = Math.sign(delta);
+    // 잠시 멈춘 뒤의 움직임은 이전의 느린 이동과 합산하지 않는다.
+    if (direction !== gestureDirection || (lastGestureAt && timestamp - lastGestureAt > GESTURE_PAUSE)) {
+      gestureDirection = direction;
+      gestureDistance = 0;
+      gestureStartedAt = timestamp;
+    }
+    lastGestureAt = timestamp;
+    gestureDistance += Math.abs(delta);
+
+    const elapsed = Math.max(16, timestamp - gestureStartedAt);
+    const velocity = gestureDistance / elapsed;
+    if (gestureDistance >= MIN_GESTURE_DISTANCE && velocity >= MIN_GESTURE_VELOCITY) {
+      animateChrome(direction > 0);
+      resetGesture();
+    }
   }
 
   function onScroll(event) {
     const page = event.target;
     if (!(page instanceof Element) || !page.classList.contains('center-page')) return;
-
     const currentTop = Math.max(0, page.scrollTop);
     const previousTop = scrollPositions.get(page) ?? currentTop;
     scrollPositions.set(page, currentTop);
-
-    if (currentTop <= 1) {
-      showChrome();
+    if (currentTop <= 1 && previousTop > currentTop) {
+      animateChrome(false);
+      resetGesture();
       return;
     }
-
-    const delta = currentTop - previousTop;
-    if (Math.abs(delta) < 0.5) return;
-    const direction = Math.sign(delta);
-
-    if (direction !== pendingDirection) {
-      pendingDirection = direction;
-      pendingDistance = 0;
-    }
-    pendingDistance += Math.abs(delta);
-    if (pendingDistance < DIRECTION_THRESHOLD) return;
-
-    // 임계값을 넘긴 뒤에는 실제 스크롤 이동량을 그대로 패널 이동량으로 쓴다.
-    const distance = pendingDistance;
-    pendingDistance = 0;
-    const topLimit = infoPanel.offsetHeight;
-    const bottomLimit = bottomChrome.offsetHeight;
-    topOffset = Math.max(0, Math.min(topLimit, topOffset + direction * distance));
-    bottomOffset = Math.max(0, Math.min(bottomLimit, bottomOffset + direction * distance));
-    scheduleRender();
+    trackGesture(currentTop - previousTop, event.timeStamp);
   }
 
   area.addEventListener('scroll', onScroll, { capture: true, passive: true });
+  area.addEventListener('wheel', event => trackGesture(event.deltaY, event.timeStamp), { passive: true });
+  area.addEventListener('touchstart', event => {
+    lastTouchY = event.touches.length === 1 ? event.touches[0].clientY : null;
+    resetGesture();
+  }, { passive: true });
+  area.addEventListener('touchmove', event => {
+    if (lastTouchY === null || event.touches.length !== 1) return;
+    const currentY = event.touches[0].clientY;
+    trackGesture(lastTouchY - currentY, event.timeStamp);
+    lastTouchY = currentY;
+  }, { passive: true });
+  area.addEventListener('touchend', () => {
+    lastTouchY = null;
+    resetGesture();
+  }, { passive: true });
 
   // 새 카테고리/그룹 페이지는 항상 최상단에서 시작하므로 기본 패널 상태도 복원한다.
   const pageObserver = new MutationObserver(() => {
     const activePage = area.querySelector('.center-page.active');
     if (activePage) scrollPositions.set(activePage, activePage.scrollTop);
-    showChrome();
+    animateChrome(false);
+    resetGesture();
   });
   pageObserver.observe(area, { childList: true });
 
-  window.addEventListener('resize', scheduleRender, { passive: true });
+  window.addEventListener('resize', () => {
+    const wasHidden = topOffset > infoPanel.offsetHeight / 2;
+    animateChrome(wasHidden, true);
+  }, { passive: true });
 }
 
 /* ════════════════════════════════════════════════

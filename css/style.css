@@ -441,9 +441,9 @@ body::after {
       flex-shrink: 0;
       display: flex;
       flex-direction: column;
-      translate: 0 var(--bottom-chrome-offset);
+      transform: translate3d(0, var(--bottom-chrome-offset), 0);
       margin-top: calc(-1 * var(--bottom-chrome-offset));
-      will-change: translate, margin-top;
+      will-change: transform, margin-top;
     }
 
     /* ── INFO PANEL (설명창) ── */
@@ -458,9 +458,15 @@ body::after {
       justify-content: center;
       position: relative;
       z-index: 20;
-      translate: 0 calc(-1 * var(--top-chrome-offset));
+      transform: translate3d(0, calc(-1 * var(--top-chrome-offset)), 0);
       margin-bottom: calc(-1 * var(--top-chrome-offset));
-      will-change: translate, margin-bottom;
+      will-change: transform, margin-bottom;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .info-panel,
+      .create-chrome-bottom {
+        animation-duration: 1ms !important;
+      }
     }
     .info-empty {
       font-family: 'Noto Serif KR', serif;
