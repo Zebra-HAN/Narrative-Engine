@@ -58,13 +58,13 @@ const WORLD_CARDS = {
   obstacle: { /*  장애물 카테고리  */
     groups: [
 
-/* ════════════════════════════════════════════════     🔻 장애물 - 그룹1 🔻     ════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════     🔻 장애물 - 인간·사회: society🔻     ════════════════════════════════════════════════ */
 
     {
       id: 'obstacle1',
-      label: '그룹1',
+      label: '인간·사회',
       layoutType: '3',
-      img:'images/core/sub-nav/wrld/tech.jpg' ,
+      img:'images/world/group/society.jpg',
       subgroups: [
         {
           id: 'obstacle1_sub1',
@@ -97,13 +97,13 @@ const WORLD_CARDS = {
       ]
     },
 
-/* ════════════════════════════════════════════════     🔻 장애물 - 그룹2 🔻     ════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════     🔻 장애물 - 세계·환경: environment 🔻     ════════════════════════════════════════════════ */
 
     {
       id: 'obstacle2',
-      label: '그룹2',
+      label: '세계·환경',
       layoutType: '3',
-      img:'images/core/sub-nav/wrld/setting.jpg' ,
+      img:'images/world/group/environment.jpg',
       subgroups: [
         {
           id: 'obstacle2_sub1',
@@ -136,13 +136,13 @@ const WORLD_CARDS = {
       ]
     },
 
-/* ════════════════════════════════════════════════     🔻 장애물 - 그룹3 🔻     ════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════     🔻 장애물 - 3 생존·자원·수단: survival🔻     ════════════════════════════════════════════════ */
 
     {
       id: 'obstacle3',
-      label: '그룹3',
+      label: '생존·자원·수단',
       layoutType: '3',
-      img:'images/core/sub-nav/wrld/setting.jpg',
+      img:'images/world/group/survival.jpg',
       subgroups: [
         {
           id: 'obstacle3_sub1',
@@ -175,13 +175,13 @@ const WORLD_CARDS = {
       ]
     },
 
-/* ════════════════════════════════════════════════     🔻 장애물 - 그룹4 🔻     ════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════     🔻 장애물 - 4 정보·시간·상황: context 🔻     ════════════════════════════════════════════════ */
 
     {
       id: 'obstacle4',
-      label: '그룹4',
+      label: '정보·시간·상황',
       layoutType: '3',
-      img:'images/core/sub-nav/wrld/setting.jpg',
+      img:'images/world/group/context.jpg',
       subgroups: [
         {
           id: 'obstacle4_sub1',
@@ -214,13 +214,13 @@ const WORLD_CARDS = {
       ]
     },
 
-/* ════════════════════════════════════════════════     🔻 장애물 - 그룹5 🔻     ════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════     🔻 장애물 - 5 세계 법칙: laws 🔻     ════════════════════════════════════════════════ */
 
     {
       id: 'obstacle5',
-      label: '그룹5',
+      label: '세계 법칙',
       layoutType: '3',
-      img:'images/core/sub-nav/wrld/setting.jpg',
+      img:'images/world/group/laws.jpg',
       subgroups: [
         {
           id: 'obstacle5_sub1',
@@ -253,13 +253,13 @@ const WORLD_CARDS = {
       ]
     },
 
-/* ════════════════════════════════════════════════     🔻 장애물 - 그룹6 🔻     ════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════     🔻 장애물 - 초자연: supernatural 🔻     ════════════════════════════════════════════════ */
 
     {
       id: 'obstacle6',
       label: '그룹6',
       layoutType: '3',
-      img:'images/core/sub-nav/wrld/setting.jpg',
+      img:'images/world/group/supernatural.jpg',
       subgroups: [
         {
           id: 'obstacle6_sub1',
