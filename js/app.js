@@ -641,6 +641,12 @@ function initScrollResponsiveChrome() {
   });
   pageObserver.observe(area, { childList: true });
 
+  // 창작 화면을 다시 열 때 이전 방문의 숨김 위치가 남지 않게 한다.
+  screen._resetResponsiveChrome = () => {
+    resetGesture();
+    animateChrome(false, true);
+  };
+
   window.addEventListener('resize', () => {
     const wasHidden = topOffset > infoPanel.offsetHeight / 2;
     animateChrome(wasHidden, true);
@@ -663,6 +669,7 @@ function restartCreateIntro() {
   const createScreen = document.getElementById('screen-create');
   if (!createScreen) return;
 
+  createScreen._resetResponsiveChrome?.();
   createScreen.classList.remove('entering');
   void createScreen.offsetWidth;
   createScreen.classList.add('entering');
