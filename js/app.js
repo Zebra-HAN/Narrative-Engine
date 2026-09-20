@@ -505,6 +505,100 @@ window.addEventListener('load', () => {
 
 initInfoSliderSwipe();
 initCenterBackSwipe();
+initScrollResponsiveChrome();
+
+/* ════════════════════════════════════════════════
+   SCROLL-RESPONSIVE CREATIVE CHROME
+   콘텐츠를 위로 탐색하면 상·하단 패널을 스크롤한 거리만큼 밀어 내고,
+   반대 방향에서는 같은 거리만큼 복원한다.
+════════════════════════════════════════════════ */
+function initScrollResponsiveChrome() {
+  const screen = document.getElementById('screen-create');
+  const area = document.getElementById('center-area');
+  const infoPanel = document.getElementById('info-panel');
+  const bottomChrome = document.getElementById('create-chrome-bottom');
+  if (!screen || !area || !infoPanel || !bottomChrome) return;
+
+  const DIRECTION_THRESHOLD = 6;
+  const scrollPositions = new WeakMap();
+  let topOffset = 0;
+  let bottomOffset = 0;
+  let pendingDirection = 0;
+  let pendingDistance = 0;
+  let frameId = 0;
+
+  area.querySelectorAll('.center-page').forEach(page => {
+    scrollPositions.set(page, page.scrollTop);
+  });
+
+  function renderOffsets() {
+    frameId = 0;
+    const topLimit = infoPanel.offsetHeight;
+    const bottomLimit = bottomChrome.offsetHeight;
+    topOffset = Math.min(topOffset, topLimit);
+    bottomOffset = Math.min(bottomOffset, bottomLimit);
+    screen.style.setProperty('--top-chrome-offset', `${topOffset}px`);
+    screen.style.setProperty('--bottom-chrome-offset', `${bottomOffset}px`);
+  }
+
+  function scheduleRender() {
+    if (!frameId) frameId = requestAnimationFrame(renderOffsets);
+  }
+
+  function showChrome() {
+    pendingDirection = 0;
+    pendingDistance = 0;
+    topOffset = 0;
+    bottomOffset = 0;
+    scheduleRender();
+  }
+
+  function onScroll(event) {
+    const page = event.target;
+    if (!(page instanceof Element) || !page.classList.contains('center-page')) return;
+
+    const currentTop = Math.max(0, page.scrollTop);
+    const previousTop = scrollPositions.get(page) ?? currentTop;
+    scrollPositions.set(page, currentTop);
+
+    if (currentTop <= 1) {
+      showChrome();
+      return;
+    }
+
+    const delta = currentTop - previousTop;
+    if (Math.abs(delta) < 0.5) return;
+    const direction = Math.sign(delta);
+
+    if (direction !== pendingDirection) {
+      pendingDirection = direction;
+      pendingDistance = 0;
+    }
+    pendingDistance += Math.abs(delta);
+    if (pendingDistance < DIRECTION_THRESHOLD) return;
+
+    // 임계값을 넘긴 뒤에는 실제 스크롤 이동량을 그대로 패널 이동량으로 쓴다.
+    const distance = pendingDistance;
+    pendingDistance = 0;
+    const topLimit = infoPanel.offsetHeight;
+    const bottomLimit = bottomChrome.offsetHeight;
+    topOffset = Math.max(0, Math.min(topLimit, topOffset + direction * distance));
+    bottomOffset = Math.max(0, Math.min(bottomLimit, bottomOffset + direction * distance));
+    scheduleRender();
+  }
+
+  area.addEventListener('scroll', onScroll, { capture: true, passive: true });
+
+  // 새 카테고리/그룹 페이지는 항상 최상단에서 시작하므로 기본 패널 상태도 복원한다.
+  const pageObserver = new MutationObserver(() => {
+    const activePage = area.querySelector('.center-page.active');
+    if (activePage) scrollPositions.set(activePage, activePage.scrollTop);
+    showChrome();
+  });
+  pageObserver.observe(area, { childList: true });
+
+  window.addEventListener('resize', scheduleRender, { passive: true });
+}
 
 /* ════════════════════════════════════════════════
    SCREEN TRANSITION

@@ -414,6 +414,8 @@ body::after {
        MAIN CREATIVE PAGE
     ═══════════════════════════════════════════════ */
     #screen-create {
+      --top-chrome-offset: 0px;
+      --bottom-chrome-offset: 0px;
       background: var(--bg-deepest);
       display: flex;
       flex-direction: column;
@@ -439,6 +441,9 @@ body::after {
       flex-shrink: 0;
       display: flex;
       flex-direction: column;
+      translate: 0 var(--bottom-chrome-offset);
+      margin-top: calc(-1 * var(--bottom-chrome-offset));
+      will-change: translate, margin-top;
     }
 
     /* ── INFO PANEL (설명창) ── */
@@ -453,6 +458,9 @@ body::after {
       justify-content: center;
       position: relative;
       z-index: 20;
+      translate: 0 calc(-1 * var(--top-chrome-offset));
+      margin-bottom: calc(-1 * var(--top-chrome-offset));
+      will-change: translate, margin-bottom;
     }
     .info-empty {
       font-family: 'Noto Serif KR', serif;
