@@ -68,7 +68,7 @@ name:'수정✅ 36분',
 name:'악당'  ,   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
 
       { icon:'🃏', 
-name:'트릭스터1'     }, 
+name:'트릭스터1' , img:'images/core/sub-nav/stry/goal.jpg'    }, 
       
       { icon:'👼', 
 name:'수호자'     },
