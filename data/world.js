@@ -56,15 +56,17 @@ const WORLD_CARDS = {
 
   obstacle: { /*  장애물 카테고리  */
     groups: [
-/* ════════════════════════════════════════════════     🔻 장애물 - 인간·사회: society🔻     ════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════     🔻 장애물 - 1 인간·사회: society🔻     ════════════════════════════════════════════════ */
        
     { id: 'society',
       label: '인간·사회',
       layoutType: '3',
       img: 'images/world/group/society.jpg',
       cards: [
-        {
-          name: '카드명',
+         
+{ type: 'section' ,  label: ' 사람·관계의 장애물 — 다른 사람은 어떤 방식으로 인물의 목적·행동·생존을 방해하는가? ' },  
+         
+        { name: '카드명',
           img: 'images/core/sub-nav/wrld/setting.jpg', desc: '설명', detailLayout: 'AB',
           detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
           detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
