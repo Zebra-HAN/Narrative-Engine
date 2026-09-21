@@ -415,7 +415,7 @@ body::after {
     ═══════════════════════════════════════════════ */
     #screen-create {
       --chrome-progress: 0;
-      --top-chrome-height: 177px;
+      --top-chrome-height: 96px;
       --bottom-chrome-height: 149px;
       --top-chrome-offset: 0%;
       --bottom-chrome-offset: 0%;
@@ -478,10 +478,11 @@ body::after {
       right: 0;
       bottom: 0;
       left: 0;
-      min-height: 177px;
+      height: 96px;
+      min-height: 96px;
       background: linear-gradient(180deg, #ffffff 0%, #f9f9f9 100%);
       border-bottom: 1.5px solid var(--border-gold2);
-      padding: 14px 14px 12px;
+      padding: 5px 10px 7px;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -512,8 +513,9 @@ body::after {
     .info-slider-wrap {
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      min-height: 138px;
+      gap: 2px;
+      min-height: 0;
+      height: 100%;
     }
     .info-slider-wrap.hidden {
       display: none;
@@ -532,10 +534,12 @@ body::after {
       overflow: hidden;
       touch-action: pan-y;
       flex: 1;
+      min-height: 0;
     }
     .info-slider-track {
       display: flex;
       width: 200%;
+      height: 100%;
       transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .info-slider-track.show-category {
@@ -545,58 +549,60 @@ body::after {
       width: 50%;
       flex-shrink: 0;
       display: flex;
-      flex-direction: column;
-      gap: 10px;
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
       padding: 0 2px;
       box-sizing: border-box;
     }
     .info-main {
       display: flex;
-      align-items: flex-start;
-      gap: 12px;
+      align-items: center;
+      gap: 8px;
       flex: 1;
       min-width: 0;
     }
     .info-icon {
       flex-shrink: 0;
-      width: 48px;
-      height: 48px;
+      width: 38px;
+      height: 38px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.75rem;
+      font-size: 1.35rem;
       border: 1.5px solid var(--border-gold2);
-      border-radius: 10px;
+      border-radius: 8px;
       background: linear-gradient(160deg, #f0f7f3, #e4f0ea);
     }
     .info-text-wrap {
       flex: 1;
       min-width: 0;
-      padding-top: 2px;
+      padding-top: 0;
     }
     .info-name {
       font-family: 'Noto Serif KR', serif;
-      font-size: 0.95rem;
+      font-size: 0.78rem;
       font-weight: 600;
       color: var(--gold-bright);
-      margin-bottom: 6px;
+      margin-bottom: 2px;
       letter-spacing: 0.04em;
     }
     .info-desc {
-      font-size: 0.75rem;
+      font-size: 0.62rem;
       color: var(--text-secondary);
-      line-height: 1.65;
+      line-height: 1.35;
       display: -webkit-box;
-      -webkit-line-clamp: 5;
+      -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
     .info-actions {
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: flex-end;
-      gap: 8px;
-      margin-top: auto;
+      gap: 4px;
+      margin-left: auto;
     }
     .info-btn-detail {
       padding: 6px 14px;
@@ -1653,9 +1659,8 @@ body::after {
 
     /* 반응형: 태블릿/PC */
     @media (min-width: 600px) {
-      .info-panel { min-height: 192px; padding: 16px 18px 14px; }
-      .info-slider-wrap { min-height: 150px; }
-      .info-icon { width: 52px; height: 52px; font-size: 1.9rem; }
+      .info-panel { height: 104px; min-height: 104px; padding: 6px 18px 8px; }
+      .info-icon { width: 42px; height: 42px; font-size: 1.5rem; }
       .ctrl-btn { font-size: 0.62rem; padding: 6px 8px; }
       .subnav-panel { height: 64px; }
       .diamond-btn { width: 40px; height: 40px; }
@@ -2056,8 +2061,8 @@ body::after {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 8px;
-  padding: 6px 0 2px;
+  gap: 7px;
+  padding: 1px 0;
 }
 .info-dot {
   display: block;
@@ -2073,10 +2078,11 @@ body::after {
 /* ── 버튼 크기 줄이기 (상세정보 & 선택/취소 동일하게) ── */
 .info-btn-detail,
 .info-btn-select {
-  padding: 4px 10px;
-  font-size: 0.62rem;
-  min-width: 56px;
-  height: 28px;
+  padding: 2px 8px;
+  font-size: 0.6rem;
+  min-width: 54px;
+  height: 24px;
+  border-radius: 7px;
 }
 
 
