@@ -506,6 +506,59 @@ window.addEventListener('load', () => {
 initInfoSliderSwipe();
 initCenterBackSwipe();
 initScrollResponsiveChrome();
+initInfoTextAutoFit();
+
+/* ════════════════════════════════════════════════
+   INFO PANEL TEXT AUTO-FIT
+   패널 높이는 그대로 둔 채 실제 렌더링 영역을 넘는 텍스트만 단계적으로 축소한다.
+════════════════════════════════════════════════ */
+const INFO_TEXT_MIN_SCALE = 0.75;
+const INFO_TEXT_STEP_PX = 0.5;
+let infoTextFitFrame = 0;
+
+function elementHasVerticalOverflow(element) {
+  return element.scrollHeight > element.clientHeight + 0.5;
+}
+
+function fitInfoTextElement(element) {
+  if (!element) return;
+
+  // 이전 카드에서 적용된 축소를 먼저 지워 짧은 텍스트가 항상 기본 크기로 돌아오게 한다.
+  element.style.removeProperty('font-size');
+  const baseSize = parseFloat(getComputedStyle(element).fontSize);
+  if (!baseSize || !elementHasVerticalOverflow(element)) return;
+
+  const minimumSize = baseSize * INFO_TEXT_MIN_SCALE;
+  let nextSize = baseSize;
+  while (elementHasVerticalOverflow(element) && nextSize > minimumSize) {
+    nextSize = Math.max(minimumSize, nextSize - INFO_TEXT_STEP_PX);
+    element.style.fontSize = `${nextSize}px`;
+  }
+}
+
+function fitInfoPanelText() {
+  document.querySelectorAll('.info-slide').forEach(slide => {
+    // 제목과 설명은 각자의 실제 clientHeight/scrollHeight를 별도로 비교한다.
+    fitInfoTextElement(slide.querySelector('.info-name'));
+    fitInfoTextElement(slide.querySelector('.info-desc'));
+
+    // 제목 축소로 설명 영역이 달라질 수 있으므로 최종 레이아웃에서 한 번 더 확인한다.
+    fitInfoTextElement(slide.querySelector('.info-desc'));
+  });
+}
+
+function requestInfoTextAutoFit() {
+  if (infoTextFitFrame) cancelAnimationFrame(infoTextFitFrame);
+  infoTextFitFrame = requestAnimationFrame(() => {
+    infoTextFitFrame = 0;
+    fitInfoPanelText();
+  });
+}
+
+function initInfoTextAutoFit() {
+  window.addEventListener('resize', requestInfoTextAutoFit, { passive: true });
+  if (document.fonts?.ready) document.fonts.ready.then(requestInfoTextAutoFit);
+}
 
 /* ════════════════════════════════════════════════
    SCROLL-RESPONSIVE CREATIVE CHROME
@@ -1603,6 +1656,7 @@ function updateInfoPanel() {
 
   const hint = document.getElementById('info-swipe-hint');
   if (hint) hint.classList.remove('hidden');
+  requestInfoTextAutoFit();
 }
 
 function selectCurrentCard() {
