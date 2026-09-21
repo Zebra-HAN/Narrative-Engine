@@ -1627,12 +1627,12 @@ function updateInfoPanel() {
   const navInfo = Object.values(NAV_DATA).find(n => n.subs.find(s => s.id === currentSubId));
   const subInfo = navInfo ? navInfo.subs.find(s => s.id === currentSubId) : null;
 
-  document.getElementById('info-cat-icon').innerHTML = subInfo ? renderIcon(subInfo.icon, subInfo.img, 'info-icon-img') : '✦';
+  setInfoVisual(document.getElementById('info-cat-icon'), subInfo?.img);
   document.getElementById('info-cat-name').textContent = subInfo ? subInfo.label : currentSubId;
   document.getElementById('info-cat-desc').textContent = getSubDescription(currentSubId);
 
   if (focusedCard && focusedCard.subId === currentSubId) {
-    document.getElementById('info-card-icon').innerHTML = renderIcon(focusedCard.icon, focusedCard.img, 'info-icon-img');
+    setInfoVisual(document.getElementById('info-card-icon'), focusedCard.img);
     document.getElementById('info-card-name').textContent = focusedCard.name;
     document.getElementById('info-card-desc').textContent = focusedCard.desc || '설명 없음';
     const isSelected = selectedCards[focusedCard.subId] && selectedCards[focusedCard.subId].has(focusedCard.idx);
@@ -1643,7 +1643,7 @@ function updateInfoPanel() {
     if (cardActions) cardActions.classList.remove('info-actions-hidden');
     setInfoSlide(false);
   } else {
-    document.getElementById('info-card-icon').innerHTML = '?';
+    setInfoVisual(document.getElementById('info-card-icon'), null);
     document.getElementById('info-card-name').textContent = '카드 미선택';
     document.getElementById('info-card-desc').textContent = '카드를 탭하면 이곳에 항목 설명이 표시됩니다.';
     selectBtn.textContent = '선택';
@@ -2197,6 +2197,29 @@ function renderIcon(icon, img, className) {
     return `<img src="${img}" class="${className}" alt="">`;
   }
   return icon || '';
+}
+
+/* 상단 패널 이미지는 장식 배경으로만 렌더링하고, 없거나 로드에 실패하면 흰 패널을 유지한다. */
+function setInfoVisual(container, img) {
+  if (!container) return;
+  container.replaceChildren();
+  container.classList.remove('has-image');
+  if (!img) return;
+
+  const image = new Image();
+  image.className = 'info-icon-img';
+  image.alt = '';
+  image.draggable = false;
+  image.addEventListener('load', () => {
+    if (image.parentElement === container) container.classList.add('has-image');
+  }, { once: true });
+  image.addEventListener('error', () => {
+    if (image.parentElement !== container) return;
+    container.classList.remove('has-image');
+    image.remove();
+  }, { once: true });
+  image.src = img;
+  container.appendChild(image);
 }
 
 function formatLabel(label, icon) {

@@ -535,6 +535,8 @@ body::after {
       touch-action: pan-y;
       flex: 1;
       min-height: 0;
+      margin-left: -10px;
+      width: calc(100% + 10px);
     }
     .info-slider-track {
       display: flex;
@@ -546,35 +548,49 @@ body::after {
       transform: translateX(-50%);
     }
     .info-slide {
+      position: relative;
+      isolation: isolate;
       width: 50%;
       flex-shrink: 0;
       display: flex;
       flex-direction: row;
       align-items: center;
       gap: 8px;
-      padding: 0 2px;
+      padding: 0 2px 0 12px;
       box-sizing: border-box;
     }
     .info-main {
+      position: relative;
+      z-index: 1;
       display: flex;
       align-items: center;
       gap: 8px;
       flex: 1;
       min-width: 0;
     }
-    .info-icon {
-      flex-shrink: 0;
-      width: 38px;
-      height: 38px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.35rem;
-      border: 1.5px solid var(--border-gold2);
-      border-radius: 8px;
-      background: linear-gradient(160deg, #f0f7f3, #e4f0ea);
+    .info-visual {
+      position: absolute;
+      z-index: 0;
+      inset: 0 auto 0 0;
+      width: min(64%, 390px);
+      pointer-events: none;
+      opacity: 0;
+      overflow: hidden;
+      -webkit-mask-image: linear-gradient(to right, #000 0%, #000 46%, transparent 100%);
+      mask-image: linear-gradient(to right, #000 0%, #000 46%, transparent 100%);
+    }
+    .info-visual.has-image {
+      opacity: 1;
+    }
+    .info-visual .info-icon-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
     }
     .info-text-wrap {
+      position: relative;
       flex: 1;
       min-width: 0;
       height: 100%;
@@ -584,6 +600,17 @@ body::after {
       flex-direction: column;
       justify-content: center;
       overflow: hidden;
+      padding-left: 8px;
+      text-shadow: 0 1px 1px rgba(255, 255, 255, 0.95);
+    }
+    .info-text-wrap::before {
+      content: '';
+      position: absolute;
+      z-index: -1;
+      inset: -4px -8px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.8), rgba(255,255,255,0.58) 68%, transparent);
+      filter: blur(3px);
+      border-radius: 10px;
     }
     .info-name {
       font-family: 'Noto Serif KR', serif;
@@ -606,6 +633,8 @@ body::after {
       overflow: hidden;
     }
     .info-actions {
+      position: relative;
+      z-index: 2;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -1669,7 +1698,8 @@ body::after {
     /* 반응형: 태블릿/PC */
     @media (min-width: 600px) {
       .info-panel { height: 104px; min-height: 104px; padding: 6px 18px 8px; }
-      .info-icon { width: 42px; height: 42px; font-size: 1.5rem; }
+      .info-slider-viewport { margin-left: -18px; width: calc(100% + 18px); }
+      .info-slide { padding-left: 20px; }
       .ctrl-btn { font-size: 0.62rem; padding: 6px 8px; }
       .subnav-panel { height: 64px; }
       .diamond-btn { width: 40px; height: 40px; }
@@ -1865,12 +1895,12 @@ body::after {
   pointer-events: none;
 }
 
-/* 설명창(info-panel) 속 아이콘 이미지 꽉차게 */
+/* 설명창(info-panel)의 왼쪽 배경 이미지 */
 .info-icon-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: inherit;
+  display: block;
 }
 
 
