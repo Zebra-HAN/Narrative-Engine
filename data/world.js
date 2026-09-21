@@ -56,8 +56,9 @@ const WORLD_CARDS = {
 
   obstacle: { /*  장애물 카테고리  */
     groups: [
-    {
-      id: 'society',
+/* ════════════════════════════════════════════════     🔻 장애물 - 인간·사회: society🔻     ════════════════════════════════════════════════ */
+       
+    { id: 'society',
       label: '인간·사회',
       layoutType: '3',
       img: 'images/world/group/society.jpg',
@@ -70,8 +71,10 @@ const WORLD_CARDS = {
         }
       ]
     },
-    {
-      id: 'environment',
+
+       
+/* ════════════════════════════════════════════════     🔻 장애물 - 2  세계·환경: environment 🔻     ════════════════════════════════════════════════ */
+    { id: 'environment',
       label: '세계·환경',
       layoutType: '3',
       img: 'images/world/group/environment.jpg',
@@ -84,8 +87,11 @@ const WORLD_CARDS = {
         }
       ]
     },
-    {
-      id: 'survival',
+
+       
+/* ════════════════════════════════════════════════     🔻 장애물 - 3 생존·자원·수단: survival🔻     ════════════════════════════════════════════════ */
+       
+    { id: 'survival',
       label: '생존·자원·수단',
       layoutType: '3',
       img: 'images/world/group/survival.jpg',
@@ -98,8 +104,10 @@ const WORLD_CARDS = {
         }
       ]
     },
-    {
-      id: 'context',
+       
+/* ════════════════════════════════════════════════     🔻 장애물 - 4 정보·시간·상황: context 🔻     ════════════════════════════════════════════════ */
+       
+    { id: 'context',
       label: '정보·시간·상황',
       layoutType: '3',
       img: 'images/world/group/context.jpg',
@@ -112,8 +120,10 @@ const WORLD_CARDS = {
         }
       ]
     },
-    {
-      id: 'lars',
+       
+/* ════════════════════════════════════════════════     🔻 장애물 - 5 세계 법칙: lars 🔻     ════════════════════════════════════════════════ */
+       
+    { id: 'lars',
       label: '세계 법칙',
       layoutType: '3',
       img: 'images/world/group/laws.jpg',
@@ -126,8 +136,10 @@ const WORLD_CARDS = {
         }
       ]
     },
-    {
-      id: 'supernatural',
+       
+/* ════════════════════════════════════════════════     🔻 장애물 - 6 초자연: supernatural 🔻     ════════════════════════════════════════════════ */
+       
+    { id: 'supernatural',
       label: '초자연',
       layoutType: '3',
       img: 'images/world/group/supernatural.jpg',
@@ -142,6 +154,8 @@ const WORLD_CARDS = {
     }
     ] /* groups 끝 */
   }, /* 카테고리 끝 */
+
+   
 /* ════════════════════════════════════════════════      세팅 = 배경     ════════════════════════════════════════════════ */  
   setting: [
 
