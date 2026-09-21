@@ -994,8 +994,10 @@ body::after {
 
   .card-grid-layout-d .card-img-frame {
       width: 33.333%;
-      height: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
       flex: 0 0 33.333%;
+      align-self: center;
     }
 
     /* 이미지 없을 때 이모지 아이콘 영역 */
@@ -1031,8 +1033,10 @@ body::after {
       font-size: 0.54rem;
       line-height: 1.35;
       padding: 2px 4px;
-      justify-content: flex-start;
-      text-align: left;
+      width: auto;
+      align-self: stretch;
+      justify-content: center;
+      text-align: center;
       min-width: 0;
       overflow-wrap: anywhere;
     }
