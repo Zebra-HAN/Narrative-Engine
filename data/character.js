@@ -71,7 +71,7 @@ name:'악당'  ,   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n
 name:'트릭스터1' , img:'images/core/sub-nav/stry/goal.jpg'    }, 
       
       { icon:'👼', 
-name:'수호자'     },
+name:'수호자' , img:'images/core/sub-nav/stry/goal.jpg'     },
       
 
 { type: 'section' ,  label: ' 헤더 — 추가 내용 ' },  
