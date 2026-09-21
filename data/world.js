@@ -66,10 +66,11 @@ const WORLD_CARDS = {
          
 { type: 'section' ,  label: ' 사람·관계의 장애물 — 다른 사람은 어떤 방식으로 인물의 목적·행동·생존을 방해하는가? ' },  
          
-        { name: '카드명',
-          img: 'images/core/sub-nav/wrld/setting.jpg', desc: '설명', detailLayout: 'AB',
-          detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
-          detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
+        { name: '직접적인 적대·공격',
+          icon:'⚔️',
+          desc: '상대가 의도적으로 인물에게 피해를 주거나 목적 달성을 막는다', detailLayout: 'AB',
+          detailA: '공격해 옴\n\n죽이려 함\n\n다치게 하려 함\n\n붙잡으려 함\n\n쫓아옴\n\n몰아내려 함\n\n길을 막음\n\n',
+          detailB: '목적지에 가지 못하게 함\n\n행동을 강제로 저지함\n\n가진 것을 빼앗으려 함\n\n중요한 것을 파괴하려 함\n\n위협・협박함\n\n약점을 잡고 압박함\n\n인질을 이용함\n\n함정에 빠뜨림\n\n지속적으로 괴롭힘\n\n'
         }
       ]
     },
