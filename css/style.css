@@ -536,6 +536,9 @@ body::after {
       flex: 1;
       min-height: 0;
       margin-left: -10px;
+      /* The viewport is the artwork's clipping boundary. Pull that boundary
+         through the panel's bottom padding so the image reaches the rule. */
+      margin-bottom: -7px;
       width: calc(100% + 10px);
     }
     .info-slider-track {
@@ -1714,7 +1717,7 @@ body::after {
     /* 반응형: 태블릿/PC */
     @media (min-width: 600px) {
       .info-panel { height: 104px; min-height: 104px; padding: 6px 18px 8px; }
-      .info-slider-viewport { margin-left: -18px; width: calc(100% + 18px); }
+      .info-slider-viewport { margin-left: -18px; margin-bottom: -8px; width: calc(100% + 18px); }
       .info-slide { padding-left: 20px; }
       .info-visual { bottom: -8px; }
       .ctrl-btn { font-size: 0.62rem; padding: 6px 8px; }
