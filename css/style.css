@@ -494,8 +494,8 @@ body::after {
       opacity: 1;
       will-change: transform, opacity;
     }
-    #screen-create.chrome-hidden .info-panel,
-    #screen-create.chrome-hidden .create-chrome-bottom { pointer-events: none; }
+    #screen-create.top-chrome-hidden .info-panel { pointer-events: none; }
+    #screen-create.bottom-chrome-hidden .create-chrome-bottom { pointer-events: none; }
     @media (prefers-reduced-motion: reduce) {
       #screen-create { scroll-behavior: auto; }
     }

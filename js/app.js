@@ -585,11 +585,14 @@ function initScrollResponsiveChrome() {
   let lastTouchX = null;
   let lastTouchY = null;
   let touchDirection = null;
-  let targetProgress = 0;
-  let renderedProgress = 0;
+  let targetTopProgress = 0;
+  let targetBottomProgress = 0;
+  let renderedTopProgress = 0;
+  let renderedBottomProgress = 0;
   let animationFrame = 0;
   let animationStartedAt = 0;
-  let animationStartProgress = 0;
+  let animationStartTopProgress = 0;
+  let animationStartBottomProgress = 0;
   let lastDirectInputAt = -Infinity;
 
   area.querySelectorAll('.center-page').forEach(page => {
@@ -605,32 +608,58 @@ function initScrollResponsiveChrome() {
 
   function renderChrome(timestamp) {
     const elapsed = timestamp - animationStartedAt;
-    const duration = ANIMATION_DURATION * Math.abs(targetProgress - animationStartProgress);
+    const travelDistance = Math.max(
+      Math.abs(targetTopProgress - animationStartTopProgress),
+      Math.abs(targetBottomProgress - animationStartBottomProgress)
+    );
+    const duration = ANIMATION_DURATION * travelDistance;
     const timeProgress = duration ? Math.min(1, elapsed / duration) : 1;
     const easedProgress = 1 - Math.pow(1 - timeProgress, 3);
-    renderedProgress = animationStartProgress
-      + (targetProgress - animationStartProgress) * easedProgress;
-    screen.style.setProperty('--chrome-progress', renderedProgress.toFixed(4));
-    screen.style.setProperty('--top-chrome-offset', `${renderedProgress * -100}%`);
-    screen.style.setProperty('--bottom-chrome-offset', `${renderedProgress * 100}%`);
-    screen.classList.toggle('chrome-hidden', renderedProgress > 0.98);
+    renderedTopProgress = animationStartTopProgress
+      + (targetTopProgress - animationStartTopProgress) * easedProgress;
+    renderedBottomProgress = animationStartBottomProgress
+      + (targetBottomProgress - animationStartBottomProgress) * easedProgress;
+    screen.style.setProperty('--chrome-progress', renderedBottomProgress.toFixed(4));
+    screen.style.setProperty('--top-chrome-offset', `${renderedTopProgress * -100}%`);
+    screen.style.setProperty('--bottom-chrome-offset', `${renderedBottomProgress * 100}%`);
+    screen.classList.toggle('top-chrome-hidden', renderedTopProgress > 0.98);
+    screen.classList.toggle('bottom-chrome-hidden', renderedBottomProgress > 0.98);
     if (timeProgress < 1) {
       animationFrame = requestAnimationFrame(renderChrome);
     } else {
-      renderedProgress = targetProgress;
+      renderedTopProgress = targetTopProgress;
+      renderedBottomProgress = targetBottomProgress;
       animationFrame = 0;
     }
   }
 
-  function setProgress(progress) {
-    const nextProgress = Math.max(0, Math.min(1, progress));
-    if (nextProgress === targetProgress && animationFrame) return;
-    if (nextProgress === renderedProgress && !animationFrame) return;
-    targetProgress = nextProgress;
-    animationStartProgress = renderedProgress;
+  function animateChrome(topProgress, bottomProgress) {
+    const nextTopProgress = Math.max(0, Math.min(1, topProgress));
+    const nextBottomProgress = Math.max(0, Math.min(1, bottomProgress));
+    if (nextTopProgress === targetTopProgress
+        && nextBottomProgress === targetBottomProgress
+        && animationFrame) return;
+    if (nextTopProgress === renderedTopProgress
+        && nextBottomProgress === renderedBottomProgress
+        && !animationFrame) return;
+    targetTopProgress = nextTopProgress;
+    targetBottomProgress = nextBottomProgress;
+    animationStartTopProgress = renderedTopProgress;
+    animationStartBottomProgress = renderedBottomProgress;
     animationStartedAt = performance.now();
     if (animationFrame) cancelAnimationFrame(animationFrame);
     animationFrame = requestAnimationFrame(renderChrome);
+  }
+
+  function setProgress(progress) {
+    animateChrome(progress, progress);
+  }
+
+  function revealTopChromeForCard() {
+    // 카드 탭은 양쪽 패널이 완전히 숨은 경우에만 위 설명 패널을 복원한다.
+    // 아래 패널의 진행률은 건드리지 않아 내비게이션과 버튼 상태를 그대로 보존한다.
+    if (renderedTopProgress <= 0.98 || renderedBottomProgress <= 0.98) return;
+    animateChrome(0, targetBottomProgress);
   }
 
   function trackGesture(delta, timestamp = performance.now()) {
@@ -671,6 +700,9 @@ function initScrollResponsiveChrome() {
     lastDirectInputAt = performance.now();
     trackGesture(event.deltaY);
   }, { passive: true });
+  area.addEventListener('click', event => {
+    if (event.target.closest('.data-card')) revealTopChromeForCard();
+  });
   function onChromeTouchStart(event) {
     const touch = event.touches.length === 1 ? event.touches[0] : null;
     lastTouchX = touch?.clientX ?? null;
