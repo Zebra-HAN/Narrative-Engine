@@ -947,7 +947,8 @@ body::after {
     }
 
     .card-grid-layout-d .data-card {
-      aspect-ratio: 2.35;
+      /* layoutType 2: taller rows leave enough room for long, wrapped titles. */
+      aspect-ratio: 1.75;
       padding: 5px;
       flex-direction: row;
       gap: 5px;
@@ -992,10 +993,9 @@ body::after {
 
 
   .card-grid-layout-d .card-img-frame {
-      width: auto;
+      width: 33.333%;
       height: 100%;
-      aspect-ratio: 1;
-      flex: 0 0 auto;
+      flex: 0 0 33.333%;
     }
 
     /* 이미지 없을 때 이모지 아이콘 영역 */
@@ -1028,7 +1028,7 @@ body::after {
  .card-grid-layout-b .card-name { font-size: 0.56rem; }
     .card-grid-layout-c .card-name { font-size: 0.56rem; line-height: 1.35; }
     .card-grid-layout-d .card-name {
-      font-size: 0.68rem;
+      font-size: 0.54rem;
       line-height: 1.35;
       padding: 2px 4px;
       justify-content: flex-start;
