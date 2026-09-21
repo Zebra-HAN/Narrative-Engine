@@ -16,6 +16,64 @@ const CARD_DATA = {
   ...COMPASS_CARDS,
 };
 
+/* ════════════════════════════════════════════════
+   CREATIVE PAGE BACKGROUNDS
+   아래 세 배열/객체의 이미지 주소를 바꾸면 화면 배경을 직접 교체할 수 있습니다.
+   - main: 하단의 메인 카테고리를 선택하고 세부 카테고리를 고르기 전의 배경
+   - sub: 원형/종족/성격 같은 세부 카테고리 화면의 배경 (선택 입력)
+   - group: 종족 안의 인간/엘프 같은 그룹 배경 (선택 입력)
+
+   sub/group에 주소를 적지 않은 항목도 palette의 이미지가 순서대로 적용됩니다.
+   데이터 객체에 background: 'images/...'를 직접 추가하면 이 설정보다 우선하며,
+   그룹 배경은 그 안의 서브그룹과 카드 화면까지 자동으로 이어집니다.
+════════════════════════════════════════════════ */
+const CREATIVE_BACKGROUNDS = {
+  palette: [
+    'images/core/home/bg_island.jpg',
+    'images/core/home/bg_modern.jpg',
+    'images/core/home/bg_map.jpg',
+  ],
+  main: {
+    character:  'images/core/home/bg_island.jpg',
+    narrative2: 'images/core/home/bg_modern.jpg',
+    world:      'images/core/home/bg_map.jpg',
+    compass:    'images/core/home/bg_island.jpg',
+  },
+  sub: {
+    // 예: race: 'images/core/home/bg_map.jpg',
+  },
+  group: {
+    // 예: race: { race_human: 'images/core/home/bg_modern.jpg' },
+  },
+};
+
+function getCreativeBackground({ navId = currentNav, subId, groupIdx } = {}) {
+  const palette = CREATIVE_BACKGROUNDS.palette;
+  const nav = NAV_DATA[navId];
+  if (!subId) return nav?.background || CREATIVE_BACKGROUNDS.main[navId] || palette[0];
+
+  const subIndex = nav?.subs.findIndex(sub => sub.id === subId) ?? -1;
+  const sub = subIndex >= 0 ? nav.subs[subIndex] : getSubInfo(subId);
+  const subBackground = sub?.background
+    || CREATIVE_BACKGROUNDS.sub[subId]
+    || palette[(Math.max(subIndex, 0) + Object.keys(NAV_DATA).indexOf(navId)) % palette.length];
+
+  if (!Number.isInteger(groupIdx)) return subBackground;
+
+  const group = CARD_DATA[subId]?.groups?.[groupIdx];
+  return group?.background
+    || CREATIVE_BACKGROUNDS.group[subId]?.[group?.id]
+    || palette[(groupIdx + Math.max(subIndex, 0)) % palette.length]
+    || subBackground;
+}
+
+function applyCreativeBackground(location) {
+  const area = document.getElementById('center-area');
+  if (!area) return;
+  const path = getCreativeBackground(location);
+  area.style.setProperty('--creative-background-image', `url(${JSON.stringify(path)})`);
+}
+
 
 /* ════════════════════════════════════════════════
    STATE  
@@ -1007,6 +1065,7 @@ function showDefaultCenter() {
 
   const def = document.getElementById('page-default');
   def.classList.add('active');
+  applyCreativeBackground({ navId: currentNav });
 }
 
 
@@ -1033,6 +1092,7 @@ function showGroupPage(subId, animate = true) {
 
   const data = CARD_DATA[subId];
   if (!data || !data.groups) return;
+  applyCreativeBackground({ navId: currentNav, subId });
 
   const page = document.createElement('div');
   page.className = 'center-page active';
@@ -1094,6 +1154,7 @@ function showSubgroupPage(subId, groupIdx) {
 
   const grp = data.groups[groupIdx];
   if (!grp || !grp.subgroups) return;
+  applyCreativeBackground({ navId: currentNav, subId, groupIdx });
 
   document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
 
@@ -1150,6 +1211,7 @@ function showSubgroupCards(subId, groupIdx, sgIdx) {
 
   const grp = data.groups[groupIdx];
   if (!grp || !grp.subgroups) return;
+  applyCreativeBackground({ navId: currentNav, subId, groupIdx });
 
   const sg = grp.subgroups[sgIdx];
   if (!sg) return;
@@ -1292,6 +1354,7 @@ function showGroupCards(subId, groupIdx) {
 
   const grp = data.groups[groupIdx];
   if (!grp) return;
+  applyCreativeBackground({ navId: currentNav, subId, groupIdx });
 
   document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
 
@@ -1437,6 +1500,7 @@ function showCardPage(subId, animate = true) {
   }
 
   const area = document.getElementById('center-area');
+  applyCreativeBackground({ navId: currentNav, subId });
 
   // default 숨기기
   document.getElementById('page-default').classList.remove('active');
