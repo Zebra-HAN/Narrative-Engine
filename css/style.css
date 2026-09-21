@@ -998,11 +998,11 @@ body::after {
 
     .data-card {
       aspect-ratio: 0.72;
-      border: 1.5px solid rgba(47, 104, 72, 0.58);
+      border: 1px solid #79634a;
       border-radius: var(--radius-card);
       background:
-        linear-gradient(135deg, rgba(255,255,255,0.92) 0 7%, transparent 7% 93%, rgba(170,139,65,0.10) 93%),
-        linear-gradient(165deg, #fffef8 0%, #f5f3e7 52%, #e9eee3 100%);
+        linear-gradient(135deg, rgba(255,255,255,0.58), transparent 18% 82%, rgba(107,78,43,0.12)),
+        linear-gradient(180deg, #eee3cb 0%, #dfcfb0 100%);
       cursor: pointer;
       display: flex;
       flex-direction: column;
@@ -1012,31 +1012,27 @@ body::after {
       position: relative;
       overflow: hidden;
       box-shadow:
-        0 3px 7px rgba(24,55,38,0.16),
-        0 1px 2px rgba(20,43,30,0.18),
-        inset 0 0 0 1px rgba(255,255,255,0.90),
-        inset 0 0 0 3px rgba(198,174,107,0.34),
-        inset 0 0 0 4px rgba(39,94,62,0.20),
-        inset 0 1px 0 rgba(255,255,255,0.95);
+        0 3px 7px rgba(57,42,25,0.24),
+        0 1px 2px rgba(57,42,25,0.25),
+        inset 0 0 0 2px rgba(255,248,226,0.88),
+        inset 0 0 0 4px rgba(137,108,70,0.44);
       transition: transform 0.12s ease, filter 0.12s ease, border-color 0.18s ease, box-shadow 0.18s ease;
       -webkit-tap-highlight-color: transparent;
       backface-visibility: hidden;
     }
 
-    /* CSS-only corner inlay: restrained ornaments keep the compact card readable. */
+    /* Warm, restrained border ornament inspired by a classic illustrated card. */
     .data-card::before {
       content: '';
       position: absolute;
       inset: 3px;
       z-index: 3;
-      border: 1px solid rgba(169,137,62,0.34);
+      border: 1px solid rgba(123,91,52,0.45);
       border-radius: calc(var(--radius-card) - 4px);
       background:
-        linear-gradient(135deg, rgba(49,108,73,0.72) 0 1px, transparent 1px) left 2px top 2px / 8px 8px no-repeat,
-        linear-gradient(225deg, rgba(49,108,73,0.72) 0 1px, transparent 1px) right 2px top 2px / 8px 8px no-repeat,
-        linear-gradient(45deg, rgba(49,108,73,0.60) 0 1px, transparent 1px) left 2px bottom 2px / 8px 8px no-repeat,
-        linear-gradient(315deg, rgba(49,108,73,0.60) 0 1px, transparent 1px) right 2px bottom 2px / 8px 8px no-repeat;
-      box-shadow: inset 0 0 5px rgba(255,255,255,0.75);
+        radial-gradient(circle at left bottom, transparent 5px, rgba(126,93,52,0.42) 5.5px 6.5px, transparent 7px) left 1px bottom 1px / 11px 11px no-repeat,
+        radial-gradient(circle at right bottom, transparent 5px, rgba(126,93,52,0.42) 5.5px 6.5px, transparent 7px) right 1px bottom 1px / 11px 11px no-repeat;
+      box-shadow: inset 0 0 4px rgba(255,250,232,0.72);
       pointer-events: none;
     }
 
@@ -1066,8 +1062,8 @@ body::after {
       100% { opacity: 1; transform: rotateY(0deg) scale(1); }
     }
     .data-card.selected {
-      border: 2.5px solid var(--gold-mid);
-      box-shadow: 0 0 16px rgba(58,125,90,0.4), 0 0 6px rgba(46,107,74,0.25), 0 3px 8px rgba(0,0,0,0.12), inset 0 0 0 2px rgba(224,204,145,0.52);
+      border: 2.5px solid #9a7646;
+      box-shadow: 0 0 14px rgba(154,118,70,0.38), 0 3px 8px rgba(57,42,25,0.22), inset 0 0 0 2px rgba(255,239,197,0.62);
     }
     .data-card.selected::after {
       content: '🔒';
@@ -1082,28 +1078,23 @@ body::after {
       flex: 0 0 75%;
       border-radius: 6px;
       overflow: hidden;
-      background: linear-gradient(145deg, #d9e6dc, #f8f3dd 48%, #cbdccf);
+      background: #fcfaf3;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
       position: relative;
       box-shadow:
-        0 1px 2px rgba(27,57,39,0.22),
-        inset 0 0 0 1px rgba(69,112,80,0.56),
-        inset 0 0 0 2px rgba(255,251,230,0.80),
-        inset 0 0 0 3px rgba(170,139,65,0.40),
-        inset 0 0 7px rgba(15,48,29,0.30);
+        0 1px 2px rgba(62,43,24,0.24),
+        0 0 0 1px rgba(92,65,37,0.78);
     }
 
-    .card-img-frame::after {
-      content: '';
-      position: absolute;
-      inset: 3px;
-      border: 1px solid rgba(245,229,178,0.60);
-      border-radius: 3px;
-      box-shadow: inset 0 0 4px rgba(23,65,40,0.32);
-      pointer-events: none;
+    /* Image-less cards get a brighter field so their icon stays immediately legible. */
+    .card-img-frame.has-icon {
+      background: linear-gradient(145deg, #ffffff 0%, #fffdf6 55%, #f5f0e4 100%);
+      color: #3b3024;
+      font-size: 1.5rem;
+      text-shadow: 0 1px 0 #fff, 0 2px 4px rgba(68,48,26,0.16);
     }
 
     .card-img-frame > * {
@@ -1151,9 +1142,8 @@ body::after {
       font-family: 'Noto Sans KR', sans-serif;
       position: relative;
       background:
-        linear-gradient(90deg, transparent, rgba(177,148,75,0.24) 18%, rgba(255,255,255,0.62) 50%, rgba(177,148,75,0.24) 82%, transparent),
-        linear-gradient(180deg, rgba(255,255,255,0.66), rgba(232,237,222,0.58));
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.86), inset 0 -1px 0 rgba(66,111,78,0.20);
+        linear-gradient(90deg, transparent, rgba(132,96,51,0.12) 18%, rgba(255,248,228,0.46) 50%, rgba(132,96,51,0.12) 82%, transparent);
+      box-shadow: inset 0 1px 0 rgba(255,250,235,0.74);
       text-shadow: 0 1px 0 rgba(255,255,255,0.92);
     }
 

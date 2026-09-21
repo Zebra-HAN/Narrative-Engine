@@ -1185,7 +1185,7 @@ function showSubgroupCards(subId, groupIdx, sgIdx) {
         ontouchstart="startLongPress(event,this,'subgroup','${subId}',${groupIdx},${sgIdx},${idx})"
         onmouseup="cancelLongPress()" ontouchend="handleCardTouchEnd(event,'subgroup','${subId}',${groupIdx},${sgIdx},${idx})"
         onmouseleave="cancelLongPress()" ontouchcancel="cancelLongPress()">
-        <div class="card-img-frame">${renderIcon(card.icon, card.img, 'card-img')}</div>
+        <div class="card-img-frame ${card.img ? 'has-image' : 'has-icon'}">${renderIcon(card.icon, card.img, 'card-img')}</div>
         <div class="card-name">${card.name}</div>
       </div>
     `;
@@ -1325,7 +1325,7 @@ function showGroupCards(subId, groupIdx) {
     ontouchstart="startLongPress(event,this,'group','${subId}',${groupIdx},${idx})"
     onmouseup="cancelLongPress()" ontouchend="handleCardTouchEnd(event,'group','${subId}',${groupIdx},${idx})"
     onmouseleave="cancelLongPress()" ontouchcancel="cancelLongPress()">
-        <div class="card-img-frame">${renderIcon(card.icon, card.img, 'card-img')}</div>
+        <div class="card-img-frame ${card.img ? 'has-image' : 'has-icon'}">${renderIcon(card.icon, card.img, 'card-img')}</div>
         <div class="card-name">${card.name}</div>
       </div>
     `;
@@ -1478,7 +1478,7 @@ function showCardPage(subId, animate = true) {
     onmouseup="cancelLongPress()"  ontouchend="handleCardTouchEnd(event,'card','${subId}',${idx})"
     onmouseleave="cancelLongPress()" ontouchcancel="cancelLongPress()">
     
-        <div class="card-img-frame">${renderIcon(card.icon, card.img, 'card-img')}</div>
+        <div class="card-img-frame ${card.img ? 'has-image' : 'has-icon'}">${renderIcon(card.icon, card.img, 'card-img')}</div>
         <div class="card-name">${card.name}</div>
       </div>
     `;
