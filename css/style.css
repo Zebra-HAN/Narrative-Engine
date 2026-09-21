@@ -916,7 +916,7 @@ body::after {
    .card-grid.card-grid-layout-a { grid-template-columns: repeat(5, 1fr); }
     .card-grid.card-grid-layout-b { grid-template-columns: repeat(4, 1fr); }
     .card-grid.card-grid-layout-c { grid-template-columns: repeat(3, 1fr); }
-    .card-grid.card-grid-layout-d { grid-template-columns: repeat(2, 1fr); }
+    .card-grid.card-grid-layout-d { grid-template-columns: repeat(3, 1fr); }
 
     .data-card {
       aspect-ratio: 0.72;
@@ -950,7 +950,7 @@ body::after {
       aspect-ratio: 2.35;
       padding: 5px;
       flex-direction: row;
-      gap: 4px;
+      gap: 5px;
     }
 
     .data-card.card-deal {
@@ -994,7 +994,8 @@ body::after {
   .card-grid-layout-d .card-img-frame {
       width: auto;
       height: 100%;
-      flex: 0 0 38%;
+      aspect-ratio: 1;
+      flex: 0 0 auto;
     }
 
     /* 이미지 없을 때 이모지 아이콘 영역 */
@@ -1032,6 +1033,8 @@ body::after {
       padding: 2px 4px;
       justify-content: flex-start;
       text-align: left;
+      min-width: 0;
+      overflow-wrap: anywhere;
     }
 
     /* 상세 정보 시트 */
