@@ -529,7 +529,9 @@ function initScrollResponsiveChrome() {
   let gestureDistance = 0;
   let gestureStartedAt = 0;
   let lastGestureAt = 0;
+  let lastTouchX = null;
   let lastTouchY = null;
+  let touchDirection = null;
   let targetProgress = 0;
   let renderedProgress = 0;
   let animationFrame = 0;
@@ -616,17 +618,46 @@ function initScrollResponsiveChrome() {
     lastDirectInputAt = performance.now();
     trackGesture(event.deltaY);
   }, { passive: true });
-  area.addEventListener('touchstart', event => {
-    lastTouchY = event.touches.length === 1 ? event.touches[0].clientY : null;
+  function onChromeTouchStart(event) {
+    const touch = event.touches.length === 1 ? event.touches[0] : null;
+    lastTouchX = touch?.clientX ?? null;
+    lastTouchY = touch?.clientY ?? null;
+    touchDirection = null;
     resetGesture();
-  }, { passive: true });
-  area.addEventListener('touchmove', event => {
+  }
+
+  function onChromeTouchMove(event) {
     if (lastTouchY === null || event.touches.length !== 1) return;
-    const currentY = event.touches[0].clientY;
+    const touch = event.touches[0];
+    const currentX = touch.clientX;
+    const currentY = touch.clientY;
+    const dx = currentX - lastTouchX;
+    const dy = currentY - lastTouchY;
+
+    // 설명 패널의 좌우 정보 전환과 상하 패널 제스처가 서로 간섭하지 않도록
+    // 첫 방향을 잠근 뒤 세로 입력만 크롬 표시 상태에 전달한다.
+    if (!touchDirection && Math.hypot(dx, dy) >= 6) {
+      touchDirection = Math.abs(dx) > Math.abs(dy) ? 'horizontal' : 'vertical';
+    }
+    if (touchDirection === 'horizontal') return;
+    lastTouchX = currentX;
     lastDirectInputAt = performance.now();
     trackGesture(lastTouchY - currentY);
     lastTouchY = currentY;
-  }, { passive: true });
+  }
+
+  function onChromeTouchEnd() {
+    lastTouchX = null;
+    lastTouchY = null;
+    touchDirection = null;
+    resetGesture();
+  }
+
+  area.addEventListener('touchstart', onChromeTouchStart, { passive: true });
+  area.addEventListener('touchmove', onChromeTouchMove, { passive: true });
+  // 위쪽 설명 패널에서 시작한 수직 스와이프도 동일하게 숨김 동작을 수행한다.
+  infoPanel.addEventListener('touchstart', onChromeTouchStart, { passive: true });
+  infoPanel.addEventListener('touchmove', onChromeTouchMove, { passive: true });
 
   const chromeResizeObserver = new ResizeObserver(() => {
     const topHeight = infoPanel.getBoundingClientRect().height;
@@ -636,10 +667,10 @@ function initScrollResponsiveChrome() {
   });
   chromeResizeObserver.observe(infoPanel);
   chromeResizeObserver.observe(bottomChrome);
-  area.addEventListener('touchend', () => {
-    lastTouchY = null;
-    resetGesture();
-  }, { passive: true });
+  area.addEventListener('touchend', onChromeTouchEnd, { passive: true });
+  area.addEventListener('touchcancel', onChromeTouchEnd, { passive: true });
+  infoPanel.addEventListener('touchend', onChromeTouchEnd, { passive: true });
+  infoPanel.addEventListener('touchcancel', onChromeTouchEnd, { passive: true });
 
   // 새 카테고리/그룹 페이지는 항상 최상단에서 시작하므로 기본 패널 상태도 복원한다.
   const pageObserver = new MutationObserver(() => {
