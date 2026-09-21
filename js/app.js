@@ -71,7 +71,15 @@ function applyCreativeBackground(location) {
   const area = document.getElementById('center-area');
   if (!area) return;
   const path = getCreativeBackground(location);
-  area.style.setProperty('--creative-background-image', `url(${JSON.stringify(path)})`);
+  /*
+   * 이 값은 css/style.css 안에서 실제 background-image로 사용됩니다. 상대 경로를
+   * 그대로 넘기면 브라우저가 CSS 파일 위치(css/)를 기준으로 해석하여
+   * css/images/...를 찾게 되고, 이미지 대신 배경색만 보일 수 있습니다.
+   * 현재 문서 주소를 기준으로 절대 URL을 만든 뒤 넘겨 어느 배포 경로에서도
+   * 올바른 이미지 파일을 가리키게 합니다.
+   */
+  const imageUrl = new URL(path, document.baseURI).href;
+  area.style.setProperty('--creative-background-image', `url(${JSON.stringify(imageUrl)})`);
 }
 
 
