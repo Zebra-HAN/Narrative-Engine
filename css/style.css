@@ -878,12 +878,10 @@ body::after {
   margin-bottom: 6px;
   padding: 4px 8px;
   border-left: 2px solid var(--gold-dim);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  
-  display: flex;                       /* 앞뒤 글자가 나란히 오도록 */
-  align-items: center;                 /* 높낮이를 가운데로 딱 맞춤 */
+  /* 긴 섹션 문구도 모바일 화면 안에서 전부 읽을 수 있도록 줄바꿈한다. */
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.5;
 }
 
 /* [앞부분] 헤더 타이틀 - 크고 진하게 */
