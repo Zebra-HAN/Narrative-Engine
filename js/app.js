@@ -1627,12 +1627,12 @@ function updateInfoPanel() {
   const navInfo = Object.values(NAV_DATA).find(n => n.subs.find(s => s.id === currentSubId));
   const subInfo = navInfo ? navInfo.subs.find(s => s.id === currentSubId) : null;
 
-  setInfoVisual(document.getElementById('info-cat-icon'), subInfo?.img);
+  setInfoVisual(document.getElementById('info-cat-icon'), subInfo?.img, subInfo?.icon);
   document.getElementById('info-cat-name').textContent = subInfo ? subInfo.label : currentSubId;
   document.getElementById('info-cat-desc').textContent = getSubDescription(currentSubId);
 
   if (focusedCard && focusedCard.subId === currentSubId) {
-    setInfoVisual(document.getElementById('info-card-icon'), focusedCard.img);
+    setInfoVisual(document.getElementById('info-card-icon'), focusedCard.img, focusedCard.icon);
     document.getElementById('info-card-name').textContent = focusedCard.name;
     document.getElementById('info-card-desc').textContent = focusedCard.desc || '설명 없음';
     const isSelected = selectedCards[focusedCard.subId] && selectedCards[focusedCard.subId].has(focusedCard.idx);
@@ -2199,12 +2199,28 @@ function renderIcon(icon, img, className) {
   return icon || '';
 }
 
-/* 상단 패널 이미지는 장식 배경으로만 렌더링하고, 없거나 로드에 실패하면 흰 패널을 유지한다. */
-function setInfoVisual(container, img) {
+/* 상단 패널에서 이미지를 우선하고, 이미지가 없거나 로드에 실패하면 카드 아이콘을 표시한다. */
+function setInfoVisual(container, img, icon) {
   if (!container) return;
   container.replaceChildren();
-  container.classList.remove('has-image');
-  if (!img) return;
+  container.classList.remove('has-image', 'has-icon');
+
+  const showIcon = () => {
+    container.replaceChildren();
+    container.classList.remove('has-image');
+    if (!icon) return;
+
+    const iconElement = document.createElement('span');
+    iconElement.className = 'info-icon-text';
+    iconElement.textContent = icon;
+    container.appendChild(iconElement);
+    container.classList.add('has-icon');
+  };
+
+  if (!img) {
+    showIcon();
+    return;
+  }
 
   const image = new Image();
   image.className = 'info-icon-img';
@@ -2215,8 +2231,7 @@ function setInfoVisual(container, img) {
   }, { once: true });
   image.addEventListener('error', () => {
     if (image.parentElement !== container) return;
-    container.classList.remove('has-image');
-    image.remove();
+    showIcon();
   }, { once: true });
   image.src = img;
   container.appendChild(image);
