@@ -589,7 +589,8 @@ body::after {
       -webkit-mask-image: linear-gradient(to right, #000 0%, #000 50%, rgba(0,0,0,0.92) 58%, rgba(0,0,0,0.68) 70%, rgba(0,0,0,0.38) 82%, rgba(0,0,0,0.14) 92%, transparent 100%);
       mask-image: linear-gradient(to right, #000 0%, #000 50%, rgba(0,0,0,0.92) 58%, rgba(0,0,0,0.68) 70%, rgba(0,0,0,0.38) 82%, rgba(0,0,0,0.14) 92%, transparent 100%);
     }
-    .info-visual.has-image {
+    .info-visual.has-image,
+    .info-visual.has-icon {
       opacity: 1;
     }
     .info-visual .info-icon-img {
@@ -598,6 +599,20 @@ body::after {
       object-fit: cover;
       object-position: center 35%;
       display: block;
+    }
+    .info-visual.has-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      /* Emoji are standalone artwork, so they should not fade out like a
+         full-bleed image at the text edge. */
+      -webkit-mask-image: none;
+      mask-image: none;
+    }
+    .info-visual .info-icon-text {
+      font-size: clamp(3rem, 8vw, 5.5rem);
+      line-height: 1;
+      filter: drop-shadow(0 2px 3px rgba(45, 31, 16, 0.22));
     }
     .info-text-wrap {
       position: relative;
