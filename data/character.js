@@ -466,6 +466,8 @@ race: {   /* ═══  [종족]  ═══ */
         label: '직업1',
         layoutType: '5',  
         icon: '👤',
+        img:'images/core/home/bg_map.jpg',
+         
         cards: [
             { name: '천사',     img:'images/character/race/angel.jpg',      subImg:'images/character/race/angels.jpg',  desc: '신의 사자. 날개를 가지며 신성한 힘으로 인간을 수호하거나 신의 명령을 전달하는 역할. 단순히 선한 존재가 아니라 신의 의지를 집행하는 무서운 면도 있음.', detail: '【상세】 정보\n【보편】\n"나는 심판을 내리러 온 게 아니야. 다만... 지켜보고 있었어."\n\n【어둠】\n"신의 뜻이라면, 이 도시 전부를 불태워도 돼."\n\n【밝음】\n"후광이 있으면 터널에서 조명 필요 없어. 이건 진짜 실용적인 능력이야."' },
             { name: '세라핌',    img:'images/character/race/seraphim.jpg',      desc: '성경에 등장하는 가장 높은 위계의 천사. 날개가 여섯 개이며 신의 보좌 주위에서 찬양하는 역할. 그 빛이 너무 강해 직접 보면 압도된다고 함.', detail: '【상세】 정보\n【보편】\n"내 모습을 직접 보면 안 돼. 그래서 \'두려워하지 마라\'라고 먼저 말하는 거야."\n\n【어둠】\n"사랑과 심판은 다르지 않아. 신은 두 가지를 동시에 할 수 있거든."\n\n【밝음】\n"날개가 여섯 개야. 입고 벗을 수 있는 옷이 우주에 없어."' },
@@ -498,6 +500,7 @@ race: {   /* ═══  [종족]  ═══ */
         label: '직업3',
         layoutType: '4',  
         icon: '✨',
+        img:'images/core/home/bg_island.jpg',
         cards: [
               { icon:'⚗', name:'연금술사', img:'images/character/race/sylph.jpg' },
              { name: '천사',     img:'images/character/race/angel.jpg',      subImg:'images/character/race/angels.jpg',  desc: '신의 사자. 날개를 가지며 신성한 힘으로 인간을 수호하거나 신의 명령을 전달하는 역할. 단순히 선한 존재가 아니라 신의 의지를 집행하는 무서운 면도 있음.', detail: '【상세】 정보\n【보편】\n"나는 심판을 내리러 온 게 아니야. 다만... 지켜보고 있었어."\n\n【어둠】\n"신의 뜻이라면, 이 도시 전부를 불태워도 돼."\n\n【밝음】\n"후광이 있으면 터널에서 조명 필요 없어. 이건 진짜 실용적인 능력이야."' },
