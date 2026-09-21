@@ -60,7 +60,7 @@ const WORLD_CARDS = {
        
     { id: 'society',
       label: '인간·사회',
-      layoutType: '3',
+      layoutType: '2',
       img: 'images/world/group/society.jpg',
       cards: [
          
