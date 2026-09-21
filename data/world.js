@@ -56,356 +56,92 @@ const WORLD_CARDS = {
 
   obstacle: { /*  장애물 카테고리  */
     groups: [
-/* ════════════════════════════════════════════════     🔻 장애물 - 인간·사회: society🔻     ════════════════════════════════════════════════ */
     {
       id: 'society',
       label: '인간·사회',
       layoutType: '3',
-      img:'images/world/group/society.jpg',
-      subgroups: [
+      img: 'images/world/group/society.jpg',
+      cards: [
         {
-          id: 'people',
-          label: '사람·관계',
-          img: 'images/world/group/society.jpg',
-          cards: [
-            { type: 'section', label: '사람·관계의 장애물' },
-            {
-              name: '카드명',
-              img: 'images/core/sub-nav/wrld/setting.jpg', desc: '설명', detailLayout: 'AB',
-              detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
-              detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
-            }
-          ]
-        },
-        {
-          id: 'relations',
-          label: '관계별',
-          img: 'images/world/group/society.jpg',
-          cards: [
-            { type: 'section', label: '관계별의 장애물' },
-            {
-              name: '카드명',
-              img: 'images/core/sub-nav/wrld/setting.jpg', desc: '설명', detailLayout: 'AB',
-              detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
-              detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
-            }
-          ]
-        },
-        {
-          id: 'society',
-          label: '사회·제도',
-          img: 'images/world/group/society.jpg',
-          cards: [
-            { type: 'section', label: '사회·제도의 장애물' },
-            {
-              name: '카드명',
-              img: 'images/core/sub-nav/wrld/setting.jpg', desc: '설명', detailLayout: 'AB',
-              detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
-              detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
-            }
-          ]
-        },
-        {
-          id: 'power',
-          label: '집단·권력',
-          img: 'images/world/group/society.jpg',
-          cards: [
-            { type: 'section', label: '집단·권력의 장애물' },
-            {
-              name: '카드명',
-              img: 'images/core/sub-nav/wrld/setting.jpg', desc: '설명', detailLayout: 'AB',
-              detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
-              detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
-            }
-          ]
-        },
-        {
-          id: 'war',
-          label: '전쟁·분쟁',
-          img: 'images/world/group/society.jpg',
-          cards: [
-            { type: 'section', label: '전쟁·분쟁의 장애물' },
-            {
-              name: '카드명',
-              img: 'images/core/sub-nav/wrld/setting.jpg', desc: '설명', detailLayout: 'AB',
-              detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
-              detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
-            }
-          ]
-        },
-        {
-          id: 'duty',
-          label: '의무·책임·역할',
-          img: 'images/world/group/society.jpg',
-          cards: [
-            { type: 'section', label: '의무·책임·역할의 장애물' },
-            {
-              name: '카드명',
-              img: 'images/core/sub-nav/wrld/setting.jpg', desc: '설명', detailLayout: 'AB',
-              detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
-              detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
-            }
-          ]
+          name: '카드명',
+          img: 'images/core/sub-nav/wrld/setting.jpg', desc: '설명', detailLayout: 'AB',
+          detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
+          detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
         }
       ]
     },
-/* ════════════════════════════════════════════════     🔻 장애물 - 2  세계·환경: environment 🔻     ════════════════════════════════════════════════ */
     {
       id: 'environment',
       label: '세계·환경',
       layoutType: '3',
-      img:'images/world/group/environment.jpg',
-      subgroups: [
+      img: 'images/world/group/environment.jpg',
+      cards: [
         {
-          id: 'location',
-          label: '장소·공간',
-          img: 'images/world/group/society.jpg',
-          cards: [
-            { type: 'section', label: '장소·공간의 장애물' },
-            {
-              name: '카드명',
-              img: 'images/core/sub-nav/wrld/setting.jpg', desc: '설명', detailLayout: 'AB',
-              detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
-              detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
-            }
-          ]
-        },
-        {
-          id: 'nature',
-          label: '자연·기후',
-          img: 'images/world/group/society.jpg',
-          cards: [
-            { type: 'section', label: '자연·기후의 장애물' },
-            {
-              name: '카드명',
-              img: 'images/core/sub-nav/wrld/setting.jpg', desc: '설명', detailLayout: 'AB',
-              detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
-              detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
-            }
-          ]
-        },
-        {
-          id: 'creatures',
-          label: '생물·생태',
-          img: 'images/world/group/society.jpg',
-          cards: [
-            { type: 'section', label: '생물·생태의 장애물' },
-            {
-              name: '카드명',
-              img: 'images/core/sub-nav/wrld/setting.jpg', desc: '설명', detailLayout: 'AB',
-              detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
-              detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
-            }
-          ]
-        },
-        {
-          id: 'disaster',
-          label: '사고·재난',
-          img: 'images/world/group/society.jpg',
-          cards: [
-            { type: 'section', label: '사고·재난의 장애물' },
-            {
-              name: '카드명',
-              img: 'images/core/sub-nav/wrld/setting.jpg', desc: '설명', detailLayout: 'AB',
-              detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
-              detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
-            }
-          ]
+          name: '카드명',
+          img: 'images/core/sub-nav/wrld/setting.jpg', desc: '설명', detailLayout: 'AB',
+          detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
+          detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
         }
       ]
     },
-/* ════════════════════════════════════════════════     🔻 장애물 - 3 생존·자원·수단: survival🔻     ════════════════════════════════════════════════ */
     {
       id: 'survival',
       label: '생존·자원·수단',
       layoutType: '3',
-      img:'images/world/group/survival.jpg',
-      subgroups: [
+      img: 'images/world/group/survival.jpg',
+      cards: [
         {
-          id: 'survival',
-          label: '생존',
-          img: 'images/world/group/society.jpg',
-          cards: [
-            { type: 'section', label: '생존의 장애물' },
-            {
-              name: '카드명',
-              img: 'images/core/sub-nav/wrld/setting.jpg', desc: '설명', detailLayout: 'AB',
-              detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
-              detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
-            }
-          ]
-        },
-        {
-          id: 'resources',
-          label: '자원·경제',
-          img: 'images/world/group/society.jpg',
-          cards: [
-            { type: 'section', label: '자원·경제의 장애물' },
-            {
-              name: '카드명',
-              img: 'images/core/sub-nav/wrld/setting.jpg', desc: '설명', detailLayout: 'AB',
-              detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
-              detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
-            }
-          ]
-        },
-        {
-          id: 'access',
-          label: '이동·접근',
-          img: 'images/world/group/society.jpg',
-          cards: [
-            { type: 'section', label: '이동·접근의 장애물' },
-            {
-              name: '카드명',
-              img: 'images/core/sub-nav/wrld/setting.jpg', desc: '설명', detailLayout: 'AB',
-              detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
-              detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
-            }
-          ]
-        },
-        {
-          id: 'technology',
-          label: '기술·문명',
-          img: 'images/world/group/society.jpg',
-          cards: [
-            { type: 'section', label: '기술·문명의 장애물' },
-            {
-              name: '카드명',
-              img: 'images/core/sub-nav/wrld/setting.jpg', desc: '설명', detailLayout: 'AB',
-              detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
-              detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
-            }
-          ]
-        },
-        {
-          id: 'objects',
-          label: '물건·도구·시설',
-          img: 'images/world/group/society.jpg',
-          cards: [
-            { type: 'section', label: '물건·도구·시설의 장애물' },
-            {
-              name: '카드명',
-              img: 'images/core/sub-nav/wrld/setting.jpg', desc: '설명', detailLayout: 'AB',
-              detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
-              detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
-            }
-          ]
+          name: '카드명',
+          img: 'images/core/sub-nav/wrld/setting.jpg', desc: '설명', detailLayout: 'AB',
+          detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
+          detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
         }
       ]
     },
-/* ════════════════════════════════════════════════     🔻 장애물 - 4 정보·시간·상황: context 🔻     ════════════════════════════════════════════════ */
     {
       id: 'context',
       label: '정보·시간·상황',
       layoutType: '3',
-      img:'images/world/group/context.jpg',
-      subgroups: [
+      img: 'images/world/group/context.jpg',
+      cards: [
         {
-          id: 'information',
-          label: '정보·지식',
-          img: 'images/world/group/society.jpg',
-          cards: [
-            { type: 'section', label: '정보·지식의 장애물' },
-            {
-              name: '카드명',
-              img: 'images/core/sub-nav/wrld/setting.jpg', desc: '설명', detailLayout: 'AB',
-              detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
-              detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
-            }
-          ]
-        },
-        {
-          id: 'time',
-          label: '시간·시기',
-          img: 'images/world/group/society.jpg',
-          cards: [
-            { type: 'section', label: '시간·시기의 장애물' },
-            {
-              name: '카드명',
-              img: 'images/core/sub-nav/wrld/setting.jpg', desc: '설명', detailLayout: 'AB',
-              detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
-              detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
-            }
-          ]
-        },
-        {
-          id: 'situation',
-          label: '상태·상황적 제약',
-          img: 'images/world/group/society.jpg',
-          cards: [
-            { type: 'section', label: '상태·상황적 제약의 장애물' },
-            {
-              name: '카드명',
-              img: 'images/core/sub-nav/wrld/setting.jpg', desc: '설명', detailLayout: 'AB',
-              detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
-              detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
-            }
-          ]
+          name: '카드명',
+          img: 'images/core/sub-nav/wrld/setting.jpg', desc: '설명', detailLayout: 'AB',
+          detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
+          detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
         }
       ]
     },
-/* ════════════════════════════════════════════════     🔻 장애물 - 5 세계 법칙: lars 🔻     ════════════════════════════════════════════════ */
     {
       id: 'lars',
       label: '세계 법칙',
       layoutType: '3',
-      img:'images/world/group/laws.jpg',
-      subgroups: [
+      img: 'images/world/group/laws.jpg',
+      cards: [
         {
-          id: 'worldrules',
-          label: '세계 법칙',
-          img: 'images/world/group/society.jpg',
-          cards: [
-            { type: 'section', label: '세계 법칙의 장애물' },
-            {
-              name: '카드명',
-              img: 'images/core/sub-nav/wrld/setting.jpg', desc: '설명', detailLayout: 'AB',
-              detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
-              detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
-            }
-          ]
+          name: '카드명',
+          img: 'images/core/sub-nav/wrld/setting.jpg', desc: '설명', detailLayout: 'AB',
+          detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
+          detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
         }
       ]
     },
-/* ════════════════════════════════════════════════     🔻 장애물 - 초자연: supernatural 🔻     ════════════════════════════════════════════════ */
     {
       id: 'supernatural',
       label: '초자연',
       layoutType: '3',
-      img:'images/world/group/supernatural.jpg',
-      subgroups: [
+      img: 'images/world/group/supernatural.jpg',
+      cards: [
         {
-          id: 'supernatural',
-          label: '초자연적 환경',
-          img: 'images/world/group/society.jpg',
-          cards: [
-            { type: 'section', label: '초자연적 환경의 장애물' },
-            {
-              name: '카드명',
-              img: 'images/core/sub-nav/wrld/setting.jpg', desc: '설명', detailLayout: 'AB',
-              detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
-              detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
-            }
-          ]
-        },
-        {
-          id: 'mysticforces',
-          label: '초자연적 힘·현상',
-          img: 'images/world/group/society.jpg',
-          cards: [
-            { type: 'section', label: '초자연적 힘·현상의 장애물' },
-            {
-              name: '카드명',
-              img: 'images/core/sub-nav/wrld/setting.jpg', desc: '설명', detailLayout: 'AB',
-              detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
-              detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
-            }
-          ]
+          name: '카드명',
+          img: 'images/core/sub-nav/wrld/setting.jpg', desc: '설명', detailLayout: 'AB',
+          detailA: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n',
+          detailB: '【제목】 내용 / 내용\n\n【활용법】\n《제목》\n내용\n\n《제목》\n내용\n\n'
         }
       ]
-    },
-    ]    /* groups 끝 */
-  },     /* 카테고리 끝 */
+    }
+    ] /* groups 끝 */
+  }, /* 카테고리 끝 */
 /* ════════════════════════════════════════════════      세팅 = 배경     ════════════════════════════════════════════════ */  
   setting: [
 
