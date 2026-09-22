@@ -8,6 +8,11 @@
    ========================================================================== */
 
 #screen-create {
+  /* Category artwork used to inherit the compact 36px diamond size.  Give
+     every category image a full 72px canvas while preserving horizontal
+     scrolling for menus with many entries. */
+  --category-image-size: 72px;
+  --bottom-chrome-height: 185px;
   --wood-line: rgba(238, 194, 127, 0.54);
   --wood-shadow: rgba(45, 23, 13, 0.34);
   --cream: #f7ebd3;
@@ -77,6 +82,7 @@
 /* 2. Category panel ------------------------------------------------------- */
 #screen-create .subnav-panel {
   position: relative;
+  height: 94px;
   background: transparent;
   border-color: transparent;
   box-shadow: none;
@@ -88,12 +94,25 @@
 }
 
 #screen-create .diamond-btn {
+  width: var(--category-image-size);
+  height: var(--category-image-size);
   border: 0;
   border-radius: 0;
   background: transparent;
   box-shadow: none;
   overflow: visible;
   transform: none;
+}
+
+@media (min-width: 600px) {
+  #screen-create {
+    --category-image-size: 80px;
+    --bottom-chrome-height: 189px;
+  }
+
+  #screen-create .subnav-panel {
+    height: 104px;
+  }
 }
 
 #screen-create .diamond-btn-icon {
