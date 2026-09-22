@@ -724,6 +724,9 @@ function initScrollResponsiveChrome() {
   }
 
   function setProgress(progress) {
+    // 하단 크롬이 숨기 시작하면 열린 유틸리티 메뉴도 함께 닫는다.
+    // 메뉴를 단순히 아래로 끌고 가지 않아 다음 표시 때 닫힌 상태가 유지된다.
+    if (progress > 0 && extraMenuOpen) closeExtraMenu({ instant: true });
     animateChrome(progress, progress);
   }
 
