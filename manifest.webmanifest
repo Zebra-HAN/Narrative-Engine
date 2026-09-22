@@ -1,9 +1,0 @@
-{
-  "name": "Narrative Builder — 창조주의 설계도",
-  "short_name": "Narrative Builder",
-  "start_url": "./",
-  "scope": "./",
-  "display": "standalone",
-  "background_color": "#9a7652",
-  "theme_color": "#9a7652"
-}
