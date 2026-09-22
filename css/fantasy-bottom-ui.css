@@ -104,17 +104,6 @@
   transform: none;
 }
 
-@media (min-width: 600px) {
-  #screen-create {
-    --category-image-size: 80px;
-    --bottom-chrome-height: 189px;
-  }
-
-  #screen-create .subnav-panel {
-    height: 104px;
-  }
-}
-
 #screen-create .diamond-btn-icon {
   color: var(--cream);
   filter: sepia(0.15) brightness(1.17);
