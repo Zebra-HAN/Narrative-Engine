@@ -2064,6 +2064,17 @@ body::after {
   transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 
+/* 이미지가 없는 아이콘형 버튼에만 카드와 어울리는 밝은 목재 표면을 적용한다.
+   이미지형 버튼의 기존 배경, 이미지 크기와 배치는 위 기본 스타일을 그대로 사용한다. */
+.group-select-btn:not(:has(.group-btn-img)) {
+  background:
+    repeating-linear-gradient(2deg, rgba(128, 101, 62, 0.028) 0 1px, transparent 1px 6px),
+    repeating-linear-gradient(178deg, transparent 0 10px, rgba(145, 116, 73, 0.022) 10px 11px),
+    linear-gradient(135deg, #f8edda 0%, #f2e2c6 52%, #f7ead4 100%);
+  border-color: #c8b590;
+  box-shadow: 0 2px 10px rgba(128, 101, 62, 0.10);
+}
+
 .group-select-btn.group-appear-done {
   opacity: 1;
   animation: none;
