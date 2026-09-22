@@ -26,13 +26,13 @@ const CHARACTER_NAV = {
   label: '캐릭터',
   resetLabel: '캐릭터 초기화',
   subs: [
-    { id:'archetype',   label:'원형', img:'images/core/sub-nav/char/c-archetype.jpg' },
-    { id:'race',        label:'종족', img:'images/core/sub-nav/char/c-race.jpg', type:'group'    },
-    { id:'job',         label:'직업', img:'images/core/sub-nav/char/c-job.jpg',  type:'group'    },
-    { id:'personality', label:'성격', img:'images/core/sub-nav/char/c-personality.jpg'   },
-    { id:'attribute',   label:'속성', img:'images/core/sub-nav/char/c-attribute.jpg'  ,type:'group'   },
-    { id:'ability',     label:'능력', img:'images/core/sub-nav/char/c-ability.jpg' ,type:'group'   },
-    { id:'relation',    label:'관계', img:'images/core/sub-nav/char/c-relation.jpg'    },
+    { id:'archetype',   label:'원형', img:'images/core/sub-nav/char/archetype.webp' },
+    { id:'race',        label:'종족', img:'images/core/sub-nav/char/race.webp', type:'group'    },
+    { id:'job',         label:'직업', img:'images/core/sub-nav/char/job.webp',  type:'group'    },
+    { id:'personality', label:'성격', img:'images/core/sub-nav/char/personality.webp'   },
+    { id:'attribute',   label:'속성', img:'images/core/sub-nav/char/attribute.webp'  ,type:'group'   },
+    { id:'ability',     label:'능력', img:'images/core/sub-nav/char/ability.webp' ,type:'group'   },
+    { id:'relation',    label:'관계', img:'images/core/sub-nav/char/relation.webp'    },
   ]
 };
 
