@@ -1718,8 +1718,8 @@ body::after {
 
     /* 서브메뉴 페이드인 */
     @keyframes subnavReveal {
-      0%   { opacity: 0; transform: scale(0.65) rotate(45deg); }
-      100% { opacity: 1; transform: scale(1) rotate(45deg); }
+      0%   { opacity: 0; transform: scale(0.65); }
+      100% { opacity: 1; transform: scale(1); }
     }
     .subnav-item .diamond-btn {
       animation: none;
@@ -1731,8 +1731,8 @@ body::after {
     /* 선택된 카운트 배지  -마름모 카테고리에 선택된 카드 숫자 표시  */
     .selection-badge {
   position: absolute; 
-  top: -2px;           /*  top: 4px → -2px ( 4에서-6= -2 마이너스일수록 위로 올림) */
-  right: 1px;          /* right: 0px → 5px (왼쪽으로 5px 이동) */
+  top: -2px;
+  right: 1px;
   width: 14px; height: 14px;
   border-radius: 50%;
   background: #FFC107;
@@ -1947,11 +1947,11 @@ body::after {
 
 /* ── 이미지 아이콘 공통 ── */
 
-/* 마름모 버튼 속 이미지 — 45도 회전된 부모를 역보정해서 정방향으로 */
+/* 카테고리 버튼 이미지 — 원본 PNG의 형태와 투명 영역을 그대로 표시 */
 .diamond-img {
-  width: 132%;
-  height: 132%;
-  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
   display: block;
   pointer-events: none;      /* ← 이미지 드래그/저장 차단 */
   -webkit-user-drag: none;   /* ← Safari 드래그 차단 */
