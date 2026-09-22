@@ -30,17 +30,17 @@ const CARD_DATA = {
 const CREATIVE_BACKGROUNDS = {
   palette: [
     'images/core/home/bg_map.jpg',
-    'images/core/home/bg_monster.jpg',
+    'images/core/home/bg_map.jpg',
     'images/core/home/bg_map.jpg',
   ],
   main: {
-    character:  'images/core/home/bg_map.jpg',
+    character:  'images/core/home/bg_explorer.jpg',
     narrative2: 'images/core/home/bg_map.jpg',
     world:      'images/core/home/bg_map.jpg',
-    compass:    'images/core/home/bg_island.jpg',
+    compass:    'images/core/home/bg_explorer.jpg',
   },
   sub: {
-    // 예: race: 'images/core/home/bg_map.jpg',
+     race: 'images/core/home/bg_monster.jpg',
   },
   group: {
     // 예: race: { race_human: 'images/core/home/bg_modern.jpg' },
