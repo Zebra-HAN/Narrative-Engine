@@ -1,16 +1,13 @@
 /* ===========================================================================
-   Bottom fantasy wood theme
+   Bottom fantasy panel skin
 
    Visual overrides for the three pieces of create-screen bottom chrome only:
-   the selection/address bar, category bar, and primary navigation. Keeping
-   this palette separate makes the wood treatment safe to retune or remove.
+   the selection/address bar, category bar, and primary navigation. The
+   complete panel artwork lives in bottom_panel.jpg. The three existing UI
+   regions remain transparent so that artwork reads as one continuous surface.
    ========================================================================== */
 
 #screen-create {
-  --wood-deep: #5b321f;
-  --wood-mid: #75472d;
-  --wood-warm: #8c6043;
-  --wood-light: #b9885d;
   --wood-line: rgba(238, 194, 127, 0.54);
   --wood-shadow: rgba(45, 23, 13, 0.34);
   --cream: #f7ebd3;
@@ -19,30 +16,27 @@
   --forest-light: #477b50;
   --accent-gold: #d6aa55;
   --accent-gold-light: #f0cf7d;
-  --wood-grain:
-    radial-gradient(ellipse at 16% 16%, rgba(255, 218, 156, 0.09) 0 2px, transparent 3px),
-    radial-gradient(ellipse at 78% 72%, rgba(52, 24, 13, 0.13) 0 2px, transparent 4px),
-    repeating-linear-gradient(4deg, transparent 0 12px, rgba(45, 22, 12, 0.055) 13px, transparent 15px),
-    linear-gradient(180deg, var(--wood-warm), var(--wood-mid));
+}
+
+/* One image skins the complete selection, category, and navigation stack. */
+#screen-create .create-chrome-bottom {
+  background-image: url('../images/core/buttons/bottom_panel.jpg');
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
 }
 
 /* 1. Selection / breadcrumb panel ---------------------------------------- */
 #screen-create .control-bar {
-  background: var(--wood-grain);
-  border-top: 1px solid var(--wood-line);
-  border-bottom: 2px solid #4b2819;
-  box-shadow:
-    inset 0 1px rgba(255, 231, 186, 0.28),
-    inset 0 -2px rgba(45, 22, 12, 0.2),
-    0 -2px 8px rgba(45, 23, 13, 0.13);
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
 }
 
 #screen-create .ctrl-address {
   color: var(--cream);
   border: 1px solid var(--wood-line);
-  background:
-    linear-gradient(90deg, transparent 49.7%, rgba(245, 205, 139, 0.07) 50%, transparent 50.3%),
-    linear-gradient(180deg, rgba(61, 31, 19, 0.54), rgba(91, 51, 31, 0.46));
+  background: transparent;
   box-shadow:
     inset 0 1px 3px rgba(38, 18, 10, 0.34),
     0 1px rgba(255, 229, 180, 0.14);
@@ -60,7 +54,7 @@
 
 #screen-create .ctrl-btn-menu {
   border-color: var(--wood-line);
-  background: linear-gradient(180deg, #966746, #68402a);
+  background: transparent;
   color: var(--cream);
   box-shadow:
     inset 0 1px rgba(255, 231, 184, 0.25),
@@ -76,20 +70,9 @@
 /* 2. Category panel ------------------------------------------------------- */
 #screen-create .subnav-panel {
   position: relative;
-  background: var(--wood-grain);
-  border-top: 1px solid var(--wood-line);
-  border-bottom: 2px solid #452517;
-  box-shadow: inset 0 2px rgba(255, 225, 173, 0.12), inset 0 -2px rgba(47, 23, 13, 0.24);
-}
-
-#screen-create .subnav-panel::before,
-#screen-create .bottom-nav::before {
-  content: '';
-  position: absolute;
-  inset: 3px 5px;
-  border: 1px solid rgba(235, 190, 121, 0.24);
-  border-radius: 10px;
-  pointer-events: none;
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
 }
 
 #screen-create .subnav-scroll {
@@ -98,9 +81,9 @@
 }
 
 #screen-create .diamond-btn {
-  border-color: var(--wood-light);
-  background: linear-gradient(145deg, #835638, #633a25);
-  box-shadow: inset 0 1px rgba(255, 225, 177, 0.18), 2px 3px 5px rgba(42, 21, 12, 0.24);
+  border-color: var(--wood-line);
+  background: transparent;
+  box-shadow: 2px 3px 5px rgba(42, 21, 12, 0.24);
 }
 
 #screen-create .diamond-btn-icon {
@@ -129,18 +112,9 @@
 
 /* 3. Primary navigation -------------------------------------------------- */
 #screen-create .bottom-nav {
-  background:
-    linear-gradient(90deg, transparent 19.75%, rgba(238, 194, 127, 0.12) 20%, transparent 20.25%,
-      transparent 39.75%, rgba(238, 194, 127, 0.1) 40%, transparent 40.25%,
-      transparent 59.75%, rgba(238, 194, 127, 0.1) 60%, transparent 60.25%,
-      transparent 79.75%, rgba(238, 194, 127, 0.12) 80%, transparent 80.25%),
-    var(--wood-grain);
-  border-top: 2px solid var(--wood-light);
-  border-bottom: 2px solid #402116;
-  box-shadow:
-    inset 0 2px rgba(255, 226, 177, 0.15),
-    inset 0 -3px rgba(43, 20, 12, 0.24),
-    0 -3px 9px rgba(40, 20, 11, 0.18);
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
 }
 
 #screen-create .bottom-nav-indicator {
@@ -172,10 +146,10 @@
   color: #fff4d8;
 }
 
-/* The opened utility drawer belongs to the bottom controls, so it receives
-   the same wood shell without altering its buttons or behavior. */
+/* Keep the utility drawer transparent as well, without altering its buttons
+   or behavior. */
 #screen-create .extra-menu-panel {
-  background: var(--wood-grain);
+  background: transparent;
   border: 1px solid var(--wood-line);
   border-bottom-color: #4b2819;
   border-radius: 12px 12px 0 0;
