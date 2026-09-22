@@ -4,6 +4,11 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
+      /* Keep the application at its original mobile canvas width on larger
+         viewports. The value only caps wide screens; narrow phones still use
+         all of their available width. */
+      --app-max-width: 430px;
+
       /* ── 배경 계열: 클린 화이트 ── */
       --bg-deepest:    #f5f5f5;
       --bg-dark:       #f9f9f9;
@@ -81,8 +86,14 @@ body::after {
        SCREEN MANAGEMENT
     ═══════════════════════════════════════════════ */
     .screen {
-      position: fixed; inset: 0;
-      width: 100%; height: 100%;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 100%;
+      max-width: var(--app-max-width);
+      height: 100%;
+      transform: translateX(-50%);
       opacity: 0;
       pointer-events: none;
       transition: opacity var(--screen-fade-ms, 300ms) var(--screen-fade-ease, ease);
@@ -170,7 +181,7 @@ body::after {
       pointer-events: none;
     }
     .opening-divider.expand {
-      width: min(450px, 78vw);    /* 라인 길이  컴터픽셀 길이랑, 모바일 전체크기100%중 78%vw를 뜻함 뷰width 가로길이 */
+      width: min(450px, 78%);    /* 앱 화면 폭을 기준으로 하여 PC에서도 모바일 길이를 유지 */
     }
 
     .opening-subtitle {
@@ -200,7 +211,7 @@ body::after {
       position: absolute;
       top: 0;
       left: 50%;
-      width: min(100vw, 980px);
+      width: 100%;
       height: min(92vh, 980px);
       background: url('../images/core/home/royal-banner.webp') top center / contain no-repeat;
       pointer-events: none;
@@ -1178,7 +1189,7 @@ body::after {
   position: relative;
        
   /* 1. 상세 정보창 너비를 화면에 꽉 차게 수정 */
-  width: 90vw;          /* 원래 코드: width: min(80%, 600px); */
+  width: 90%;           /* 앱 화면 폭을 기준으로 모바일 비율 유지 */
   max-width: 600px;    /* PC넓이 안전장치 */
   
   /* 2. 높이를 화면에 꽉 차게 수정 */
@@ -1617,7 +1628,12 @@ body::after {
     /* 앱 스타일 다이얼로그 */
     .app-dialog-overlay {
       position: fixed;
-      inset: 0;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 100%;
+      max-width: var(--app-max-width);
+      transform: translateX(-50%);
       z-index: 800;
       background: rgba(0, 0, 0, 0.55);    /* 블러 쓰면 어두운 정도 살짝 줄여도 돼*/
   backdrop-filter: blur(2px);           /* 숫자 클수록 더 흐릿*/
@@ -1764,18 +1780,6 @@ body::after {
   z-index: 10;  /* 이미지 레이어(z-index:0) 보다 확실히 위 */
   box-shadow: 0 0 6px 0.2px rgba(255, 130, 0, 0.4);
 }
-
-
-    /* 반응형: 태블릿/PC */
-    @media (min-width: 600px) {
-      .info-panel { height: 104px; min-height: 104px; padding: 6px 18px 8px; }
-      .info-slider-viewport { margin-left: -18px; margin-bottom: -8px; width: calc(100% + 18px); }
-      .info-slide { padding-left: 20px; }
-      .info-visual { bottom: -8px; }
-      .ctrl-btn { font-size: 0.62rem; padding: 6px 8px; }
-      .subnav-panel { height: 64px; }
-      .diamond-btn { width: 40px; height: 40px; }
-    }
 
 
 /* ── 컨트롤 바 개편 ── */
@@ -2687,8 +2691,17 @@ body::after {
 
 /* PC에서도 모바일처럼 좁게 표시 */
 body {
+  width: 100%;
   max-width: 430px;
   margin: 0 auto;
+}
+
+/* vw units refer to the browser rather than the capped app canvas. Freeze the
+   two viewport-scaled headings at their 430px mobile values on wide screens. */
+@media (min-width: 431px) {
+  .opening-title { font-size: 1.075rem; }
+  .opening-subtitle { font-size: 0.85rem; }
+  .home-link { font-size: 2rem; }
 }
 
 
