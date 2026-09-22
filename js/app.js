@@ -45,8 +45,9 @@ const CREATIVE_BACKGROUNDS = {
      
   },
   group: {
-     race: { race_fantasy: 'images/core/home/bg_monster.jpg' },
-     race: { race_human: 'images/core/home/bg_modern.jpg' },
+     race: { race_fantasy: 'images/core/home/bg_monster.jpg', 
+             race_human: 'images/core/home/bg_modern.jpg',
+           },
      
     // 예: race: { race_human: 'images/core/home/bg_modern.jpg' },
   },
