@@ -8,11 +8,9 @@
    ========================================================================== */
 
 #screen-create {
-  /* Category artwork used to inherit the compact 36px diamond size.  Give
-     every category image a full 72px canvas while preserving horizontal
-     scrolling for menus with many entries. */
-  --category-image-size: 72px;
-  --bottom-chrome-height: 185px;
+  /* Enlarge category artwork to 1.5x its original 36px size without changing
+     the dimensions of the bottom chrome that contains it. */
+  --category-image-size: 54px;
   --wood-line: rgba(238, 194, 127, 0.54);
   --wood-shadow: rgba(45, 23, 13, 0.34);
   --cream: #f7ebd3;
@@ -82,7 +80,6 @@
 /* 2. Category panel ------------------------------------------------------- */
 #screen-create .subnav-panel {
   position: relative;
-  height: 94px;
   background: transparent;
   border-color: transparent;
   box-shadow: none;
@@ -105,25 +102,64 @@
 }
 
 #screen-create .diamond-btn-icon {
+  position: relative;
+  z-index: 1;
   color: var(--cream);
-  filter: sepia(0.15) brightness(1.17);
+  filter: sepia(0.15) brightness(1.08);
   transform: none;
+  transition: filter 0.22s ease, transform 0.22s ease;
 }
 
 #screen-create .subnav-label {
-  color: var(--cream);
-  text-shadow: 0 1px 2px rgba(40, 19, 10, 0.9);
+  margin-top: -13px;
+  padding: 2px 7px 3px;
+  border: 1px solid rgba(255, 224, 157, 0.7);
+  border-radius: 999px;
+  color: #fff8e8;
+  background: linear-gradient(180deg, rgba(50, 31, 18, 0.76), rgba(28, 18, 12, 0.92));
+  box-shadow: 0 1px 4px rgba(15, 8, 3, 0.72), inset 0 1px rgba(255, 245, 211, 0.2);
+  font-weight: 700;
+  line-height: 1.05;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px #1a0d05, 0 0 3px rgba(255, 226, 164, 0.55);
 }
 
 #screen-create .subnav-item.active .diamond-btn {
   border: 0;
   background: transparent;
-  box-shadow: none;
+  box-shadow: 0 0 10px rgba(255, 220, 128, 0.9), 0 0 20px rgba(255, 178, 62, 0.72);
+}
+
+/* A light layer above the selected artwork makes the active category
+   immediately recognizable while allowing each image's own colors through. */
+#screen-create .subnav-item.active .diamond-btn::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 230, 0.34) 0 30%, rgba(255, 218, 123, 0.18) 52%, transparent 72%);
+  box-shadow: inset 0 0 12px rgba(255, 250, 213, 0.72), 0 0 15px rgba(255, 190, 71, 0.9);
+  mix-blend-mode: screen;
+}
+
+#screen-create .subnav-item.active .diamond-btn-icon {
+  filter: brightness(1.48) saturate(1.3) drop-shadow(0 0 5px rgba(255, 240, 170, 0.96));
+  transform: scale(1.06);
 }
 
 #screen-create .subnav-item.active .subnav-label {
-  color: #fff4d8;
-  text-shadow: 0 1px 2px rgba(35, 19, 9, 0.92), 0 0 5px rgba(240, 207, 125, 0.42);
+  color: #fffdf3;
+  border-color: #ffe19a;
+  background: linear-gradient(180deg, rgba(128, 82, 24, 0.9), rgba(67, 38, 12, 0.96));
+  box-shadow: 0 0 8px rgba(255, 201, 79, 0.72), inset 0 1px rgba(255, 249, 219, 0.34);
+  text-shadow: 0 1px 2px #2b1505, 0 0 5px rgba(255, 224, 139, 0.9);
+}
+
+#screen-create .selection-badge {
+  top: 5px;
+  right: 8px;
 }
 
 /* 3. Primary navigation -------------------------------------------------- */
