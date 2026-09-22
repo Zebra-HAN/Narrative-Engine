@@ -208,7 +208,6 @@ body::after {
       align-items: center;
       justify-content: center;
       z-index: 90;
-      position: relative;
       overflow: hidden;
     }
     #screen-home::before {
