@@ -1169,6 +1169,7 @@ body::after {
     /* 카드 이름 제목 폰트 */
     .card-name {
       flex: 1;
+      min-height: 0;
       width: 100%;
       display: flex;
       align-items: center;
@@ -1188,6 +1189,20 @@ body::after {
         inset 0 1px rgba(88, 58, 34, 0.38),
         inset 0 2px rgba(255,255,255,0.58);
       text-shadow: none;
+      font-weight: 500;
+      overflow: hidden;
+    }
+
+    /* The title fitter changes only this text layer. Keeping it separate from
+       the parchment container lets measurements use the parchment's real
+       content box while the container remains a hard clipping boundary. */
+    .card-name-text {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      text-align: center;
+      overflow-wrap: anywhere;
+      word-break: normal;
     }
 
 

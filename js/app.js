@@ -578,6 +578,90 @@ initInfoSliderSwipe();
 initCenterBackSwipe();
 initScrollResponsiveChrome();
 initInfoTextAutoFit();
+initCardTitleAutoFit();
+
+/* ════════════════════════════════════════════════
+   CARD TITLE AUTO-FIT
+   Each title is fitted against its own parchment area, from the largest
+   type step down. The card and parchment geometry are never changed.
+════════════════════════════════════════════════ */
+const CARD_TITLE_MIN_PX = 7;
+const CARD_TITLE_SCALES = [1, 0.88, 0.76, 0.66, 0.58];
+let cardTitleFitFrame = 0;
+
+function getCardTitleLineHeight(lineCount) {
+  if (lineCount <= 1) return 1.22;
+  if (lineCount === 2) return 1.16;
+  return 1.1;
+}
+
+function cardTitleFits(container, text) {
+  const style = getComputedStyle(container);
+  const availableHeight = container.clientHeight
+    - parseFloat(style.paddingTop)
+    - parseFloat(style.paddingBottom);
+  return text.scrollWidth <= text.clientWidth + 0.5
+    && text.scrollHeight <= availableHeight + 0.5;
+}
+
+function applyCardTitleSize(container, text, fontSize) {
+  text.style.fontSize = `${fontSize}px`;
+  text.style.lineHeight = '1.22';
+
+  const singleLineHeight = fontSize * 1.22;
+  const lineCount = Math.max(1, Math.round(text.scrollHeight / singleLineHeight));
+  text.style.lineHeight = String(getCardTitleLineHeight(lineCount));
+}
+
+function fitCardTitle(container) {
+  const text = container.querySelector('.card-name-text');
+  if (!text || container.clientWidth <= 0 || container.clientHeight <= 0) return;
+
+  text.style.removeProperty('font-size');
+  text.style.removeProperty('line-height');
+
+  const style = getComputedStyle(container);
+  const innerHeight = container.clientHeight
+    - parseFloat(style.paddingTop)
+    - parseFloat(style.paddingBottom);
+  // A one-line title can use most of the available height. The upper cap
+  // prevents unusually tall landscape title areas from producing logo-sized text.
+  const largestSize = Math.min(18, Math.max(CARD_TITLE_MIN_PX, innerHeight / 1.16));
+  const candidates = CARD_TITLE_SCALES
+    .map(scale => Math.max(CARD_TITLE_MIN_PX, largestSize * scale))
+    .concat(CARD_TITLE_MIN_PX)
+    .filter((size, index, sizes) => index === 0 || Math.abs(size - sizes[index - 1]) > 0.1);
+
+  for (const size of candidates) {
+    applyCardTitleSize(container, text, size);
+    if (cardTitleFits(container, text)) return;
+  }
+
+  // Extreme titles stay clipped by .card-name rather than escaping the parchment.
+  applyCardTitleSize(container, text, CARD_TITLE_MIN_PX);
+}
+
+function fitAllCardTitles() {
+  document.querySelectorAll('.card-name').forEach(fitCardTitle);
+}
+
+function requestCardTitleAutoFit() {
+  if (cardTitleFitFrame) cancelAnimationFrame(cardTitleFitFrame);
+  cardTitleFitFrame = requestAnimationFrame(() => {
+    cardTitleFitFrame = 0;
+    fitAllCardTitles();
+  });
+}
+
+function initCardTitleAutoFit() {
+  window.addEventListener('resize', requestCardTitleAutoFit, { passive: true });
+  new MutationObserver(requestCardTitleAutoFit).observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+  if (document.fonts?.ready) document.fonts.ready.then(requestCardTitleAutoFit);
+  requestCardTitleAutoFit();
+}
 
 /* ════════════════════════════════════════════════
    INFO PANEL TEXT AUTO-FIT
@@ -1264,7 +1348,7 @@ function showSubgroupCards(subId, groupIdx, sgIdx) {
         onmouseup="cancelLongPress()" ontouchend="handleCardTouchEnd(event,'subgroup','${subId}',${groupIdx},${sgIdx},${idx})"
         onmouseleave="cancelLongPress()" ontouchcancel="cancelLongPress()">
         <div class="card-img-frame ${card.img ? 'has-image' : 'has-icon'}">${renderIcon(card.icon, card.img, 'card-img')}</div>
-        <div class="card-name">${card.name}</div>
+        <div class="card-name"><span class="card-name-text">${card.name}</span></div>
       </div>
     `;
   });
@@ -1405,7 +1489,7 @@ function showGroupCards(subId, groupIdx) {
     onmouseup="cancelLongPress()" ontouchend="handleCardTouchEnd(event,'group','${subId}',${groupIdx},${idx})"
     onmouseleave="cancelLongPress()" ontouchcancel="cancelLongPress()">
         <div class="card-img-frame ${card.img ? 'has-image' : 'has-icon'}">${renderIcon(card.icon, card.img, 'card-img')}</div>
-        <div class="card-name">${card.name}</div>
+        <div class="card-name"><span class="card-name-text">${card.name}</span></div>
       </div>
     `;
   });
@@ -1559,7 +1643,7 @@ function showCardPage(subId, animate = true) {
     onmouseleave="cancelLongPress()" ontouchcancel="cancelLongPress()">
     
         <div class="card-img-frame ${card.img ? 'has-image' : 'has-icon'}">${renderIcon(card.icon, card.img, 'card-img')}</div>
-        <div class="card-name">${card.name}</div>
+        <div class="card-name"><span class="card-name-text">${card.name}</span></div>
       </div>
     `;
   });
