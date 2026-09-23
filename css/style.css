@@ -1037,12 +1037,13 @@ body::after {
 
     .data-card {
       aspect-ratio: 0.72;
-      border: 0.75px solid #b8ad99;
+      /* A restrained timber rim: narrow enough for dense mobile grids, but
+         built from several quiet tones rather than a single brown stroke. */
+      border: 1px solid #65472f;
       border-radius: var(--radius-card);
       background:
-        repeating-linear-gradient(2deg, rgba(128,101,62,0.018) 0 1px, transparent 1px 5px),
-        repeating-linear-gradient(178deg, transparent 0 9px, rgba(145,116,73,0.014) 9px 10px),
-        #fbf7ed;
+        repeating-linear-gradient(92deg, rgba(255,235,194,0.045) 0 1px, transparent 1px 7px),
+        linear-gradient(135deg, #8a6746 0%, #6f4e34 46%, #79583a 100%);
       cursor: pointer;
       display: flex;
       flex-direction: column;
@@ -1051,13 +1052,17 @@ body::after {
       padding: 4px 4px 3px;
       position: relative;
       overflow: hidden;
-      box-shadow: none;
+      box-shadow:
+        inset 0 0 0 1px rgba(239, 210, 161, 0.28),
+        inset 0 1px 1px rgba(255, 244, 215, 0.18),
+        0 1px 2px rgba(55, 37, 23, 0.14);
       transition: transform 0.12s ease, filter 0.12s ease, border-color 0.18s ease, box-shadow 0.18s ease;
       -webkit-tap-highlight-color: transparent;
       backface-visibility: hidden;
     }
 
-    /* Keep the card surface intentionally plain: one outer border, no ornament. */
+    /* The frame remains unornamented; its material detail comes from the
+       restrained layered background and inset highlights above. */
     .data-card::before {
       content: none;
     }
@@ -1088,8 +1093,11 @@ body::after {
       100% { opacity: 1; transform: rotateY(0deg) scale(1); }
     }
     .data-card.selected {
-      border-color: #8d7657;
-      box-shadow: none;
+      border-color: #49321f;
+      box-shadow:
+        inset 0 0 0 1px rgba(246, 219, 168, 0.38),
+        0 0 0 1px rgba(92, 65, 39, 0.24),
+        0 2px 5px rgba(54, 37, 22, 0.18);
     }
     .data-card.selected::after {
       content: '🔒';
@@ -1102,23 +1110,30 @@ body::after {
     .card-img-frame {
       width: 100%;
       flex: 0 0 75%;
-      border-radius: 6px;
+      border-radius: 6px 6px 2px 2px;
       overflow: hidden;
-      background: #fcfaf3;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.035), rgba(18,31,16,0.09)),
+        #435b3d;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
       position: relative;
-      box-shadow: none;
+      box-shadow:
+        inset 0 0 0 1px rgba(31, 43, 27, 0.32),
+        inset 0 1px rgba(224, 231, 205, 0.10);
     }
 
-    /* Image-less cards get a brighter field so their icon stays immediately legible. */
+    /* Image-less cards use the sage field; image cards still cover this area
+       completely through the existing .card-img object-fit rules. */
     .card-img-frame.has-icon {
-      background: transparent;
-      color: #3b3024;
+      background:
+        repeating-linear-gradient(4deg, rgba(236,242,218,0.018) 0 1px, transparent 1px 6px),
+        linear-gradient(180deg, #486244 0%, #40583b 100%);
+      color: #f5ecd7;
       font-size: 1.5rem;
-      text-shadow: none;
+      text-shadow: 0 1px 2px rgba(15, 24, 13, 0.38);
     }
 
     .card-img-frame > * {
@@ -1159,14 +1174,19 @@ body::after {
       align-items: center;
       justify-content: center;
       font-size: 0.5rem;   /* ← 폰트 크기 수정 0.54 */
-      color: var(--ivory-dim);
+      color: #302a22;
       text-align: center;
       padding: 2px 2px 0;
       line-height: 1.3;
       font-family: 'Noto Sans KR', sans-serif;
       position: relative;
-      background: transparent;
-      box-shadow: none;
+      border-radius: 1px 1px 6px 6px;
+      background:
+        repeating-linear-gradient(2deg, rgba(120,91,52,0.022) 0 1px, transparent 1px 5px),
+        linear-gradient(180deg, #fffdf5 0%, #f7f0df 100%);
+      box-shadow:
+        inset 0 1px rgba(88, 58, 34, 0.38),
+        inset 0 2px rgba(255,255,255,0.58);
       text-shadow: none;
     }
 
@@ -1183,6 +1203,14 @@ body::after {
       text-align: center;
       min-width: 0;
       overflow-wrap: anywhere;
+      border-radius: 1px 6px 6px 1px;
+      box-shadow:
+        inset 1px 0 rgba(88, 58, 34, 0.38),
+        inset 2px 0 rgba(255,255,255,0.58);
+    }
+
+    .card-grid-layout-d .card-img-frame {
+      border-radius: 6px 1px 1px 6px;
     }
 
     /* 상세 정보 시트 */
