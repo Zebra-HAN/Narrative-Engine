@@ -33,8 +33,8 @@ const CREATIVE_BACKGROUNDS = {
     'images/core/home/bg_explorer.jpg',
   ],
   main: {
-    character:  'images/core/home/bg_explorer.jpg',
-    narrative2: 'images/core/home/bg_map.jpg',
+    character:  'images/core/home/bg_dinosaur.jpg',
+    narrative2: 'images/core/home/bg_island.jpg',
     world:      'images/core/home/bg_map.jpg',
     compass:    'images/core/home/bg_explorer.jpg',
   },
