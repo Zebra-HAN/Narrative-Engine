@@ -2049,7 +2049,7 @@ body::after {
   align-items: center;
   gap: 14px;
   background: linear-gradient(135deg, #ffffff, #f5f5f5);
-  border: 1.5px solid var(--border-gold);
+  border: 0;
   border-radius: 10px;
   color: var(--text-primary);
   font-size: 1rem;
@@ -2074,7 +2074,6 @@ body::after {
     repeating-linear-gradient(2deg, rgba(128, 101, 62, 0.028) 0 1px, transparent 1px 6px),
     repeating-linear-gradient(178deg, transparent 0 10px, rgba(145, 116, 73, 0.022) 10px 11px),
     linear-gradient(135deg, #f8edda 0%, #f2e2c6 52%, #f7ead4 100%);
-  border-color: #c8b590;
   box-shadow: 0 2px 10px rgba(128, 101, 62, 0.10);
 }
 

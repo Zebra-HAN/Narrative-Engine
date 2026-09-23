@@ -86,8 +86,15 @@
 }
 
 #screen-create .subnav-scroll {
-  gap: 14px;
+  /* Keep every category in the four content tabs visually connected. */
+  gap: 7px;
   padding-inline: 7px;
+}
+
+/* Lift only the category artwork and its caption. The address/menu row and
+   the surrounding bottom panel retain their existing positions and sizes. */
+#screen-create .subnav-item {
+  top: -3px;
 }
 
 #screen-create .diamond-btn {
