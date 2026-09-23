@@ -30,7 +30,6 @@ const CARD_DATA = {
 const CREATIVE_BACKGROUNDS = {
   palette: [
     'images/core/home/bg_map.jpg',
-    'images/core/home/bg_modern.jpg',
     'images/core/home/bg_explorer.jpg',
   ],
   main: {
