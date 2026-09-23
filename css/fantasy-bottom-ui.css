@@ -91,7 +91,10 @@
   height: calc(58px + var(--category-overlap));
   margin-top: calc(-1 * var(--category-overlap));
   padding-top: 1px;
-  pointer-events: none;
+  /* Keep the whole viewport in the hit-test tree.  Disabling pointer events
+     here left only the individual buttons touchable, so a drag that started
+     in a gap could not initiate the native horizontal scroller on mobile. */
+  pointer-events: auto;
   background: transparent;
   border-color: transparent;
   box-shadow: none;
@@ -101,13 +104,17 @@
   /* Keep every category in the four content tabs visually connected. */
   gap: 7px;
   padding-inline: 7px;
-  pointer-events: none;
+  pointer-events: auto;
+  touch-action: pan-x;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
 }
 
-/* Lift only the category artwork and its caption. The address/menu row and
-   the surrounding bottom panel retain their existing positions and sizes. */
+/* Place the category caption just above the primary navigation.  The panel's
+   extra runway still protects the enlarged emblem while this lower position
+   balances the two rows and keeps the caption fully visible. */
 #screen-create .subnav-item {
-  top: -3px;
+  top: 4px;
   pointer-events: auto;
 }
 
