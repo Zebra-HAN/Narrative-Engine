@@ -34,11 +34,12 @@ const CREATIVE_BACKGROUNDS = {
   ],
   main: {
     character:  'images/core/home/bg_dinosaur.jpg',
-    narrative2: 'images/core/home/bg_island.jpg',
+    narrative2: 'images/core/home/bg_wood.jpg',
     world:      'images/core/home/bg_map.jpg',
     compass:    'images/core/home/bg_explorer.jpg',
   },
   sub: {
+     archetype: 'images/core/home/bg_wood.jpg',
      race: 'images/core/home/bg_monster.jpg',
      type:  'images/core/home/bg_explorer.jpg',
      
