@@ -9,7 +9,9 @@
 }
 
 .card-grid-layout-c .card-name {
-  font-size: 0.56rem;
-  line-height: 1.15;
+  /* Three-column title cards use one restrained standard size. Individual
+     short labels are not enlarged; the fitter only handles real overflow. */
+  font-size: 0.68rem;
+  line-height: 1.28;
   padding: 0 2px;
 }

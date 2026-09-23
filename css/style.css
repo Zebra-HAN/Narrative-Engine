@@ -1193,9 +1193,8 @@ body::after {
       overflow: hidden;
     }
 
-    /* The title fitter changes only this text layer. Keeping it separate from
-       the parchment container lets measurements use the parchment's real
-       content box while the container remains a hard clipping boundary. */
+    /* The title fitter may only shrink this text layer when it overflows. The
+       layout-level size on .card-name remains the shared typography baseline. */
     .card-name-text {
       display: block;
       width: calc(100% - clamp(4px, 8%, 10px));
@@ -1210,10 +1209,12 @@ body::after {
 
 
  .card-grid-layout-b .card-name { font-size: 0.56rem; }
-    .card-grid-layout-c .card-name { font-size: 0.56rem; line-height: 1.35; }
+    .card-grid-layout-c .card-name { font-size: 0.68rem; line-height: 1.28; }
     .card-grid-layout-d .card-name {
-      font-size: 0.54rem;
-      line-height: 1.35;
+      /* Wide copy cards favor characters per line and a calm, consistent
+         reading rhythm rather than growing to fill the parchment. */
+      font-size: 0.58rem;
+      line-height: 1.4;
       padding: 2px 4px;
       width: auto;
       align-self: stretch;
