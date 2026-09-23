@@ -17,13 +17,13 @@ const COMPASS_NAV = {
   label: '나침반',
   resetLabel: '나침반 초기화',
   subs: [
-    { id: 'type',     label: '유형',  img:'images/core/sub-nav/comp/type.jpg'  },
-    { id: 'genre',    label: '장르',  img:'images/core/sub-nav/comp/genre.jpg'  },
-    { id: 'message',  label: '메시지', img:'images/core/sub-nav/comp/message.jpg'  },
-    { id: 'theme',    label: '테마',  img:'images/core/sub-nav/comp/theme.jpg'  },
-    { id: 'quote',    label: '명언',  img:'images/core/sub-nav/comp/quote.jpg'  },
-    { id: 'reader',   label: '체험',  img:'images/core/sub-nav/comp/reader.jpg'  },
-    { id: 'mood',     label: '분위기', img:'images/core/sub-nav/comp/mood.jpg'  },
+    { id: 'type',     label: '유형',  img:'images/core/sub-nav/comp/type.webp'  },
+    { id: 'genre',    label: '장르',  img:'images/core/sub-nav/comp/genre.webp'  },
+    { id: 'message',  label: '메시지', img:'images/core/sub-nav/comp/message.webp'  },
+    { id: 'theme',    label: '테마',  img:'images/core/sub-nav/comp/theme.webp'  },
+    { id: 'quote',    label: '명언',  img:'images/core/sub-nav/comp/quote.webp'  },
+    { id: 'reader',   label: '체험',  img:'images/core/sub-nav/comp/reader.webp'  },
+    { id: 'mood',     label: '분위기', img:'images/core/sub-nav/comp/mood.webp'  },
   ]
 };
 
