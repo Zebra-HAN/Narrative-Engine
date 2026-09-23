@@ -67,25 +67,25 @@ const WORLD_CARDS = {
 { type: 'section' ,  label: ' 사람·관계의 장애물 — 다른 사람은 어떤 방식으로 인물의 목적·행동·생존을 방해하는가? ' },  
          
         { name: '직접적인 적대·공격',
-          icon:'⚔️',
+          icon:'⚔️', img:'images/character/race/fairy.jpg',
           desc: '상대가 의도적으로 인물에게 피해를 주거나 목적 달성을 막는다', detailLayout: 'AB',
           detailA: '공격해 옴\n\n죽이려 함\n\n다치게 하려 함\n\n붙잡으려 함\n\n쫓아옴\n\n몰아내려 함\n\n길을 막음\n\n',
           detailB: '목적지에 가지 못하게 함\n\n행동을 강제로 저지함\n\n가진 것을 빼앗으려 함\n\n중요한 것을 파괴하려 함\n\n위협・협박함\n\n약점을 잡고 압박함\n\n인질을 이용함\n\n함정에 빠뜨림\n\n지속적으로 괴롭힘\n\n'
         },
         { name: '경쟁·이해관계 충돌',
-          icon: '🏆',
+          icon: '🏆', img:'images/character/race/anubis.jpg', 
           desc: '악의가 없어도 서로 원하는 것이 충돌한다', detailLayout: 'AB',
           detailA: '같은 목표를 노림\n\n같은 자리·지위를 노림\n\n같은 보상을 노림\n\n한정된 자원을 두고 경쟁함\n\n먼저 도착해야 함\n\n상대보다 높은 평가를 받아야 함\n\n',
           detailB: '한쪽의 성공이 다른 쪽의 실패가 됨\n\n서로 다른 해결책을 주장함\n\n서로 양보할 수 없는 조건을 가짐\n\n한쪽이 얻으면 다른 쪽이 잃음\n\n같은 사람·대상을 서로 원함\n\n서로 다른 집단의 이익을 대표함\n\n'
         },
         { name: '통제·지배·강요',
-          icon: '👑',
+          icon: '👑', img:'images/character/race/necromancer.jpg',
           desc: '상대가 인물의 행동이나 선택권을 제한한다', detailLayout: 'AB',
           detailA: '명령을 내림\n\n복종을 요구함\n\n선택을 대신 결정함\n\n특정 행동을 강요함\n\n원하는 일을 하지 못하게 함\n\n떠나지 못하게 함\n\n특정 역할을 강요함\n\n',
           detailB: '감시함\n\n행동을 보고하게 함\n\n자유를 제한함\n\n경제적으로 통제함\n\n약점을 이용해 조종함\n\n관계를 이용해 통제함\n\n보호를 명목으로 행동을 제한함\n\n'
         },
         { name: '추적·발각의 위험',
-          icon: '🔍',
+          icon: '🔍',  img:'images/character/race/golem.jpg', 
           desc: '상대와 싸우는 것보다 ‘들키지 않는 것’ 자체가 장애물이 된다', detailLayout: 'AB',
           detailA: '추적당함\n\n수색당함\n\n감시당함\n\n의심받음\n\n정체를 조사당함\n\n거짓말을 들킬 위험이 있음\n\n',
           detailB: '숨어 있는 장소를 발견당할 위험이 있음\n\n흔적을 추적당함\n\n행동의 증거가 남음\n\n내부에 자신을 의심하는 사람이 있음\n\n자신을 알아보는 사람이 나타남\n\n비밀을 알고 있는 사람이 있음\n\n'
