@@ -11,6 +11,8 @@
   /* Enlarge category artwork to 1.5x its original 36px size without changing
      the dimensions of the bottom chrome that contains it. */
   --category-image-size: 54px;
+  /* Give the enlarged artwork a transparent runway into the address row. */
+  --category-overlap: 12px;
   --wood-line: rgba(238, 194, 127, 0.54);
   --wood-shadow: rgba(45, 23, 13, 0.34);
   --cream: #f7ebd3;
@@ -31,6 +33,8 @@
 
 /* 1. Selection / breadcrumb panel ---------------------------------------- */
 #screen-create .control-bar {
+  position: relative;
+  z-index: 1;
   background: transparent;
   border-color: transparent;
   box-shadow: none;
@@ -80,6 +84,14 @@
 /* 2. Category panel ------------------------------------------------------- */
 #screen-create .subnav-panel {
   position: relative;
+  z-index: 2;
+  /* Extend the category viewport over the address row, rather than moving or
+     resizing either row. This preserves the bottom chrome's measured height
+     and its show/hide animation while giving the 54px emblems room to render. */
+  height: calc(58px + var(--category-overlap));
+  margin-top: calc(-1 * var(--category-overlap));
+  padding-top: 1px;
+  pointer-events: none;
   background: transparent;
   border-color: transparent;
   box-shadow: none;
@@ -89,12 +101,14 @@
   /* Keep every category in the four content tabs visually connected. */
   gap: 7px;
   padding-inline: 7px;
+  pointer-events: none;
 }
 
 /* Lift only the category artwork and its caption. The address/menu row and
    the surrounding bottom panel retain their existing positions and sizes. */
 #screen-create .subnav-item {
   top: -3px;
+  pointer-events: auto;
 }
 
 #screen-create .diamond-btn {
