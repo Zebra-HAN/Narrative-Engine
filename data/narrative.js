@@ -27,14 +27,14 @@ const NARRATIVE_NAV = {
   label: '스토리',
   resetLabel: '스토리 초기화',
   subs: [
-    { id:'goal',    label:'목표', img:'images/core/sub-nav/stry/goal.jpg' },
-    { id:'want',  label:'욕망', img:'images/core/sub-nav/stry/desire.jpg',   type:'group'   },
-    { id:'conflict',label:'갈등', img:'images/core/sub-nav/stry/conflict.jpg'  },
-    { id:'distort', label:'왜곡', img:'images/core/sub-nav/stry/distort.jpg' },
-    { id:'event',   label:'사건', img:'images/core/sub-nav/stry/event.jpg' },
-    { id:'choice',  label:'선택', img:'images/core/sub-nav/stry/choice.jpg'  },
-    { id:'twist',   label:'반전', img:'images/core/sub-nav/stry/twist.jpg' },
-    { id:'ending',  label:'결말', img:'images/core/sub-nav/stry/ending.jpg' },
+    { id:'goal',    label:'목표', img:'images/core/sub-nav/stry/goal.webp' },
+    { id:'want',  label:'욕망', img:'images/core/sub-nav/stry/desire.webp',   type:'group'   },
+    { id:'conflict',label:'갈등', img:'images/core/sub-nav/stry/conflict.webp'  },
+    { id:'distort', label:'왜곡', img:'images/core/sub-nav/stry/distort.webp' },
+    { id:'event',   label:'사건', img:'images/core/sub-nav/stry/event.webp' },
+    { id:'choice',  label:'선택', img:'images/core/sub-nav/stry/choice.webp'  },
+    { id:'twist',   label:'반전', img:'images/core/sub-nav/stry/twist.webp' },
+    { id:'ending',  label:'결말', img:'images/core/sub-nav/stry/ending.webp' },
   ]
 };
 
