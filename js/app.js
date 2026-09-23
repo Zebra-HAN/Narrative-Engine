@@ -585,31 +585,55 @@ initInfoTextAutoFit();
    type step down. The card and parchment geometry are never changed.
 ════════════════════════════════════════════════ */
 const CARD_TITLE_MIN_PX = 7;
-const CARD_TITLE_SCALES = [1, 0.88, 0.76, 0.66, 0.58];
+const CARD_TITLE_MAX_PX = 15;
+const CARD_TITLE_SIZE_STEP_PX = 0.5;
+const CARD_TITLE_COMFORTABLE_LINE_HEIGHT = 1.28;
+const CARD_TITLE_COMPACT_LINE_HEIGHTS = [1.22, 1.16];
 let cardTitleFitFrame = 0;
 
-function getCardTitleLineHeight(lineCount) {
-  if (lineCount <= 1) return 1.22;
-  if (lineCount === 2) return 1.16;
-  return 1.1;
-}
-
-function cardTitleFits(container, text) {
+function getCardTitleAvailableSize(container) {
   const style = getComputedStyle(container);
-  const availableHeight = container.clientHeight
+  const width = container.clientWidth
+    - parseFloat(style.paddingLeft)
+    - parseFloat(style.paddingRight);
+  const height = container.clientHeight
     - parseFloat(style.paddingTop)
     - parseFloat(style.paddingBottom);
+
+  return { width, height };
+}
+
+function getCardTitleMaximumSize(width, height) {
+  // Scale the cap with the real parchment area, but keep even large cards from
+  // turning a short title into a logo. Height is deliberately the stronger
+  // constraint because it also guarantees visible space above and below.
+  const areaBasedCap = 8 + Math.sqrt(width * height) * 0.1;
+  const heightBasedCap = height * 0.58;
+  return Math.max(
+    CARD_TITLE_MIN_PX,
+    Math.min(CARD_TITLE_MAX_PX, areaBasedCap, heightBasedCap)
+  );
+}
+
+function getCardTitleCandidates(maximumSize) {
+  const candidates = [];
+  for (let size = maximumSize; size >= CARD_TITLE_MIN_PX; size -= CARD_TITLE_SIZE_STEP_PX) {
+    candidates.push(size);
+  }
+  if (candidates[candidates.length - 1] > CARD_TITLE_MIN_PX) {
+    candidates.push(CARD_TITLE_MIN_PX);
+  }
+  return candidates;
+}
+
+function cardTitleFits(text, availableHeight) {
   return text.scrollWidth <= text.clientWidth + 0.5
     && text.scrollHeight <= availableHeight + 0.5;
 }
 
-function applyCardTitleSize(container, text, fontSize) {
+function applyCardTitleSize(text, fontSize, lineHeight) {
   text.style.fontSize = `${fontSize}px`;
-  text.style.lineHeight = '1.22';
-
-  const singleLineHeight = fontSize * 1.22;
-  const lineCount = Math.max(1, Math.round(text.scrollHeight / singleLineHeight));
-  text.style.lineHeight = String(getCardTitleLineHeight(lineCount));
+  text.style.lineHeight = String(lineHeight);
 }
 
 function fitCardTitle(container) {
@@ -619,25 +643,35 @@ function fitCardTitle(container) {
   text.style.removeProperty('font-size');
   text.style.removeProperty('line-height');
 
-  const style = getComputedStyle(container);
-  const innerHeight = container.clientHeight
-    - parseFloat(style.paddingTop)
-    - parseFloat(style.paddingBottom);
-  // A one-line title can use most of the available height. The upper cap
-  // prevents unusually tall landscape title areas from producing logo-sized text.
-  const largestSize = Math.min(18, Math.max(CARD_TITLE_MIN_PX, innerHeight / 1.16));
-  const candidates = CARD_TITLE_SCALES
-    .map(scale => Math.max(CARD_TITLE_MIN_PX, largestSize * scale))
-    .concat(CARD_TITLE_MIN_PX)
-    .filter((size, index, sizes) => index === 0 || Math.abs(size - sizes[index - 1]) > 0.1);
+  const { width, height } = getCardTitleAvailableSize(container);
+  // Keep a modest vertical safety zone instead of accepting text right up to
+  // the parchment boundary. The text layer's CSS width supplies the matching
+  // horizontal safety zone.
+  const availableHeight = height - Math.max(3, height * 0.1);
+  const candidates = getCardTitleCandidates(getCardTitleMaximumSize(width, height));
 
   for (const size of candidates) {
-    applyCardTitleSize(container, text, size);
-    if (cardTitleFits(container, text)) return;
+    applyCardTitleSize(text, size, CARD_TITLE_COMFORTABLE_LINE_HEIGHT);
+    if (cardTitleFits(text, availableHeight)) return;
+  }
+
+  // Only after every size has failed with comfortable leading may exceptionally
+  // long titles use tighter leading. Limit this pass to the smaller sizes so a
+  // compact but oversized block cannot win over a calmer, readable setting.
+  const compactCandidates = candidates.filter(size => size <= candidates[0] * 0.75);
+  for (const lineHeight of CARD_TITLE_COMPACT_LINE_HEIGHTS) {
+    for (const size of compactCandidates) {
+      applyCardTitleSize(text, size, lineHeight);
+      if (cardTitleFits(text, availableHeight)) return;
+    }
   }
 
   // Extreme titles stay clipped by .card-name rather than escaping the parchment.
-  applyCardTitleSize(container, text, CARD_TITLE_MIN_PX);
+  applyCardTitleSize(
+    text,
+    CARD_TITLE_MIN_PX,
+    CARD_TITLE_COMPACT_LINE_HEIGHTS[CARD_TITLE_COMPACT_LINE_HEIGHTS.length - 1]
+  );
 }
 
 function fitAllCardTitles() {
