@@ -1008,14 +1008,32 @@ body::after {
     .card-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      gap: 6px 4px;
-      margin-bottom: 16px;
+      /* Give every card a little more breathing room without changing its
+         layout-specific aspect ratio. */
+      gap: 9px 6px;
+      margin: 0 8px 16px;
       perspective: 900px;
     }
-   .card-grid.card-grid-layout-a { grid-template-columns: repeat(5, 1fr); }
-    .card-grid.card-grid-layout-b { grid-template-columns: repeat(4, 1fr); }
-    .card-grid.card-grid-layout-c { grid-template-columns: repeat(3, 1fr); }
-    .card-grid.card-grid-layout-d { grid-template-columns: repeat(3, 1fr); }
+   .card-grid.card-grid-layout-a {
+      grid-template-columns: repeat(5, 1fr);
+      gap: 9px 6px;
+      margin-inline: 8px;
+    }
+    .card-grid.card-grid-layout-b {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px 7px;
+      margin-inline: 10px;
+    }
+    .card-grid.card-grid-layout-c {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 11px 8px;
+      margin-inline: 12px;
+    }
+    .card-grid.card-grid-layout-d {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 11px 8px;
+      margin-inline: 12px;
+    }
 
     .data-card {
       aspect-ratio: 0.72;
@@ -2012,22 +2030,32 @@ body::after {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   min-height: 100%;
   align-items: center;
+  align-content: center;
   justify-content: center;
   gap: 12px;
+}
+
+/* Small sets should sit in the visual center of the available canvas.
+   Large grids intentionally retain their top-aligned, scroll-first layout. */
+.group-layout-list {
+  min-height: 100%;
+  justify-content: center;
 }
 
 .group-layout-four {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: start;
+  align-content: center;
   gap: 12px;
+  min-height: 100%;
 }
 
 .group-layout-six {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: start;
+  align-content: center;
   gap: 12px;
+  min-height: 100%;
 }
 
 .group-layout-grid {
