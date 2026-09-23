@@ -578,7 +578,6 @@ initInfoSliderSwipe();
 initCenterBackSwipe();
 initScrollResponsiveChrome();
 initInfoTextAutoFit();
-initCardTitleAutoFit();
 
 /* ════════════════════════════════════════════════
    CARD TITLE AUTO-FIT
@@ -662,6 +661,10 @@ function initCardTitleAutoFit() {
   if (document.fonts?.ready) document.fonts.ready.then(requestCardTitleAutoFit);
   requestCardTitleAutoFit();
 }
+
+// The fitter reads the state declared above immediately, so initialize it only
+// after that state has left the temporal dead zone.
+initCardTitleAutoFit();
 
 /* ════════════════════════════════════════════════
    INFO PANEL TEXT AUTO-FIT
