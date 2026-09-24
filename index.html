@@ -80,42 +80,17 @@
 ══════════════════════════════════════ -->
 <div id="screen-create" class="screen">
 
-  <!-- ① 설명창 (info-panel) — 카드 / 카테고리 슬라이드 -->
+  <!-- ① 메인 카테고리 안내창 (카드 정보는 카드 영역의 별도 패널에 표시) -->
   <div class="create-chrome-slot create-chrome-slot-top">
   <div class="info-panel" id="info-panel">
-    <div class="info-empty" id="info-empty">카테고리를 선택하세요</div>
-    <div class="info-slider-wrap hidden" id="info-slider-wrap">
-      <div class="info-swipe-hint hidden" id="info-swipe-hint"></div>
-<div class="info-dots" id="info-dots">
-  <span class="info-dot" id="dot-0"></span>
-  <span class="info-dot" id="dot-1"></span>
-</div>
-      
-      <div class="info-slider-viewport" id="info-slider-viewport">
-        <div class="info-slider-track" id="info-slider-track">
-          <div class="info-slide info-slide-card">
-            <div class="info-visual" id="info-card-icon" aria-hidden="true"></div>
-            <div class="info-main">
-              <div class="info-text-wrap">
-                <div class="info-name" id="info-card-name"></div>
-                <div class="info-desc" id="info-card-desc"></div>
-              </div>
-            </div>
-            <div class="info-actions">
-              <button type="button" class="info-btn-detail pressable" onclick="openDetailSheet('card')">상세 정보</button>
-              <button type="button" class="info-btn-select pressable" id="info-select-btn" onclick="selectCurrentCard()">선택</button>
-            </div>
-          </div>
-          <div class="info-slide info-slide-category">
-            <div class="info-visual" id="info-cat-icon" aria-hidden="true"></div>
-            <div class="info-main">
-              <div class="info-text-wrap">
-                <div class="info-name" id="info-cat-name"></div>
-                <div class="info-desc" id="info-cat-desc"></div>
-              </div>
-            </div>
-            <div class="info-actions">
-              <button type="button" class="info-btn-detail pressable" onclick="openDetailSheet('category')">상세 정보</button>
+    <div class="info-slider-wrap" id="info-slider-wrap">
+      <div class="info-slider-viewport">
+        <div class="info-slide info-slide-category">
+          <div class="info-visual" id="info-cat-icon" aria-hidden="true"></div>
+          <div class="info-main">
+            <div class="info-text-wrap">
+              <div class="info-name" id="info-cat-name"></div>
+              <div class="info-desc" id="info-cat-desc"></div>
             </div>
           </div>
         </div>
