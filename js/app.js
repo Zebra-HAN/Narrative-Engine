@@ -842,13 +842,6 @@ function initScrollResponsiveChrome() {
     animateChrome(progress, progress);
   }
 
-  function revealTopChromeForCard() {
-    // 카드 탭은 양쪽 패널이 완전히 숨은 경우에만 위 설명 패널을 복원한다.
-    // 아래 패널의 진행률은 건드리지 않아 내비게이션과 버튼 상태를 그대로 보존한다.
-    if (renderedTopProgress <= 0.98 || renderedBottomProgress <= 0.98) return;
-    animateChrome(0, targetBottomProgress);
-  }
-
   function trackGesture(delta, timestamp = performance.now()) {
     if (Math.abs(delta) < 0.5) return;
     const direction = Math.sign(delta);
@@ -887,9 +880,6 @@ function initScrollResponsiveChrome() {
     lastDirectInputAt = performance.now();
     trackGesture(event.deltaY);
   }, { passive: true });
-  area.addEventListener('click', event => {
-    if (event.target.closest('.data-card')) revealTopChromeForCard();
-  });
   function onChromeTouchStart(event) {
     const touch = event.touches.length === 1 ? event.touches[0] : null;
     lastTouchX = touch?.clientX ?? null;
@@ -1724,13 +1714,21 @@ function positionCardInfo(panel, cardEl) {
 
   const pageRect = page.getBoundingClientRect();
   const cardRect = cardEl.getBoundingClientRect();
+  const grid = cardEl.closest('.card-grid');
+  const rowTop = grid
+    ? Math.min(...Array.from(grid.querySelectorAll('.data-card'), card => card.getBoundingClientRect().top))
+    : cardRect.top;
+  const isFirstRow = Math.abs(cardRect.top - rowTop) < 2;
   const panelWidth = Math.min(440, page.clientWidth - 24);
   panel.style.width = `${panelWidth}px`;
 
   const centeredLeft = cardRect.left - pageRect.left + page.scrollLeft
     + (cardRect.width - panelWidth) / 2;
   const left = Math.max(12, Math.min(centeredLeft, page.scrollWidth - panelWidth - 12));
-  const top = cardRect.top - pageRect.top + page.scrollTop - panel.offsetHeight - 10;
+  const top = isFirstRow
+    ? cardRect.bottom - pageRect.top + page.scrollTop + 10
+    : cardRect.top - pageRect.top + page.scrollTop - panel.offsetHeight - 10;
+  panel.classList.toggle('is-below-card', isFirstRow);
   panel.style.left = `${left}px`;
   panel.style.top = `${Math.max(4, top)}px`;
   panel.style.setProperty('--card-anchor-x', `${Math.max(18, Math.min(panelWidth - 18, cardRect.left - pageRect.left + page.scrollLeft + cardRect.width / 2 - left))}px`);
