@@ -145,7 +145,9 @@
 #screen-create .info-text-wrap {
   position: absolute;
   z-index: 2;
-  inset: 29% 14% 27% 19%;
+  /* Balance the copy against the artwork by nudging its fixed-width region
+     slightly toward the left side of the parchment. */
+  inset: 29% 16% 27% 17%;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
