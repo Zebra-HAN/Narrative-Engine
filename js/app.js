@@ -1196,6 +1196,45 @@ function getGroupLayoutClass(count) {
   return 'group-layout-list';
 }
 
+/*
+ * Keep the first cards clearly separated, then compress the remaining reveal
+ * into a fixed time window. The exponential tail approaches (but never grows
+ * beyond) CARD_REVEAL_MAX_DELAY_MS, even for very large card collections.
+ */
+const CARD_REVEAL_MAX_DELAY_MS = 1500;
+
+function getCardRevealDelayMs(index) {
+  const cardIndex = Math.max(0, Number(index) || 0);
+
+  // Cards 1-8: a deliberate, easy-to-follow cadence.
+  if (cardIndex < 8) return cardIndex * 100;
+
+  // Cards 9-20: progressively shorten the gap from the preceding card.
+  if (cardIndex < 20) {
+    const acceleratedIndex = cardIndex - 7;
+    const progress = acceleratedIndex / 12;
+    return 700 + 520 * (1 - Math.pow(1 - progress, 1.7));
+  }
+
+  // Card 21 onward: a very fast, asymptotic sweep with a hard upper bound.
+  const tailIndex = cardIndex - 19;
+  return 1220 + (CARD_REVEAL_MAX_DELAY_MS - 1220) * (1 - Math.exp(-tailIndex / 36));
+}
+
+function getCardRevealDelayStyle(index) {
+  return `animation-delay:${Math.round(getCardRevealDelayMs(index))}ms`;
+}
+
+function setupCardRevealAnimations(page) {
+  page.querySelectorAll('.card-deal').forEach(card => {
+    // A card becomes usable when its own reveal begins, independently of all
+    // cards that are still waiting later in the stagger.
+    card.addEventListener('animationstart', () => card.classList.add('card-interactive'), { once: true });
+    card.addEventListener('animationend', () => card.classList.remove('card-deal', 'card-interactive'), { once: true });
+    card.addEventListener('animationcancel', () => card.classList.remove('card-deal', 'card-interactive'), { once: true });
+  });
+}
+
 /* ════════════════════════════════════════════════
    그룹 선택 화면 렌더
    ─ type:'group' 인 카테고리를 클릭했을 때 열리는 화면
@@ -1359,7 +1398,7 @@ function showSubgroupCards(subId, groupIdx, sgIdx) {
     const sel = selectedCards[subId].has(globalIdx) ? ' selected' : '';
     html += `
       <div class="data-card pressable card-deal${sel}"
-        style="animation-delay:${animIdx * 0.04}s"
+        style="${getCardRevealDelayStyle(animIdx)}"
          data-global-idx="${globalIdx}"
         onclick="subgroupCardClick('${subId}', ${groupIdx}, ${sgIdx}, ${idx})"
         ondblclick="openSubgroupCardDetail('${subId}', ${groupIdx}, ${sgIdx}, ${idx})"
@@ -1377,9 +1416,7 @@ function showSubgroupCards(subId, groupIdx, sgIdx) {
   page.innerHTML = html;
   area.appendChild(page);
 
-  page.querySelectorAll('.card-deal').forEach(card => {
-    card.addEventListener('animationend', () => card.classList.remove('card-deal'), { once: true });
-  });
+  setupCardRevealAnimations(page);
    setSubgroupAddress(subId, groupIdx, sgIdx);
 }
 
@@ -1501,7 +1538,7 @@ function showGroupCards(subId, groupIdx) {
     const sel = selectedCards[subId].has(globalIdx) ? ' selected' : '';
     html += `
   <div class="data-card pressable card-deal${sel}"
-    style="animation-delay:${animIdx * 0.04}s"
+    style="${getCardRevealDelayStyle(animIdx)}"
     data-global-idx="${globalIdx}"
     onclick="groupCardClick('${subId}', ${groupIdx}, ${idx})"
     ondblclick="openGroupCardDetail('${subId}', ${groupIdx}, ${idx})"
@@ -1518,9 +1555,7 @@ function showGroupCards(subId, groupIdx) {
   page.innerHTML = html;
   area.appendChild(page);
 
-  page.querySelectorAll('.card-deal').forEach(card => {
-    card.addEventListener('animationend', () => card.classList.remove('card-deal'), { once: true });
-  });
+  setupCardRevealAnimations(page);
    setGroupAddress(subId, groupIdx, true);
 }
 
@@ -1653,7 +1688,7 @@ function showCardPage(subId, animate = true) {
     const animIdx = cardRealIdx++;  // 애니메이션 딜레이용
     const sel = selectedCards[subId].has(idx) ? ' selected' : '';
     const deal = animate ? ' card-deal' : '';
-    const delay = animate ? ` style="animation-delay:${animIdx * 0.04}s"` : '';
+    const delay = animate ? ` style="${getCardRevealDelayStyle(animIdx)}"` : '';
    html += `
   <div class="data-card pressable${sel}${deal}"${delay}
     data-global-idx="${idx}"
@@ -1675,9 +1710,7 @@ function showCardPage(subId, animate = true) {
   area.appendChild(page);
 
   // card-deal 애니메이션 끝난 뒤 클래스 제거 → pressable 눌림효과 항상 작동
-  page.querySelectorAll('.card-deal').forEach(card => {
-    card.addEventListener('animationend', () => card.classList.remove('card-deal'), { once: true });
-  });
+  setupCardRevealAnimations(page);
 }
 
 
