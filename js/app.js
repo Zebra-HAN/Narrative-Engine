@@ -202,6 +202,17 @@ function getCardGridOpenTag(group) {
   return `<div class="card-grid ${getCardGridLayoutClass(group)}">`;
 }
 
+function markFirstCardRow(page) {
+  const firstGrid = page.querySelector('.card-grid');
+  const cards = firstGrid ? Array.from(firstGrid.querySelectorAll('.data-card')) : [];
+  if (cards.length === 0) return;
+
+  const firstRowTop = cards[0].offsetTop;
+  cards.forEach(card => {
+    card.classList.toggle('first-row-card', card.offsetTop === firstRowTop);
+  });
+}
+
 function isSectionItem(item) {
   return item && item.type === 'section';
 }
@@ -1416,6 +1427,7 @@ function showSubgroupCards(subId, groupIdx, sgIdx) {
   page.innerHTML = html;
   area.appendChild(page);
 
+  markFirstCardRow(page);
   setupCardRevealAnimations(page);
    setSubgroupAddress(subId, groupIdx, sgIdx);
 }
@@ -1555,6 +1567,7 @@ function showGroupCards(subId, groupIdx) {
   page.innerHTML = html;
   area.appendChild(page);
 
+  markFirstCardRow(page);
   setupCardRevealAnimations(page);
    setGroupAddress(subId, groupIdx, true);
 }
@@ -1709,6 +1722,7 @@ function showCardPage(subId, animate = true) {
   page.innerHTML = html;
   area.appendChild(page);
 
+  markFirstCardRow(page);
   // card-deal 애니메이션 끝난 뒤 클래스 제거 → pressable 눌림효과 항상 작동
   setupCardRevealAnimations(page);
 }
@@ -1747,11 +1761,7 @@ function positionCardInfo(panel, cardEl) {
 
   const pageRect = page.getBoundingClientRect();
   const cardRect = cardEl.getBoundingClientRect();
-  const grid = cardEl.closest('.card-grid');
-  const rowTop = grid
-    ? Math.min(...Array.from(grid.querySelectorAll('.data-card'), card => card.getBoundingClientRect().top))
-    : cardRect.top;
-  const isFirstRow = Math.abs(cardRect.top - rowTop) < 2;
+  const isFirstRow = cardEl.classList.contains('first-row-card');
   const panelWidth = Math.min(440, page.clientWidth - 24);
   panel.style.width = `${panelWidth}px`;
 
