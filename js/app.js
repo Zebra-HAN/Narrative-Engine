@@ -98,8 +98,14 @@ let selectedCards = {};   // { subId: Set<idx> }
 let selectedDetails = {}; // { "subId__globalIdx": Set<detailItemIdx> }
 let selectedSubImages = {}; // { "subId__globalIdx": true }
 let focusedCard  = null;  // { subId, idx, name, icon }
-let infoSlideCategory = false; // false=카드, true=카테고리
 let addressTrail = [];
+
+const MAIN_CATEGORY_INFO = {
+  character:  { icon: '🛡️', description: '인물의 원형, 종족, 직업, 성격과 관계를 설계합니다.' },
+  narrative2: { icon: '📜', description: '이야기의 목표, 갈등, 사건과 흐름을 구성합니다.' },
+  world:      { icon: '🌍', description: '작품의 배경이 되는 세계와 사회, 환경을 만듭니다.' },
+  compass:    { icon: '🧭', description: '창작의 방향을 점검하고 이야기의 가능성을 탐색합니다.' }
+};
 
 
 
@@ -575,7 +581,6 @@ window.addEventListener('load', () => {
 
 
 
-initInfoSliderSwipe();
 initCenterBackSwipe();
 initScrollResponsiveChrome();
 initInfoTextAutoFit();
@@ -1061,6 +1066,7 @@ function switchScreen(targetId, callback, options = {}) {
    NAVIGATION
 ════════════════════════════════════════════════ */
 function goHome() {
+  closeCardInfo();
   closeDetailSheet();
   closeStatusOverlay();
   closeExtraMenu({ instant: true });
@@ -1125,7 +1131,7 @@ function switchNav(navId, skipAnimation, options = {}) {
   renderSubnav(navId, !skipAnimation && prev !== navId);
 
   // 중앙 기본 상태로
-  focusedCard = null;
+  closeCardInfo();
   showDefaultCenter();
   updateInfoPanel();
    if (!options.silentAddress) setNavAddress(navId);
@@ -1160,6 +1166,7 @@ function renderSubnav(navId, animate) {
    SUB MENU SELECT
 ════════════════════════════════════════════════ */
 function selectSub(subId, navId) {
+  closeCardInfo();
   // 이전 active 제거
   document.querySelectorAll('.subnav-item').forEach(el => el.classList.remove('active'));
   // 현재 active
@@ -1168,11 +1175,6 @@ function selectSub(subId, navId) {
 
   const same = currentSubId === subId;
   currentSubId = subId;
-  if (!same) {
-    focusedCard = null;
-    setInfoSlide(false);
-  }
-
   showCardPage(subId, !same);
   updateInfoPanel();
     setSubAddress(subId, navId || currentNav);
@@ -1182,6 +1184,7 @@ function selectSub(subId, navId) {
    CENTER DISPLAY
 ════════════════════════════════════════════════ */
 function showDefaultCenter() {
+  closeCardInfo();
   const area = document.getElementById('center-area');
 
   // 기존 동적 페이지 제거
@@ -1210,6 +1213,7 @@ function getGroupLayoutClass(count) {
    ─ 그룹 안에 subgroups 배열이 있으면 → 2단계(서브그룹) 구조로 동작
 ════════════════════════════════════════════════ */
 function showGroupPage(subId, animate = true) {
+  closeCardInfo();
   const area = document.getElementById('center-area');
 
   document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
@@ -1272,6 +1276,7 @@ sg.cards.forEach((card, cIdx) => {
    ─ 그룹 안에 subgroups 배열이 있을 때 그룹 버튼 클릭 시 열림
 ════════════════════════════════════════════════ */
 function showSubgroupPage(subId, groupIdx) {
+  closeCardInfo();
   const area = document.getElementById('center-area');
   const data = CARD_DATA[subId];
   if (!data || !data.groups) return;
@@ -1329,6 +1334,7 @@ function showSubgroupPage(subId, groupIdx) {
    서브그룹 카드 목록 렌더 (2단계 → 카드)
 ════════════════════════════════════════════════ */
 function showSubgroupCards(subId, groupIdx, sgIdx) {
+  closeCardInfo();
   const area = document.getElementById('center-area');
   const data = CARD_DATA[subId];
   if (!data || !data.groups) return;
@@ -1392,9 +1398,7 @@ function subgroupCardClick(subId, groupIdx, sgIdx, idx) {
   const sg = CARD_DATA[subId].groups[groupIdx].subgroups[sgIdx];
   const card = sg.cards[idx];
   const globalIdx = getSubgroupCardGlobalIdx(groupIdx, sgIdx, idx);
-  focusedCard = { subId, idx: globalIdx, path: { type: 'subgroup', groupIdx, sgIdx, cardIdx: idx }, name: card.name, icon: card.icon, img: card.img, desc: card.desc };
-  setInfoSlide(false);
-  updateInfoPanel();
+  toggleCardInfo({ subId, idx: globalIdx, path: { type: 'subgroup', groupIdx, sgIdx, cardIdx: idx }, name: card.name, icon: card.icon, img: card.img, desc: card.desc });
 }
 
 /* 서브그룹 카드 선택/해제 */
@@ -1427,7 +1431,7 @@ function subgroupCardDblClick(subId, groupIdx, sgIdx, idx) {
   const groupPageEl = document.getElementById('page-' + subId);
   if (groupPageEl) updateGroupBadges(subId);
 
-  subgroupCardClick(subId, groupIdx, sgIdx, idx);
+  refreshCardInfo();
 
   renderSubnav(currentNav, false);
   const el = document.querySelector(`[data-sub-id="${subId}"]`);
@@ -1438,7 +1442,9 @@ function subgroupCardDblClick(subId, groupIdx, sgIdx, idx) {
 
 /* 서브그룹 카드 더블클릭 — 상세 정보 열기 */
 function openSubgroupCardDetail(subId, groupIdx, sgIdx, idx) {
-  subgroupCardClick(subId, groupIdx, sgIdx, idx);
+  const card = CARD_DATA[subId].groups[groupIdx].subgroups[sgIdx].cards[idx];
+  focusedCard = { subId, idx: getSubgroupCardGlobalIdx(groupIdx, sgIdx, idx), path: { type: 'subgroup', groupIdx, sgIdx, cardIdx: idx }, ...card };
+  renderCardInfo();
   openDetailSheet('card');
 }
 
@@ -1472,6 +1478,7 @@ function updateSubgroupBadges(subId, groupIdx) {
    그룹 버튼 클릭 → 해당 그룹의 카드 목록 열기 (1단계 그룹용)
 ════════════════════════════════════════════════ */
 function showGroupCards(subId, groupIdx) {
+  closeCardInfo();
   const area = document.getElementById('center-area');
   const data = CARD_DATA[subId];
   if (!data || !data.groups) return;
@@ -1532,9 +1539,7 @@ function groupCardClick(subId, groupIdx, idx) {
   const grp = CARD_DATA[subId].groups[groupIdx];
   const card = grp.cards[idx];
   const globalIdx = getGroupCardGlobalIdx(groupIdx, idx);
-  focusedCard = { subId, idx: globalIdx, path: { type: 'group', groupIdx, cardIdx: idx }, name: card.name, icon: card.icon, img: card.img, desc: card.desc };
-  setInfoSlide(false);
-  updateInfoPanel();
+  toggleCardInfo({ subId, idx: globalIdx, path: { type: 'group', groupIdx, cardIdx: idx }, name: card.name, icon: card.icon, img: card.img, desc: card.desc });
 }
 
 /* 그룹 카드 선택/해제 */
@@ -1559,7 +1564,7 @@ function groupCardDblClick(subId, groupIdx, idx) {
   const groupPageEl = document.getElementById('page-' + subId);
   if (groupPageEl) updateGroupBadges(subId);
 
-  groupCardClick(subId, groupIdx, idx);
+  refreshCardInfo();
 
   renderSubnav(currentNav, false);
   const el = document.querySelector(`[data-sub-id="${subId}"]`);
@@ -1570,7 +1575,9 @@ function groupCardDblClick(subId, groupIdx, idx) {
 
 /* 그룹 카드 더블클릭 — 상세 정보 열기 */
 function openGroupCardDetail(subId, groupIdx, idx) {
-  groupCardClick(subId, groupIdx, idx);
+  const card = CARD_DATA[subId].groups[groupIdx].cards[idx];
+  focusedCard = { subId, idx: getGroupCardGlobalIdx(groupIdx, idx), path: { type: 'group', groupIdx, cardIdx: idx }, ...card };
+  renderCardInfo();
   openDetailSheet('card');
 }
 
@@ -1614,6 +1621,7 @@ function updateGroupBadges(subId) {
 
 
 function showCardPage(subId, animate = true) {
+  closeCardInfo();
 
   // type:'group' 인 경우 그룹 선택 화면을 열고 종료
   const navInfo2 = Object.values(NAV_DATA).find(n => n.subs.find(s => s.id === subId));
@@ -1688,194 +1696,100 @@ function showCardPage(subId, animate = true) {
 ════════════════════════════════════════════════ */
 function cardClick(subId, idx) {
   const card = CARD_DATA[subId][idx];
-  focusedCard = { subId, idx, name: card.name, icon: card.icon, img: card.img, desc: card.desc };
-  setInfoSlide(false);
-  updateInfoPanel();
+  toggleCardInfo({ subId, idx, name: card.name, icon: card.icon, img: card.img, desc: card.desc });
 }
 
 /* 일반 카드 더블클릭 — 상세 정보 열기 */
 function openCardDetail(subId, idx) {
-  cardClick(subId, idx);
+  const card = CARD_DATA[subId][idx];
+  focusedCard = { subId, idx, name: card.name, icon: card.icon, img: card.img, desc: card.desc };
+  renderCardInfo();
   openDetailSheet('card');
 }
 
-function setInfoSlide(showCategory) {
-  infoSlideCategory = showCategory;
-  const track    = document.getElementById('info-slider-track');
-  const viewport = document.getElementById('info-slider-viewport');
-  if (!track || !viewport) return;
-  // classList 방식 제거 → transform 방식으로 직접 이동
-  const w = viewport.offsetWidth;
-  const offset = showCategory ? -w : 0;
-  track.style.transition = 'transform 0.32s cubic-bezier(0.4, 0, 0.2, 1)';
-  track.style.transform  = `translateX(${offset}px)`;
-  // dot 갱신
-  const dot0 = document.getElementById('dot-0');
-  const dot1 = document.getElementById('dot-1');
-  if (dot0 && dot1) {
-    dot0.style.transform = showCategory ? 'scale(1)' : 'scale(1.55)';
-    dot1.style.transform = showCategory ? 'scale(1.55)' : 'scale(1)';
-    dot0.style.opacity   = showCategory ? '0.45' : '1';
-    dot1.style.opacity   = showCategory ? '1' : '0.45';
-  }
-  const hint = document.getElementById('info-swipe-hint');
-  if (hint) hint.classList.add('hidden');
+function closeCardInfo() {
+  document.querySelectorAll('.card-info-popover').forEach(panel => panel.remove());
+  document.querySelectorAll('.data-card.card-info-active').forEach(card => card.classList.remove('card-info-active'));
+  focusedCard = null;
 }
 
-function initInfoSliderSwipe() {
-  const viewport = document.getElementById('info-slider-viewport');
-  const track    = document.getElementById('info-slider-track');
-  if (!viewport || !track) return;
-
-  let startX   = 0;
-  let curX     = 0;
-  let dragging = false;
-  let baseOffset = 0; // 현재 슬라이드의 시작 오프셋 (0 or -50%)
-
-  function getSlideWidth() {
-    return viewport.offsetWidth;
-  }
-
-  function applyTransform(offsetPx, animate) {
-    track.style.transition = animate
-      ? 'transform 0.32s cubic-bezier(0.4, 0, 0.2, 1)'
-      : 'none';
-    track.style.transform = `translateX(${offsetPx}px)`;
-    updateDots(offsetPx);
-  }
-
-  function updateDots(offsetPx) {
-    const w = getSlideWidth();
-    // 0px = 카드(왼쪽), -w = 카테고리(오른쪽)
-    // ratio: 0(카드) ~ 1(카테고리)
-    const ratio = Math.min(1, Math.max(0, -offsetPx / w));
-    const dot0 = document.getElementById('dot-0');
-    const dot1 = document.getElementById('dot-1');
-    if (!dot0 || !dot1) return;
-    // 큰 점이 ratio에 따라 오른쪽으로 이동
-    // dot0: ratio=0일때 크게, dot1: ratio=1일때 크게
-    const s0 = 1 + (1 - ratio) * 0.55; // 1 ~ 1.55
-    const s1 = 1 + ratio * 0.55;
-    dot0.style.transform = `scale(${s0})`;
-    dot1.style.transform = `scale(${s1})`;
-    dot0.style.opacity = 0.45 + (1 - ratio) * 0.55;
-    dot1.style.opacity = 0.45 + ratio * 0.55;
-  }
-
-  function snapToSlide(targetCategory) {
-    infoSlideCategory = targetCategory;
-    baseOffset = targetCategory ? -getSlideWidth() : 0;
-    applyTransform(baseOffset, true);
-    updateDots(baseOffset);
-    // hint 숨기기
-    const hint = document.getElementById('info-swipe-hint');
-    if (hint) hint.classList.add('hidden');
-  }
-
-  function onStart(clientX) {
-    if (!currentSubId) return;
-    startX = clientX;
-    curX   = clientX;
-    dragging = true;
-    baseOffset = infoSlideCategory ? -getSlideWidth() : 0;
-    track.style.transition = 'none';
-  }
-
-  function onMove(clientX) {
-    if (!dragging || !currentSubId) return;
-    curX = clientX;
-    const dx = curX - startX;
-    // 경계에서 저항감 (rubber band)
-    let offset = baseOffset + dx;
-    const w = getSlideWidth();
-    if (offset > 0)        offset = offset * 0.25;
-    if (offset < -w)       offset = -w + (offset + w) * 0.25;
-    applyTransform(offset, false);
-  }
-
-  function onEnd() {
-    if (!dragging || !currentSubId) return;
-    dragging = false;
-    const dx = curX - startX;
-    const w  = getSlideWidth();
-    const THRESHOLD = w * 0.2; // 20%만 넘어도 전환
-    if (dx < -THRESHOLD && !infoSlideCategory) {
-      snapToSlide(true);
-    } else if (dx > THRESHOLD && infoSlideCategory) {
-      snapToSlide(false);
-    } else {
-      // 원래 위치로 복귀
-      applyTransform(baseOffset, true);
-      updateDots(baseOffset);
-    }
-  }
-
-  // Touch
-  viewport.addEventListener('touchstart', (e) => {
-    // Tapping an action button is not a slider gesture.  Keeping it out of
-    // drag setup prevents the detail/select click from being swallowed.
-    if (e.target.closest('button')) return;
-    onStart(e.touches[0].clientX);
-  }, { passive: true });
-  viewport.addEventListener('touchmove',  (e) => onMove(e.touches[0].clientX),  { passive: true });
-  viewport.addEventListener('touchend',   (e) => onEnd(), { passive: true });
-
-  // Mouse
-  viewport.addEventListener('mousedown', (e) => {
-    if (e.target.closest('button')) return;
-    e.preventDefault();
-    onStart(e.clientX);
-  });
-  window.addEventListener('mousemove',   (e) => onMove(e.clientX));
-  window.addEventListener('mouseup',     ()  => onEnd());
+function getFocusedCardElement() {
+  if (!focusedCard) return null;
+  return document.querySelector(`.center-page.active .data-card[data-global-idx="${focusedCard.idx}"]`);
 }
 
-function updateInfoPanel() {
-  const emptyEl = document.getElementById('info-empty');
-  const sliderWrap = document.getElementById('info-slider-wrap');
-  const selectBtn = document.getElementById('info-select-btn');
+function positionCardInfo(panel, cardEl) {
+  const page = cardEl.closest('.center-page');
+  if (!page) return;
 
-  if (!currentSubId) {
-    emptyEl.classList.remove('hidden');
-    sliderWrap.classList.add('hidden');
+  const pageRect = page.getBoundingClientRect();
+  const cardRect = cardEl.getBoundingClientRect();
+  const panelWidth = Math.min(440, page.clientWidth - 24);
+  panel.style.width = `${panelWidth}px`;
+
+  const centeredLeft = cardRect.left - pageRect.left + page.scrollLeft
+    + (cardRect.width - panelWidth) / 2;
+  const left = Math.max(12, Math.min(centeredLeft, page.scrollWidth - panelWidth - 12));
+  const top = cardRect.top - pageRect.top + page.scrollTop - panel.offsetHeight - 10;
+  panel.style.left = `${left}px`;
+  panel.style.top = `${Math.max(4, top)}px`;
+  panel.style.setProperty('--card-anchor-x', `${Math.max(18, Math.min(panelWidth - 18, cardRect.left - pageRect.left + page.scrollLeft + cardRect.width / 2 - left))}px`);
+}
+
+function renderCardInfo() {
+  document.querySelectorAll('.card-info-popover').forEach(panel => panel.remove());
+  document.querySelectorAll('.data-card.card-info-active').forEach(card => card.classList.remove('card-info-active'));
+  if (!focusedCard) return;
+
+  const cardEl = getFocusedCardElement();
+  const page = cardEl?.closest('.center-page');
+  if (!cardEl || !page) {
+    focusedCard = null;
     return;
   }
 
-  emptyEl.classList.add('hidden');
-  sliderWrap.classList.remove('hidden');
+  cardEl.classList.add('card-info-active');
+  const selected = Boolean(selectedCards[focusedCard.subId]?.has(focusedCard.idx));
+  const panel = document.createElement('section');
+  panel.className = 'card-info-popover';
+  panel.setAttribute('role', 'dialog');
+  panel.setAttribute('aria-label', `${focusedCard.name} 카드 정보`);
+  panel.innerHTML = `
+    <button type="button" class="card-info-close pressable" aria-label="카드 정보 닫기">×</button>
+    <div class="card-info-copy">
+      <h3 class="card-info-title">${escapeHtml(focusedCard.name)}</h3>
+      <p class="card-info-desc">${escapeHtml(focusedCard.desc || '설명 없음')}</p>
+    </div>
+    <div class="card-info-actions">
+      <button type="button" class="card-info-detail pressable">상세 정보</button>
+      <button type="button" class="card-info-select pressable${selected ? ' is-selected' : ''}">${selected ? '선택 취소' : '선택'}</button>
+    </div>`;
+  page.appendChild(panel);
+  panel.querySelector('.card-info-close').addEventListener('click', closeCardInfo);
+  panel.querySelector('.card-info-detail').addEventListener('click', () => openDetailSheet('card'));
+  panel.querySelector('.card-info-select').addEventListener('click', selectCurrentCard);
+  positionCardInfo(panel, cardEl);
+}
 
-  const navInfo = Object.values(NAV_DATA).find(n => n.subs.find(s => s.id === currentSubId));
-  const subInfo = navInfo ? navInfo.subs.find(s => s.id === currentSubId) : null;
-
-  setInfoVisual(document.getElementById('info-cat-icon'), subInfo?.img, subInfo?.icon);
-  document.getElementById('info-cat-name').textContent = subInfo ? subInfo.label : currentSubId;
-  document.getElementById('info-cat-desc').textContent = getSubDescription(currentSubId);
-
-  if (focusedCard && focusedCard.subId === currentSubId) {
-    setInfoVisual(document.getElementById('info-card-icon'), focusedCard.img, focusedCard.icon);
-    document.getElementById('info-card-name').textContent = focusedCard.name;
-    document.getElementById('info-card-desc').textContent = focusedCard.desc || '설명 없음';
-    const isSelected = selectedCards[focusedCard.subId] && selectedCards[focusedCard.subId].has(focusedCard.idx);
-    selectBtn.textContent = isSelected ? '취소' : '선택';
-    selectBtn.classList.toggle('is-selected', isSelected);
-    // 카드 선택 시 버튼 다시 표시
-    const cardActions = document.querySelector('.info-slide-card .info-actions');
-    if (cardActions) cardActions.classList.remove('info-actions-hidden');
-    setInfoSlide(false);
-  } else {
-    setInfoVisual(document.getElementById('info-card-icon'), null);
-    document.getElementById('info-card-name').textContent = '카드 미선택';
-    document.getElementById('info-card-desc').textContent = '카드를 탭하면 이곳에 항목 설명이 표시됩니다.';
-    selectBtn.textContent = '선택';
-    selectBtn.classList.remove('is-selected');
-    // 카드 미선택 시 버튼 숨김
-    const cardActions = document.querySelector('.info-slide-card .info-actions');
-    if (cardActions) cardActions.classList.add('info-actions-hidden');
-    setInfoSlide(true);
+function toggleCardInfo(card) {
+  if (focusedCard?.subId === card.subId && focusedCard.idx === card.idx) {
+    closeCardInfo();
+    return;
   }
+  focusedCard = card;
+  renderCardInfo();
+}
 
-  const hint = document.getElementById('info-swipe-hint');
-  if (hint) hint.classList.remove('hidden');
+function refreshCardInfo() {
+  if (focusedCard) renderCardInfo();
+}
+
+function updateInfoPanel() {
+  const nav = NAV_DATA[currentNav];
+  const info = MAIN_CATEGORY_INFO[currentNav] || {};
+  setInfoVisual(document.getElementById('info-cat-icon'), null, info.icon || '◆');
+  document.getElementById('info-cat-name').textContent = nav?.label || '';
+  document.getElementById('info-cat-desc').textContent = info.description || '';
   requestInfoTextAutoFit();
 }
 
@@ -1929,7 +1843,7 @@ function toggleCardSelect(subId, idx) {
 
   // 설명창 선택 버튼 업데이트
   if (focusedCard && focusedCard.subId === subId && focusedCard.idx === idx) {
-    updateInfoPanel();
+    refreshCardInfo();
   }
   refreshStatusIfOpen();
    updateNavBadges();  /* ← 여기 추가, 선택한 카드 총량 표시 추가*/

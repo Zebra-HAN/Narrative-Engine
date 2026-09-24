@@ -1,8 +1,8 @@
 /* ========================================================================== 
    Creative screen — illustrated top information panel
 
-   The two transparent WEBP assets are the panel chrome.  The existing DOM,
-   slider state, event handlers and entrance animation remain unchanged.
+   The two transparent WEBP assets are the panel chrome. The panel is reserved
+   for the active main category; card information lives beside its card.
    ========================================================================== */
 
 #screen-create {
@@ -12,6 +12,13 @@
   --info-button-dark: #4f2d19;
   --info-button-mid: #9b5d2e;
   --info-button-light: #d79a4c;
+}
+
+/* Let the highest tips of the ornament sit just beyond the viewport, while
+   reclaiming that same amount of vertical space for the scrolling content. */
+#screen-create .create-chrome-slot-top { top: -10px; }
+#screen-create .center-page {
+  padding-top: calc(var(--top-chrome-height) - 2px);
 }
 
 /* The old rectangular panel is now only a transparent layout/animation hook. */
@@ -56,6 +63,7 @@
   align-items: start;
   gap: 0;
   padding: 0;
+  width: 100%;
 }
 
 /* The selected card and the ornamental frame are independent layers. */
@@ -276,4 +284,105 @@
     min-width: 62px;
     padding-inline: 7px;
   }
+}
+
+/* Card-attached information panel. It is absolutely positioned inside the
+   scrolling page, so it follows the card rather than the viewport and never
+   changes the grid's measurements. */
+#screen-create .card-info-popover {
+  position: absolute;
+  z-index: 16;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 82px;
+  gap: 10px;
+  min-height: 92px;
+  padding: 13px 13px 11px 16px;
+  border: 2px solid #664126;
+  border-radius: 10px 13px 10px 13px;
+  color: #493522;
+  background:
+    linear-gradient(rgba(255, 249, 224, .93), rgba(230, 207, 159, .94)),
+    repeating-linear-gradient(4deg, transparent 0 9px, rgba(91, 60, 31, .06) 10px 11px);
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 246, 207, .72),
+    inset 0 -8px 18px rgba(103, 66, 34, .12),
+    0 5px 12px rgba(44, 27, 15, .38);
+  animation: cardInfoAppear .16s ease-out both;
+}
+
+#screen-create .card-info-popover::before {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: var(--card-anchor-x, 50%);
+  width: 16px;
+  height: 16px;
+  border-right: 2px solid #664126;
+  border-bottom: 2px solid #664126;
+  background: #e6cf9f;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+#screen-create .card-info-copy { min-width: 0; align-self: center; }
+#screen-create .card-info-title {
+  margin: 0 20px 5px 0;
+  color: #3e2919;
+  font: 700 .9rem/1.25 'Noto Serif KR', serif;
+}
+#screen-create .card-info-desc {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: #715943;
+  font-size: .7rem;
+  line-height: 1.42;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+#screen-create .card-info-actions {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 7px;
+  padding-top: 8px;
+}
+#screen-create .card-info-detail,
+#screen-create .card-info-select {
+  min-height: 27px;
+  padding: 3px 5px;
+  border: 1px solid #4c2916;
+  border-radius: 6px 8px;
+  color: #fff2cf;
+  background: linear-gradient(#d79a4c, #9b5d2e 56%, #4f2d19);
+  box-shadow: inset 0 1px rgba(255,225,158,.72), 0 2px 2px rgba(48,25,12,.25);
+  font: 700 .64rem/1 'Noto Sans KR', sans-serif;
+}
+#screen-create .card-info-select { background: linear-gradient(#66824b, #3f6039 58%, #29442c); }
+#screen-create .card-info-select.is-selected { background: linear-gradient(#b96045, #873c2d 58%, #60251d); }
+#screen-create .card-info-close {
+  position: absolute;
+  z-index: 2;
+  top: -8px;
+  right: -7px;
+  display: grid;
+  place-items: center;
+  width: 23px;
+  height: 23px;
+  padding: 0 0 2px;
+  border: 2px solid #f5d6bd;
+  border-radius: 50%;
+  color: #fff8e9;
+  background: linear-gradient(#d95d4e, #902b24);
+  box-shadow: 0 2px 4px rgba(55, 19, 13, .4);
+  font: 700 1rem/1 sans-serif;
+}
+#screen-create .data-card.card-info-active {
+  border-color: #e1b75e;
+  box-shadow: inset 0 0 0 1px rgba(255,236,174,.55), 0 0 0 2px rgba(117,75,34,.55), 0 4px 9px rgba(42,25,13,.28);
+}
+@keyframes cardInfoAppear {
+  from { opacity: 0; transform: translateY(5px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
