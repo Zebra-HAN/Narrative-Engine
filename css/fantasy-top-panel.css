@@ -1,174 +1,267 @@
 /* ========================================================================== 
-   Creative screen — fantasy information panel
+   Creative screen — illustrated top information panel
 
-   Visual-only overrides for the moving top panel. Motion, dimensions and
-   interaction remain owned by style.css and app.js. The variables below are
-   the intended tuning points for wood, parchment, type and image fade.
+   This file only changes presentation. The existing slider, ids, click
+   handlers and state classes remain the source of all panel behaviour.
    ========================================================================== */
 
 #screen-create {
-  --info-wood-dark: #51301f;
-  --info-wood: #815236;
-  --info-wood-light: #b47d50;
-  --info-wood-highlight: rgba(247, 207, 139, 0.58);
-  --info-parchment: #fff5dc;
-  --info-parchment-deep: #eed8aa;
-  --info-parchment-ink: #493a2b;
-  --info-title-forest: #214f35;
-  --info-button-forest: #2e5d3a;
-  --info-button-forest-light: #477b50;
-  --info-gold: #d6aa55;
-  --info-image-solid-stop: 48%;
-  --info-image-fade-stop: 100%;
-  --info-frame-width: 6px;
+  --top-chrome-height: 112px;
+  --info-ink: #493522;
+  --info-muted: #715943;
+  --info-cloth: #fff7df;
+  --info-button-dark: #4f2d19;
+  --info-button-mid: #9b5d2e;
+  --info-button-light: #d79a4c;
 }
 
-/* The panel's transform/position/height are deliberately left untouched. */
 #screen-create .info-panel {
   isolation: isolate;
   overflow: hidden;
-  background:
-    radial-gradient(ellipse at 18% 38%, rgba(127, 86, 46, 0.055) 0 1px, transparent 2px),
-    radial-gradient(ellipse at 74% 68%, rgba(127, 86, 46, 0.045) 0 1px, transparent 2px),
-    linear-gradient(100deg, rgba(255,255,255,0.42), transparent 28%, rgba(211,173,105,0.08) 72%, transparent),
-    var(--info-parchment);
-  border-bottom: 0;
-  box-shadow: 0 3px 8px rgba(54, 30, 17, 0.22);
+  height: var(--top-chrome-height);
+  min-height: var(--top-chrome-height);
+  padding: 2px 6px;
+  border: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,250,239,.9));
+  box-shadow: 0 3px 9px rgba(55, 31, 18, .18);
 }
 
-/* Four softly rounded timber rails sit above the content like a picture
-   frame. They are paint only, so they cannot affect swipe or button input. */
-#screen-create .info-panel::after {
+#screen-create .info-slider-wrap,
+#screen-create .info-slider-viewport,
+#screen-create .info-slider-track {
+  height: 100%;
+}
+
+#screen-create .info-slider-viewport {
+  width: 100%;
+  margin: 0;
+}
+
+#screen-create .info-slide {
+  display: grid;
+  grid-template-columns: clamp(92px, 29vw, 106px) clamp(188px, 61vw, 226px);
+  grid-template-rows: 1fr;
+  justify-content: center;
+  align-items: center;
+  gap: 0;
+  padding: 0 3px;
+}
+
+/* Selected artwork sits in the transparent opening of top_icon.webp. */
+#screen-create .info-visual {
+  position: relative;
+  z-index: 3;
+  inset: auto;
+  grid-column: 1;
+  grid-row: 1;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: visible;
+  opacity: 0;
+  pointer-events: none;
+  -webkit-mask-image: none;
+  mask-image: none;
+  filter: drop-shadow(0 3px 2px rgba(47, 27, 15, .2));
+}
+
+#screen-create .info-visual.has-image,
+#screen-create .info-visual.has-icon { opacity: 1; }
+
+#screen-create .info-visual::after {
   content: '';
   position: absolute;
+  z-index: 2;
   inset: 0;
-  z-index: 5;
-  pointer-events: none;
-  border: var(--info-frame-width) solid transparent;
-  border-radius: 8px;
-  background:
-    linear-gradient(90deg, var(--info-wood-dark), var(--info-wood-light) 14%, var(--info-wood) 48%, #986542 78%, var(--info-wood-dark)) top / 100% var(--info-frame-width) no-repeat,
-    linear-gradient(90deg, #48291b, var(--info-wood) 25%, var(--info-wood-light) 52%, var(--info-wood-dark)) bottom / 100% var(--info-frame-width) no-repeat,
-    linear-gradient(180deg, var(--info-wood-light), var(--info-wood), var(--info-wood-dark)) left / var(--info-frame-width) 100% no-repeat,
-    linear-gradient(180deg, var(--info-wood-dark), var(--info-wood-light) 45%, var(--info-wood)) right / var(--info-frame-width) 100% no-repeat;
-  box-shadow:
-    inset 0 0 0 1px var(--info-wood-highlight),
-    inset 0 0 0 calc(var(--info-frame-width) + 1px) rgba(99, 56, 31, 0.18);
+  background: url('../images/core/buttons/top_icon.webp') center / contain no-repeat;
 }
 
-#screen-create .info-empty {
-  color: #75634d;
-  text-shadow: 0 1px rgba(255, 255, 255, 0.72);
+#screen-create .info-visual .info-icon-img,
+#screen-create .info-visual .info-icon-text {
+  position: absolute;
+  z-index: 1;
+  left: 19%;
+  top: 20%;
+  width: 60%;
+  height: 60%;
+  border-radius: 50%;
+  overflow: hidden;
 }
 
-#screen-create .info-slider-wrap {
+#screen-create .info-visual .info-icon-img {
+  object-fit: cover;
+  object-position: center;
+}
+
+#screen-create .info-visual.has-icon {
+  display: block;
+}
+
+#screen-create .info-visual .info-icon-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(2rem, 8vw, 3rem);
+  line-height: 1;
+  background: #ead8ae;
+}
+
+/* The panel overlaps the icon slightly so both assets read as one fixture. */
+#screen-create .info-main {
   position: relative;
+  z-index: 1;
+  grid-column: 2;
+  grid-row: 1;
+  align-self: center;
+  width: calc(100% + 14px);
+  height: 100%;
+  min-width: 0;
+  margin-left: -14px;
+  padding: 0;
+  background: url('../images/core/buttons/top_panel.webp') center / 100% auto no-repeat;
+  filter: drop-shadow(0 3px 2px rgba(47, 27, 15, .18));
 }
 
-/* Float the page dots over the parchment so the artwork retains the full
-   available height without changing the slider's structure. */
+#screen-create .info-text-wrap {
+  position: absolute;
+  z-index: 2;
+  inset: 27% 16% 28% 18%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  height: auto;
+  padding: 0 2px 17px;
+  overflow: hidden;
+  color: var(--info-ink);
+  text-align: center;
+  text-shadow: 0 1px rgba(255,255,255,.8);
+}
+
+#screen-create .info-text-wrap::before { display: none; }
+
+#screen-create .info-name {
+  flex: 0 0 auto;
+  max-height: 45%;
+  margin: 0 0 1px;
+  overflow: hidden;
+  color: #3f2c1d;
+  font-family: 'Noto Serif KR', serif;
+  font-size: clamp(.66rem, 2.5vw, .78rem);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: .025em;
+}
+
+#screen-create .info-desc {
+  min-height: 0;
+  overflow: hidden;
+  color: var(--info-muted);
+  font-size: clamp(.52rem, 2vw, .61rem);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+#screen-create .info-actions {
+  position: relative;
+  z-index: 4;
+  grid-column: 2;
+  grid-row: 1;
+  align-self: end;
+  justify-self: center;
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+  margin: 0 0 13px -10px;
+  transform: none;
+}
+
+#screen-create .info-btn-detail,
+#screen-create .info-btn-select {
+  position: relative;
+  height: 21px;
+  min-width: 50px;
+  padding: 1px 8px 2px;
+  border: 1px solid #4c2916;
+  border-radius: 5px 8px 5px 8px;
+  color: #fff2cf;
+  background: linear-gradient(180deg, var(--info-button-light), var(--info-button-mid) 55%, var(--info-button-dark));
+  box-shadow: inset 0 1px rgba(255,225,158,.72), 0 2px 2px rgba(48,25,12,.3);
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: .57rem;
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: 0 1px 1px rgba(45,22,9,.75);
+}
+
+#screen-create .info-btn-detail::before,
+#screen-create .info-btn-select::before {
+  content: '◆';
+  margin-right: 3px;
+  color: #f2cf78;
+  font-size: .43rem;
+}
+
+#screen-create .info-btn-select {
+  background: linear-gradient(180deg, #66824b, #3f6039 58%, #29442c);
+  border-color: #29371f;
+}
+
+#screen-create .info-btn-select.is-selected {
+  color: #fff2cf;
+  background: linear-gradient(180deg, #b96045, #873c2d 58%, #60251d);
+  border-color: #512117;
+}
+
+#screen-create .info-btn-detail:focus-visible,
+#screen-create .info-btn-select:focus-visible {
+  outline: 2px solid #f1d17d;
+  outline-offset: 1px;
+}
+
+#screen-create .info-btn-detail:active,
+#screen-create .info-btn-select:active {
+  transform: scale(.94);
+  box-shadow: inset 0 2px 4px rgba(45,22,9,.35);
+}
+
 #screen-create .info-dots {
   position: absolute;
-  z-index: 4;
-  top: 2px;
+  z-index: 6;
+  top: 4px;
   left: 50%;
   padding: 0;
   transform: translateX(-50%);
 }
 
 #screen-create .info-dot {
-  background: var(--info-button-forest);
-  box-shadow: 0 0 0 1px rgba(255, 245, 216, 0.8);
+  width: 5px;
+  height: 5px;
+  background: #725035;
+  box-shadow: 0 0 0 1px rgba(255,247,220,.85);
 }
 
-#screen-create .info-visual {
-  left: var(--info-frame-width);
-  width: clamp(130px, 39%, 320px);
-  -webkit-mask-image: linear-gradient(
-    to right,
-    #000 0,
-    #000 var(--info-image-solid-stop),
-    rgba(0, 0, 0, 0.88) 60%,
-    rgba(0, 0, 0, 0.5) 76%,
-    rgba(0, 0, 0, 0.14) 92%,
-    transparent var(--info-image-fade-stop)
-  );
-  mask-image: linear-gradient(
-    to right,
-    #000 0,
-    #000 var(--info-image-solid-stop),
-    rgba(0, 0, 0, 0.88) 60%,
-    rgba(0, 0, 0, 0.5) 76%,
-    rgba(0, 0, 0, 0.14) 92%,
-    transparent var(--info-image-fade-stop)
-  );
+#screen-create .info-empty {
+  align-self: center;
+  width: min(226px, 72vw);
+  padding: 38px 34px 28px;
+  color: var(--info-muted);
+  background: url('../images/core/buttons/top_panel.webp') center / contain no-repeat;
+  font-family: 'Noto Serif KR', serif;
+  font-size: .72rem;
+  font-weight: 600;
+  text-shadow: 0 1px rgba(255,255,255,.8);
 }
 
-#screen-create .info-visual .info-icon-img {
-  object-fit: cover;
-  object-position: center 35%;
-}
+@media (max-width: 340px) {
+  #screen-create .info-slide {
+    grid-template-columns: 88px 184px;
+  }
 
-#screen-create .info-text-wrap {
-  color: var(--info-parchment-ink);
-  text-shadow: 0 1px rgba(255, 251, 236, 0.9);
-}
+  #screen-create .info-actions { margin-left: -7px; }
 
-#screen-create .info-text-wrap::before {
-  background: linear-gradient(90deg, rgba(255, 247, 224, 0.82), rgba(255, 247, 224, 0.58) 76%, transparent);
-  border-color: rgba(164, 119, 67, 0.12);
-  box-shadow: none;
-}
-
-#screen-create .info-name {
-  color: var(--info-title-forest);
-  font-weight: 700;
-}
-
-#screen-create .info-desc {
-  color: var(--info-parchment-ink);
-}
-
-#screen-create .info-btn-detail,
-#screen-create .info-btn-select {
-  border-radius: 8px;
-  font-family: 'Noto Sans KR', sans-serif;
-  font-weight: 700;
-  text-shadow: 0 1px rgba(255,255,255,0.45);
-}
-
-#screen-create .info-btn-detail {
-  color: #503724;
-  border: 1px solid #885c39;
-  background: linear-gradient(180deg, #fff8e7, #eacb98);
-  box-shadow: inset 0 1px rgba(255,255,255,0.85), 0 2px 3px rgba(72, 39, 20, 0.2);
-}
-
-#screen-create .info-btn-select {
-  color: #fff8df;
-  border: 1px solid var(--info-gold);
-  background: linear-gradient(180deg, var(--info-button-forest-light), var(--info-button-forest));
-  box-shadow: inset 0 1px rgba(255,255,255,0.2), 0 0 0 1px rgba(91,55,30,0.5), 0 2px 4px rgba(51,29,17,0.24);
-  text-shadow: 0 1px 1px rgba(20, 43, 27, 0.8);
-}
-
-#screen-create .info-btn-select.is-selected {
-  color: #503724;
-  border-color: #885c39;
-  background: linear-gradient(180deg, #fff8e7, #eacb98);
-  box-shadow: inset 0 1px rgba(255,255,255,0.85), 0 2px 3px rgba(72, 39, 20, 0.2);
-  text-shadow: 0 1px rgba(255,255,255,0.5);
-}
-
-#screen-create .info-btn-detail:focus,
-#screen-create .info-btn-detail:focus-visible,
-#screen-create .info-btn-select:focus,
-#screen-create .info-btn-select:focus-visible {
-  outline: 2px solid rgba(240, 207, 125, 0.72);
-  outline-offset: 1px;
-}
-
-#screen-create .info-btn-detail:active,
-#screen-create .info-btn-select:active {
-  box-shadow: inset 0 2px 4px rgba(66, 35, 19, 0.24);
+  #screen-create .info-btn-detail,
+  #screen-create .info-btn-select {
+    min-width: 47px;
+    padding-inline: 6px;
+  }
 }
