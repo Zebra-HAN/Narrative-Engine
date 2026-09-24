@@ -324,6 +324,14 @@
   transform: translateX(-50%) rotate(45deg);
 }
 
+#screen-create .card-info-popover.is-below-card::before {
+  top: -10px;
+  bottom: auto;
+  border: 0;
+  border-top: 2px solid #664126;
+  border-left: 2px solid #664126;
+}
+
 #screen-create .card-info-copy { min-width: 0; align-self: center; }
 #screen-create .card-info-title {
   margin: 0 20px 5px 0;
