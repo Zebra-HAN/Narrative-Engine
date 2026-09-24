@@ -1086,7 +1086,11 @@ body::after {
 
     .data-card.card-deal {
       opacity: 0;
+      pointer-events: none;
       animation: cardFlip 0.45s ease forwards;
+    }
+    .data-card.card-deal.card-interactive {
+      pointer-events: auto;
     }
     @keyframes cardFlip {
       0%   { opacity: 0; transform: rotateY(90deg) scale(0.95); }
