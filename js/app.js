@@ -111,6 +111,53 @@ const UI_SOUND = (() => {
   };
 })();
 
+/* ════════════════════════════════════════════════
+   배경 음악
+   HTMLAudio를 사용해 긴 음원을 스트리밍하고, 화면에 맞는 한 곡만 반복 재생한다.
+   브라우저가 최초 자동 재생을 막는 경우에는 첫 사용자 입력에서 오프닝 음악을 다시
+   시도한다. 창작 시작 버튼은 사용자 입력 안에서 호출되므로 즉시 전환할 수 있다.
+════════════════════════════════════════════════ */
+const BGM = (() => {
+  const tracks = {
+    opening: new Audio('sounds/bgm_opening1.mp3'),
+    start: new Audio('sounds/bgm_start.mp3')
+  };
+  let currentName = null;
+
+  Object.values(tracks).forEach(audio => {
+    audio.loop = true;
+    audio.preload = 'auto';
+    audio.volume = 0.7;
+  });
+
+  function play(name) {
+    const next = tracks[name];
+    if (!next) return;
+
+    Object.entries(tracks).forEach(([trackName, audio]) => {
+      if (trackName === name) return;
+      audio.pause();
+      audio.currentTime = 0;
+    });
+
+    currentName = name;
+    next.play().catch(() => {
+      // 자동 재생 정책으로 거부되면 아래의 첫 사용자 입력 핸들러가 다시 시도한다.
+    });
+  }
+
+  function resumeCurrentTrack() {
+    const current = tracks[currentName];
+    if (current?.paused) current.play().catch(() => {});
+  }
+
+  ['pointerdown', 'touchstart', 'keydown'].forEach(type => {
+    document.addEventListener(type, resumeCurrentTrack, { capture: true, once: true, passive: true });
+  });
+
+  return { play };
+})();
+
 function initUiSounds() {
   const cardSounds = ['pong1', 'pong2', 'pong3', 'pong4', 'pong5'];
 
@@ -120,7 +167,10 @@ function initUiSounds() {
 
     // 완료된 `click`에서만 피드백을 재생한다. 특히 pointerdown/touchstart는 손가락이
     // 닿는 즉시뿐 아니라 스크롤이나 길게 누르기를 시작할 때도 발생하므로 사용하지 않는다.
-    if (target.matches('.data-card')) {
+    if (target.matches('#btn-create')) {
+      // 창작 시작 버튼은 전용 BGM으로 피드백하므로 일반 클릭음을 겹치지 않는다.
+      return;
+    } else if (target.matches('.data-card')) {
       UI_SOUND.play(cardSounds[Math.floor(Math.random() * cardSounds.length)]);
     } else if (target.matches('#btn-extra-menu')) {
       UI_SOUND.play(extraMenuOpen ? 'card' : 'click');
@@ -740,6 +790,7 @@ window.addEventListener('load', () => {
 
 // 앱 시작: 첫 프레임은 흰색으로 유지하고, 기다림 없이 홈 화면이 부드럽게 떠오르게 한다.
 window.addEventListener('load', () => {
+  BGM.play('opening');
   setTimeout(() => {
      switchScreen('screen-home', null, { type: 'launch', duration: FADE_MS_LAUNCH });
   }, 10);
@@ -1229,6 +1280,8 @@ function goHome() {
   const createScreen = document.getElementById('screen-create');
   if (createScreen) createScreen.classList.remove('entering');
 
+  BGM.play('opening');
+
   switchScreen('screen-home', null, {
     type: 'dissolve',
     duration: FADE_MS_BACK,
@@ -1239,6 +1292,8 @@ function goToNarrative() {
   switchScreen('screen-narrative', null, { type: 'instant' });
 }
 function goToCreate() {
+  BGM.play('start');
+
   // 이전 방문에서 열린 메뉴가 닫히는 애니메이션이 첫 프레임에 보이지 않도록 즉시 초기화
   closeExtraMenu({ instant: true });
 
