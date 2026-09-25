@@ -1095,17 +1095,30 @@ body::after {
       to   { opacity: 1; transform: rotateY(0deg); }
     }
     .data-card.selected {
-      border-color: #49321f;
+      /* 선택 완료는 기본/정보 열람 상태보다 선명한 숲색 프레임으로 구분한다. */
+      border: 2px solid #1f5a3b;
       box-shadow:
-        inset 0 0 0 1px rgba(246, 219, 168, 0.38),
-        0 0 0 1px rgba(92, 65, 39, 0.24),
-        0 2px 5px rgba(54, 37, 22, 0.18);
+        inset 0 0 0 1px rgba(231, 239, 207, 0.48),
+        0 0 0 1px rgba(190, 151, 66, 0.5),
+        0 0 8px rgba(39, 92, 60, 0.34),
+        0 3px 6px rgba(45, 38, 21, 0.22);
     }
     .data-card.selected::after {
-      content: '🔒';
-      position: absolute; top: 1px; right: 1px;
-      font-size: 0.70rem;
-      color: var(--gold-bright);
+      content: '✓';
+      position: absolute;
+      top: 3px;
+      right: 3px;
+      display: grid;
+      place-items: center;
+      width: 20px;
+      height: 20px;
+      border: 1px solid rgba(243, 219, 157, 0.9);
+      border-radius: 50%;
+      color: #f9f1d5;
+      background: linear-gradient(145deg, #3f7a50, #1f5337);
+      box-shadow: 0 1px 4px rgba(20, 49, 31, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+      font: 800 1rem/1 'Noto Sans KR', sans-serif;
+      text-shadow: 0 1px 1px rgba(12, 40, 24, 0.48);
       z-index: 5;
     }
     /* 카드 이미지 프레임 — 카드 높이의 75% 차지 */
