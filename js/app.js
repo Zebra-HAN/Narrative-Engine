@@ -101,9 +101,11 @@ function initUiSounds() {
     // Play feedback only from the completed `click`. In particular, do not use
     // pointerdown/touchstart: those fire as soon as a finger lands and also at
     // the beginning of a scroll or long press.
-    if (target.matches('.detail-idea-block, .data-card')) {
+    if (target.matches('.data-card')) {
       UI_SOUND.play('card');
-    } else if (target.matches('.group-select-btn, .card-info-close, .card-info-select.is-selected, .status-close, .detail-close, .app-dialog-btn-cancel')) {
+    } else if (target.matches('.extra-btn-home, .extra-btn-random-all, .extra-btn-random, #btn-extra-menu')) {
+      UI_SOUND.play('card');
+    } else if (target.matches('.group-select-btn, .card-info-close, .card-info-detail, .card-info-select, .detail-idea-block, .status-close, .detail-close, .app-dialog-btn-cancel, .app-dialog-btn-confirm')) {
       UI_SOUND.play('touch');
     } else if (target.matches('#nav-idea')) {
       UI_SOUND.play('click');
