@@ -98,10 +98,10 @@
 #screen-create .info-visual .info-icon-text {
   position: absolute;
   z-index: 1;
-  left: 18.5%;
-  top: 19%;
-  width: 61%;
-  height: 61%;
+  left: 16.5%;
+  top: 17%;
+  width: 66%;
+  height: 66%;
   border-radius: 50%;
   overflow: hidden;
 }
@@ -110,6 +110,8 @@
   display: block;
   object-fit: cover;
   object-position: center;
+  /* 이미지가 원형 장식 아래까지 넉넉히 겹치게 해 가장자리에 빈틈이 생기지 않는다. */
+  transform: scale(1.1);
 }
 
 #screen-create .info-visual.has-icon { display: block; }
