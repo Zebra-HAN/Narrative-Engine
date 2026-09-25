@@ -1,5 +1,5 @@
 /* ════════════════════════════════════════════════
-   DATA ASSEMBLY
+   데이터 조립
    각 데이터 파일에서 NAV_DATA / CARD_DATA 조립
 ════════════════════════════════════════════════ */
 const NAV_DATA = {
@@ -17,10 +17,10 @@ const CARD_DATA = {
 };
 
 /* ════════════════════════════════════════════════
-   SOUND EFFECTS
-   All UI audio goes through this small controller so volume/mute controls can
-   be added in one place later. Files are fetched and decoded at startup so the
-   confirmed click only has to create and start a lightweight buffer source.
+   효과음
+   모든 UI 오디오는 이 작은 컨트롤러를 통과하므로 나중에 한 곳에서 음량 및 음소거
+   제어를 추가할 수 있다. 시작할 때 파일을 가져와 디코딩하므로 클릭이 확정되면
+   가벼운 버퍼 소스를 생성하고 시작하기만 하면 된다.
 ════════════════════════════════════════════════ */
 const UI_SOUND = (() => {
   const sources = {
@@ -40,9 +40,9 @@ const UI_SOUND = (() => {
 
   if (output) output.connect(context.destination);
 
-  // Decode every effect in parallel as soon as this script runs. Keeping only
-  // AudioBuffers means playback never waits for an HTML media element or seeks
-  // a shared voice. decodeAudioData's callbacks also support older iOS Safari.
+  // 이 스크립트가 실행되자마자 모든 효과음을 병렬로 디코딩한다. AudioBuffer만
+  // 유지하면 재생 시 HTML 미디어 요소를 기다리거나 공유 음원의 위치를 찾지 않아도 된다.
+  // decodeAudioData의 콜백은 이전 버전의 iOS Safari도 지원한다.
   if (context) {
     Object.entries(sources).forEach(([name, src]) => {
       fetch(src)
@@ -65,8 +65,8 @@ const UI_SOUND = (() => {
     unlockHandled = true;
     unlockEvents.forEach(type => document.removeEventListener(type, unlock, true));
 
-    // iOS Safari/PWA only permits this transition inside a user gesture. Do it
-    // once on the first interaction, before the later confirmed click handler.
+    // iOS Safari/PWA는 사용자 제스처 안에서만 이 상태 전환을 허용한다. 이후의 클릭 확정
+    // 핸들러보다 앞서 첫 상호작용에서 한 번 수행한다.
     if (context && context.state === 'suspended') {
       context.resume().catch(error => console.warn(error));
     }
@@ -81,8 +81,8 @@ const UI_SOUND = (() => {
     const buffer = buffers.get(name);
     if (muted || !context || !buffer) return;
 
-    // AudioBufferSourceNodes are intentionally one-shot. A fresh node per click
-    // starts immediately and allows arbitrarily fast activations to overlap.
+    // AudioBufferSourceNode는 의도적으로 한 번만 사용한다. 클릭마다 새 노드를 만들면
+    // 즉시 시작되며 아무리 빠른 연속 입력도 겹쳐서 재생할 수 있다.
     const source = context.createBufferSource();
     source.buffer = buffer;
     source.connect(output);
@@ -105,9 +105,8 @@ function initUiSounds() {
     const target = event.target.closest('button, [role="button"], [onclick], .pressable');
     if (!target || target.disabled) return;
 
-    // Play feedback only from the completed `click`. In particular, do not use
-    // pointerdown/touchstart: those fire as soon as a finger lands and also at
-    // the beginning of a scroll or long press.
+    // 완료된 `click`에서만 피드백을 재생한다. 특히 pointerdown/touchstart는 손가락이
+    // 닿는 즉시뿐 아니라 스크롤이나 길게 누르기를 시작할 때도 발생하므로 사용하지 않는다.
     if (target.matches('.data-card')) {
       UI_SOUND.play('card');
     } else if (target.matches('.extra-btn-home, .extra-btn-random-all, .extra-btn-random, #btn-extra-menu')) {
@@ -123,18 +122,17 @@ function initUiSounds() {
     }
   }
 
-  // A click is dispatched only after release on the same control and is
-  // cancelled by the browser for normal scroll/drag gestures. Capture it before
-  // target handlers perform rendering/navigation so playback starts at the
-  // confirmation instant instead of after the UI work has completed. This is
-  // the sole general activation path, so touchend/pointerup cannot duplicate it.
+  // 클릭은 같은 컨트롤 위에서 손을 뗀 뒤에만 전달되며, 일반적인 스크롤 및 드래그
+  // 제스처에서는 브라우저가 취소한다. 대상 핸들러가 렌더링이나 이동을 수행하기 전에
+  // 이를 캡처하여 UI 작업이 끝난 뒤가 아니라 입력이 확정되는 순간 재생을 시작한다.
+  // 이것이 유일한 일반 활성화 경로이므로 touchend/pointerup에서 중복 실행되지 않는다.
   document.addEventListener('click', event => {
     playActivationSound(event);
   }, { capture: true });
 }
 
 /* ════════════════════════════════════════════════
-   CREATIVE PAGE BACKGROUNDS
+   창작 페이지 배경
    아래 세 배열/객체의 이미지 주소를 바꾸면 화면 배경을 직접 교체할 수 있습니다.
    - main: 하단의 메인 카테고리를 선택하고 세부 카테고리를 고르기 전의 배경
    - sub: 원형/종족/성격 같은 세부 카테고리 화면의 배경 (선택 입력)
@@ -207,7 +205,7 @@ function applyCreativeBackground(location) {
 
 
 /* ════════════════════════════════════════════════
-   STATE  
+   상태
 ════════════════════════════════════════════════ */
 let currentNav   = 'character';
 let currentSubId = null;
@@ -320,9 +318,9 @@ function getCardGridOpenTag(group) {
 }
 
 function markFirstCardRow(page) {
-  // A section may appear before the first cards, leaving the initial grid empty.
-  // Only the first *actual* row on the page is the top row; rows opened after
-  // later section headers must keep showing their popover above the card.
+  // 첫 카드보다 앞에 섹션이 나타나 초기 그리드가 비어 있을 수 있다. 페이지에서
+  // 첫 번째로 *실제로 표시되는* 행만 최상단 행이며, 이후 섹션 헤더 다음에 시작되는 행은
+  // 팝오버를 계속 카드 위에 표시해야 한다.
   const grids = Array.from(page.querySelectorAll('.card-grid'));
   const firstCards = grids
     .map(grid => Array.from(grid.querySelectorAll('.data-card')))
@@ -663,7 +661,7 @@ function setSubgroupAddress(subId, groupIdx, sgIdx) {
 }
 
 /* ════════════════════════════════════════════════
-   OPENING ANIMATION   오프닝
+   오프닝 애니메이션
 ════════════════════════════════════════════════ */
 const FADE_MS_LAUNCH = 1400;       // 앱 시작: 흰 바탕에서 홈이 느긋하게 페이드인
 const FADE_MS_FORWARD_WHITE = 280; // 홈 → 다음 화면: 흰빛이 빠르게 스쳐 지나가는 시간
@@ -724,9 +722,9 @@ initInfoTextAutoFit();
 initUiSounds();
 
 /* ════════════════════════════════════════════════
-   CARD TITLE AUTO-FIT
-   CSS supplies one standard size for each layout. Auto-fit is deliberately
-   only an overflow safety net: it never enlarges an individual short title.
+   카드 제목 자동 맞춤
+   CSS는 각 레이아웃에 하나의 표준 크기를 제공한다. 자동 맞춤은 의도적으로 내용이
+   넘칠 때를 대비한 안전장치일 뿐이며, 개별 짧은 제목을 확대하지 않는다.
 ════════════════════════════════════════════════ */
 const CARD_TITLE_SIZE_STEP_PX = 0.5;
 const CARD_TITLE_MIN_SCALE = 0.72;
@@ -780,9 +778,8 @@ function fitCardTitle(container) {
   const standardLineHeightPx = parseFloat(standardStyle.lineHeight);
   if (!standardSize || !standardLineHeightPx) return;
 
-  // Keep a modest vertical safety zone instead of accepting text right up to
-  // the parchment boundary. The text layer's CSS width supplies the matching
-  // horizontal safety zone.
+  // 문구가 양피지 경계에 바로 닿게 두지 않고 적당한 세로 안전 영역을 유지한다.
+  // 문구 레이어의 CSS 너비가 이에 맞는 가로 안전 영역을 제공한다.
   const availableHeight = height - Math.max(3, height * 0.1);
   const standardLineHeight = standardLineHeightPx / standardSize;
   const candidates = getCardTitleCandidates(standardSize);
@@ -792,15 +789,14 @@ function fitCardTitle(container) {
     if (cardTitleFits(text, availableHeight)) return;
   }
 
-  // Only an extreme title that still overflows at the minimum size receives
-  // slightly tighter leading. Normal one- and multi-line cards share the same
-  // comfortable layout-specific rhythm.
+  // 최소 크기에서도 여전히 넘치는 극단적으로 긴 제목에만 줄 간격을 조금 좁게 적용한다.
+  // 일반적인 한 줄 및 여러 줄 카드는 레이아웃별로 같은 여유로운 간격을 공유한다.
   const minimumSize = candidates[candidates.length - 1];
   const compactLineHeight = standardLineHeight * CARD_TITLE_COMPACT_LINE_HEIGHT_SCALE;
   applyCardTitleSize(text, minimumSize, compactLineHeight);
   if (cardTitleFits(text, availableHeight)) return;
 
-  // Extreme titles stay clipped by .card-name rather than escaping the parchment.
+  // 극단적으로 긴 제목은 양피지 밖으로 벗어나지 않고 .card-name에서 잘린다.
   applyCardTitleSize(text, minimumSize, compactLineHeight);
 }
 
@@ -826,12 +822,12 @@ function initCardTitleAutoFit() {
   requestCardTitleAutoFit();
 }
 
-// The fitter reads the state declared above immediately, so initialize it only
-// after that state has left the temporal dead zone.
+// 맞춤 로직은 위에서 선언한 상태를 즉시 읽으므로, 해당 상태가 일시적 사각지대를
+// 벗어난 뒤에만 초기화한다.
 initCardTitleAutoFit();
 
 /* ════════════════════════════════════════════════
-   INFO PANEL TEXT AUTO-FIT
+   정보 패널 문구 자동 맞춤
    패널 높이는 그대로 둔 채 실제 렌더링 영역을 넘는 텍스트만 단계적으로 축소한다.
 ════════════════════════════════════════════════ */
 const INFO_TEXT_MIN_SCALE = 0.75;
@@ -883,7 +879,7 @@ function initInfoTextAutoFit() {
 }
 
 /* ════════════════════════════════════════════════
-   SCROLL-RESPONSIVE CREATIVE CHROME
+   스크롤 반응형 창작 화면 장식
    빠르고 분명한 탐색 제스처만 받아 패널을 일정한 시간으로 끝까지 움직인다.
    wheel/touch를 직접 추적하므로 콘텐츠가 짧아도 같은 방식으로 동작한다.
    중앙 스크롤 영역의 크기와 위치는 절대 변경하지 않아 카드가 튀거나 늘어나지 않는다.
@@ -1083,7 +1079,7 @@ function initScrollResponsiveChrome() {
 }
 
 /* ════════════════════════════════════════════════
-   SCREEN TRANSITION
+   화면 전환
 ════════════════════════════════════════════════ */
 function restartHomeIntro() {
   const home = document.getElementById('screen-home');
@@ -1191,7 +1187,7 @@ function switchScreen(targetId, callback, options = {}) {
 }
 
 /* ════════════════════════════════════════════════
-   NAVIGATION
+   내비게이션
 ════════════════════════════════════════════════ */
 function goHome() {
   closeCardInfo();
@@ -1239,7 +1235,7 @@ function setBottomNavState(navId) {
 }
 
 /* ════════════════════════════════════════════════
-   MAIN NAV SWITCH
+   주 내비게이션 전환
 ════════════════════════════════════════════════ */
 function switchNav(navId, skipAnimation, options = {}) {
   if (navId === currentNav && !skipAnimation && addressTrail.length > 0 && !options.force) return;
@@ -1291,7 +1287,7 @@ function renderSubnav(navId, animate) {
 }
 
 /* ════════════════════════════════════════════════
-   SUB MENU SELECT
+   하위 메뉴 선택
 ════════════════════════════════════════════════ */
 function selectSub(subId, navId) {
   closeCardInfo();
@@ -1309,7 +1305,7 @@ function selectSub(subId, navId) {
 }
 
 /* ════════════════════════════════════════════════
-   CENTER DISPLAY
+   중앙 표시 영역
 ════════════════════════════════════════════════ */
 function showDefaultCenter() {
   closeCardInfo();
@@ -1335,26 +1331,26 @@ function getGroupLayoutClass(count) {
 }
 
 /*
- * Keep the first cards clearly separated, then compress the remaining reveal
- * into a fixed time window. The exponential tail approaches (but never grows
- * beyond) CARD_REVEAL_MAX_DELAY_MS, even for very large card collections.
+ * 첫 카드들은 명확한 간격을 두고, 나머지 공개 과정은 고정된 시간 범위로 압축한다.
+ * 카드 묶음이 매우 커도 지수형 꼬리 구간은 CARD_REVEAL_MAX_DELAY_MS에
+ * 가까워질 뿐 절대 이를 넘지 않는다.
  */
 const CARD_REVEAL_MAX_DELAY_MS = 1500;
 
 function getCardRevealDelayMs(index) {
   const cardIndex = Math.max(0, Number(index) || 0);
 
-  // Cards 1-8: a deliberate, easy-to-follow cadence.
+  // 1~8번 카드: 알아보기 쉽도록 의도적으로 여유 있는 간격을 둔다.
   if (cardIndex < 8) return cardIndex * 100;
 
-  // Cards 9-20: progressively shorten the gap from the preceding card.
+  // 9~20번 카드: 앞 카드와의 간격을 점진적으로 줄인다.
   if (cardIndex < 20) {
     const acceleratedIndex = cardIndex - 7;
     const progress = acceleratedIndex / 12;
     return 700 + 520 * (1 - Math.pow(1 - progress, 1.7));
   }
 
-  // Card 21 onward: a very fast, asymptotic sweep with a hard upper bound.
+  // 21번 이후 카드: 상한을 확실히 둔 매우 빠른 점근적 흐름을 적용한다.
   const tailIndex = cardIndex - 19;
   return 1220 + (CARD_REVEAL_MAX_DELAY_MS - 1220) * (1 - Math.exp(-tailIndex / 36));
 }
@@ -1365,8 +1361,8 @@ function getCardRevealDelayStyle(index) {
 
 function setupCardRevealAnimations(page) {
   page.querySelectorAll('.card-deal').forEach(card => {
-    // A card becomes usable when its own reveal begins, independently of all
-    // cards that are still waiting later in the stagger.
+    // 각 카드는 이후 순차 공개를 기다리는 다른 카드와 관계없이 자신의 공개가
+    // 시작되는 순간 사용할 수 있게 된다.
     card.addEventListener('animationstart', () => card.classList.add('card-interactive'), { once: true });
     card.addEventListener('animationend', () => card.classList.remove('card-deal', 'card-interactive'), { once: true });
     card.addEventListener('animationcancel', () => card.classList.remove('card-deal', 'card-interactive'), { once: true });
@@ -2244,7 +2240,7 @@ function closeDetailSheet(e) {
 
 
 /* ════════════════════════════════════════════════
-   STATUS OVERLAY
+   상태 오버레이
 ════════════════════════════════════════════════ */
 function openStatusOverlay() {
   setBottomNavState('idea');
@@ -2416,7 +2412,7 @@ function refreshStatusIfOpen() {
 }
 
 /* ════════════════════════════════════════════════
-   RESET
+   초기화
 ════════════════════════════════════════════════ */
 async function partialReset() {
   const label = NAV_DATA[currentNav].label;
@@ -2492,7 +2488,7 @@ function updateNavBadges() {
 }
 
 /* ════════════════════════════════════════════════
-   RENDER ICON (이모지 or 이미지 자동 분기)
+   아이콘 렌더링(이모지 또는 이미지 자동 분기)
 ════════════════════════════════════════════════ */
 function renderIcon(icon, img, className) {
   if (img) {
@@ -2569,14 +2565,14 @@ function formatSectionHeaderLabel(label) {
 
 
 /* ════════════════════════════════════════════════
-   UTIL
+   유틸리티
 ════════════════════════════════════════════════ */
 function escHtml(s) {
   return s.replace(/'/g, "\\'");
 }
 
 /* ════════════════════════════════════════════════
-   EXTRA MENU TOGGLE
+   추가 메뉴 전환
 ════════════════════════════════════════════════ */
 let extraMenuOpen = false;
 
@@ -2611,7 +2607,7 @@ function toggleExtraMenu() {
 }
 
 /* ════════════════════════════════════════════════
-   RANDOM SELECT
+   무작위 선택
 ════════════════════════════════════════════════ */
 
 // 현재 탭의 현재 서브(마름모) 카드 1개 랜덤 선택
@@ -2780,7 +2776,7 @@ function runGroupButtonAction(btn) {
 
 
 /* ════════════════════════════════════════════════
-   LONG PRESS → 카드 선택/취소
+   길게 누르기 → 카드 선택/취소
 ════════════════════════════════════════════════ */
 let _lpTimer = null;
 let _lpStartX = 0;
@@ -2854,7 +2850,7 @@ document.addEventListener('touchmove', (e) => {
 }, { passive: true });
 
 /* ════════════════════════════════════════════════
-   SWIPE TO CLOSE (왼쪽 스와이프로 패널 닫기)
+   스와이프로 닫기(왼쪽 스와이프로 패널 닫기)
 ════════════════════════════════════════════════ */
 function attachSwipeToClose(panelEl, closeFn) {
   if (!panelEl) return;

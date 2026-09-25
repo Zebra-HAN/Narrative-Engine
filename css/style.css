@@ -1,12 +1,12 @@
 /* ═══════════════════════════════════════════════
-       RESET & ROOT  VARIABLES 
+       초기화 및 루트 변수
     ══════════════════════════════════════════════ */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      /* Keep the application at its original mobile canvas width on larger
-         viewports. The value only caps wide screens; narrow phones still use
-         all of their available width. */
+      /* 큰 뷰포트에서도 애플리케이션의 원래 모바일 캔버스 너비를 유지한다.
+         이 값은 넓은 화면에만 상한을 두며, 좁은 휴대전화에서는 여전히
+         사용 가능한 너비를 모두 활용한다. */
       --app-max-width: 430px;
 
       /* ── 배경 계열: 클린 화이트 ── */
@@ -83,7 +83,7 @@ body::after {
     }
 
     /* ═══════════════════════════════════════════════
-       SCREEN MANAGEMENT
+       화면 관리
     ═══════════════════════════════════════════════ */
     .screen {
       position: fixed;
@@ -113,7 +113,7 @@ body::after {
     }
 
     /* ═══════════════════════════════════════════════
-       OPENING SCREEN
+       오프닝 화면
     ═══════════════════════════════════════════════ */
     #screen-opening {
       background: #ffffff;
@@ -194,7 +194,7 @@ body::after {
     }
 
 /* ═══════════════════════════════════════════════
-        HOME SCREEN   홈 화면
+        홈 화면   홈 화면
      ═══════════════════════════════════════════════ */
     #screen-home {
       background:
@@ -316,7 +316,7 @@ body::after {
 
 
     /* ═══════════════════════════════════════════════
-       NARRATIVE STRUCTURE PAGE
+       스토리 구조 페이지
     ═══════════════════════════════════════════════ */
     #screen-narrative {
       background: var(--bg-deepest);
@@ -421,7 +421,7 @@ body::after {
 
 
     /* ═══════════════════════════════════════════════
-       MAIN CREATIVE PAGE
+       메인 창작 페이지
     ═══════════════════════════════════════════════ */
     #screen-create {
       --chrome-progress: 0;
@@ -451,8 +451,8 @@ body::after {
     .create-chrome-slot-bottom {
       bottom: 0;
       height: var(--bottom-chrome-height);
-      /* The utility menu opens above the fixed bottom chrome.  It must not be
-         clipped by the animation slot that keeps the chrome out of layout. */
+      /* 유틸리티 메뉴는 고정된 하단 장식 위로 열린다. 장식을 레이아웃 밖에
+         유지하는 애니메이션 영역에 의해 잘리지 않아야 한다. */
       overflow: visible;
     }
     #screen-create.entering .info-panel {
@@ -482,7 +482,7 @@ body::after {
       will-change: transform, opacity;
     }
 
-    /* ── INFO PANEL (설명창) ── */
+    /* ── 정보 패널(설명창) ── */
     .info-panel {
       position: absolute;
       right: 0;
@@ -497,8 +497,8 @@ body::after {
       flex-direction: column;
       justify-content: center;
       z-index: 20;
-      /* The slot itself ignores empty-space hits, while the visible panel and
-         all of its buttons/swipe surface remain interactive. */
+      /* 영역 자체는 빈 공간의 입력을 무시하지만, 보이는 패널과 그 안의 모든 버튼 및
+         스와이프 영역은 계속 상호작용할 수 있다. */
       pointer-events: auto;
       transform: translate3d(0, var(--top-chrome-offset), 0);
       opacity: 1;
@@ -546,8 +546,8 @@ body::after {
       flex: 1;
       min-height: 0;
       margin-left: -10px;
-      /* The viewport is the artwork's clipping boundary. Pull that boundary
-         through the panel's bottom padding so the image reaches the rule. */
+      /* 뷰포트는 삽화가 잘리는 경계다. 이미지가 구분선에 닿도록 이 경계를
+         패널의 하단 패딩까지 당긴다. */
       margin-bottom: -7px;
       width: calc(100% + 10px);
     }
@@ -579,19 +579,18 @@ body::after {
       align-items: center;
       flex: 1;
       min-width: 0;
-      /* Keep the copy in the panel's central area rather than stretching it
-         across the decorative image and the action buttons. */
+      /* 문구를 장식 이미지와 동작 버튼까지 늘리지 않고 패널 중앙 영역에 유지한다. */
       padding-left: clamp(72px, 23vw, 180px);
       justify-content: center;
     }
     .info-visual {
       position: absolute;
       z-index: 0;
-      /* Extend through the slider's padding so the artwork meets the panel's
-         lower rule instead of leaving a white strip beneath it. */
+      /* 삽화 아래에 흰 띠가 남지 않고 패널 하단 구분선에 닿도록 슬라이더의
+         패딩 영역까지 확장한다. */
       inset: -5px auto -7px 0;
-      /* Give the artwork enough horizontal room for a closer cover crop and a
-         long transition into the panel background. */
+      /* 삽화를 더 가까이 채워 자르고 패널 배경으로 길게 이어지게 할 수 있도록
+         충분한 가로 공간을 준다. */
       width: clamp(112px, 36%, 280px);
       pointer-events: none;
       opacity: 0;
@@ -614,8 +613,7 @@ body::after {
       display: flex;
       align-items: center;
       justify-content: center;
-      /* Emoji are standalone artwork, so they should not fade out like a
-         full-bleed image at the text edge. */
+      /* 이모지는 독립된 삽화이므로 문구 경계에서 전면 이미지처럼 흐려지지 않아야 한다. */
       -webkit-mask-image: none;
       mask-image: none;
     }
@@ -680,8 +678,7 @@ body::after {
       flex-direction: column;
       align-items: center;
       justify-content: flex-end;
-      /* Match the reference's more open vertical grouping without changing
-         either button's dimensions or appearance. */
+      /* 어느 버튼의 치수나 모양도 바꾸지 않고 참고 이미지의 여유로운 세로 배치를 따른다. */
       gap: 12px;
       margin-left: auto;
       transform: translateY(2px);
@@ -782,7 +779,7 @@ body::after {
     }
 
 
-    /* ── SUBNAVIGATION (bar-style, horizontal scroll) ── */
+    /* ── 하위 내비게이션(막대형, 가로 스크롤) ── */
     .subnav-panel {
       flex-shrink: 0;
   background: #ffffff; /* 깔끔한 흰색 배경 유지 */
@@ -888,7 +885,7 @@ body::after {
         0 0 8px rgba(255, 213, 94, 0.85);
     }
 
-    /* ── CENTER AREA ── */
+    /* ── 중앙 영역 ── */
     .center-area {
       --back-swipe-x: 0px;
       --creative-background-image: none;
@@ -1008,8 +1005,7 @@ body::after {
     .card-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      /* Give every card a little more breathing room without changing its
-         layout-specific aspect ratio. */
+      /* 레이아웃별 종횡비를 바꾸지 않고 모든 카드에 여유 공간을 조금 더 준다. */
       gap: 9px 6px;
       margin: 0 8px 16px;
       perspective: 900px;
@@ -1037,8 +1033,8 @@ body::after {
 
     .data-card {
       aspect-ratio: 0.72;
-      /* A restrained timber rim: narrow enough for dense mobile grids, but
-         built from several quiet tones rather than a single brown stroke. */
+      /* 절제된 나무 테두리로, 촘촘한 모바일 그리드에 맞게 좁으면서도 하나의 갈색 선 대신
+         차분한 여러 색조로 구성한다. */
       border: 1px solid #65472f;
       border-radius: var(--radius-card);
       background:
@@ -1061,8 +1057,8 @@ body::after {
       backface-visibility: hidden;
     }
 
-    /* The frame remains unornamented; its material detail comes from the
-       restrained layered background and inset highlights above. */
+    /* 프레임에는 별도 장식을 두지 않으며, 위의 절제된 다층 배경과 안쪽 강조 효과로
+       재질의 세부 표현을 만든다. */
     .data-card::before {
       content: none;
     }
@@ -1077,7 +1073,7 @@ body::after {
     }
 
     .card-grid-layout-d .data-card {
-      /* layoutType 2: taller rows leave enough room for long, wrapped titles. */
+      /* layoutType 2: 더 높은 행으로 길게 줄 바꿈되는 제목에 충분한 공간을 둔다. */
       aspect-ratio: 1.75;
       padding: 5px;
       flex-direction: row;
@@ -1129,8 +1125,8 @@ body::after {
         inset 0 1px rgba(224, 231, 205, 0.10);
     }
 
-    /* Image-less cards use the sage field; image cards still cover this area
-       completely through the existing .card-img object-fit rules. */
+    /* 이미지가 없는 카드는 세이지색 영역을 사용하며, 이미지가 있는 카드는 기존
+       .card-img의 object-fit 규칙으로 이 영역을 계속 완전히 덮는다. */
     .card-img-frame.has-icon {
       background:
         repeating-linear-gradient(4deg, rgba(236,242,218,0.018) 0 1px, transparent 1px 6px),
@@ -1197,8 +1193,8 @@ body::after {
       overflow: hidden;
     }
 
-    /* The title fitter may only shrink this text layer when it overflows. The
-       layout-level size on .card-name remains the shared typography baseline. */
+    /* 제목 맞춤 로직은 이 문구 레이어가 넘칠 때만 크기를 줄일 수 있다.
+       .card-name의 레이아웃 수준 크기는 공통 타이포그래피 기준으로 유지한다. */
     .card-name-text {
       display: block;
       width: calc(100% - clamp(4px, 8%, 10px));
@@ -1206,8 +1202,8 @@ body::after {
       text-align: center;
       overflow-wrap: anywhere;
       word-break: normal;
-      /* Noto Sans KR's line box reads slightly low despite mathematical
-         centering; this optical correction is shared by every card shape. */
+      /* Noto Sans KR의 줄 상자는 수학적으로 가운데에 있어도 약간 낮아 보이므로,
+         모든 카드 모양에 같은 시각적 보정을 적용한다. */
       transform: translateY(-0.06em);
     }
 
@@ -1215,8 +1211,8 @@ body::after {
  .card-grid-layout-b .card-name { font-size: 0.56rem; }
     .card-grid-layout-c .card-name { font-size: 0.68rem; line-height: 1.28; }
     .card-grid-layout-d .card-name {
-      /* Wide copy cards favor characters per line and a calm, consistent
-         reading rhythm rather than growing to fill the parchment. */
+      /* 문구 영역이 넓은 카드는 양피지를 채우도록 커지는 대신 한 줄의 글자 수와
+         차분하고 일관된 읽기 흐름을 우선한다. */
       font-size: 0.58rem;
       line-height: 1.4;
       padding: 2px 4px;
@@ -1326,7 +1322,7 @@ body::after {
     }
 
 
-    /* ── BOTTOM NAV ── */
+    /* ── 하단 내비게이션 ── */
     .bottom-nav {
      /* ── 하단 버튼 애니메이션 조절값 ───── 인디케이터가 클릭한 곳으로 이동하는 애니 ───────
       ───────────────────────────────────────────────────────── */
@@ -1676,7 +1672,7 @@ body::after {
 
 
     /* ═══════════════════════════════════════════════
-       EMPTY STATE
+       빈 상태
     ═══════════════════════════════════════════════ */
     .empty-state {
       display: flex;
@@ -2086,8 +2082,8 @@ body::after {
   gap: 12px;
 }
 
-/* Small sets should sit in the visual center of the available canvas.
-   Large grids intentionally retain their top-aligned, scroll-first layout. */
+/* 작은 카드 묶음은 사용 가능한 캔버스의 시각적 중앙에 둔다.
+   큰 그리드는 의도적으로 상단 정렬 및 스크롤 우선 레이아웃을 유지한다. */
 .group-layout-list {
   min-height: 100%;
   justify-content: center;
@@ -2164,7 +2160,7 @@ body::after {
 .group-layout-two .group-select-btn {
   width: 100%;
   min-height: 0;
-  /* Two choices are intentionally tall portrait buttons placed side by side. */
+  /* 두 선택지는 의도적으로 세로로 긴 버튼으로 만들어 나란히 배치한다. */
   aspect-ratio: 1 / 1.8;
   align-self: center;
   flex-direction: column;
@@ -2197,7 +2193,7 @@ body::after {
   overflow: visible;
 }
 
-/* ── group-btn-icon: 이모지 아이콘 OR 이미지 배경 레이어 ──────
+/* ── group-btn-icon: 이모지 아이콘 또는 이미지 배경 레이어 ──────
    이미지 없을 때 → 이모지를 버튼 왼쪽에 표시 (기본 flex 흐름)
    이미지 있을 때 → 버튼 전체를 덮는 absolute 배경으로 전환됨
      (JS 에서 img 가 있으면 group-btn-icon 이 absolute 레이어가 됨,
@@ -2260,7 +2256,7 @@ body::after {
   /* show-category 클래스 기반 이동 삭제, JS transform으로 제어 */
 }
 
-/* ── Dot Indicator ── */
+/* ── 점 표시기 ── */
 .info-dots {
   display: flex;
   justify-content: center;
@@ -2297,7 +2293,7 @@ body::after {
   user-select: none;
 }
 
-/* ── Detail Sheet 내용, 상세 정보 ── */
+/* ── 상세 시트 내용 및 상세 정보 ── */
 .detail-content {
   padding: 20px 18px 28px;
   display: flex;
@@ -2380,7 +2376,7 @@ body::after {
   border-left: 0;
 }
 
-/* ── Detail Idea Blocks ── */
+/* ── 상세 아이디어 블록 ── */
  .detail-column,
  .detail-columns {
   width: 100%;
@@ -2774,8 +2770,8 @@ body {
   margin: 0 auto;
 }
 
-/* vw units refer to the browser rather than the capped app canvas. Freeze the
-   two viewport-scaled headings at their 430px mobile values on wide screens. */
+/* vw 단위는 너비가 제한된 앱 캔버스가 아니라 브라우저를 기준으로 한다. 넓은 화면에서는
+   뷰포트에 따라 조절되는 두 제목을 430px 모바일 기준값으로 고정한다. */
 @media (min-width: 431px) {
   .opening-title { font-size: 1.075rem; }
   .opening-subtitle { font-size: 0.85rem; }

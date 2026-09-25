@@ -1,17 +1,17 @@
 /* ===========================================================================
-   Bottom fantasy panel skin
+   하단 판타지 패널 스킨
 
-   Visual overrides for the three pieces of create-screen bottom chrome only:
-   the selection/address bar, category bar, and primary navigation. The
-   complete panel artwork lives in bottom_panel.jpg. The three existing UI
-   regions remain transparent so that artwork reads as one continuous surface.
+   생성 화면 하단 장식의 세 부분인 선택 및 주소 표시줄, 카테고리 표시줄,
+   주 내비게이션에만 시각적 스타일을 덮어쓴다. 전체 패널 삽화는
+   bottom_panel.jpg에 있다. 기존 UI 영역 세 곳은 투명하게 유지하여
+   삽화가 하나로 이어진 표면처럼 보이게 한다.
    ========================================================================== */
 
 #screen-create {
-  /* Enlarge category artwork to 1.5x its original 36px size without changing
-     the dimensions of the bottom chrome that contains it. */
+  /* 카테고리 삽화를 원래 36px 크기의 1.5배로 확대하되, 이를 담는 하단 장식의
+     치수는 바꾸지 않는다. */
   --category-image-size: 54px;
-  /* Give the enlarged artwork a transparent runway into the address row. */
+  /* 확대된 삽화가 주소 행까지 뻗을 수 있도록 투명한 여유 공간을 둔다. */
   --category-overlap: 12px;
   --wood-line: rgba(238, 194, 127, 0.54);
   --wood-shadow: rgba(45, 23, 13, 0.34);
@@ -23,7 +23,7 @@
   --accent-gold-light: #f0cf7d;
 }
 
-/* One image skins the complete selection, category, and navigation stack. */
+/* 하나의 이미지로 선택, 카테고리, 내비게이션 영역 전체를 꾸민다. */
 #screen-create .create-chrome-bottom {
   background-image: url('../images/core/buttons/bottom_panel.jpg');
   background-repeat: no-repeat;
@@ -31,7 +31,7 @@
   background-size: cover;
 }
 
-/* 1. Selection / breadcrumb panel ---------------------------------------- */
+/* 1. 선택 및 이동 경로 패널 ---------------------------------------- */
 #screen-create .control-bar {
   position: relative;
   z-index: 1;
@@ -81,19 +81,19 @@
   border-radius: 0;
 }
 
-/* 2. Category panel ------------------------------------------------------- */
+/* 2. 카테고리 패널 ------------------------------------------------------- */
 #screen-create .subnav-panel {
   position: relative;
   z-index: 2;
-  /* Extend the category viewport over the address row, rather than moving or
-     resizing either row. This preserves the bottom chrome's measured height
-     and its show/hide animation while giving the 54px emblems room to render. */
+  /* 어느 행도 이동하거나 크기를 바꾸지 않고 카테고리 뷰포트를 주소 행 위로
+     확장한다. 이렇게 하면 하단 장식의 계산된 높이와 표시 및 숨김 애니메이션을
+     유지하면서 54px 문양을 그릴 공간을 확보할 수 있다. */
   height: calc(58px + var(--category-overlap));
   margin-top: calc(-1 * var(--category-overlap));
   padding-top: 1px;
-  /* Keep the whole viewport in the hit-test tree.  Disabling pointer events
-     here left only the individual buttons touchable, so a drag that started
-     in a gap could not initiate the native horizontal scroller on mobile. */
+  /* 전체 뷰포트를 히트 테스트 트리에 유지한다. 여기서 포인터 이벤트를 끄면
+     개별 버튼만 터치할 수 있어, 빈 공간에서 시작한 드래그로는 모바일의
+     기본 가로 스크롤을 시작할 수 없다. */
   pointer-events: auto;
   background: transparent;
   border-color: transparent;
@@ -101,7 +101,7 @@
 }
 
 #screen-create .subnav-scroll {
-  /* Keep every category in the four content tabs visually connected. */
+  /* 네 개 콘텐츠 탭의 모든 카테고리가 시각적으로 이어지게 한다. */
   gap: 7px;
   padding-inline: 7px;
   pointer-events: auto;
@@ -110,9 +110,9 @@
   overscroll-behavior-x: contain;
 }
 
-/* Place the category caption just above the primary navigation.  The panel's
-   extra runway still protects the enlarged emblem while this lower position
-   balances the two rows and keeps the caption fully visible. */
+/* 카테고리 설명을 주 내비게이션 바로 위에 배치한다. 패널의 추가 여유 공간은
+   확대된 문양을 계속 보호하며, 이처럼 낮은 위치는 두 행의 균형을 맞추고
+   설명 전체가 보이게 한다. */
 #screen-create .subnav-item {
   top: 4px;
   pointer-events: auto;
@@ -129,9 +129,9 @@
   transform: none;
 }
 
-/* The halo only exists for the active item (see below).  Keeping an
-   opacity-zero pseudo-element alive for every item can leave a composited
-   texture behind while this row is scrolling, particularly in WebKit. */
+/* 후광은 활성 항목에만 존재한다(아래 참고). 모든 항목에 투명도가 0인
+   의사 요소를 유지하면 이 행을 스크롤할 때, 특히 WebKit에서 합성된
+   텍스처가 남을 수 있다. */
 #screen-create .diamond-btn::before {
   content: none;
   position: absolute;
@@ -153,9 +153,8 @@
   color: var(--cream);
   filter: sepia(0.15) brightness(1.08);
   transform: none;
-  /* Do not interpolate filters: changing a multi-stage drop-shadow filter
-     creates transient GPU filter surfaces whose square bounds can flash or
-     linger when the active category changes. */
+  /* 필터를 보간하지 않는다. 여러 단계의 그림자 필터를 변경하면 일시적인 GPU
+     필터 표면이 생겨 활성 카테고리가 바뀔 때 사각 경계가 번쩍이거나 남을 수 있다. */
   transition: none;
 }
 
@@ -179,9 +178,8 @@
   box-shadow: none;
 }
 
-/* Keep the strong emblem illumination on the alpha-masked artwork itself.
-   Only these tight shadows follow the PNG/WebP silhouette; the broader,
-   deliberately bounded halo is the separate layer above. */
+/* 강한 문양 조명은 알파 마스크가 적용된 삽화 자체에 유지한다. 이 밀착된 그림자만
+   PNG/WebP 윤곽을 따르며, 더 넓고 의도적으로 경계를 둔 후광은 위의 별도 레이어다. */
 #screen-create .subnav-item.active .diamond-btn-icon {
   filter:
     brightness(1.62)
@@ -209,7 +207,7 @@
   right: 8px;
 }
 
-/* 3. Primary navigation -------------------------------------------------- */
+/* 3. 주 내비게이션 -------------------------------------------------- */
 #screen-create .bottom-nav {
   background: transparent;
   border-color: transparent;
@@ -245,8 +243,7 @@
   color: #fff4d8;
 }
 
-/* Keep the utility drawer transparent as well, without altering its buttons
-   or behavior. */
+/* 유틸리티 서랍도 버튼이나 동작을 바꾸지 않고 투명하게 유지한다. */
 #screen-create .extra-menu-panel {
   background: transparent;
   border: 0;
@@ -254,7 +251,7 @@
   box-shadow: none;
 }
 
-/* Utility artwork keeps its rounded button crop, but no decorative outline. */
+/* 유틸리티 삽화는 둥근 버튼 모양의 자르기를 유지하되 장식 테두리는 두지 않는다. */
 #screen-create .extra-btn,
 #screen-create .extra-btn:active {
   border: 0;

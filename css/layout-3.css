@@ -9,8 +9,8 @@
 }
 
 .card-grid-layout-c .card-name {
-  /* Three-column title cards use one restrained standard size. Individual
-     short labels are not enlarged; the fitter only handles real overflow. */
+  /* 3열 제목 카드는 절제된 하나의 표준 크기를 사용한다. 개별 짧은 문구는
+     확대하지 않으며, 맞춤 로직은 실제로 넘치는 경우만 처리한다. */
   font-size: 0.68rem;
   line-height: 1.28;
   padding: 0 2px;
