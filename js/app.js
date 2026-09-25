@@ -30,35 +30,57 @@ const UI_SOUND = (() => {
     click: 'sounds/se_click.mp3',
     card: 'sounds/se_card.mp3'
   };
-  // A small pool lets click + page effects overlap without rewinding each other.
-  // Calling load() now also asks the browser to fetch/decode the short clips before
-  // the first interaction, avoiding the lag caused by creating audio on demand.
+  // A fixed, reusable pool lets rapid activations overlap without allocating an
+  // Audio object in the input path or rewinding a sound which is still playing.
+  // load() is intentionally done during app initialization, not on every tap.
+  const POOL_SIZE = 6;
   const audio = Object.fromEntries(Object.entries(sources).map(([name, src]) => {
-    const pool = Array.from({ length: 3 }, () => {
+    const pool = Array.from({ length: POOL_SIZE }, () => {
       const element = new Audio(src);
       element.preload = 'auto';
       element.load();
-      return element;
+      const voice = { element, inUse: false };
+      const release = () => { voice.inUse = false; };
+      element.addEventListener('ended', release);
+      element.addEventListener('error', release);
+      return voice;
     });
-    return [name, { pool, cursor: 0, lastPlayedAt: -Infinity }];
+    return [name, { pool, cursor: 0 }];
   }));
   let muted = false;
   let volume = 1;
 
   function play(name) {
     if (muted || !audio[name]) return;
-    const now = performance.now();
     const sound = audio[name];
-    // Suppress duplicate handlers for one gesture, while still allowing two
-    // different effects (for example click followed by page) to play together.
-    if (now - sound.lastPlayedAt < 40) return;
-    sound.lastPlayedAt = now;
-    const element = sound.pool[sound.cursor];
-    sound.cursor = (sound.cursor + 1) % sound.pool.length;
+    let voice = null;
+
+    // Prefer an idle voice. The cursor keeps simultaneous taps distributed
+    // across the pool; it is not a cooldown and never drops a valid activation.
+    for (let offset = 0; offset < sound.pool.length; offset++) {
+      const index = (sound.cursor + offset) % sound.pool.length;
+      const candidate = sound.pool[index];
+      if (!candidate.inUse || candidate.element.paused || candidate.element.ended) {
+        voice = candidate;
+        sound.cursor = (index + 1) % sound.pool.length;
+        break;
+      }
+    }
+
+    // Six voices comfortably cover overlapping short UI effects. In the very
+    // unlikely event that all remain busy, reuse the oldest cursor voice rather
+    // than silently discarding the user's activation.
+    if (!voice) {
+      voice = sound.pool[sound.cursor];
+      sound.cursor = (sound.cursor + 1) % sound.pool.length;
+    }
+
+    const element = voice.element;
+    voice.inUse = true;
     element.volume = volume;
     element.currentTime = 0;
     const promise = element.play();
-    if (promise) promise.catch(() => {});
+    if (promise) promise.catch(() => { voice.inUse = false; });
   }
 
   return {
@@ -66,7 +88,7 @@ const UI_SOUND = (() => {
     setMuted(value) { muted = Boolean(value); },
     setVolume(value) {
       volume = Math.max(0, Math.min(1, Number(value) || 0));
-      Object.values(audio).forEach(sound => sound.pool.forEach(element => { element.volume = volume; }));
+      Object.values(audio).forEach(sound => sound.pool.forEach(({ element }) => { element.volume = volume; }));
     }
   };
 })();
@@ -92,11 +114,14 @@ function initUiSounds() {
     }
   }
 
-  // A click is dispatched only after release on the same control. This keeps
-  // sounds aligned with an action being accepted and also supports keyboards.
+  // A click is dispatched only after release on the same control and is
+  // cancelled by the browser for normal scroll/drag gestures. Capture it before
+  // target handlers perform rendering/navigation so playback starts at the
+  // confirmation instant instead of after the UI work has completed. This is
+  // the sole general activation path, so touchend/pointerup cannot duplicate it.
   document.addEventListener('click', event => {
     playActivationSound(event);
-  });
+  }, { capture: true });
 }
 
 /* ════════════════════════════════════════════════
