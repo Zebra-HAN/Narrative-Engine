@@ -1083,14 +1083,16 @@ body::after {
     .data-card.card-deal {
       opacity: 0;
       pointer-events: none;
-      animation: cardFlip 0.45s ease forwards;
+      /* 공개 간격과 재생 시간은 유지하고, 회전 자체만 하나의 연속 곡선으로 처리한다. */
+      animation: cardFlip 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      transform-origin: center center;
     }
     .data-card.card-deal.card-interactive {
       pointer-events: auto;
     }
     @keyframes cardFlip {
-      0%   { opacity: 0; transform: rotateY(90deg) scale(0.95); }
-      100% { opacity: 1; transform: rotateY(0deg) scale(1); }
+      from { opacity: 0; transform: rotateY(90deg); }
+      to   { opacity: 1; transform: rotateY(0deg); }
     }
     .data-card.selected {
       border-color: #49321f;
