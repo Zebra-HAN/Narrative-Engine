@@ -72,13 +72,17 @@ const UI_SOUND = (() => {
 })();
 
 function initUiSounds() {
-  let lastPointerSound = null;
-
   function playActivationSound(event) {
     const target = event.target.closest('button, [role="button"], [onclick], .pressable');
     if (!target || target.disabled) return;
-    if (target.matches('.data-card')) {
+
+    // Play feedback only from the completed `click`. In particular, do not use
+    // pointerdown/touchstart: those fire as soon as a finger lands and also at
+    // the beginning of a scroll or long press.
+    if (target.matches('.detail-idea-block, .data-card')) {
       UI_SOUND.play('card');
+    } else if (target.matches('.group-select-btn, .card-info-close, .card-info-select.is-selected, .status-close, .detail-close, .app-dialog-btn-cancel')) {
+      UI_SOUND.play('touch');
     } else if (target.matches('#nav-idea')) {
       UI_SOUND.play('click');
     } else if (target.closest('.bottom-nav')) {
@@ -86,43 +90,13 @@ function initUiSounds() {
     } else {
       UI_SOUND.play('click');
     }
-    return target;
   }
 
-  // pointerdown occurs before click and keeps playback inside the browser's
-  // immediate user-activation window. Keyboard-generated clicks use the fallback.
-  document.addEventListener('pointerdown', event => {
-    const target = playActivationSound(event);
-    if (target) lastPointerSound = { target, time: performance.now() };
-  });
+  // A click is dispatched only after release on the same control. This keeps
+  // sounds aligned with an action being accepted and also supports keyboards.
   document.addEventListener('click', event => {
-    const target = event.target.closest('button, [role="button"], [onclick], .pressable');
-    if (target && lastPointerSound?.target === target && performance.now() - lastPointerSound.time < 700) return;
     playActivationSound(event);
   });
-
-  const MOVE_THRESHOLD = 9;
-  let touchStart = null;
-  let touchSoundPlayed = false;
-  document.addEventListener('touchstart', event => {
-    if (event.touches.length !== 1) return;
-    touchStart = { x: event.touches[0].clientX, y: event.touches[0].clientY };
-    touchSoundPlayed = false;
-  }, { passive: true });
-  document.addEventListener('touchmove', event => {
-    if (!touchStart || touchSoundPlayed || event.touches.length !== 1) return;
-    const dx = event.touches[0].clientX - touchStart.x;
-    const dy = event.touches[0].clientY - touchStart.y;
-    // Every deliberate drag gets tactile feedback, including horizontal category
-    // rails. Page feedback is added separately only if navigation completes.
-    if (Math.hypot(dx, dy) >= MOVE_THRESHOLD) {
-      touchSoundPlayed = true;
-      UI_SOUND.play('touch');
-    }
-  }, { passive: true });
-  const finishTouch = () => { touchStart = null; touchSoundPlayed = false; };
-  document.addEventListener('touchend', finishTouch, { passive: true });
-  document.addEventListener('touchcancel', finishTouch, { passive: true });
 }
 
 /* ════════════════════════════════════════════════
@@ -2051,8 +2025,6 @@ function openDetailSheet(mode) {
   if (mode === 'card' && !focusedCard) return;
   if (mode === 'category' && !currentSubId) return;
 
-  UI_SOUND.play('page');
-
   const iconEl   = document.getElementById('detail-icon');
   const nameEl   = document.getElementById('detail-name');
   const descEl   = document.getElementById('detail-desc');
@@ -2235,7 +2207,6 @@ function closeDetailSheet(e) {
    STATUS OVERLAY
 ════════════════════════════════════════════════ */
 function openStatusOverlay() {
-  UI_SOUND.play('page');
   setBottomNavState('idea');
   renderStatusContent();
   document.getElementById('status-overlay').classList.add('active');
@@ -2818,7 +2789,6 @@ function handleCardTouchEnd(evt, type, subId, a, b, c) {
   if (isDoubleTap) {
     evt.preventDefault();
     _lastCardTap = null;
-    UI_SOUND.play('page');
     if (type === 'subgroup') openSubgroupCardDetail(subId, a, b, c);
     else if (type === 'group') openGroupCardDetail(subId, a, b);
     else openCardDetail(subId, a);
