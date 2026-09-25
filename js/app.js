@@ -225,7 +225,7 @@ const MAIN_CATEGORY_INFO = {
 /* 하단 내비게이션의 선택 상태 이미지(-a)를 상단 패널에서도 그대로 사용한다. */
 const MAIN_CATEGORY_IMAGE = {
   character:  'images/core/buttons/nav_character-a.webp',
-  narrative2: 'images/core/buttons/nav_story-a.png',
+  narrative2: 'images/core/buttons/nav_story-a.webp',
   world:      'images/core/buttons/nav_world-a.png',
   compass:    'images/core/buttons/nav_compass-a.webp'
 };
