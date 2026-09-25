@@ -1083,13 +1083,14 @@ body::after {
     .data-card.card-deal {
       opacity: 0;
       pointer-events: none;
-      animation: cardFlip 0.45s ease forwards;
+      animation: cardFlip var(--card-reveal-duration, 0.72s) cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
     .data-card.card-deal.card-interactive {
       pointer-events: auto;
     }
     @keyframes cardFlip {
-      0%   { opacity: 0; transform: rotateY(90deg) scale(0.95); }
+      0%   { opacity: 0; transform: perspective(600px) rotateY(92deg) scale(0.92); }
+      58%  { opacity: 1; transform: perspective(600px) rotateY(-7deg) scale(1.015); }
       100% { opacity: 1; transform: rotateY(0deg) scale(1); }
     }
     .data-card.selected {
@@ -2084,7 +2085,9 @@ body::after {
 
 /* 작은 카드 묶음은 사용 가능한 캔버스의 시각적 중앙에 둔다.
    큰 그리드는 의도적으로 상단 정렬 및 스크롤 우선 레이아웃을 유지한다. */
-.group-layout-list {
+.group-layout-list,
+.group-layout-three,
+.group-layout-five {
   min-height: 100%;
   justify-content: center;
 }
@@ -2133,7 +2136,7 @@ body::after {
   text-align: left;
   box-shadow: 0 2px 10px rgba(180,130,50,0.10);
   opacity: 0;
-  animation: groupBtnAppear 0.35s ease forwards;
+  animation: groupBtnAppear 0.78s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   /* overflow: hidden 제거 — 배지가 버튼 밖으로 나와야 하기 때문
      이미지 모서리 클리핑은 .group-btn-icon:has(.group-btn-img) 에서 처리 */
   overflow: visible;
@@ -2245,8 +2248,21 @@ body::after {
 .group-layout-grid .group-btn-label { font-size: 0.78rem; line-height: 1.25; }
 
 @keyframes groupBtnAppear {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
+  0%   { opacity: 0; transform: translate3d(0, 42px, 0) scale(0.97); }
+  70%  { opacity: 1; transform: translate3d(0, -3px, 0) scale(1.005); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+/* 3개와 5개는 오른쪽에서 차례로 들어오고, 도착 직전에 길게 감속한다. */
+.group-layout-three .group-select-btn,
+.group-layout-five .group-select-btn {
+  animation-name: groupBtnAppearFromRight;
+}
+
+@keyframes groupBtnAppearFromRight {
+  0%   { opacity: 0; transform: translate3d(72px, 0, 0) scale(0.97); }
+  70%  { opacity: 1; transform: translate3d(-4px, 0, 0) scale(1.005); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
 }
 
 
