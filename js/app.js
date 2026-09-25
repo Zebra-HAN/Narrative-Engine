@@ -320,8 +320,14 @@ function getCardGridOpenTag(group) {
 }
 
 function markFirstCardRow(page) {
-  const firstGrid = page.querySelector('.card-grid');
-  const cards = firstGrid ? Array.from(firstGrid.querySelectorAll('.data-card')) : [];
+  // A section may appear before the first cards, leaving the initial grid empty.
+  // Only the first *actual* row on the page is the top row; rows opened after
+  // later section headers must keep showing their popover above the card.
+  const grids = Array.from(page.querySelectorAll('.card-grid'));
+  const firstCards = grids
+    .map(grid => Array.from(grid.querySelectorAll('.data-card')))
+    .find(cards => cards.length > 0);
+  const cards = firstCards || [];
   if (cards.length === 0) return;
 
   const firstRowTop = cards[0].offsetTop;
