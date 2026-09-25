@@ -27,81 +27,78 @@ const UI_SOUND = (() => {
     touch: 'sounds/se_touch.mp3',
     page: 'sounds/se_page.mp3',
     nav: 'sounds/se_nav.mp3',
-    click: 'sounds/se_click.mp3'
+    click: 'sounds/se_click.mp3',
+    card: 'sounds/se_card.mp3'
   };
+  // A small pool lets click + page effects overlap without rewinding each other.
+  // Calling load() now also asks the browser to fetch/decode the short clips before
+  // the first interaction, avoiding the lag caused by creating audio on demand.
   const audio = Object.fromEntries(Object.entries(sources).map(([name, src]) => {
-    const element = new Audio(src);
-    element.preload = 'auto';
-    return [name, element];
+    const pool = Array.from({ length: 3 }, () => {
+      const element = new Audio(src);
+      element.preload = 'auto';
+      element.load();
+      return element;
+    });
+    return [name, { pool, cursor: 0, lastPlayedAt: -Infinity }];
   }));
   let muted = false;
   let volume = 1;
-  let lastPlayedAt = 0;
-  let pendingCardClick = 0;
 
   function play(name) {
     if (muted || !audio[name]) return;
     const now = performance.now();
-    // Bubbling handlers can describe the same physical action more than once.
-    if (now - lastPlayedAt < 70) return;
-    lastPlayedAt = now;
-    const element = audio[name];
+    const sound = audio[name];
+    // Suppress duplicate handlers for one gesture, while still allowing two
+    // different effects (for example click followed by page) to play together.
+    if (now - sound.lastPlayedAt < 40) return;
+    sound.lastPlayedAt = now;
+    const element = sound.pool[sound.cursor];
+    sound.cursor = (sound.cursor + 1) % sound.pool.length;
     element.volume = volume;
     element.currentTime = 0;
     const promise = element.play();
     if (promise) promise.catch(() => {});
   }
 
-  function scheduleCardClick() {
-    clearTimeout(pendingCardClick);
-    // Unlock this media element while the click still has transient user
-    // activation; Safari may otherwise reject the delayed single-click sound.
-    const clickAudio = audio.click;
-    clickAudio.muted = true;
-    const unlockPromise = clickAudio.play();
-    if (unlockPromise) unlockPromise.catch(() => {});
-    clickAudio.pause();
-    clickAudio.currentTime = 0;
-    clickAudio.muted = false;
-    pendingCardClick = setTimeout(() => {
-      pendingCardClick = 0;
-      play('click');
-    }, 240);
-  }
-
-  function playPageInsteadOfCardClick() {
-    clearTimeout(pendingCardClick);
-    pendingCardClick = 0;
-    play('page');
-  }
-
   return {
     play,
-    scheduleCardClick,
-    playPageInsteadOfCardClick,
     setMuted(value) { muted = Boolean(value); },
-    setVolume(value) { volume = Math.max(0, Math.min(1, Number(value) || 0)); }
+    setVolume(value) {
+      volume = Math.max(0, Math.min(1, Number(value) || 0));
+      Object.values(audio).forEach(sound => sound.pool.forEach(element => { element.volume = volume; }));
+    }
   };
 })();
 
 function initUiSounds() {
-  document.addEventListener('click', event => {
+  let lastPointerSound = null;
+
+  function playActivationSound(event) {
     const target = event.target.closest('button, [role="button"], [onclick], .pressable');
     if (!target || target.disabled) return;
-    if (target.closest('.bottom-nav')) {
+    if (target.matches('.data-card')) {
+      UI_SOUND.play('card');
+    } else if (target.matches('#nav-idea')) {
+      UI_SOUND.play('click');
+    } else if (target.closest('.bottom-nav')) {
       UI_SOUND.play('nav');
-    } else if (target.matches('.card-info-detail')) {
-      UI_SOUND.playPageInsteadOfCardClick();
-    } else if (target.matches('.data-card')) {
-      // Wait briefly so a double click that opens details produces page only.
-      UI_SOUND.scheduleCardClick();
     } else {
       UI_SOUND.play('click');
     }
-  });
+    return target;
+  }
 
-  document.addEventListener('dblclick', event => {
-    if (event.target.closest('.data-card')) UI_SOUND.playPageInsteadOfCardClick();
+  // pointerdown occurs before click and keeps playback inside the browser's
+  // immediate user-activation window. Keyboard-generated clicks use the fallback.
+  document.addEventListener('pointerdown', event => {
+    const target = playActivationSound(event);
+    if (target) lastPointerSound = { target, time: performance.now() };
+  });
+  document.addEventListener('click', event => {
+    const target = event.target.closest('button, [role="button"], [onclick], .pressable');
+    if (target && lastPointerSound?.target === target && performance.now() - lastPointerSound.time < 700) return;
+    playActivationSound(event);
   });
 
   const MOVE_THRESHOLD = 9;
@@ -116,8 +113,9 @@ function initUiSounds() {
     if (!touchStart || touchSoundPlayed || event.touches.length !== 1) return;
     const dx = event.touches[0].clientX - touchStart.x;
     const dy = event.touches[0].clientY - touchStart.y;
-    // Horizontal motion belongs to page/panel swipe sounds, not scroll touch.
-    if (Math.abs(dy) >= MOVE_THRESHOLD && Math.abs(dy) > Math.abs(dx)) {
+    // Every deliberate drag gets tactile feedback, including horizontal category
+    // rails. Page feedback is added separately only if navigation completes.
+    if (Math.hypot(dx, dy) >= MOVE_THRESHOLD) {
       touchSoundPlayed = true;
       UI_SOUND.play('touch');
     }
@@ -509,7 +507,6 @@ function initCenterBackSwipe() {
 
       if (dx > 0 && dx > Math.abs(dy) * HORIZONTAL_BIAS) {
         isDragging = true;
-        UI_SOUND.play('page');
         area.classList.add('is-back-swiping');
       }
     }
@@ -552,7 +549,10 @@ function initCenterBackSwipe() {
     isDragging = false;
     isVerticalGesture = false;
 
-    if (shouldGoBack) navigateAddressBack();
+    if (shouldGoBack) {
+      UI_SOUND.play('page');
+      navigateAddressBack();
+    }
   }
 
   function onTouchCancel() {
@@ -2051,6 +2051,8 @@ function openDetailSheet(mode) {
   if (mode === 'card' && !focusedCard) return;
   if (mode === 'category' && !currentSubId) return;
 
+  UI_SOUND.play('page');
+
   const iconEl   = document.getElementById('detail-icon');
   const nameEl   = document.getElementById('detail-name');
   const descEl   = document.getElementById('detail-desc');
@@ -2233,6 +2235,7 @@ function closeDetailSheet(e) {
    STATUS OVERLAY
 ════════════════════════════════════════════════ */
 function openStatusOverlay() {
+  UI_SOUND.play('page');
   setBottomNavState('idea');
   renderStatusContent();
   document.getElementById('status-overlay').classList.add('active');
@@ -2815,7 +2818,7 @@ function handleCardTouchEnd(evt, type, subId, a, b, c) {
   if (isDoubleTap) {
     evt.preventDefault();
     _lastCardTap = null;
-    UI_SOUND.playPageInsteadOfCardClick();
+    UI_SOUND.play('page');
     if (type === 'subgroup') openSubgroupCardDetail(subId, a, b, c);
     else if (type === 'group') openGroupCardDetail(subId, a, b);
     else openCardDetail(subId, a);
@@ -2889,7 +2892,6 @@ function attachSwipeToClose(panelEl, closeFn) {
     // 수평 스와이프 판정 (세로 스크롤과 구분)
     if (!isDragging && Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 8) {
       isDragging = true;
-      UI_SOUND.play('page');
     }
     if (isDragging) {
       const distance = Math.abs(dx);
@@ -2912,6 +2914,7 @@ function attachSwipeToClose(panelEl, closeFn) {
     const closeDirection = dx < 0 ? -1 : 1;
 
     if (shouldClose) {
+      UI_SOUND.play('page');
       // 충분히 밀었으면 스와이프 방향 그대로 닫기
       panelEl.style.transition = `transform ${CLOSE_DURATION}ms ease, opacity ${CLOSE_DURATION}ms ease`;
       panelEl.style.transform = `translateX(${closeDirection * 110}%)`;
