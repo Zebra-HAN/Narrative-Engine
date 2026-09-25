@@ -35,10 +35,13 @@ const UI_SOUND = (() => {
   const output = context ? context.createGain() : null;
   const buffers = new Map();
   let muted = false;
-  let volume = 1;
+  let volume = 0.7;
   let unlockHandled = false;
 
-  if (output) output.connect(context.destination);
+  if (output) {
+    output.gain.value = volume;
+    output.connect(context.destination);
+  }
 
   // 이 스크립트가 실행되자마자 모든 효과음을 병렬로 디코딩한다. AudioBuffer만
   // 유지하면 재생 시 HTML 미디어 요소를 기다리거나 공유 음원의 위치를 찾지 않아도 된다.
