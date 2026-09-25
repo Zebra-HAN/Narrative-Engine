@@ -19,8 +19,8 @@ const CARD_DATA = {
 /* ════════════════════════════════════════════════
    SOUND EFFECTS
    All UI audio goes through this small controller so volume/mute controls can
-   be added in one place later. Audio instances are created up front, but are
-   only played from user-generated click/touch events (important on iOS/PWA).
+   be added in one place later. Files are fetched and decoded at startup so the
+   confirmed click only has to create and start a lightweight buffer source.
 ════════════════════════════════════════════════ */
 const UI_SOUND = (() => {
   const sources = {
@@ -30,57 +30,64 @@ const UI_SOUND = (() => {
     click: 'sounds/se_click.mp3',
     card: 'sounds/se_card.mp3'
   };
-  // A fixed, reusable pool lets rapid activations overlap without allocating an
-  // Audio object in the input path or rewinding a sound which is still playing.
-  // load() is intentionally done during app initialization, not on every tap.
-  const POOL_SIZE = 6;
-  const audio = Object.fromEntries(Object.entries(sources).map(([name, src]) => {
-    const pool = Array.from({ length: POOL_SIZE }, () => {
-      const element = new Audio(src);
-      element.preload = 'auto';
-      element.load();
-      const voice = { element, inUse: false };
-      const release = () => { voice.inUse = false; };
-      element.addEventListener('ended', release);
-      element.addEventListener('error', release);
-      return voice;
-    });
-    return [name, { pool, cursor: 0 }];
-  }));
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  const context = AudioContextClass ? new AudioContextClass({ latencyHint: 'interactive' }) : null;
+  const output = context ? context.createGain() : null;
+  const buffers = new Map();
   let muted = false;
   let volume = 1;
+  let unlockHandled = false;
+
+  if (output) output.connect(context.destination);
+
+  // Decode every effect in parallel as soon as this script runs. Keeping only
+  // AudioBuffers means playback never waits for an HTML media element or seeks
+  // a shared voice. decodeAudioData's callbacks also support older iOS Safari.
+  if (context) {
+    Object.entries(sources).forEach(([name, src]) => {
+      fetch(src)
+        .then(response => {
+          if (!response.ok) throw new Error(`Unable to load sound: ${src}`);
+          return response.arrayBuffer();
+        })
+        .then(arrayBuffer => new Promise((resolve, reject) => {
+          context.decodeAudioData(arrayBuffer, resolve, reject);
+        }))
+        .then(buffer => buffers.set(name, buffer))
+        .catch(error => console.warn(error));
+    });
+  }
+
+  const unlockEvents = ['pointerdown', 'touchstart', 'mousedown', 'keydown', 'click'];
+
+  function unlock() {
+    if (unlockHandled) return;
+    unlockHandled = true;
+    unlockEvents.forEach(type => document.removeEventListener(type, unlock, true));
+
+    // iOS Safari/PWA only permits this transition inside a user gesture. Do it
+    // once on the first interaction, before the later confirmed click handler.
+    if (context && context.state === 'suspended') {
+      context.resume().catch(error => console.warn(error));
+    }
+  }
+
+  unlockEvents.forEach(type => document.addEventListener(type, unlock, {
+    capture: true,
+    passive: true
+  }));
 
   function play(name) {
-    if (muted || !audio[name]) return;
-    const sound = audio[name];
-    let voice = null;
+    const buffer = buffers.get(name);
+    if (muted || !context || !buffer) return;
 
-    // Prefer an idle voice. The cursor keeps simultaneous taps distributed
-    // across the pool; it is not a cooldown and never drops a valid activation.
-    for (let offset = 0; offset < sound.pool.length; offset++) {
-      const index = (sound.cursor + offset) % sound.pool.length;
-      const candidate = sound.pool[index];
-      if (!candidate.inUse || candidate.element.paused || candidate.element.ended) {
-        voice = candidate;
-        sound.cursor = (index + 1) % sound.pool.length;
-        break;
-      }
-    }
-
-    // Six voices comfortably cover overlapping short UI effects. In the very
-    // unlikely event that all remain busy, reuse the oldest cursor voice rather
-    // than silently discarding the user's activation.
-    if (!voice) {
-      voice = sound.pool[sound.cursor];
-      sound.cursor = (sound.cursor + 1) % sound.pool.length;
-    }
-
-    const element = voice.element;
-    voice.inUse = true;
-    element.volume = volume;
-    element.currentTime = 0;
-    const promise = element.play();
-    if (promise) promise.catch(() => { voice.inUse = false; });
+    // AudioBufferSourceNodes are intentionally one-shot. A fresh node per click
+    // starts immediately and allows arbitrarily fast activations to overlap.
+    const source = context.createBufferSource();
+    source.buffer = buffer;
+    source.connect(output);
+    source.start();
+    source.addEventListener('ended', () => source.disconnect(), { once: true });
   }
 
   return {
@@ -88,7 +95,7 @@ const UI_SOUND = (() => {
     setMuted(value) { muted = Boolean(value); },
     setVolume(value) {
       volume = Math.max(0, Math.min(1, Number(value) || 0));
-      Object.values(audio).forEach(sound => sound.pool.forEach(({ element }) => { element.volume = volume; }));
+      if (output) output.gain.value = volume;
     }
   };
 })();
