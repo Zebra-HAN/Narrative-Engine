@@ -17,6 +17,117 @@ const CARD_DATA = {
 };
 
 /* ════════════════════════════════════════════════
+   SOUND EFFECTS
+   All UI audio goes through this small controller so volume/mute controls can
+   be added in one place later. Audio instances are created up front, but are
+   only played from user-generated click/touch events (important on iOS/PWA).
+════════════════════════════════════════════════ */
+const UI_SOUND = (() => {
+  const sources = {
+    touch: 'sounds/se_touch.mp3',
+    page: 'sounds/se_page.mp3',
+    nav: 'sounds/se_nav.mp3',
+    click: 'sounds/se_click.mp3'
+  };
+  const audio = Object.fromEntries(Object.entries(sources).map(([name, src]) => {
+    const element = new Audio(src);
+    element.preload = 'auto';
+    return [name, element];
+  }));
+  let muted = false;
+  let volume = 1;
+  let lastPlayedAt = 0;
+  let pendingCardClick = 0;
+
+  function play(name) {
+    if (muted || !audio[name]) return;
+    const now = performance.now();
+    // Bubbling handlers can describe the same physical action more than once.
+    if (now - lastPlayedAt < 70) return;
+    lastPlayedAt = now;
+    const element = audio[name];
+    element.volume = volume;
+    element.currentTime = 0;
+    const promise = element.play();
+    if (promise) promise.catch(() => {});
+  }
+
+  function scheduleCardClick() {
+    clearTimeout(pendingCardClick);
+    // Unlock this media element while the click still has transient user
+    // activation; Safari may otherwise reject the delayed single-click sound.
+    const clickAudio = audio.click;
+    clickAudio.muted = true;
+    const unlockPromise = clickAudio.play();
+    if (unlockPromise) unlockPromise.catch(() => {});
+    clickAudio.pause();
+    clickAudio.currentTime = 0;
+    clickAudio.muted = false;
+    pendingCardClick = setTimeout(() => {
+      pendingCardClick = 0;
+      play('click');
+    }, 240);
+  }
+
+  function playPageInsteadOfCardClick() {
+    clearTimeout(pendingCardClick);
+    pendingCardClick = 0;
+    play('page');
+  }
+
+  return {
+    play,
+    scheduleCardClick,
+    playPageInsteadOfCardClick,
+    setMuted(value) { muted = Boolean(value); },
+    setVolume(value) { volume = Math.max(0, Math.min(1, Number(value) || 0)); }
+  };
+})();
+
+function initUiSounds() {
+  document.addEventListener('click', event => {
+    const target = event.target.closest('button, [role="button"], [onclick], .pressable');
+    if (!target || target.disabled) return;
+    if (target.closest('.bottom-nav')) {
+      UI_SOUND.play('nav');
+    } else if (target.matches('.card-info-detail')) {
+      UI_SOUND.playPageInsteadOfCardClick();
+    } else if (target.matches('.data-card')) {
+      // Wait briefly so a double click that opens details produces page only.
+      UI_SOUND.scheduleCardClick();
+    } else {
+      UI_SOUND.play('click');
+    }
+  });
+
+  document.addEventListener('dblclick', event => {
+    if (event.target.closest('.data-card')) UI_SOUND.playPageInsteadOfCardClick();
+  });
+
+  const MOVE_THRESHOLD = 9;
+  let touchStart = null;
+  let touchSoundPlayed = false;
+  document.addEventListener('touchstart', event => {
+    if (event.touches.length !== 1) return;
+    touchStart = { x: event.touches[0].clientX, y: event.touches[0].clientY };
+    touchSoundPlayed = false;
+  }, { passive: true });
+  document.addEventListener('touchmove', event => {
+    if (!touchStart || touchSoundPlayed || event.touches.length !== 1) return;
+    const dx = event.touches[0].clientX - touchStart.x;
+    const dy = event.touches[0].clientY - touchStart.y;
+    // Horizontal motion belongs to page/panel swipe sounds, not scroll touch.
+    if (Math.abs(dy) >= MOVE_THRESHOLD && Math.abs(dy) > Math.abs(dx)) {
+      touchSoundPlayed = true;
+      UI_SOUND.play('touch');
+    }
+  }, { passive: true });
+  const finishTouch = () => { touchStart = null; touchSoundPlayed = false; };
+  document.addEventListener('touchend', finishTouch, { passive: true });
+  document.addEventListener('touchcancel', finishTouch, { passive: true });
+}
+
+/* ════════════════════════════════════════════════
    CREATIVE PAGE BACKGROUNDS
    아래 세 배열/객체의 이미지 주소를 바꾸면 화면 배경을 직접 교체할 수 있습니다.
    - main: 하단의 메인 카테고리를 선택하고 세부 카테고리를 고르기 전의 배경
@@ -398,6 +509,7 @@ function initCenterBackSwipe() {
 
       if (dx > 0 && dx > Math.abs(dy) * HORIZONTAL_BIAS) {
         isDragging = true;
+        UI_SOUND.play('page');
         area.classList.add('is-back-swiping');
       }
     }
@@ -595,6 +707,7 @@ window.addEventListener('load', () => {
 initCenterBackSwipe();
 initScrollResponsiveChrome();
 initInfoTextAutoFit();
+initUiSounds();
 
 /* ════════════════════════════════════════════════
    CARD TITLE AUTO-FIT
@@ -2702,6 +2815,7 @@ function handleCardTouchEnd(evt, type, subId, a, b, c) {
   if (isDoubleTap) {
     evt.preventDefault();
     _lastCardTap = null;
+    UI_SOUND.playPageInsteadOfCardClick();
     if (type === 'subgroup') openSubgroupCardDetail(subId, a, b, c);
     else if (type === 'group') openGroupCardDetail(subId, a, b);
     else openCardDetail(subId, a);
@@ -2775,6 +2889,7 @@ function attachSwipeToClose(panelEl, closeFn) {
     // 수평 스와이프 판정 (세로 스크롤과 구분)
     if (!isDragging && Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 8) {
       isDragging = true;
+      UI_SOUND.play('page');
     }
     if (isDragging) {
       const distance = Math.abs(dx);
