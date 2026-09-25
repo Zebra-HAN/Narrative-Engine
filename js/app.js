@@ -28,7 +28,15 @@ const UI_SOUND = (() => {
     page: 'sounds/se_page.mp3',
     nav: 'sounds/se_nav.mp3',
     click: 'sounds/se_click.mp3',
-    card: 'sounds/se_card.mp3'
+    card: 'sounds/se_card.mp3',
+    cancel: 'sounds/se_cancel.mp3',
+    selectYes: 'sounds/se_select_yes.mp3',
+    selectNo: 'sounds/se_select_no.mp3',
+    pong1: 'sounds/se_pong1.mp3',
+    pong2: 'sounds/se_pong2.mp3',
+    pong3: 'sounds/se_pong3.mp3',
+    pong4: 'sounds/se_pong4.mp3',
+    pong5: 'sounds/se_pong5.mp3'
   };
   const AudioContextClass = window.AudioContext || window.webkitAudioContext;
   const context = AudioContextClass ? new AudioContextClass({ latencyHint: 'interactive' }) : null;
@@ -104,6 +112,8 @@ const UI_SOUND = (() => {
 })();
 
 function initUiSounds() {
+  const cardSounds = ['pong1', 'pong2', 'pong3', 'pong4', 'pong5'];
+
   function playActivationSound(event) {
     const target = event.target.closest('button, [role="button"], [onclick], .pressable');
     if (!target || target.disabled) return;
@@ -111,10 +121,20 @@ function initUiSounds() {
     // 완료된 `click`에서만 피드백을 재생한다. 특히 pointerdown/touchstart는 손가락이
     // 닿는 즉시뿐 아니라 스크롤이나 길게 누르기를 시작할 때도 발생하므로 사용하지 않는다.
     if (target.matches('.data-card')) {
+      UI_SOUND.play(cardSounds[Math.floor(Math.random() * cardSounds.length)]);
+    } else if (target.matches('#btn-extra-menu')) {
+      UI_SOUND.play(extraMenuOpen ? 'card' : 'click');
+    } else if (target.matches('.extra-btn-home')) {
+      UI_SOUND.play('selectNo');
+    } else if (target.matches('.extra-btn, .group-select-btn')) {
+      UI_SOUND.play('click');
+    } else if (target.matches('.subnav-item')) {
       UI_SOUND.play('card');
-    } else if (target.matches('.extra-btn-home, .extra-btn-random-all, .extra-btn-random, #btn-extra-menu')) {
-      UI_SOUND.play('card');
-    } else if (target.matches('.group-select-btn, .card-info-close, .card-info-detail, .card-info-select, .detail-idea-block, .status-close, .detail-close, .app-dialog-btn-cancel, .app-dialog-btn-confirm')) {
+    } else if (target.matches('.app-dialog-btn-cancel') || target.matches('.card-info-select.is-selected')) {
+      UI_SOUND.play('cancel');
+    } else if (target.dataset.sound) {
+      UI_SOUND.play(target.dataset.sound);
+    } else if (target.matches('.card-info-close, .card-info-detail, .card-info-select, .detail-idea-block, .detail-sub-image-row, .status-close, .detail-close')) {
       UI_SOUND.play('touch');
     } else if (target.matches('#nav-idea')) {
       UI_SOUND.play('click');
@@ -2383,6 +2403,7 @@ function showAppDialog(msg, buttons) {
       btn.type = 'button';
       btn.className = 'app-dialog-btn pressable ' + b.className;
       btn.textContent = b.label;
+      if (b.sound) btn.dataset.sound = b.sound;
       btn.onclick = () => closeAppDialog(b.value);
       actions.appendChild(btn);
     });
@@ -2414,10 +2435,10 @@ function showAppNotice(msg) {
   ]);
 }
 
-function showAppConfirm(msg) {
+function showAppConfirm(msg, confirmSound) {
   return showAppDialog(msg, [
     { label: '아니오', className: 'app-dialog-btn-cancel', value: false },
-    { label: '예', className: 'app-dialog-btn-confirm', value: true }
+    { label: '예', className: 'app-dialog-btn-confirm', value: true, sound: confirmSound }
   ]);
 }
 
@@ -2433,7 +2454,7 @@ function refreshStatusIfOpen() {
 ════════════════════════════════════════════════ */
 async function partialReset() {
   const label = NAV_DATA[currentNav].label;
-  const ok = await showAppConfirm(`${label} 탭의 선택을 모두 초기화할까요?`);
+  const ok = await showAppConfirm(`${label} 탭의 선택을 모두 초기화할까요?`, 'selectNo');
   if (!ok) return;
   const subs = NAV_DATA[currentNav].subs;
   subs.forEach(sub => {
@@ -2458,7 +2479,7 @@ async function partialReset() {
 }
 
 async function fullReset() {
-  const ok = await showAppConfirm('모든 선택을 초기화할까요?');
+  const ok = await showAppConfirm('모든 선택을 초기화할까요?', 'selectNo');
   if (!ok) return;
   selectedCards = {};
   selectedDetails = {};
@@ -2635,7 +2656,7 @@ async function randomSelectCurrent() {
   }
   const navLabel = NAV_DATA[currentNav].label;
   const subLabel = NAV_DATA[currentNav].subs.find(s => s.id === currentSubId)?.label || currentSubId;
-  const ok = await showAppConfirm(`[${navLabel} — ${subLabel}]\n랜덤 선택을 하시겠습니까?`);
+  const ok = await showAppConfirm(`[${navLabel} — ${subLabel}]\n랜덤 선택을 하시겠습니까?`, 'selectYes');
   if (!ok) return;
 
    
@@ -2682,7 +2703,7 @@ const data = CARD_DATA[currentSubId];
 // 현재 탭의 모든 서브(마름모) 각 1개씩 랜덤 선택
 async function randomSelectAll() {
   const navLabel = NAV_DATA[currentNav].label;
-  const ok = await showAppConfirm(`[${navLabel}]\n모든 카테고리에서 각 1개씩\n랜덤 선택을 하시겠습니까?`);
+  const ok = await showAppConfirm(`[${navLabel}]\n모든 카테고리에서 각 1개씩\n랜덤 선택을 하시겠습니까?`, 'selectYes');
   if (!ok) return;
 
   const subs = NAV_DATA[currentNav].subs;
