@@ -1355,40 +1355,39 @@ function showDefaultCenter() {
 
 function getGroupLayoutClass(count) {
   if (count === 2) return 'group-layout-two';
-  if (count === 3) return 'group-layout-three';
   if (count === 4) return 'group-layout-four';
-  if (count === 5) return 'group-layout-five';
   if (count === 6) return 'group-layout-six';
   if (count >= 6) return 'group-layout-grid';
   return 'group-layout-list';
 }
 
 /*
- * 첫 네 장은 뒤집힘을 읽을 수 있게 여유 있게 보여 주고, 5~6장부터 가속한다.
- * 7~8장 이후의 간격은 급격히 압축해 13번째 카드가 끝날 때에는 나머지 카드도
- * 모두 펼쳐진 상태가 되도록 한다.
+ * 첫 카드들은 명확한 간격을 두고, 나머지 공개 과정은 고정된 시간 범위로 압축한다.
+ * 카드 묶음이 매우 커도 지수형 꼬리 구간은 CARD_REVEAL_MAX_DELAY_MS에
+ * 가까워질 뿐 절대 이를 넘지 않는다.
  */
-const CARD_REVEAL_DELAYS_MS = [0, 380, 760, 1140, 1480, 1740, 1920, 2020, 2080, 2120, 2150, 2170, 2185];
+const CARD_REVEAL_MAX_DELAY_MS = 1500;
 
 function getCardRevealDelayMs(index) {
   const cardIndex = Math.max(0, Number(index) || 0);
 
-  if (cardIndex < CARD_REVEAL_DELAYS_MS.length) return CARD_REVEAL_DELAYS_MS[cardIndex];
+  // 1~8번 카드: 알아보기 쉽도록 의도적으로 여유 있는 간격을 둔다.
+  if (cardIndex < 8) return cardIndex * 100;
 
-  // 14번째 이후는 동시에 펼쳐 수십 장짜리 묶음도 전체 대기 시간이 늘지 않는다.
-  return CARD_REVEAL_DELAYS_MS[CARD_REVEAL_DELAYS_MS.length - 1];
-}
+  // 9~20번 카드: 앞 카드와의 간격을 점진적으로 줄인다.
+  if (cardIndex < 20) {
+    const acceleratedIndex = cardIndex - 7;
+    const progress = acceleratedIndex / 12;
+    return 700 + 520 * (1 - Math.pow(1 - progress, 1.7));
+  }
 
-function getCardRevealDurationMs(index) {
-  const cardIndex = Math.max(0, Number(index) || 0);
-  if (cardIndex < 4) return 720;
-  if (cardIndex < 6) return 520;
-  if (cardIndex < 8) return 340;
-  return 140;
+  // 21번 이후 카드: 상한을 확실히 둔 매우 빠른 점근적 흐름을 적용한다.
+  const tailIndex = cardIndex - 19;
+  return 1220 + (CARD_REVEAL_MAX_DELAY_MS - 1220) * (1 - Math.exp(-tailIndex / 36));
 }
 
 function getCardRevealDelayStyle(index) {
-  return `animation-delay:${Math.round(getCardRevealDelayMs(index))}ms;--card-reveal-duration:${getCardRevealDurationMs(index)}ms`;
+  return `animation-delay:${Math.round(getCardRevealDelayMs(index))}ms`;
 }
 
 function setupCardRevealAnimations(page) {
@@ -1424,7 +1423,7 @@ function showGroupPage(subId, animate = true) {
   const groupLayoutClass = getGroupLayoutClass(data.groups.length);
   let html = `<div class="group-select-wrap ${groupLayoutClass}">`;
   data.groups.forEach((grp, i) => {
-    const delay = animate ? `style="animation-delay:${i * 0.16}s"` : '';
+    const delay = animate ? `style="animation-delay:${i * 0.08}s"` : '';
 
     // 배지 카운트 — subgroups 있으면 하위 모든 카드, 없으면 직속 카드
     let grpCount = 0;
@@ -1498,7 +1497,7 @@ function showSubgroupPage(subId, groupIdx) {
       if (selectedCards[subId]?.has(getSubgroupCardGlobalIdx(groupIdx, sgIdx, cIdx))) sgCount++;
     });
 
-     const delay = `style="animation-delay:${sgIdx * 0.16}s"`;
+     const delay = `style="animation-delay:${sgIdx * 0.08}s"`;
      
     html += `
       <button
