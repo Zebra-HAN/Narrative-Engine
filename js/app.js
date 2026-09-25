@@ -222,6 +222,14 @@ const MAIN_CATEGORY_INFO = {
   compass:    { icon: '🧭', description: '창작의 방향을 점검하고 이야기의 가능성을 탐색합니다.' }
 };
 
+/* 하단 내비게이션의 선택 상태 이미지(-a)를 상단 패널에서도 그대로 사용한다. */
+const MAIN_CATEGORY_IMAGE = {
+  character:  'images/core/buttons/nav_character-a.webp',
+  narrative2: 'images/core/buttons/nav_story-a.png',
+  world:      'images/core/buttons/nav_world-a.png',
+  compass:    'images/core/buttons/nav_compass-a.webp'
+};
+
 
 
 
@@ -1951,9 +1959,15 @@ function refreshCardInfo() {
 function updateInfoPanel() {
   const nav = NAV_DATA[currentNav];
   const info = MAIN_CATEGORY_INFO[currentNav] || {};
-  setInfoVisual(document.getElementById('info-cat-icon'), null, info.icon || '◆');
-  document.getElementById('info-cat-name').textContent = nav?.label || '';
-  document.getElementById('info-cat-desc').textContent = info.description || '';
+  const sub = currentSubId ? nav?.subs.find(item => item.id === currentSubId) : null;
+  const image = sub?.img || MAIN_CATEGORY_IMAGE[currentNav];
+  const icon = sub?.icon || info.icon || '◆';
+
+  setInfoVisual(document.getElementById('info-cat-icon'), image, icon);
+  document.getElementById('info-cat-name').textContent = sub?.label || nav?.label || '';
+  document.getElementById('info-cat-desc').textContent = sub
+    ? getSubDescription(sub.id)
+    : (info.description || '');
   requestInfoTextAutoFit();
 }
 
