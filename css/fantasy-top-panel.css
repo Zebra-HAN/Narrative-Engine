@@ -389,8 +389,22 @@
   font: 700 1rem/1 sans-serif;
 }
 #screen-create .data-card.card-info-active {
-  border-color: #e1b75e;
-  box-shadow: inset 0 0 0 1px rgba(255,236,174,.55), 0 0 0 2px rgba(117,75,34,.55), 0 4px 9px rgba(42,25,13,.28);
+  border-color: #2f6845;
+  box-shadow:
+    inset 0 0 0 1px rgba(214, 232, 196, .48),
+    0 0 0 1px rgba(38, 92, 59, .46),
+    0 3px 7px rgba(29, 55, 35, .22);
+}
+
+/* 선택 완료 상태가 정보 열람 상태와 겹쳐도 가장 강한 강조 단계로 유지한다. */
+#screen-create .data-card.selected,
+#screen-create .data-card.selected.card-info-active {
+  border: 2px solid #1f5a3b;
+  box-shadow:
+    inset 0 0 0 1px rgba(231, 239, 207, .48),
+    0 0 0 1px rgba(190, 151, 66, .5),
+    0 0 8px rgba(39, 92, 60, .34),
+    0 3px 6px rgba(45, 38, 21, .22);
 }
 @keyframes cardInfoAppear {
   from { opacity: 0; transform: translateY(5px) scale(.98); }
