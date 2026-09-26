@@ -207,7 +207,9 @@ function initUiSounds() {
     } else if (target.matches('.app-dialog-btn-cancel, .card-info-close, .status-close, .detail-close')) {
       UI_SOUND.play('cancel');
     } else if (target.matches('.app-dialog-btn-confirm, .card-info-select')) {
-      // 실제로 동작이 확정된 뒤 해당 핸들러가 결과별 효과음을 재생한다.
+      // 확인 버튼에 지정된 효과음은 클릭이 확정되는 즉시 재생한다. 별도 효과음이 없는
+      // 선택 버튼의 결과별 효과음은 실제 동작을 처리하는 핸들러에서 재생한다.
+      if (target.dataset.sound) UI_SOUND.play(target.dataset.sound);
       return;
     } else if (target.dataset.sound) {
       UI_SOUND.play(target.dataset.sound);
