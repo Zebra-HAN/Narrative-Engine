@@ -29,6 +29,13 @@ const UI_SOUND = (() => {
     nav: 'sounds/se_nav.mp3',
     click: 'sounds/se_click.mp3',
     card: 'sounds/se_card.mp3',
+    category1: 'sounds/se_category1.mp3',
+    category2: 'sounds/se_category2.mp3',
+    category3: 'sounds/se_category3.mp3',
+    category4: 'sounds/se_category4.mp3',
+    category5: 'sounds/se_category5.mp3',
+    delete: 'sounds/se_delete.mp3',
+    delete2: 'sounds/se_delete2.mp3',
     cancel: 'sounds/se_cancel.mp3',
     selectYes: 'sounds/se_select_yes.mp3',
     selectNo: 'sounds/se_select_no.mp3',
@@ -168,6 +175,12 @@ const SCENE_SOUND = (() => {
 
 function initUiSounds() {
   const cardSounds = ['pong1', 'pong2', 'pong3', 'pong4', 'pong5'];
+  const categorySounds = ['card', 'category1', 'category2', 'category3', 'category4', 'category5'];
+  const cardClickCounts = new WeakMap();
+
+  function playRandom(sounds) {
+    UI_SOUND.play(sounds[Math.floor(Math.random() * sounds.length)]);
+  }
 
   function playActivationSound(event) {
     const target = event.target.closest('button, [role="button"], [onclick], .pressable');
@@ -176,7 +189,13 @@ function initUiSounds() {
     // 완료된 `click`에서만 피드백을 재생한다. 특히 pointerdown/touchstart는 손가락이
     // 닿는 즉시뿐 아니라 스크롤이나 길게 누르기를 시작할 때도 발생하므로 사용하지 않는다.
     if (target.matches('.data-card')) {
-      UI_SOUND.play(cardSounds[Math.floor(Math.random() * cardSounds.length)]);
+      // 브라우저의 더블클릭은 보통 click 두 번 뒤에 dblclick 한 번을 보낸다.
+      // 각 click에 한 번만 재생하면 일반 클릭은 1회, 더블클릭은 정확히 2회가 된다.
+      // 일부 환경이 click을 하나만 보낼 경우 아래 dblclick 보정기가 빠진 한 번만 채운다.
+      playRandom(cardSounds);
+      const now = performance.now();
+      const count = event.detail >= 2 ? 2 : 1;
+      cardClickCounts.set(target, { count, time: now });
     } else if (target.matches('#btn-extra-menu')) {
       UI_SOUND.play(extraMenuOpen ? 'card' : 'click');
     } else if (target.matches('.extra-btn-home')) {
@@ -184,12 +203,15 @@ function initUiSounds() {
     } else if (target.matches('.extra-btn, .group-select-btn')) {
       UI_SOUND.play('click');
     } else if (target.matches('.subnav-item')) {
-      UI_SOUND.play('card');
-    } else if (target.matches('.app-dialog-btn-cancel, .card-info-close, .status-close, .detail-close') || target.matches('.card-info-select.is-selected')) {
+      playRandom(categorySounds);
+    } else if (target.matches('.app-dialog-btn-cancel, .card-info-close, .status-close, .detail-close')) {
       UI_SOUND.play('cancel');
+    } else if (target.matches('.app-dialog-btn-confirm, .card-info-select')) {
+      // 실제로 동작이 확정된 뒤 해당 핸들러가 결과별 효과음을 재생한다.
+      return;
     } else if (target.dataset.sound) {
       UI_SOUND.play(target.dataset.sound);
-    } else if (target.matches('.card-info-detail, .card-info-select, .detail-idea-block, .detail-sub-image-row')) {
+    } else if (target.matches('.card-info-detail, .detail-idea-block, .detail-sub-image-row')) {
       UI_SOUND.play('touch');
     } else if (target.matches('#nav-idea')) {
       UI_SOUND.play('click');
@@ -205,7 +227,25 @@ function initUiSounds() {
   // 이를 캡처하여 UI 작업이 끝난 뒤가 아니라 입력이 확정되는 순간 재생을 시작한다.
   // 이것이 유일한 일반 활성화 경로이므로 touchend/pointerup에서 중복 실행되지 않는다.
   document.addEventListener('click', event => {
+    const card = event.target.closest('.data-card');
+    if (card && _lpDidFire) return;
+    if (card && _suppressedTouchClick?.card === card
+        && performance.now() - _suppressedTouchClick.time < 600) {
+      _suppressedTouchClick = null;
+      return;
+    }
     playActivationSound(event);
+  }, { capture: true });
+
+  document.addEventListener('dblclick', event => {
+    const card = event.target.closest('.data-card');
+    if (!card) return;
+    const recent = cardClickCounts.get(card);
+    const count = recent && performance.now() - recent.time < 600 ? recent.count : 0;
+    for (let i = count; i < 2; i++) {
+      setTimeout(() => playRandom(cardSounds), i * 70);
+    }
+    cardClickCounts.delete(card);
   }, { capture: true });
 }
 
@@ -2054,6 +2094,7 @@ function updateInfoPanel() {
 
 function selectCurrentCard() {
   if (!focusedCard) return;
+  const wasSelected = Boolean(selectedCards[focusedCard.subId]?.has(focusedCard.idx));
   const data = CARD_DATA[focusedCard.subId];
   if (data && data.groups) {
     const path = focusedCard.path;
@@ -2074,6 +2115,7 @@ function selectCurrentCard() {
   } else {
     toggleCardSelect(focusedCard.subId, focusedCard.idx);
   }
+  UI_SOUND.play(wasSelected ? 'cancel' : 'category5');
 }
 
 function toggleCardSelect(subId, idx) {
@@ -2512,8 +2554,9 @@ function refreshStatusIfOpen() {
 ════════════════════════════════════════════════ */
 async function partialReset() {
   const label = NAV_DATA[currentNav].label;
-  const ok = await showAppConfirm(`${label} 탭의 선택을 모두 초기화할까요?`, 'selectNo');
+  const ok = await showAppConfirm(`${label} 탭의 선택을 모두 초기화할까요?`);
   if (!ok) return;
+  UI_SOUND.play('delete2');
   const subs = NAV_DATA[currentNav].subs;
   subs.forEach(sub => {
     delete selectedCards[sub.id];
@@ -2537,8 +2580,9 @@ async function partialReset() {
 }
 
 async function fullReset() {
-  const ok = await showAppConfirm('모든 선택을 초기화할까요?', 'selectNo');
+  const ok = await showAppConfirm('모든 선택을 초기화할까요?');
   if (!ok) return;
+  UI_SOUND.play('delete');
   selectedCards = {};
   selectedDetails = {};
    selectedSubImages = {};
@@ -2879,6 +2923,7 @@ let _lpStartX = 0;
 let _lpStartY = 0;
 let _lpDidFire = false;
 let _lastCardTap = null;
+let _suppressedTouchClick = null;
 const LONG_PRESS_MS = 480; // 꾹 누르는 시간 (ms)
 const DOUBLE_TAP_MS = 320; // 모바일 더블터치 인식 시간 (ms)
 
@@ -2892,12 +2937,19 @@ function startLongPress(evt, el, type, subId, a, b, c) {
   _lpTimer = setTimeout(() => {
     _lpTimer = null;
     _lpDidFire = true;
-     if (type === 'subgroup') subgroupCardDblClick(subId, a, b, c);
+    let globalIdx;
+    if (type === 'subgroup') globalIdx = getSubgroupCardGlobalIdx(a, b, c);
+    else if (type === 'group') globalIdx = getGroupCardGlobalIdx(a, b);
+    else globalIdx = a;
+    const wasSelected = Boolean(selectedCards[subId]?.has(globalIdx));
+
+    if (type === 'subgroup') subgroupCardDblClick(subId, a, b, c);
     else if (type === 'group') groupCardDblClick(subId, a, b);
     else {
       cardClick(subId, a);
       toggleCardSelect(subId, a);
     }
+    UI_SOUND.play(wasSelected ? 'cancel' : 'category5');
   }, LONG_PRESS_MS);
 }
 
@@ -2921,6 +2973,11 @@ function handleCardTouchEnd(evt, type, subId, a, b, c) {
   if (isDoubleTap) {
     evt.preventDefault();
     _lastCardTap = null;
+    // 첫 탭의 합성 click에서 이미 한 번 재생되므로, 네이티브 dblclick이 없는
+    // 터치 환경에서는 여기서 두 번째 소리만 더한다.
+    const cardSounds = ['pong1', 'pong2', 'pong3', 'pong4', 'pong5'];
+    UI_SOUND.play(cardSounds[Math.floor(Math.random() * cardSounds.length)]);
+    _suppressedTouchClick = { card: evt.currentTarget, time: performance.now() };
     if (type === 'subgroup') openSubgroupCardDetail(subId, a, b, c);
     else if (type === 'group') openGroupCardDetail(subId, a, b);
     else openCardDetail(subId, a);
