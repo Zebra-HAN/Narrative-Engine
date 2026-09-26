@@ -29,6 +29,8 @@ const UI_SOUND = (() => {
     nav: 'sounds/se_nav.mp3',
     click: 'sounds/se_click.mp3',
     card: 'sounds/se_card.mp3',
+    card1: 'sounds/se_card1.mp3',
+    card2: 'sounds/se_card2.mp3',
     category1: 'sounds/se_category1.mp3',
     category2: 'sounds/se_category2.mp3',
     category3: 'sounds/se_category3.mp3',
@@ -175,7 +177,7 @@ const SCENE_SOUND = (() => {
 
 function initUiSounds() {
   const cardSounds = ['pong1', 'pong2', 'pong3', 'pong4', 'pong5'];
-  const categorySounds = ['card', 'category1', 'category2', 'category3', 'category4', 'category5'];
+  const categorySounds = ['card', 'card1', 'card2'];
   const cardClickCounts = new WeakMap();
 
   function playRandom(sounds) {
@@ -197,7 +199,7 @@ function initUiSounds() {
       const count = event.detail >= 2 ? 2 : 1;
       cardClickCounts.set(target, { count, time: now });
     } else if (target.matches('#btn-extra-menu')) {
-      UI_SOUND.play(extraMenuOpen ? 'card' : 'click');
+      UI_SOUND.play(extraMenuOpen ? 'category4' : 'category3');
     } else if (target.matches('.extra-btn-home')) {
       UI_SOUND.play('selectNo');
     } else if (target.matches('.extra-btn, .group-select-btn')) {
