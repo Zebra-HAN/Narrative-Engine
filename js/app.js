@@ -1464,21 +1464,17 @@ function getGroupLayoutClass(count) {
 }
 
 /*
- * 첫 카드부터 시작 간격을 계속 줄여 여섯 번째까지 자연스럽게 가속한다.
- * 일곱 번째부터는 시작 시점을 조밀하게 모으고, 아홉 번째 이후는 같은 시점에
- * 뒤집기를 시작해 카드 수가 늘어나도 전체 대기 시간이 길어지지 않게 한다.
+ * 뒤집기 속도는 모든 카드에서 같게 유지하고 시작 간격만 줄인다.
+ * 여섯 번째까지는 파동의 방향이 보이도록 순서를 남기고, 일곱 번째부터는
+ * 시작 시점을 거의 같게 모아 카드 수가 늘어나도 전체 연출이 1초 안에 끝난다.
  */
-const CARD_REVEAL_DELAYS_MS = [0, 185, 330, 435, 505, 545, 567, 577];
-const CARD_REVEAL_BURST_DELAY_MS = 582;
+const CARD_REVEAL_DURATION_MS = 450;
+const CARD_REVEAL_DELAYS_MS = [0, 140, 255, 345, 410, 455, 480, 492];
+const CARD_REVEAL_BURST_DELAY_MS = 498;
 
 function getCardRevealDelayMs(index) {
   const cardIndex = Math.max(0, Number(index) || 0);
   return CARD_REVEAL_DELAYS_MS[cardIndex] ?? CARD_REVEAL_BURST_DELAY_MS;
-}
-
-function getCardRevealDurationMs(index) {
-  const cardIndex = Math.max(0, Number(index) || 0);
-  return Math.max(400, 450 - (cardIndex * 10));
 }
 
 function getGroupRevealDelayMs(index, count) {
@@ -1498,7 +1494,7 @@ function getGroupRevealDelayMs(index, count) {
 }
 
 function getCardRevealDelayStyle(index) {
-  return `animation-delay:${getCardRevealDelayMs(index)}ms;--card-reveal-duration:${getCardRevealDurationMs(index)}ms`;
+  return `animation-delay:${getCardRevealDelayMs(index)}ms;--card-reveal-duration:${CARD_REVEAL_DURATION_MS}ms`;
 }
 
 function setupCardRevealAnimations(page) {
