@@ -1463,19 +1463,10 @@ function getGroupLayoutClass(count) {
   return 'group-layout-list';
 }
 
-/*
- * 뒤집기 속도는 모든 카드에서 같게 유지하고 시작 간격만 줄인다.
- * 여섯 번째까지는 파동의 방향이 보이도록 순서를 남기고, 일곱 번째부터는
- * 시작 시점을 거의 같게 모아 카드 수가 늘어나도 전체 연출이 1초 안에 끝난다.
- */
 const CARD_REVEAL_DURATION_MS = 450;
-const CARD_REVEAL_DELAYS_MS = [0, 140, 255, 345, 410, 455, 480, 492];
-const CARD_REVEAL_BURST_DELAY_MS = 498;
-
-function getCardRevealDelayMs(index) {
-  const cardIndex = Math.max(0, Number(index) || 0);
-  return CARD_REVEAL_DELAYS_MS[cardIndex] ?? CARD_REVEAL_BURST_DELAY_MS;
-}
+const CARD_REVEAL_WAVE_GAP_MS = 80;
+const CARD_REVEAL_BURST_CARD_INDEX = 11;
+const CARD_REVEAL_EXTRA_WAVE_STEPS = 2;
 
 function getGroupRevealDelayMs(index, count) {
   const groupIndex = Math.max(0, Number(index) || 0);
@@ -1493,12 +1484,46 @@ function getGroupRevealDelayMs(index, count) {
   return Math.round(delay);
 }
 
-function getCardRevealDelayStyle(index) {
-  return `animation-delay:${getCardRevealDelayMs(index)}ms;--card-reveal-duration:${CARD_REVEAL_DURATION_MS}ms`;
+function getCardRevealDelayStyle() {
+  return `--card-reveal-duration:${CARD_REVEAL_DURATION_MS}ms`;
 }
 
 function setupCardRevealAnimations(page) {
-  page.querySelectorAll('.card-deal').forEach(card => {
+  const cards = Array.from(page.querySelectorAll('.card-deal'));
+  const rows = [];
+
+  // 실제 배치 좌표로 행과 열을 찾으므로 3·4·5열과 섹션으로 나뉜 그리드에 모두 대응한다.
+  cards.forEach(card => {
+    const rect = card.getBoundingClientRect();
+    let row = rows.find(candidate => Math.abs(candidate.top - rect.top) < 1);
+    if (!row) {
+      row = { top: rect.top, cards: [] };
+      rows.push(row);
+    }
+    row.cards.push({ card, left: rect.left });
+  });
+
+  rows.sort((a, b) => a.top - b.top);
+  const waveSteps = new Map();
+  rows.forEach((row, rowIndex) => {
+    row.cards.sort((a, b) => a.left - b.left);
+    row.cards.forEach(({ card }, columnIndex) => {
+      waveSteps.set(card, rowIndex + columnIndex);
+    });
+  });
+
+  // 12번째 카드의 파동 뒤 두 단계를 더 보여 준 다음, 남은 카드도 같은 flip으로 함께 시작한다.
+  const twelfthCardWave = waveSteps.get(cards[CARD_REVEAL_BURST_CARD_INDEX]);
+  const lastSequentialWave = twelfthCardWave === undefined
+    ? Infinity
+    : twelfthCardWave + CARD_REVEAL_EXTRA_WAVE_STEPS;
+  const burstWave = lastSequentialWave + 1;
+
+  cards.forEach(card => {
+    const naturalWave = waveSteps.get(card) || 0;
+    const wave = naturalWave > lastSequentialWave ? burstWave : naturalWave;
+    card.style.animationDelay = `${wave * CARD_REVEAL_WAVE_GAP_MS}ms`;
+
     // 각 카드는 이후 순차 공개를 기다리는 다른 카드와 관계없이 자신의 공개가
     // 시작되는 순간 사용할 수 있게 된다.
     card.addEventListener('animationstart', () => card.classList.add('card-interactive'), { once: true });
@@ -1657,20 +1682,18 @@ function showSubgroupCards(subId, groupIdx, sgIdx) {
 
  let html = getCardGridOpenTag(grp);
 
-  let sgCardRealIdx = 0;
   sg.cards.forEach((card, rawIdx) => {
     if (card.type === 'section') {
       html += `</div><div class="card-section-header">${formatSectionHeaderLabel(card.label)}</div>${getCardGridOpenTag(grp)}`;
       return;
     }
     const idx = rawIdx;
-    const animIdx = sgCardRealIdx++;
    // globalIdx = (groupIdx + 1) * 1000000 + sgIdx * 1000 + idx
     const globalIdx = getSubgroupCardGlobalIdx(groupIdx, sgIdx, idx);
     const sel = selectedCards[subId].has(globalIdx) ? ' selected' : '';
     html += `
       <div class="data-card pressable card-deal${sel}"
-        style="${getCardRevealDelayStyle(animIdx)}"
+        style="${getCardRevealDelayStyle()}"
          data-global-idx="${globalIdx}"
         onclick="subgroupCardClick('${subId}', ${groupIdx}, ${sgIdx}, ${idx})"
         ondblclick="openSubgroupCardDetail('${subId}', ${groupIdx}, ${sgIdx}, ${idx})"
@@ -1799,19 +1822,17 @@ function showGroupCards(subId, groupIdx) {
   const offset = groupIdx * 1000;
 
   let html = getCardGridOpenTag(grp);
-  let grpCardRealIdx = 0;
   grp.cards.forEach((card, rawIdx) => {
     if (card.type === 'section') {
       html += `</div><div class="card-section-header">${formatSectionHeaderLabel(card.label)}</div>${getCardGridOpenTag(grp)}`;
       return;
     }
     const idx = rawIdx;
-    const animIdx = grpCardRealIdx++;
     const globalIdx = getGroupCardGlobalIdx(groupIdx, idx);
     const sel = selectedCards[subId].has(globalIdx) ? ' selected' : '';
     html += `
   <div class="data-card pressable card-deal${sel}"
-    style="${getCardRevealDelayStyle(animIdx)}"
+    style="${getCardRevealDelayStyle()}"
     data-global-idx="${globalIdx}"
     onclick="groupCardClick('${subId}', ${groupIdx}, ${idx})"
     ondblclick="openGroupCardDetail('${subId}', ${groupIdx}, ${idx})"
@@ -1952,17 +1973,15 @@ function showCardPage(subId, animate = true) {
 
   if (!selectedCards[subId]) selectedCards[subId] = new Set();
 
-  let cardRealIdx = 0;
   cards.forEach((card, rawIdx) => {
     if (card.type === 'section') {
       html += `</div><div class="card-section-header">${formatSectionHeaderLabel(card.label)}</div>${getCardGridOpenTag()}`;
       return;
     }
     const idx = rawIdx;       // ← 배열 원본 인덱스
-    const animIdx = cardRealIdx++;  // 애니메이션 딜레이용
     const sel = selectedCards[subId].has(idx) ? ' selected' : '';
     const deal = animate ? ' card-deal' : '';
-    const delay = animate ? ` style="${getCardRevealDelayStyle(animIdx)}"` : '';
+    const delay = animate ? ` style="${getCardRevealDelayStyle()}"` : '';
    html += `
   <div class="data-card pressable${sel}${deal}"${delay}
     data-global-idx="${idx}"
