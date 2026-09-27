@@ -1464,11 +1464,12 @@ function getGroupLayoutClass(count) {
 }
 
 /*
- * 첫 네 장은 뒤집힘을 충분히 보여 주고, 다섯 번째부터 간격을 급격히 줄인다.
- * 열 번째 이후는 카드 수와 관계없이 같은 시점에 짧게 뒤집어 전체 대기 시간을 제한한다.
+ * 첫 카드부터 시작 간격을 계속 줄여 여섯 번째까지 자연스럽게 가속한다.
+ * 일곱 번째부터는 시작 시점을 조밀하게 모으고, 아홉 번째 이후는 같은 시점에
+ * 뒤집기를 시작해 카드 수가 늘어나도 전체 대기 시간이 길어지지 않게 한다.
  */
-const CARD_REVEAL_DELAYS_MS = [0, 180, 360, 540, 670, 750, 795, 820, 835];
-const CARD_REVEAL_BURST_DELAY_MS = 845;
+const CARD_REVEAL_DELAYS_MS = [0, 185, 330, 435, 505, 545, 567, 577];
+const CARD_REVEAL_BURST_DELAY_MS = 582;
 
 function getCardRevealDelayMs(index) {
   const cardIndex = Math.max(0, Number(index) || 0);
@@ -1477,9 +1478,23 @@ function getCardRevealDelayMs(index) {
 
 function getCardRevealDurationMs(index) {
   const cardIndex = Math.max(0, Number(index) || 0);
-  if (cardIndex < 4) return 450;
-  if (cardIndex < 9) return 400 - ((cardIndex - 4) * 35);
-  return 180;
+  return Math.max(400, 450 - (cardIndex * 10));
+}
+
+function getGroupRevealDelayMs(index, count) {
+  const groupIndex = Math.max(0, Number(index) || 0);
+  const groupCount = Math.max(0, Number(count) || 0);
+
+  // 2~4개를 비롯해 5개까지는 기존의 0.14초 간격을 그대로 유지한다.
+  if (groupCount < 6) return groupIndex * 140;
+
+  // 첫 두 버튼은 기존 간격을 보여 주고, 이후 간격은 그룹 수가 많을수록 더 크게 압축한다.
+  const compressionRatio = Math.max(0.42, 0.72 - ((groupCount - 6) * 0.03));
+  let delay = 0;
+  for (let gapIndex = 0; gapIndex < groupIndex; gapIndex++) {
+    delay += 140 * Math.pow(compressionRatio, gapIndex);
+  }
+  return Math.round(delay);
 }
 
 function getCardRevealDelayStyle(index) {
@@ -1519,7 +1534,7 @@ function showGroupPage(subId, animate = true) {
   const groupLayoutClass = getGroupLayoutClass(data.groups.length);
   let html = `<div class="group-select-wrap ${groupLayoutClass}">`;
   data.groups.forEach((grp, i) => {
-    const delay = animate ? `style="animation-delay:${i * 0.14}s"` : '';
+    const delay = animate ? `style="animation-delay:${getGroupRevealDelayMs(i, data.groups.length)}ms"` : '';
 
     // 배지 카운트 — subgroups 있으면 하위 모든 카드, 없으면 직속 카드
     let grpCount = 0;
