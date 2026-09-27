@@ -1083,8 +1083,7 @@ body::after {
     .data-card.card-deal {
       opacity: 0;
       pointer-events: none;
-      /* 공개 간격과 재생 시간은 유지하고, 회전 자체만 하나의 연속 곡선으로 처리한다. */
-      animation: cardFlip 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      animation: cardFlip var(--card-reveal-duration, 0.45s) cubic-bezier(0.4, 0, 0.2, 1) forwards;
       transform-origin: center center;
     }
     .data-card.card-deal.card-interactive {
@@ -2148,7 +2147,7 @@ body::after {
   text-align: left;
   box-shadow: 0 2px 10px rgba(180,130,50,0.10);
   opacity: 0;
-  animation: groupBtnAppear 0.35s ease forwards;
+  animation: groupBtnRise 0.82s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   /* overflow: hidden 제거 — 배지가 버튼 밖으로 나와야 하기 때문
      이미지 모서리 클리핑은 .group-btn-icon:has(.group-btn-img) 에서 처리 */
   overflow: visible;
@@ -2183,6 +2182,11 @@ body::after {
   text-align: center;
   gap: 18px;
   overflow: visible;
+}
+
+/* 세로 목록은 오른쪽에서, 두 개짜리와 그리드는 기존처럼 아래에서 들어온다. */
+.group-layout-list .group-select-btn {
+  animation-name: groupBtnSlideFromRight;
 }
 
 .group-layout-four .group-select-btn,
@@ -2259,9 +2263,14 @@ body::after {
 .group-layout-six .group-btn-label,
 .group-layout-grid .group-btn-label { font-size: 0.78rem; line-height: 1.25; }
 
-@keyframes groupBtnAppear {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
+@keyframes groupBtnSlideFromRight {
+  from { opacity: 0; transform: translate3d(72px, 0, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes groupBtnRise {
+  from { opacity: 0; transform: translate3d(0, 64px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 
 

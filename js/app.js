@@ -1464,32 +1464,26 @@ function getGroupLayoutClass(count) {
 }
 
 /*
- * 첫 카드들은 명확한 간격을 두고, 나머지 공개 과정은 고정된 시간 범위로 압축한다.
- * 카드 묶음이 매우 커도 지수형 꼬리 구간은 CARD_REVEAL_MAX_DELAY_MS에
- * 가까워질 뿐 절대 이를 넘지 않는다.
+ * 첫 네 장은 뒤집힘을 충분히 보여 주고, 다섯 번째부터 간격을 급격히 줄인다.
+ * 열 번째 이후는 카드 수와 관계없이 같은 시점에 짧게 뒤집어 전체 대기 시간을 제한한다.
  */
-const CARD_REVEAL_MAX_DELAY_MS = 1500;
+const CARD_REVEAL_DELAYS_MS = [0, 180, 360, 540, 670, 750, 795, 820, 835];
+const CARD_REVEAL_BURST_DELAY_MS = 845;
 
 function getCardRevealDelayMs(index) {
   const cardIndex = Math.max(0, Number(index) || 0);
+  return CARD_REVEAL_DELAYS_MS[cardIndex] ?? CARD_REVEAL_BURST_DELAY_MS;
+}
 
-  // 1~8번 카드: 알아보기 쉽도록 의도적으로 여유 있는 간격을 둔다.
-  if (cardIndex < 8) return cardIndex * 100;
-
-  // 9~20번 카드: 앞 카드와의 간격을 점진적으로 줄인다.
-  if (cardIndex < 20) {
-    const acceleratedIndex = cardIndex - 7;
-    const progress = acceleratedIndex / 12;
-    return 700 + 520 * (1 - Math.pow(1 - progress, 1.7));
-  }
-
-  // 21번 이후 카드: 상한을 확실히 둔 매우 빠른 점근적 흐름을 적용한다.
-  const tailIndex = cardIndex - 19;
-  return 1220 + (CARD_REVEAL_MAX_DELAY_MS - 1220) * (1 - Math.exp(-tailIndex / 36));
+function getCardRevealDurationMs(index) {
+  const cardIndex = Math.max(0, Number(index) || 0);
+  if (cardIndex < 4) return 450;
+  if (cardIndex < 9) return 400 - ((cardIndex - 4) * 35);
+  return 180;
 }
 
 function getCardRevealDelayStyle(index) {
-  return `animation-delay:${Math.round(getCardRevealDelayMs(index))}ms`;
+  return `animation-delay:${getCardRevealDelayMs(index)}ms;--card-reveal-duration:${getCardRevealDurationMs(index)}ms`;
 }
 
 function setupCardRevealAnimations(page) {
@@ -1525,7 +1519,7 @@ function showGroupPage(subId, animate = true) {
   const groupLayoutClass = getGroupLayoutClass(data.groups.length);
   let html = `<div class="group-select-wrap ${groupLayoutClass}">`;
   data.groups.forEach((grp, i) => {
-    const delay = animate ? `style="animation-delay:${i * 0.08}s"` : '';
+    const delay = animate ? `style="animation-delay:${i * 0.14}s"` : '';
 
     // 배지 카운트 — subgroups 있으면 하위 모든 카드, 없으면 직속 카드
     let grpCount = 0;
@@ -1599,7 +1593,7 @@ function showSubgroupPage(subId, groupIdx) {
       if (selectedCards[subId]?.has(getSubgroupCardGlobalIdx(groupIdx, sgIdx, cIdx))) sgCount++;
     });
 
-     const delay = `style="animation-delay:${sgIdx * 0.08}s"`;
+     const delay = `style="animation-delay:${sgIdx * 0.14}s"`;
      
     html += `
       <button
