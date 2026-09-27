@@ -8,7 +8,7 @@
 카드 코드  { icon:'🔮', name:'이름' ,img:'images/Peep.png', subImg:'images/Giant_Elf.jpg',  desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'  },
 
 
-layoutType: '3',   ← 5/4/3/2 중 하나로 카드 배열 고정 적용됨. 카드 가로 개수, 기본=3
+layoutType: '3',   ← 5/4/3/2  카드배열 고정적용 / 기본=3  / 3= 큰카드3 / 2= 작은카드3개씩 배열
 
 
 \n 하나는 줄바꿈,  \n\n 분리,  기본 C 방식은 detail 하나만 쓰면됨,  detailLayout/detailMode: 'AB' 
@@ -746,7 +746,7 @@ const WORLD_CARDS = {
 /* ════════════════════════════════════════════════     🔻 장애물 - 2  세계·환경: environment 🔻     ════════════════════════════════════════════════ */
     { id: 'environment',
       label: '세계·환경',
-      layoutType: '3',
+      layoutType: '2',
       img: 'images/world/group/environment.jpg',
       cards: [
 
@@ -1207,7 +1207,7 @@ const WORLD_CARDS = {
        
     { id: 'survival',
       label: '생존·자원·수단',
-      layoutType: '3',
+      layoutType: '2',
       img: 'images/world/group/survival.jpg',
       cards: [
 
@@ -1328,7 +1328,7 @@ const WORLD_CARDS = {
        
     { id: 'context',
       label: '정보·시간·상황',
-      layoutType: '3',
+      layoutType: '2',
       img: 'images/world/group/context.jpg',
       cards: [
         { name: '카드명',  img: 'images/core/sub-nav/wrld/setting.jpg', desc: '설명', detailLayout: 'AB',
@@ -1342,7 +1342,7 @@ const WORLD_CARDS = {
        
     { id: 'lars',
       label: '세계 법칙',
-      layoutType: '3',
+      layoutType: '2',
       img: 'images/world/group/laws.jpg',
       cards: [
         { name: '카드명',  img: 'images/core/sub-nav/wrld/setting.jpg', desc: '설명', detailLayout: 'AB',
@@ -1356,7 +1356,7 @@ const WORLD_CARDS = {
        
     { id: 'supernatural',
       label: '초자연',
-      layoutType: '3',
+      layoutType: '2',
       img: 'images/world/group/supernatural.jpg',
       cards: [
         { name: '카드명',  img: 'images/core/sub-nav/wrld/setting.jpg', desc: '설명', detailLayout: 'AB',
