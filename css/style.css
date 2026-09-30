@@ -2191,6 +2191,13 @@ body::after {
   animation-name: groupBtnSlideFromRight, groupBtnFadeIn;
 }
 
+/* 7~25개 그리드에서만 초반에 빠르게 접근한 뒤 남은 거리를 부드럽게 감속한다.
+   fade 애니메이션의 keyframe과 duration은 기존 값을 그대로 사용한다. */
+.group-reveal-flow .group-select-btn {
+  animation-name: groupBtnRiseFlow, groupBtnFadeIn;
+  animation-timing-function: linear, linear;
+}
+
 .group-layout-four .group-select-btn,
 .group-layout-grid .group-select-btn {
   aspect-ratio: 1 / 1;
@@ -2273,6 +2280,15 @@ body::after {
 @keyframes groupBtnRise {
   from { transform: translate3d(0, 64px, 0); }
   to   { transform: translate3d(0, 0, 0); }
+}
+
+@keyframes groupBtnRiseFlow {
+  0%   { transform: translate3d(0, 64px, 0); }
+  20%  { transform: translate3d(0, 51.2px, 0); }
+  40%  { transform: translate3d(0, 32px, 0); }
+  60%  { transform: translate3d(0, 12.8px, 0); }
+  80%  { transform: translate3d(0, 6.4px, 0); }
+  100% { transform: translate3d(0, 0, 0); }
 }
 
 

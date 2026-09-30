@@ -1467,21 +1467,34 @@ const CARD_REVEAL_DURATION_MS = 450;
 const CARD_REVEAL_WAVE_GAP_MS = 80;
 const CARD_REVEAL_BURST_CARD_INDEX = 11;
 const CARD_REVEAL_EXTRA_WAVE_STEPS = 2;
+const GROUP_REVEAL_DURATION_MS = 820;
+
+function getLegacyGroupRevealDelayMs(index, count) {
+  const compressionRatio = Math.max(0.42, 0.72 - ((count - 6) * 0.03));
+  let delay = 0;
+  for (let gapIndex = 0; gapIndex < index; gapIndex++) {
+    delay += 140 * Math.pow(compressionRatio, gapIndex);
+  }
+  return Math.round(delay);
+}
 
 function getGroupRevealDelayMs(index, count) {
   const groupIndex = Math.max(0, Number(index) || 0);
   const groupCount = Math.max(0, Number(count) || 0);
 
-  // 2~4개를 비롯해 5개까지는 기존의 0.14초 간격을 그대로 유지한다.
+  // 2~6개와 26개 이상은 기존 등장 간격을 그대로 유지한다.
   if (groupCount < 6) return groupIndex * 140;
+  if (groupCount === 6) return getLegacyGroupRevealDelayMs(groupIndex, groupCount);
+  if (groupCount > 25) return getLegacyGroupRevealDelayMs(groupIndex, groupCount);
 
-  // 첫 두 버튼은 기존 간격을 보여 주고, 이후 간격은 그룹 수가 많을수록 더 크게 압축한다.
-  const compressionRatio = Math.max(0.42, 0.72 - ((groupCount - 6) * 0.03));
-  let delay = 0;
-  for (let gapIndex = 0; gapIndex < groupIndex; gapIndex++) {
-    delay += 140 * Math.pow(compressionRatio, gapIndex);
-  }
-  return Math.round(delay);
+  // 7~25개는 첫 버튼 시작부터 마지막 버튼 완료까지의 기존 흐름을 1.5배로
+  // 늘리되, 개별 애니메이션 길이는 유지한다. 모든 버튼 사이에 같은 간격을
+  // 적용해 초반의 단절과 후반의 동시 등장을 없앤다.
+  const legacyLastDelay = getLegacyGroupRevealDelayMs(groupCount - 1, groupCount);
+  const targetLastDelay = ((legacyLastDelay + GROUP_REVEAL_DURATION_MS) * 1.5)
+    - GROUP_REVEAL_DURATION_MS;
+  const stagger = targetLastDelay / (groupCount - 1);
+  return Math.round(groupIndex * stagger);
 }
 
 function getCardRevealDelayStyle() {
@@ -1553,7 +1566,10 @@ function showGroupPage(subId, animate = true) {
   page.id = 'page-' + subId;
 
   const groupLayoutClass = getGroupLayoutClass(data.groups.length);
-  let html = `<div class="group-select-wrap ${groupLayoutClass}">`;
+  const groupRevealClass = data.groups.length >= 7 && data.groups.length <= 25
+    ? ' group-reveal-flow'
+    : '';
+  let html = `<div class="group-select-wrap ${groupLayoutClass}${groupRevealClass}">`;
   data.groups.forEach((grp, i) => {
     const delay = animate ? `style="animation-delay:${getGroupRevealDelayMs(i, data.groups.length)}ms"` : '';
 
