@@ -1467,33 +1467,19 @@ const CARD_REVEAL_DURATION_MS = 450;
 const CARD_REVEAL_WAVE_GAP_MS = 80;
 const CARD_REVEAL_BURST_CARD_INDEX = 11;
 const CARD_REVEAL_EXTRA_WAVE_STEPS = 2;
-const GROUP_REVEAL_DURATION_MS = 820;
-
-function getLegacyGroupRevealDelayMs(index, count) {
-  const compressionRatio = Math.max(0.42, 0.72 - ((count - 6) * 0.03));
-  let delay = 0;
-  for (let gapIndex = 0; gapIndex < index; gapIndex++) {
-    delay += 140 * Math.pow(compressionRatio, gapIndex);
-  }
-  return Math.round(delay);
-}
+const GROUP_REVEAL_STAGGER_MS = 40;
+const GROUP_REVEAL_MAX_WAVE_MS = 200;
 
 function getGroupRevealDelayMs(index, count) {
   const groupIndex = Math.max(0, Number(index) || 0);
   const groupCount = Math.max(0, Number(count) || 0);
 
-  // 2~6개와 26개 이상은 기존 등장 간격을 그대로 유지한다.
+  // 2~5개는 기존 등장 간격을 그대로 유지한다.
   if (groupCount < 6) return groupIndex * 140;
-  if (groupCount === 6) return getLegacyGroupRevealDelayMs(groupIndex, groupCount);
-  if (groupCount > 25) return getLegacyGroupRevealDelayMs(groupIndex, groupCount);
 
-  // 7~25개는 첫 버튼 시작부터 마지막 버튼 완료까지의 기존 흐름을 1.5배로
-  // 늘리되, 개별 애니메이션 길이는 유지한다. 모든 버튼 사이에 같은 간격을
-  // 적용해 초반의 단절과 후반의 동시 등장을 없앤다.
-  const legacyLastDelay = getLegacyGroupRevealDelayMs(groupCount - 1, groupCount);
-  const targetLastDelay = ((legacyLastDelay + GROUP_REVEAL_DURATION_MS) * 1.5)
-    - GROUP_REVEAL_DURATION_MS;
-  const stagger = targetLastDelay / (groupCount - 1);
+  // 6개 이상은 개수와 무관하게 같은 짧은 연쇄 흐름을 사용한다. 버튼 수가
+  // 많아져도 마지막 시작 시점이 과도하게 늦어지지 않도록 전체 wave를 제한한다.
+  const stagger = Math.min(GROUP_REVEAL_STAGGER_MS, GROUP_REVEAL_MAX_WAVE_MS / (groupCount - 1));
   return Math.round(groupIndex * stagger);
 }
 
@@ -1566,7 +1552,7 @@ function showGroupPage(subId, animate = true) {
   page.id = 'page-' + subId;
 
   const groupLayoutClass = getGroupLayoutClass(data.groups.length);
-  const groupRevealClass = data.groups.length >= 7 && data.groups.length <= 25
+  const groupRevealClass = data.groups.length >= 6
     ? ' group-reveal-flow'
     : '';
   let html = `<div class="group-select-wrap ${groupLayoutClass}${groupRevealClass}">`;
@@ -2926,9 +2912,15 @@ subs.forEach(sub => {
 
 function setupGroupButtonActions(containerEl) {
   containerEl.querySelectorAll('.group-select-btn').forEach(btn => {
-     btn.addEventListener('animationend', () => {
+    const usesFastReveal = btn.closest('.group-reveal-flow');
+    const finishReveal = (event) => {
+      // 다수 그룹의 이동은 fade보다 먼저 끝나므로 fade가 완료될 때까지 기존
+      // opacity 애니메이션을 제거하지 않는다.
+      if (usesFastReveal && event.animationName !== 'groupBtnFadeIn') return;
       btn.classList.add('group-appear-done');
-    }, { once: true });
+      btn.removeEventListener('animationend', finishReveal);
+    };
+    btn.addEventListener('animationend', finishReveal);
 
     if (btn._groupActionAttached) return;
     btn._groupActionAttached = true;
