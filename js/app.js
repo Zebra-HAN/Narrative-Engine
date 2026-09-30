@@ -1467,20 +1467,26 @@ const CARD_REVEAL_DURATION_MS = 450;
 const CARD_REVEAL_WAVE_GAP_MS = 80;
 const CARD_REVEAL_BURST_CARD_INDEX = 11;
 const CARD_REVEAL_EXTRA_WAVE_STEPS = 2;
-const GROUP_REVEAL_STAGGER_MS = 40;
-const GROUP_REVEAL_MAX_WAVE_MS = 200;
+// Seven or more groups use a cumulative, accelerating reveal. These are the
+// gaps *before* each following button: the opening order remains legible, then
+// contracts into a quick stream. Every button after the tenth uses the final
+// short gap, so a large group never turns into a long one-by-one sequence.
+const GROUP_REVEAL_ACCELERATING_GAPS_MS = [150, 130, 110, 90, 70, 50, 35, 25, 18];
+const GROUP_REVEAL_TAIL_GAP_MS = 12;
 
 function getGroupRevealDelayMs(index, count) {
   const groupIndex = Math.max(0, Number(index) || 0);
   const groupCount = Math.max(0, Number(count) || 0);
 
-  // 2~5개는 기존 등장 간격을 그대로 유지한다.
+  // 2~5개와 6개는 각각 기존 등장 간격을 그대로 유지한다.
   if (groupCount < 6) return groupIndex * 140;
+  if (groupCount === 6) return groupIndex * 40;
 
-  // 6개 이상은 개수와 무관하게 같은 짧은 연쇄 흐름을 사용한다. 버튼 수가
-  // 많아져도 마지막 시작 시점이 과도하게 늦어지지 않도록 전체 wave를 제한한다.
-  const stagger = Math.min(GROUP_REVEAL_STAGGER_MS, GROUP_REVEAL_MAX_WAVE_MS / (groupCount - 1));
-  return Math.round(groupIndex * stagger);
+  let delay = 0;
+  for (let step = 0; step < groupIndex; step++) {
+    delay += GROUP_REVEAL_ACCELERATING_GAPS_MS[step] ?? GROUP_REVEAL_TAIL_GAP_MS;
+  }
+  return delay;
 }
 
 function getCardRevealDelayStyle() {
@@ -1553,11 +1559,14 @@ function showGroupPage(subId, animate = true) {
 
   const groupLayoutClass = getGroupLayoutClass(data.groups.length);
   const groupRevealClass = data.groups.length >= 6
-    ? ' group-reveal-flow'
+    ? ` group-reveal-flow${data.groups.length >= 7 ? ' group-reveal-accelerating' : ''}`
     : '';
   let html = `<div class="group-select-wrap ${groupLayoutClass}${groupRevealClass}">`;
   data.groups.forEach((grp, i) => {
-    const delay = animate ? `style="animation-delay:${getGroupRevealDelayMs(i, data.groups.length)}ms"` : '';
+    // This page is rebuilt whenever it becomes visible. Always restoring the
+    // delay makes re-entry (including the same category and swipe-back) replay
+    // only the reveal animation without touching selection/UI state.
+    const delay = `style="animation-delay:${getGroupRevealDelayMs(i, data.groups.length)}ms"`;
 
     // 배지 카운트 — subgroups 있으면 하위 모든 카드, 없으면 직속 카드
     let grpCount = 0;
