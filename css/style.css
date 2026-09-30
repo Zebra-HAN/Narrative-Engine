@@ -2275,14 +2275,14 @@ body::after {
   to   { transform: translate3d(0, 0, 0); }
 }
 
+
 @keyframes groupBtnFadeIn {
   0%   { opacity: 0; }
-  14%  { opacity: 0.05; }
-  28%  { opacity: 0.12; }
-  42%  { opacity: 0.22; }
-  56%  { opacity: 0.33; }
-  70%  { opacity: 0.44; }
-  84%  { opacity: 0.69; }
+  10%  { opacity: 0.05; }
+  20%  { opacity: 0.22; }
+  30%  { opacity: 0.50; }
+  40%  { opacity: 0.80; }
+  50%  { opacity: 1; }
   100% { opacity: 1; }
 }
 
