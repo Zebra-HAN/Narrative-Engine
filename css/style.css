@@ -2191,7 +2191,7 @@ body::after {
   animation-name: groupBtnSlideFromRight, groupBtnFadeIn;
 }
 
-/* 6개 버튼의 기존 다수 그룹 이동은 그대로 유지한다. */
+/* 7개 이상의 이동과 착지 흐름은 다수 그룹에만 적용한다. */
 .group-reveal-flow .group-select-btn {
   animation-name: groupBtnRiseFlow, groupBtnFadeIn;
   animation-duration: 0.41s, 0.82s;

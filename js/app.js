@@ -1471,16 +1471,15 @@ const CARD_REVEAL_EXTRA_WAVE_STEPS = 2;
 // gaps *before* each following button: the opening order remains legible, then
 // contracts into a quick stream. Every button after the tenth uses the final
 // short gap, so a large group never turns into a long one-by-one sequence.
-const GROUP_REVEAL_ACCELERATING_GAPS_MS = [150, 130, 110, 90, 70, 50, 35, 25, 18];
+const GROUP_REVEAL_ACCELERATING_GAPS_MS = [80, 65, 55, 48, 42, 38, 32, 25, 18];
 const GROUP_REVEAL_TAIL_GAP_MS = 12;
 
 function getGroupRevealDelayMs(index, count) {
   const groupIndex = Math.max(0, Number(index) || 0);
   const groupCount = Math.max(0, Number(count) || 0);
 
-  // 2~5개와 6개는 각각 기존 등장 간격을 그대로 유지한다.
-  if (groupCount < 6) return groupIndex * 140;
-  if (groupCount === 6) return groupIndex * 40;
+  // 2~6개는 같은 그리드/목록 계열의 기존 등장 간격을 유지한다.
+  if (groupCount <= 6) return groupIndex * 140;
 
   let delay = 0;
   for (let step = 0; step < groupIndex; step++) {
@@ -1558,8 +1557,8 @@ function showGroupPage(subId, animate = true) {
   page.id = 'page-' + subId;
 
   const groupLayoutClass = getGroupLayoutClass(data.groups.length);
-  const groupRevealClass = data.groups.length >= 6
-    ? ` group-reveal-flow${data.groups.length >= 7 ? ' group-reveal-accelerating' : ''}`
+  const groupRevealClass = data.groups.length >= 7
+    ? ' group-reveal-flow group-reveal-accelerating'
     : '';
   let html = `<div class="group-select-wrap ${groupLayoutClass}${groupRevealClass}">`;
   data.groups.forEach((grp, i) => {
