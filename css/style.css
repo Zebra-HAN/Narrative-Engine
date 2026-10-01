@@ -2310,13 +2310,13 @@ body::after {
   100% { transform: translate3d(0, 0, 0); }
 }
 
-
+/* 그룹 버튼 등장시의 페이드인 키프레임 0~100%=등장 타이밍 0.80=80% 투명도  */
 @keyframes groupBtnFadeIn {
   0%   { opacity: 0; }
-  10%  { opacity: 0.05; }
-  20%  { opacity: 0.22; }
-  30%  { opacity: 0.50; }
-  40%  { opacity: 0.80; }
+  10%  { opacity: 0.10; }
+  20%  { opacity: 0.25; }
+  30%  { opacity: 0.75; }
+  40%  { opacity: 1; }
   50%  { opacity: 1; }
   100% { opacity: 1; }
 }
