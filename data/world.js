@@ -1370,7 +1370,9 @@ const WORLD_CARDS = {
 
    
 /* ════════════════════════════════════════════════      세팅 = 배경     ════════════════════════════════════════════════ */  
-  setting: [
+  setting: {
+  groups: [
+    { id:'setting_existing', label:'기존 배경', icon:'📚', cards:[
 
     /* 헤더 */
     { type: 'section' ,  label: ' 헤더 — 추가 내용1 ' },  
@@ -1396,12 +1398,23 @@ const WORLD_CARDS = {
     { icon:'💀', name:'폐허' }, { icon:'🌊', name:'섬 군도' },
     { icon:'⚙', name:'스팀펑크 도시' }, { icon:'🎭', name:'환상 무대' },
     { icon:'🌸', name:'평화로운 마을' }, { icon:'🌑', name:'암흑 지대' },
-  ],
+  ] },
+    { id:'setting_new', label:'경계의 배경', icon:'🗺️', cards:[
+      { icon:'🌒', name:'낮과 밤의 경계 도시' },
+      { icon:'🌊', name:'침수되어 가는 왕국' },
+      { icon:'☁️', name:'구름 위의 군도' },
+      { icon:'🕳️', name:'지하에 숨은 문명' },
+      { icon:'🌲', name:'계절이 멈춘 숲' }
+    ]}
+  ]
+},
 
 
 /* ════════════════════════════════════════════════      세계관 - 장소     ════════════════════════════════════════════════ */  
 
-  location: [
+  location: {
+  groups: [
+    { id:'location_existing', label:'기존 장소', icon:'📚', cards:[
      
     { icon:'🏰', name:'고성' },
     { icon:'🌲', name:'고대 숲' },
@@ -1411,12 +1424,23 @@ const WORLD_CARDS = {
     { icon:'🏛', name:'신전' },
     { icon:'🚢', name:'해상 도시' },
     { icon:'🌌', name:'우주 정거장' },
-  ],
+  ] },
+    { id:'location_new', label:'비밀 장소', icon:'📍', cards:[
+      { icon:'🚪', name:'주인 없는 여관' },
+      { icon:'🗼', name:'봉인된 관측탑' },
+      { icon:'🌉', name:'두 세계의 다리' },
+      { icon:'📚', name:'움직이는 도서관' },
+      { icon:'⛲', name:'기억을 비추는 샘' }
+    ]}
+  ]
+},
 
 
 /* ════════════════════════════════════════════════      세계관 - 아이템     ════════════════════════════════════════════════ */  
 
-  item: [
+  item: {
+  groups: [
+    { id:'item_existing', label:'기존 아이템', icon:'📚', cards:[
      
     { icon:'💎', name:'마력 보석' },
     { icon:'📜', name:'고대 문서' },
@@ -1426,12 +1450,23 @@ const WORLD_CARDS = {
     { icon:'💍', name:'마법 반지' },
     { icon:'⚔', name:'전설의 검' },
     { icon:'📦', name:'수수께끼 상자' },
-  ],
+  ] },
+    { id:'item_new', label:'수수께끼 아이템', icon:'💎', cards:[
+      { icon:'🧭', name:'거짓을 가리키는 나침반' },
+      { icon:'🔔', name:'꿈을 깨우는 종' },
+      { icon:'🪞', name:'과거를 비추는 거울' },
+      { icon:'📜', name:'스스로 고쳐지는 지도' },
+      { icon:'🗝️', name:'주인을 고르는 열쇠' }
+    ]}
+  ]
+},
 
 
 /* ════════════════════════════════════════════════      세계관 - 도구     ════════════════════════════════════════════════ */  
 
-  tool: [
+  tool: {
+  groups: [
+    { id:'tool_existing', label:'기존 도구', icon:'📚', cards:[
      
     { icon:'🔨', name:'대장장이 망치' },
     { icon:'🪓', name:'벌목 도끼' },
@@ -1441,12 +1476,23 @@ const WORLD_CARDS = {
     { icon:'🔬', name:'분석 장비' },
     { icon:'🛠', name:'만능 공구' },
     { icon:'⚒', name:'제작 도구' },
-  ],
+  ] },
+    { id:'tool_new', label:'탐험 도구', icon:'🧰', cards:[
+      { icon:'🏮', name:'마력을 밝히는 등불' },
+      { icon:'🪝', name:'공간을 잇는 갈고리' },
+      { icon:'🔭', name:'시간을 보는 망원경' },
+      { icon:'🧪', name:'독을 판별하는 시약' },
+      { icon:'📡', name:'고대 신호 탐지기' }
+    ]}
+  ]
+},
 
 
 /* ════════════════════════════════════════════════      세계관 - 자원     ════════════════════════════════════════════════ */  
 
-  resource: [
+  resource: {
+  groups: [
+    { id:'resource_existing', label:'기존 자원', icon:'📚', cards:[
      
     { icon:'⛏', name:'철광석' },
     { icon:'💎', name:'마정석' },
@@ -1456,12 +1502,23 @@ const WORLD_CARDS = {
     { icon:'☀', name:'태양 에너지' },
     { icon:'🔥', name:'연료' },
     { icon:'🔋', name:'에너지 결정' },
-  ],
+  ] },
+    { id:'resource_new', label:'희귀 자원', icon:'⛏️', cards:[
+      { icon:'💠', name:'별빛 결정' },
+      { icon:'🌿', name:'회복의 이끼' },
+      { icon:'🔥', name:'꺼지지 않는 석탄' },
+      { icon:'💧', name:'기억의 샘물' },
+      { icon:'🪶', name:'부유 짐승의 깃털' }
+    ]}
+  ]
+},
 
 
 /* ════════════════════════════════════════════════      세계관 - 기술     ════════════════════════════════════════════════ */  
 
-  tech: [
+  tech: {
+  groups: [
+    { id:'tech_existing', label:'기존 기술', icon:'📚', cards:[
      
     { icon:'⚙', name:'증기 기술', img:'images/Giant_Elf.jpg', subImg:'images/Peep.png' }, 
     { icon:'💡', name:'전기 문명' },
@@ -1480,12 +1537,23 @@ const WORLD_CARDS = {
     { icon:'🔮', name:'마법 기계' },
     { icon:'⚗', name:'연금술' },
     { icon:'📡', name:'통신망' },
-  ],
+  ] },
+    { id:'tech_new', label:'금지된 기술', icon:'⚙️', cards:[
+      { icon:'🧠', name:'기억 편집술' },
+      { icon:'🌀', name:'공간 접기 장치' },
+      { icon:'🧬', name:'생명 복제 공정' },
+      { icon:'☀️', name:'인공 태양로' },
+      { icon:'⏳', name:'국소 시간 정지' }
+    ]}
+  ]
+},
 
 
 /* ════════════════════════════════════════════════      세계관 - 스킬     ════════════════════════════════════════════════ */  
 
-  skill: [
+  skill: {
+  groups: [
+    { id:'skill_existing', label:'기존 스킬', icon:'📚', cards:[
      
     { icon:'⚔', name:'검술' },
     { icon:'🏹', name:'궁술' },
@@ -1495,12 +1563,23 @@ const WORLD_CARDS = {
     { icon:'🥷', name:'암살술' },
     { icon:'🧠', name:'전략 전술' },
     { icon:'🐉', name:'용 조련' },
-  ],
+  ] },
+    { id:'skill_new', label:'희귀 스킬', icon:'✨', cards:[
+      { icon:'👁️', name:'감정의 흔적 읽기' },
+      { icon:'🫥', name:'존재감 지우기' },
+      { icon:'🧵', name:'끊어진 인연 잇기' },
+      { icon:'🌬️', name:'소리를 붙잡기' },
+      { icon:'🛡️', name:'상처 대신 받기' }
+    ]}
+  ]
+},
 
 
 /* ════════════════════════════════════════════════      세계관 - 문화     ════════════════════════════════════════════════ */ 
 
-  culture: [
+  culture: {
+  groups: [
+    { id:'culture_existing', label:'기존 문화', icon:'📚', cards:[
      
     { icon:'👑', name:'군주제' }, { icon:'⚖', name:'공화제' },
     { icon:'🌿', name:'자연 숭배' }, { icon:'🔥', name:'전쟁 문화' },
@@ -1521,12 +1600,23 @@ const WORLD_CARDS = {
     { icon:'🤝', name:'상인 연합' },
     { icon:'🎨', name:'예술 도시' },
     { icon:'👑', name:'귀족 사회' },
-  ],
+  ] },
+    { id:'culture_new', label:'생활과 의례', icon:'🏛️', cards:[
+      { icon:'🌕', name:'보름달 이름짓기' },
+      { icon:'🍞', name:'첫 수확 나눔' },
+      { icon:'🎭', name:'신분 교환 축제' },
+      { icon:'🕯️', name:'기억의 등불 의식' },
+      { icon:'🤫', name:'침묵의 장례' }
+    ]}
+  ]
+},
 
 
 /* ════════════════════════════════════════════════      세계관 - 의상     ════════════════════════════════════════════════ */  
 
-  costume: [
+  costume: {
+  groups: [
+    { id:'costume_existing', label:'기존 의상', icon:'📚', cards:[
      
     { icon:'👑', name:'왕족 의복' },
     { icon:'🛡', name:'기사 갑옷' },
@@ -1536,131 +1626,7 @@ const WORLD_CARDS = {
     { icon:'👘', name:'전통 의복' },
     { icon:'🦾', name:'강화 슈트' },
     { icon:'🤖', name:'기계 장갑' },
-  ],
-};
-
-
-/* ════════════════════════════════════════════════
-   🔻 그룹이 없던 world 카테고리 그룹 추가 🔻
-   기존 카드는 첫 그룹에 보존하고, 두 번째 그룹에는 임시 카드 5개를 둔다.
-════════════════════════════════════════════════ */
-
-/* ════════════════════════════════════════════════     🔻 setting 그룹 🔻     ════════════════════════════════════════════════ */
-WORLD_CARDS.setting = {
-  groups: [
-    { id:'setting_existing', label:'기존 배경', icon:'📚', cards:WORLD_CARDS.setting },
-    { id:'setting_new', label:'경계의 배경', icon:'🗺️', cards:[
-      { icon:'🌒', name:'낮과 밤의 경계 도시' },
-      { icon:'🌊', name:'침수되어 가는 왕국' },
-      { icon:'☁️', name:'구름 위의 군도' },
-      { icon:'🕳️', name:'지하에 숨은 문명' },
-      { icon:'🌲', name:'계절이 멈춘 숲' }
-    ]}
-  ]
-};
-
-/* ════════════════════════════════════════════════     🔻 location 그룹 🔻     ════════════════════════════════════════════════ */
-WORLD_CARDS.location = {
-  groups: [
-    { id:'location_existing', label:'기존 장소', icon:'📚', cards:WORLD_CARDS.location },
-    { id:'location_new', label:'비밀 장소', icon:'📍', cards:[
-      { icon:'🚪', name:'주인 없는 여관' },
-      { icon:'🗼', name:'봉인된 관측탑' },
-      { icon:'🌉', name:'두 세계의 다리' },
-      { icon:'📚', name:'움직이는 도서관' },
-      { icon:'⛲', name:'기억을 비추는 샘' }
-    ]}
-  ]
-};
-
-/* ════════════════════════════════════════════════     🔻 item 그룹 🔻     ════════════════════════════════════════════════ */
-WORLD_CARDS.item = {
-  groups: [
-    { id:'item_existing', label:'기존 아이템', icon:'📚', cards:WORLD_CARDS.item },
-    { id:'item_new', label:'수수께끼 아이템', icon:'💎', cards:[
-      { icon:'🧭', name:'거짓을 가리키는 나침반' },
-      { icon:'🔔', name:'꿈을 깨우는 종' },
-      { icon:'🪞', name:'과거를 비추는 거울' },
-      { icon:'📜', name:'스스로 고쳐지는 지도' },
-      { icon:'🗝️', name:'주인을 고르는 열쇠' }
-    ]}
-  ]
-};
-
-/* ════════════════════════════════════════════════     🔻 tool 그룹 🔻     ════════════════════════════════════════════════ */
-WORLD_CARDS.tool = {
-  groups: [
-    { id:'tool_existing', label:'기존 도구', icon:'📚', cards:WORLD_CARDS.tool },
-    { id:'tool_new', label:'탐험 도구', icon:'🧰', cards:[
-      { icon:'🏮', name:'마력을 밝히는 등불' },
-      { icon:'🪝', name:'공간을 잇는 갈고리' },
-      { icon:'🔭', name:'시간을 보는 망원경' },
-      { icon:'🧪', name:'독을 판별하는 시약' },
-      { icon:'📡', name:'고대 신호 탐지기' }
-    ]}
-  ]
-};
-
-/* ════════════════════════════════════════════════     🔻 resource 그룹 🔻     ════════════════════════════════════════════════ */
-WORLD_CARDS.resource = {
-  groups: [
-    { id:'resource_existing', label:'기존 자원', icon:'📚', cards:WORLD_CARDS.resource },
-    { id:'resource_new', label:'희귀 자원', icon:'⛏️', cards:[
-      { icon:'💠', name:'별빛 결정' },
-      { icon:'🌿', name:'회복의 이끼' },
-      { icon:'🔥', name:'꺼지지 않는 석탄' },
-      { icon:'💧', name:'기억의 샘물' },
-      { icon:'🪶', name:'부유 짐승의 깃털' }
-    ]}
-  ]
-};
-
-/* ════════════════════════════════════════════════     🔻 tech 그룹 🔻     ════════════════════════════════════════════════ */
-WORLD_CARDS.tech = {
-  groups: [
-    { id:'tech_existing', label:'기존 기술', icon:'📚', cards:WORLD_CARDS.tech },
-    { id:'tech_new', label:'금지된 기술', icon:'⚙️', cards:[
-      { icon:'🧠', name:'기억 편집술' },
-      { icon:'🌀', name:'공간 접기 장치' },
-      { icon:'🧬', name:'생명 복제 공정' },
-      { icon:'☀️', name:'인공 태양로' },
-      { icon:'⏳', name:'국소 시간 정지' }
-    ]}
-  ]
-};
-
-/* ════════════════════════════════════════════════     🔻 skill 그룹 🔻     ════════════════════════════════════════════════ */
-WORLD_CARDS.skill = {
-  groups: [
-    { id:'skill_existing', label:'기존 스킬', icon:'📚', cards:WORLD_CARDS.skill },
-    { id:'skill_new', label:'희귀 스킬', icon:'✨', cards:[
-      { icon:'👁️', name:'감정의 흔적 읽기' },
-      { icon:'🫥', name:'존재감 지우기' },
-      { icon:'🧵', name:'끊어진 인연 잇기' },
-      { icon:'🌬️', name:'소리를 붙잡기' },
-      { icon:'🛡️', name:'상처 대신 받기' }
-    ]}
-  ]
-};
-
-/* ════════════════════════════════════════════════     🔻 culture 그룹 🔻     ════════════════════════════════════════════════ */
-WORLD_CARDS.culture = {
-  groups: [
-    { id:'culture_existing', label:'기존 문화', icon:'📚', cards:WORLD_CARDS.culture },
-    { id:'culture_new', label:'생활과 의례', icon:'🏛️', cards:[
-      { icon:'🌕', name:'보름달 이름짓기' },
-      { icon:'🍞', name:'첫 수확 나눔' },
-      { icon:'🎭', name:'신분 교환 축제' },
-      { icon:'🕯️', name:'기억의 등불 의식' },
-      { icon:'🤫', name:'침묵의 장례' }
-    ]}
-  ]
-};
-
-/* ════════════════════════════════════════════════     🔻 costume 그룹 🔻     ════════════════════════════════════════════════ */
-WORLD_CARDS.costume = {
-  groups: [
-    { id:'costume_existing', label:'기존 의상', icon:'📚', cards:WORLD_CARDS.costume },
+  ] },
     { id:'costume_new', label:'기능성 의상', icon:'👘', cards:[
       { icon:'🌧️', name:'빗물을 튕기는 망토' },
       { icon:'🪽', name:'활공용 날개옷' },
@@ -1669,4 +1635,5 @@ WORLD_CARDS.costume = {
       { icon:'✨', name:'감정을 드러내는 장신구' }
     ]}
   ]
+},
 };

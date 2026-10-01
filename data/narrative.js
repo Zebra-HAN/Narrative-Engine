@@ -44,7 +44,9 @@ const NARRATIVE_CARDS = {
    
 /* ════════════════════════════════════════════════     🔻 목표 goal 🔻     ════════════════════════════════════════════════ */  
 
-  goal: [
+  goal: {
+  groups: [
+    { id:'goal_existing', label:'기존 목표', icon:'📚', cards:[
     { icon:'🏆', name:'최강'       }, { icon:'👑', name:'왕위'       }, { icon:'💎', name:'보물'   },
     { icon:'🔮', name:'진실'       }, { icon:'🌅', name:'평화'       }, { icon:'💀', name:'복수'   },
     { icon:'❤',  name:'사랑'       }, { icon:'🌿', name:'생존'       }, { icon:'🌌', name:'신'     },
@@ -52,7 +54,16 @@ const NARRATIVE_CARDS = {
     { icon:'🧬', name:'불사'       }, { icon:'🔥', name:'혁명'       }, { icon:'💫', name:'구원'   },
     { icon:'🌙', name:'기억'       }, { icon:'👥', name:'가족'       }, { icon:'⚖',  name:'정의'  },
     { icon:'🎭', name:'인정'       }, { icon:'🌱', name:'성장'       },
-  ],
+  ] },
+    { id:'goal_new', label:'숨겨진 목표', icon:'🎯', cards:[
+      { icon:'🗝️', name:'봉인된 문 열기' },
+      { icon:'📖', name:'잊힌 이름 되찾기' },
+      { icon:'🏠', name:'안전한 터전 만들기' },
+      { icon:'🤝', name:'흩어진 동료 모으기' },
+      { icon:'⏳', name:'정해진 운명 늦추기' }
+    ]}
+  ]
+},
 
 
       
@@ -1163,7 +1174,9 @@ const NARRATIVE_CARDS = {
    
 /* ════════════════════════════════════════════════     🔻 왜곡 🔻     ════════════════════════════════════════════════ */  
 
-  conflict: [
+  conflict: {
+  groups: [
+    { id:'conflict_existing', label:'기존 갈등', icon:'📚', cards:[
     { icon:'⚔',  name:'인간 vs 인간'     }, { icon:'🌊', name:'인간 vs 자연'   },
     { icon:'🤖', name:'인간 vs 기계'     }, { icon:'🌑', name:'인간 vs 어둠'   },
     { icon:'💫', name:'자아 vs 자아'     }, { icon:'👑', name:'개인 vs 사회'   },
@@ -1174,9 +1187,20 @@ const NARRATIVE_CARDS = {
     { icon:'🌌', name:'인간 vs 신'      }, { icon:'🐺', name:'본능 vs 문명'   },
     { icon:'🌊', name:'혁명 vs 질서'    }, { icon:'💎', name:'희생 vs 이익'   },
     { icon:'👥', name:'집단 vs 개인'    }, { icon:'⚡', name:'전통 vs 변화'    },
-  ],
+  ] },
+    { id:'conflict_new', label:'복합 갈등', icon:'⚔️', cards:[
+      { icon:'🌊', name:'생존과 신념의 충돌' },
+      { icon:'👥', name:'동료 사이의 불신' },
+      { icon:'⌛', name:'시간과의 경쟁' },
+      { icon:'🪞', name:'과거의 나와 대면' },
+      { icon:'🏛️', name:'개인과 체제의 대립' }
+    ]}
+  ]
+},
 
-  distort: [
+  distort: {
+  groups: [
+    { id:'distort_existing', label:'기존 왜곡', icon:'📚', cards:[
     { icon:'🎭', name:'거짓 믿음'    }, { icon:'🌑', name:'자기부정'     },
     { icon:'💀', name:'트라우마'     }, { icon:'🔗', name:'집착'         },
     { icon:'🌀', name:'망상'         }, { icon:'⚖',  name:'합리화'      },
@@ -1187,9 +1211,20 @@ const NARRATIVE_CARDS = {
     { icon:'⚔',  name:'복수심'      }, { icon:'🌿', name:'죄책감'       },
     { icon:'👑', name:'자만'         }, { icon:'🐾', name:'공포'         },
     { icon:'🎵', name:'유혹'         }, { icon:'🔮', name:'예언의 굴레'  },
-  ],
+  ] },
+    { id:'distort_new', label:'인식의 왜곡', icon:'🌀', cards:[
+      { icon:'🌫️', name:'선택적 기억' },
+      { icon:'🎭', name:'거짓된 자기상' },
+      { icon:'🔍', name:'확증 편향' },
+      { icon:'🗣️', name:'왜곡된 소문' },
+      { icon:'🪞', name:'타인에게 투영' }
+    ]}
+  ]
+},
 
-  event: [
+  event: {
+  groups: [
+    { id:'event_existing', label:'기존 사건', icon:'📚', cards:[
     { icon:'🌋', name:'대재앙'       }, { icon:'💥', name:'충돌'         },
     { icon:'👑', name:'왕의 죽음'    }, { icon:'🔮', name:'예언 성취'    },
     { icon:'❤',  name:'첫 만남'     }, { icon:'💀', name:'배신'         },
@@ -1200,9 +1235,20 @@ const NARRATIVE_CARDS = {
     { icon:'🌿', name:'치유'         }, { icon:'🌌', name:'차원 이동'    },
     { icon:'🔥', name:'혁명'         }, { icon:'⚖',  name:'재판'        },
     { icon:'🌑', name:'봉인 해제'    }, { icon:'✨', name:'기적'          },
-  ],
+  ] },
+    { id:'event_new', label:'촉발 사건', icon:'💥', cards:[
+      { icon:'📨', name:'정체불명의 초대장' },
+      { icon:'🌑', name:'도시 전체의 정전' },
+      { icon:'🧳', name:'낯선 유산의 도착' },
+      { icon:'🚪', name:'봉인 구역의 개방' },
+      { icon:'📣', name:'사라진 인물의 귀환' }
+    ]}
+  ]
+},
 
-  choice: [
+  choice: {
+  groups: [
+    { id:'choice_existing', label:'기존 선택', icon:'📚', cards:[
     { icon:'⚖',  name:'희생 vs 생존'     }, { icon:'❤',  name:'사랑 vs 의무'     },
     { icon:'👑', name:'권력 vs 양심'      }, { icon:'💀', name:'복수 vs 용서'      },
     { icon:'🌊', name:'도피 vs 직면'      }, { icon:'🔗', name:'자유 vs 안전'      },
@@ -1213,9 +1259,20 @@ const NARRATIVE_CARDS = {
     { icon:'🌌', name:'초월 vs 인간'      }, { icon:'💎', name:'명예 vs 생명'      },
     { icon:'🌱', name:'성장 vs 안주'      }, { icon:'👥', name:'혼자 vs 함께'      },
     { icon:'🔮', name:'운명 수용 vs 저항' }, { icon:'⚡', name:'행동 vs 침묵'       },
-  ],
+  ] },
+    { id:'choice_new', label:'결정적 선택', icon:'⚖️', cards:[
+      { icon:'🛡️', name:'한 사람과 모두 중 선택' },
+      { icon:'🗝️', name:'진실 공개와 은폐' },
+      { icon:'🔥', name:'힘의 사용과 포기' },
+      { icon:'🚪', name:'귀환과 잔류' },
+      { icon:'🤝', name:'용서와 단절' }
+    ]}
+  ]
+},
 
-  twist: [
+  twist: {
+  groups: [
+    { id:'twist_existing', label:'기존 반전', icon:'📚', cards:[
     { icon:'🎭', name:'적이 아군'     }, { icon:'💀', name:'아군이 적'     },
     { icon:'🔮', name:'예언의 반전'   }, { icon:'👁',  name:'정체 폭로'   },
     { icon:'🌑', name:'선인의 타락'   }, { icon:'⚔',  name:'악인의 구원' },
@@ -1226,9 +1283,20 @@ const NARRATIVE_CARDS = {
     { icon:'⚖',  name:'판단의 오류'  }, { icon:'❤',  name:'사랑의 배신' },
     { icon:'👑', name:'왕의 비밀'     }, { icon:'🐍', name:'내부의 적'    },
     { icon:'🔥', name:'신의 거짓'     }, { icon:'✨', name:'기적의 대가'   },
-  ],
+  ] },
+    { id:'twist_new', label:'관계의 반전', icon:'🎭', cards:[
+      { icon:'🛡️', name:'추적자가 보호자' },
+      { icon:'🧬', name:'적과 같은 혈통' },
+      { icon:'📜', name:'의뢰인의 진짜 목적' },
+      { icon:'👑', name:'가짜 왕의 정체' },
+      { icon:'🔁', name:'구원이 재앙의 시작' }
+    ]}
+  ]
+},
 
-  ending: [
+  ending: {
+  groups: [
+    { id:'ending_existing', label:'기존 결말', icon:'📚', cards:[
     { icon:'🌅', name:'완전한 승리'     }, { icon:'⚖',  name:'쓸쓸한 승리' },
     { icon:'💀', name:'비극적 결말'     }, { icon:'🌱', name:'열린 결말'    },
     { icon:'🔗', name:'순환의 결말'     }, { icon:'🌊', name:'희생의 결말'  },
@@ -1239,103 +1307,7 @@ const NARRATIVE_CARDS = {
     { icon:'⚡', name:'혁명 성공'        }, { icon:'🌙', name:'진실 수용'    },
     { icon:'🔥', name:'자기 파멸'       }, { icon:'✨', name:'구원'          },
     { icon:'⚔',  name:'끝나지 않은 싸움'}, { icon:'🌸', name:'평화'         },
-  ],
-};
-
-
-/* ════════════════════════════════════════════════
-   🔻 그룹이 없던 narrative 카테고리 그룹 추가 🔻
-   기존 카드는 첫 그룹에 보존하고, 두 번째 그룹에는 임시 카드 5개를 둔다.
-════════════════════════════════════════════════ */
-
-/* ════════════════════════════════════════════════     🔻 goal 그룹 🔻     ════════════════════════════════════════════════ */
-NARRATIVE_CARDS.goal = {
-  groups: [
-    { id:'goal_existing', label:'기존 목표', icon:'📚', cards:NARRATIVE_CARDS.goal },
-    { id:'goal_new', label:'숨겨진 목표', icon:'🎯', cards:[
-      { icon:'🗝️', name:'봉인된 문 열기' },
-      { icon:'📖', name:'잊힌 이름 되찾기' },
-      { icon:'🏠', name:'안전한 터전 만들기' },
-      { icon:'🤝', name:'흩어진 동료 모으기' },
-      { icon:'⏳', name:'정해진 운명 늦추기' }
-    ]}
-  ]
-};
-
-/* ════════════════════════════════════════════════     🔻 conflict 그룹 🔻     ════════════════════════════════════════════════ */
-NARRATIVE_CARDS.conflict = {
-  groups: [
-    { id:'conflict_existing', label:'기존 갈등', icon:'📚', cards:NARRATIVE_CARDS.conflict },
-    { id:'conflict_new', label:'복합 갈등', icon:'⚔️', cards:[
-      { icon:'🌊', name:'생존과 신념의 충돌' },
-      { icon:'👥', name:'동료 사이의 불신' },
-      { icon:'⌛', name:'시간과의 경쟁' },
-      { icon:'🪞', name:'과거의 나와 대면' },
-      { icon:'🏛️', name:'개인과 체제의 대립' }
-    ]}
-  ]
-};
-
-/* ════════════════════════════════════════════════     🔻 distort 그룹 🔻     ════════════════════════════════════════════════ */
-NARRATIVE_CARDS.distort = {
-  groups: [
-    { id:'distort_existing', label:'기존 왜곡', icon:'📚', cards:NARRATIVE_CARDS.distort },
-    { id:'distort_new', label:'인식의 왜곡', icon:'🌀', cards:[
-      { icon:'🌫️', name:'선택적 기억' },
-      { icon:'🎭', name:'거짓된 자기상' },
-      { icon:'🔍', name:'확증 편향' },
-      { icon:'🗣️', name:'왜곡된 소문' },
-      { icon:'🪞', name:'타인에게 투영' }
-    ]}
-  ]
-};
-
-/* ════════════════════════════════════════════════     🔻 event 그룹 🔻     ════════════════════════════════════════════════ */
-NARRATIVE_CARDS.event = {
-  groups: [
-    { id:'event_existing', label:'기존 사건', icon:'📚', cards:NARRATIVE_CARDS.event },
-    { id:'event_new', label:'촉발 사건', icon:'💥', cards:[
-      { icon:'📨', name:'정체불명의 초대장' },
-      { icon:'🌑', name:'도시 전체의 정전' },
-      { icon:'🧳', name:'낯선 유산의 도착' },
-      { icon:'🚪', name:'봉인 구역의 개방' },
-      { icon:'📣', name:'사라진 인물의 귀환' }
-    ]}
-  ]
-};
-
-/* ════════════════════════════════════════════════     🔻 choice 그룹 🔻     ════════════════════════════════════════════════ */
-NARRATIVE_CARDS.choice = {
-  groups: [
-    { id:'choice_existing', label:'기존 선택', icon:'📚', cards:NARRATIVE_CARDS.choice },
-    { id:'choice_new', label:'결정적 선택', icon:'⚖️', cards:[
-      { icon:'🛡️', name:'한 사람과 모두 중 선택' },
-      { icon:'🗝️', name:'진실 공개와 은폐' },
-      { icon:'🔥', name:'힘의 사용과 포기' },
-      { icon:'🚪', name:'귀환과 잔류' },
-      { icon:'🤝', name:'용서와 단절' }
-    ]}
-  ]
-};
-
-/* ════════════════════════════════════════════════     🔻 twist 그룹 🔻     ════════════════════════════════════════════════ */
-NARRATIVE_CARDS.twist = {
-  groups: [
-    { id:'twist_existing', label:'기존 반전', icon:'📚', cards:NARRATIVE_CARDS.twist },
-    { id:'twist_new', label:'관계의 반전', icon:'🎭', cards:[
-      { icon:'🛡️', name:'추적자가 보호자' },
-      { icon:'🧬', name:'적과 같은 혈통' },
-      { icon:'📜', name:'의뢰인의 진짜 목적' },
-      { icon:'👑', name:'가짜 왕의 정체' },
-      { icon:'🔁', name:'구원이 재앙의 시작' }
-    ]}
-  ]
-};
-
-/* ════════════════════════════════════════════════     🔻 ending 그룹 🔻     ════════════════════════════════════════════════ */
-NARRATIVE_CARDS.ending = {
-  groups: [
-    { id:'ending_existing', label:'기존 결말', icon:'📚', cards:NARRATIVE_CARDS.ending },
+  ] },
     { id:'ending_new', label:'여운 있는 결말', icon:'🌅', cards:[
       { icon:'🕯️', name:'작은 희망의 계승' },
       { icon:'🚶', name:'이름 없는 귀환' },
@@ -1344,4 +1316,5 @@ NARRATIVE_CARDS.ending = {
       { icon:'🌌', name:'미지로 향하는 문' }
     ]}
   ]
+},
 };
