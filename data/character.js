@@ -26,13 +26,13 @@ const CHARACTER_NAV = {
   label: '캐릭터',
   resetLabel: '캐릭터 초기화',
   subs: [
-    { id:'archetype',   label:'원형', img:'images/core/sub-nav/char/archetype.webp' },
+    { id:'archetype',   label:'원형', img:'images/core/sub-nav/char/archetype.webp', type:'group' },
     { id:'race',        label:'종족', img:'images/core/sub-nav/char/race.webp', type:'group'    },
     { id:'job',         label:'직업', img:'images/core/sub-nav/char/job.webp',  type:'group'    },
-    { id:'personality', label:'성격', img:'images/core/sub-nav/char/personality.webp'   },
+    { id:'personality', label:'성격', img:'images/core/sub-nav/char/personality.webp', type:'group' },
     { id:'attribute',   label:'속성', img:'images/core/sub-nav/char/attribute.webp'  ,type:'group'   },
     { id:'ability',     label:'능력', img:'images/core/sub-nav/char/ability.webp' ,type:'group'   },
-    { id:'relation',    label:'관계', img:'images/core/sub-nav/char/relation.webp'    },
+    { id:'relation',    label:'관계', img:'images/core/sub-nav/char/relation.webp', type:'group' },
   ]
 };
 
@@ -685,4 +685,52 @@ race: {   /* ═══  [종족]  ═══ */
     { icon:'🔮', name:'예언의 관계'  }, { icon:'💫', name:'전생인연'        }, { icon:'🌿', name:'치유자와 상처'},
     { icon:'⚖', name:'거래관계'     }, { icon:'🌑', name:'어둠의 계약'     },
   ],
+};
+
+
+/* ════════════════════════════════════════════════
+   🔻 그룹이 없던 character 카테고리 그룹 추가 🔻
+   기존 카드는 첫 그룹에 보존하고, 두 번째 그룹에는 임시 카드 5개를 둔다.
+════════════════════════════════════════════════ */
+
+/* ════════════════════════════════════════════════     🔻 archetype 그룹 🔻     ════════════════════════════════════════════════ */
+CHARACTER_CARDS.archetype = {
+  groups: [
+    { id:'archetype_existing', label:'기존 원형', icon:'📚', cards:CHARACTER_CARDS.archetype },
+    { id:'archetype_new', label:'새로운 원형', icon:'🎭', cards:[
+      { icon:'🧭', name:'길잡이' },
+      { icon:'🪞', name:'거울' },
+      { icon:'🔥', name:'개혁가' },
+      { icon:'🕊️', name:'중재자' },
+      { icon:'📜', name:'기록자' }
+    ]}
+  ]
+};
+
+/* ════════════════════════════════════════════════     🔻 personality 그룹 🔻     ════════════════════════════════════════════════ */
+CHARACTER_CARDS.personality = {
+  groups: [
+    { id:'personality_existing', label:'기존 성격', icon:'📚', cards:CHARACTER_CARDS.personality },
+    { id:'personality_new', label:'상황별 성격', icon:'🧠', cards:[
+      { icon:'🧊', name:'위기에도 침착한' },
+      { icon:'🌞', name:'낯선 이에게 다정한' },
+      { icon:'🦊', name:'협상에 능숙한' },
+      { icon:'🌱', name:'실수를 인정하는' },
+      { icon:'⚡', name:'결단이 빠른' }
+    ]}
+  ]
+};
+
+/* ════════════════════════════════════════════════     🔻 relation 그룹 🔻     ════════════════════════════════════════════════ */
+CHARACTER_CARDS.relation = {
+  groups: [
+    { id:'relation_existing', label:'기존 관계', icon:'📚', cards:CHARACTER_CARDS.relation },
+    { id:'relation_new', label:'변화하는 관계', icon:'🔗', cards:[
+      { icon:'🫱🏻‍🫲🏼', name:'불편한 동맹' },
+      { icon:'🪢', name:'공동의 비밀' },
+      { icon:'🌉', name:'화해를 잇는 사이' },
+      { icon:'🎯', name:'같은 목표의 경쟁자' },
+      { icon:'🧭', name:'서로의 길잡이' }
+    ]}
+  ]
 };
