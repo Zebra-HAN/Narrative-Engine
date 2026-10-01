@@ -2146,10 +2146,9 @@ body::after {
   cursor: pointer;
   text-align: left;
   box-shadow: 0 2px 10px rgba(180,130,50,0.10);
-  opacity: 0;
-  animation:
-    groupBtnRise 0.82s cubic-bezier(0.16, 1, 0.3, 1) forwards,
-    groupBtnFadeIn 0.82s linear forwards;
+  /* 페이드인은 비교를 위해 잠시 비활성화한다. 이동 애니메이션은 그대로 유지한다. */
+  opacity: 1;
+  animation: groupBtnRise 0.82s cubic-bezier(0.16, 1, 0.3, 1) both;
   /* overflow: hidden 제거 — 배지가 버튼 밖으로 나와야 하기 때문
      이미지 모서리 클리핑은 .group-btn-icon:has(.group-btn-img) 에서 처리 */
   overflow: visible;
@@ -2188,20 +2187,20 @@ body::after {
 
 /* 세로 목록은 오른쪽에서, 두 개짜리와 그리드는 기존처럼 아래에서 들어온다. */
 .group-layout-list .group-select-btn {
-  animation-name: groupBtnSlideFromRight, groupBtnFadeIn;
+  animation-name: groupBtnSlideFromRight;
 }
 
 /* 7개 이상의 이동과 착지 흐름은 다수 그룹에만 적용한다. */
 .group-reveal-flow .group-select-btn {
-  animation-name: groupBtnRiseFlow, groupBtnFadeIn;
-  animation-duration: 0.41s, 0.82s;
-  animation-timing-function: linear, linear;
+  animation-name: groupBtnRiseFlow;
+  animation-duration: 0.41s;
+  animation-timing-function: linear;
 }
 
-/* 7개 이상에서만 이동을 충분히 보여 주되, fade의 duration/곡선은 건드리지 않는다. */
+/* 7개 이상에서만 이동을 충분히 보여 준다. */
 .group-reveal-accelerating .group-select-btn {
-  animation-name: groupBtnRiseAccelerating, groupBtnFadeIn;
-  animation-duration: 0.76s, 0.82s;
+  animation-name: groupBtnRiseAccelerating;
+  animation-duration: 0.76s;
 }
 
 .group-layout-four .group-select-btn,
@@ -2311,6 +2310,7 @@ body::after {
 }
 
 
+/* 현재는 사용하지 않지만 페이드인 복구가 쉽도록 원래 키프레임을 보존한다. */
 @keyframes groupBtnFadeIn {
   0%   { opacity: 0; }
   10%  { opacity: 0.05; }
