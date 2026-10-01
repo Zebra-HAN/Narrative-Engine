@@ -17,13 +17,13 @@ const COMPASS_NAV = {
   label: '나침반',
   resetLabel: '나침반 초기화',
   subs: [
-    { id: 'type',     label: '유형',  img:'images/core/sub-nav/comp/type.webp'  },
-    { id: 'genre',    label: '장르',  img:'images/core/sub-nav/comp/genre.webp'  },
-    { id: 'message',  label: '메시지', img:'images/core/sub-nav/comp/message.webp'  },
-    { id: 'theme',    label: '테마',  img:'images/core/sub-nav/comp/theme.webp'  },
-    { id: 'quote',    label: '명언',  img:'images/core/sub-nav/comp/quote.webp'  },
-    { id: 'reader',   label: '체험',  img:'images/core/sub-nav/comp/reader.webp'  },
-    { id: 'mood',     label: '분위기', img:'images/core/sub-nav/comp/mood.webp'  },
+    { id: 'type',     label: '유형',  img:'images/core/sub-nav/comp/type.webp', type:'group' },
+    { id: 'genre',    label: '장르',  img:'images/core/sub-nav/comp/genre.webp', type:'group' },
+    { id: 'message',  label: '메시지', img:'images/core/sub-nav/comp/message.webp', type:'group' },
+    { id: 'theme',    label: '테마',  img:'images/core/sub-nav/comp/theme.webp', type:'group' },
+    { id: 'quote',    label: '명언',  img:'images/core/sub-nav/comp/quote.webp', type:'group' },
+    { id: 'reader',   label: '체험',  img:'images/core/sub-nav/comp/reader.webp', type:'group' },
+    { id: 'mood',     label: '분위기', img:'images/core/sub-nav/comp/mood.webp', type:'group' },
   ]
 };
 
@@ -155,3 +155,107 @@ const COMPASS_CARDS = {
 
 
 
+
+
+/* ════════════════════════════════════════════════
+   🔻 그룹이 없던 compass 카테고리 그룹 추가 🔻
+   기존 카드는 첫 그룹에 보존하고, 두 번째 그룹에는 임시 카드 5개를 둔다.
+════════════════════════════════════════════════ */
+
+/* ════════════════════════════════════════════════     🔻 type 그룹 🔻     ════════════════════════════════════════════════ */
+COMPASS_CARDS.type = {
+  groups: [
+    { id:'type_existing', label:'기존 유형', icon:'📚', cards:COMPASS_CARDS.type },
+    { id:'type_new', label:'실험적 유형', icon:'🧩', cards:[
+      { icon:'🧵', name:'교차 시점 서사' },
+      { icon:'🔁', name:'순환 구조 서사' },
+      { icon:'📨', name:'서간체 이야기' },
+      { icon:'⏱️', name:'실시간 진행극' },
+      { icon:'🗺️', name:'탐험형 옴니버스' }
+    ]}
+  ]
+};
+
+/* ════════════════════════════════════════════════     🔻 genre 그룹 🔻     ════════════════════════════════════════════════ */
+COMPASS_CARDS.genre = {
+  groups: [
+    { id:'genre_existing', label:'기존 장르', icon:'📚', cards:COMPASS_CARDS.genre },
+    { id:'genre_new', label:'혼합 장르', icon:'🎬', cards:[
+      { icon:'🧙', name:'판타지 미스터리' },
+      { icon:'🚀', name:'SF 로맨스' },
+      { icon:'👻', name:'호러 코미디' },
+      { icon:'🏛️', name:'역사 스릴러' },
+      { icon:'🌿', name:'힐링 어드벤처' }
+    ]}
+  ]
+};
+
+/* ════════════════════════════════════════════════     🔻 message 그룹 🔻     ════════════════════════════════════════════════ */
+COMPASS_CARDS.message = {
+  groups: [
+    { id:'message_existing', label:'기존 메시지', icon:'📚', cards:COMPASS_CARDS.message },
+    { id:'message_new', label:'질문을 남기는 메시지', icon:'💬', cards:[
+      { icon:'🧭', name:'옳은 길은 누가 정하는가' },
+      { icon:'⚖️', name:'정의는 누구에게 공평한가' },
+      { icon:'🌱', name:'변화는 상실을 요구하는가' },
+      { icon:'🤝', name:'용서에도 조건이 필요한가' },
+      { icon:'🕰️', name:'과거를 잊어야 나아가는가' }
+    ]}
+  ]
+};
+
+/* ════════════════════════════════════════════════     🔻 theme 그룹 🔻     ════════════════════════════════════════════════ */
+COMPASS_CARDS.theme = {
+  groups: [
+    { id:'theme_existing', label:'기존 테마', icon:'📚', cards:COMPASS_CARDS.theme },
+    { id:'theme_new', label:'관계 테마', icon:'🎨', cards:[
+      { icon:'🪢', name:'신뢰와 의심' },
+      { icon:'🏠', name:'소속과 고립' },
+      { icon:'🪞', name:'이해와 오해' },
+      { icon:'🌉', name:'세대 간의 화해' },
+      { icon:'🕊️', name:'용서와 책임' }
+    ]}
+  ]
+};
+
+/* ════════════════════════════════════════════════     🔻 quote 그룹 🔻     ════════════════════════════════════════════════ */
+COMPASS_CARDS.quote = {
+  groups: [
+    { id:'quote_existing', label:'기존 명언', icon:'📚', cards:COMPASS_CARDS.quote },
+    { id:'quote_new', label:'새로운 문장', icon:'💡', cards:[
+      { icon:'🌅', name:'끝은 다른 시작의 이름이다' },
+      { icon:'🧭', name:'길을 잃어야 내 방향을 안다' },
+      { icon:'🔥', name:'용기는 두려움과 함께 걷는다' },
+      { icon:'🌱', name:'작은 선택이 운명을 키운다' },
+      { icon:'🤝', name:'믿음은 함께 견딘 시간이다' }
+    ]}
+  ]
+};
+
+/* ════════════════════════════════════════════════     🔻 reader 그룹 🔻     ════════════════════════════════════════════════ */
+COMPASS_CARDS.reader = {
+  groups: [
+    { id:'reader_existing', label:'기존 체험', icon:'📚', cards:COMPASS_CARDS.reader },
+    { id:'reader_new', label:'사유하는 체험', icon:'👁️', cards:[
+      { icon:'🧩', name:'단서를 맞추는 즐거움' },
+      { icon:'🪞', name:'자신을 돌아보는 순간' },
+      { icon:'⚖️', name:'판단을 망설이는 긴장' },
+      { icon:'🌌', name:'낯선 세계를 발견하는 감각' },
+      { icon:'🕯️', name:'긴 여운을 곱씹는 체험' }
+    ]}
+  ]
+};
+
+/* ════════════════════════════════════════════════     🔻 mood 그룹 🔻     ════════════════════════════════════════════════ */
+COMPASS_CARDS.mood = {
+  groups: [
+    { id:'mood_existing', label:'기존 분위기', icon:'📚', cards:COMPASS_CARDS.mood },
+    { id:'mood_new', label:'복합 분위기', icon:'🌈', cards:[
+      { icon:'🌦️', name:'쓸쓸하지만 희망찬' },
+      { icon:'🕯️', name:'고요하고 불길한' },
+      { icon:'🎪', name:'화려하지만 공허한' },
+      { icon:'🌊', name:'평온하지만 긴장된' },
+      { icon:'🌙', name:'신비롭고 따뜻한' }
+    ]}
+  ]
+};
