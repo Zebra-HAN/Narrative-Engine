@@ -293,8 +293,7 @@ function applyCreativeBackground({ navId = currentNav, stage, screenKey }) {
   const area = document.getElementById('center-area');
   if (!area || !stage || !screenKey) return;
 
-  // 배경 단계는 CSS가 카드 화면에만 가독성용 밝은 오버레이를 적용할 때 사용한다.
-  // top/group 화면은 원본 이미지의 색감과 명암을 그대로 표시한다.
+  // 배경 단계 정보는 향후 단계별 화면 처리가 필요할 때 사용할 수 있도록 유지한다.
   area.dataset.backgroundStage = stage;
 
   // 같은 화면을 선택 상태 갱신 등으로 다시 그릴 때는 기존 배경을 유지한다.
