@@ -894,13 +894,18 @@ body::after {
       overflow: hidden;
       touch-action: pan-y;
       background-color: #f2eee5;
-      background-image:
-        linear-gradient(rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.24)),
-        var(--creative-background-image);
+      /* top/group은 밝은 레이어 없이 원본 JPG를 그대로 표시한다. */
+      background-image: var(--creative-background-image);
       background-position: center;
       background-size: cover;
       background-repeat: no-repeat;
       transition: background-image 0.2s ease;
+    }
+    /* 카드가 많은 화면에서만 기존의 24% 흰색 가독성 오버레이를 유지한다. */
+    .center-area[data-background-stage="card"] {
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.24)),
+        var(--creative-background-image);
     }
     .center-area::before {
       content: '';
