@@ -281,6 +281,8 @@ const CREATIVE_BACKGROUNDS = {
 };
 
 let activeBackgroundScreen = null;
+let backgroundSessionSubId = null;
+const creativeBackgroundMemory = new Map();
 
 function getCreativeBackground(navId, stage) {
   const candidates = CREATIVE_BACKGROUNDS[navId]?.[stage];
@@ -296,12 +298,16 @@ function applyCreativeBackground({ navId = currentNav, stage, screenKey }) {
   // 배경 단계 정보는 향후 단계별 화면 처리가 필요할 때 사용할 수 있도록 유지한다.
   area.dataset.backgroundStage = stage;
 
-  // 같은 화면을 선택 상태 갱신 등으로 다시 그릴 때는 기존 배경을 유지한다.
-  // 다른 화면에 갔다 돌아온 경우에는 screenKey가 달라졌다가 복원되므로 새로 뽑힌다.
   const activationKey = `${navId}:${stage}:${screenKey}`;
   if (activeBackgroundScreen === activationKey) return;
 
-  const path = getCreativeBackground(navId, stage);
+  // 현재 카테고리를 탐색하는 동안에는 화면별 선택값을 보관한다. 덕분에 뒤로
+  // 돌아오거나 방금 열었던 그룹에 다시 들어가도 그 화면의 배경이 복원된다.
+  let path = creativeBackgroundMemory.get(activationKey);
+  if (!path) {
+    path = getCreativeBackground(navId, stage);
+    if (path) creativeBackgroundMemory.set(activationKey, path);
+  }
   if (!path) return;
   activeBackgroundScreen = activationKey;
   /*
@@ -317,6 +323,16 @@ function applyCreativeBackground({ navId = currentNav, stage, screenKey }) {
 
 function resetCreativeBackgroundActivation() {
   activeBackgroundScreen = null;
+  backgroundSessionSubId = null;
+  creativeBackgroundMemory.clear();
+}
+
+function beginBackgroundCategorySession(subId) {
+  if (backgroundSessionSubId !== null && backgroundSessionSubId !== subId) {
+    activeBackgroundScreen = null;
+    creativeBackgroundMemory.clear();
+  }
+  backgroundSessionSubId = subId;
 }
 
 
@@ -1369,6 +1385,7 @@ function switchNav(navId, skipAnimation, options = {}) {
   if (navId === currentNav && !skipAnimation && addressTrail.length > 0 && !options.force) return;
 
   const prev = currentNav;
+  if (prev !== navId) resetCreativeBackgroundActivation();
   currentNav = navId;
   currentSubId = null;
 
@@ -1419,6 +1436,7 @@ function renderSubnav(navId, animate) {
 ════════════════════════════════════════════════ */
 function selectSub(subId, navId) {
   closeCardInfo();
+  beginBackgroundCategorySession(subId);
   // 이전 active 제거
   document.querySelectorAll('.subnav-item').forEach(el => el.classList.remove('active'));
   // 현재 active
