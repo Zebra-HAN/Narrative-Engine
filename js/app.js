@@ -255,65 +255,52 @@ function initUiSounds() {
 
 /* ════════════════════════════════════════════════
    창작 페이지 배경
-   아래 세 배열/객체의 이미지 주소를 바꾸면 화면 배경을 직접 교체할 수 있습니다.
-   - main: 하단의 메인 카테고리를 선택하고 세부 카테고리를 고르기 전의 배경
-   - sub: 원형/종족/성격 같은 세부 카테고리 화면의 배경 (선택 입력)
-   - group: 종족 안의 인간/엘프 같은 그룹 배경 (선택 입력)
-
-   sub/group에 주소를 적지 않은 항목도 palette의 이미지가 순서대로 적용됩니다.
-   데이터 객체에 background: 'images/...'를 직접 추가하면 이 설정보다 우선하며,
-   그룹 배경은 그 안의 서브그룹과 카드 화면까지 자동으로 이어집니다.
+   nav 종류와 화면 단계(top/group/card)별 후보를 한 곳에서 관리합니다.
 ════════════════════════════════════════════════ */
 const CREATIVE_BACKGROUNDS = {
-  palette: [
-    'images/core/home/bg_map.jpg',
-    'images/core/home/bg_explorer.jpg',
-  ],
-  main: {
-    character:  'images/core/home/bg_dinosaur.jpg',
-    narrative2: 'images/core/home/bg_wood.jpg',
-    world:      'images/core/home/bg_map.jpg',
-    compass:    'images/core/home/bg_explorer.jpg',
+  character: {
+    top: ['top_character-1.jpg', 'top_character-2.jpg', 'top_character-3.jpg'],
+    group: ['group_character-1.jpg', 'group_character-2.jpg'],
+    card: ['card_character-1.jpg', 'card_character-2.jpg', 'card_character-3.jpg', 'bg_monster.jpg'],
   },
-  sub: {
-     archetype: 'images/core/home/bg_wood.jpg',
-     race: 'images/core/home/bg_monster.jpg',
-     type:  'images/core/home/bg_explorer.jpg',
-     
+  narrative2: {
+    top: ['top_story.jpg', 'top_story-1.jpg', 'top_story-2.jpg'],
+    group: ['group_story.jpg', 'group_story-1.jpg', 'group_story-2.jpg', 'group_story-3.jpg', 'group_story-4.jpg'],
+    card: ['card_story-1.jpg', 'card_story-2.jpg', 'card_story-3.jpg', 'card_story-4.jpg', 'card_story-5.jpg'],
   },
-  group: {
-     race: { race_fantasy: 'images/core/home/bg_monster.jpg', 
-             race_human: 'images/core/home/bg_modern.jpg',
-           },
-     
-    // 예: race: { race_human: 'images/core/home/bg_modern.jpg' },
+  world: {
+    top: ['top_world-1.jpg', 'top_world-2.jpg', 'top_world-3.jpg'],
+    group: ['group_world-1.jpg', 'group_world-2.jpg'],
+    card: ['bg_map.jpg', 'card_world-1.jpg', 'card_world-2.jpg', 'card_world-3.jpg', 'card_world-4.jpg', 'card_world-5.jpg', 'card_world-6.jpg'],
+  },
+  compass: {
+    top: ['top_comp.jpg'],
+    group: ['group_comp-1.jpg', 'group_comp-2.jpg', 'group_comp-3.jpg'],
+    card: ['card_comp-1.jpg', 'card_comp-2.jpg', 'card_comp-3.jpg', 'card_comp-4.jpg'],
   },
 };
 
-function getCreativeBackground({ navId = currentNav, subId, groupIdx } = {}) {
-  const palette = CREATIVE_BACKGROUNDS.palette;
-  const nav = NAV_DATA[navId];
-  if (!subId) return nav?.background || CREATIVE_BACKGROUNDS.main[navId] || palette[0];
+let activeBackgroundScreen = null;
 
-  const subIndex = nav?.subs.findIndex(sub => sub.id === subId) ?? -1;
-  const sub = subIndex >= 0 ? nav.subs[subIndex] : getSubInfo(subId);
-  const subBackground = sub?.background
-    || CREATIVE_BACKGROUNDS.sub[subId]
-    || palette[(Math.max(subIndex, 0) + Object.keys(NAV_DATA).indexOf(navId)) % palette.length];
-
-  if (!Number.isInteger(groupIdx)) return subBackground;
-
-  const group = CARD_DATA[subId]?.groups?.[groupIdx];
-  return group?.background
-    || CREATIVE_BACKGROUNDS.group[subId]?.[group?.id]
-    || palette[(groupIdx + Math.max(subIndex, 0)) % palette.length]
-    || subBackground;
+function getCreativeBackground(navId, stage) {
+  const candidates = CREATIVE_BACKGROUNDS[navId]?.[stage];
+  if (!candidates?.length) return null;
+  const filename = candidates[Math.floor(Math.random() * candidates.length)];
+  return `images/core/home/${filename}`;
 }
 
-function applyCreativeBackground(location) {
+function applyCreativeBackground({ navId = currentNav, stage, screenKey }) {
   const area = document.getElementById('center-area');
-  if (!area) return;
-  const path = getCreativeBackground(location);
+  if (!area || !stage || !screenKey) return;
+
+  // 같은 화면을 선택 상태 갱신 등으로 다시 그릴 때는 기존 배경을 유지한다.
+  // 다른 화면에 갔다 돌아온 경우에는 screenKey가 달라졌다가 복원되므로 새로 뽑힌다.
+  const activationKey = `${navId}:${stage}:${screenKey}`;
+  if (activeBackgroundScreen === activationKey) return;
+
+  const path = getCreativeBackground(navId, stage);
+  if (!path) return;
+  activeBackgroundScreen = activationKey;
   /*
    * 이 값은 css/style.css 안에서 실제 background-image로 사용됩니다. 상대 경로를
    * 그대로 넘기면 브라우저가 CSS 파일 위치(css/)를 기준으로 해석하여
@@ -323,6 +310,10 @@ function applyCreativeBackground(location) {
    */
   const imageUrl = new URL(path, document.baseURI).href;
   area.style.setProperty('--creative-background-image', `url(${JSON.stringify(imageUrl)})`);
+}
+
+function resetCreativeBackgroundActivation() {
+  activeBackgroundScreen = null;
 }
 
 
@@ -1328,6 +1319,7 @@ function goHome() {
   
   const createScreen = document.getElementById('screen-create');
   if (createScreen) createScreen.classList.remove('entering');
+  resetCreativeBackgroundActivation();
 
   switchScreen('screen-home', null, {
     type: 'dissolve',
@@ -1449,7 +1441,7 @@ function showDefaultCenter() {
 
   const def = document.getElementById('page-default');
   def.classList.add('active');
-  applyCreativeBackground({ navId: currentNav });
+  applyCreativeBackground({ navId: currentNav, stage: 'top', screenKey: 'top' });
 }
 
 
@@ -1550,7 +1542,7 @@ function showGroupPage(subId, animate = true) {
 
   const data = CARD_DATA[subId];
   if (!data || !data.groups) return;
-  applyCreativeBackground({ navId: currentNav, subId });
+  applyCreativeBackground({ navId: currentNav, stage: 'group', screenKey: `group:${subId}` });
 
   const page = document.createElement('div');
   page.className = 'center-page active';
@@ -1619,7 +1611,7 @@ function showSubgroupPage(subId, groupIdx) {
 
   const grp = data.groups[groupIdx];
   if (!grp || !grp.subgroups) return;
-  applyCreativeBackground({ navId: currentNav, subId, groupIdx });
+  applyCreativeBackground({ navId: currentNav, stage: 'group', screenKey: `subgroup:${subId}:${groupIdx}` });
 
   document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
 
@@ -1677,7 +1669,7 @@ function showSubgroupCards(subId, groupIdx, sgIdx) {
 
   const grp = data.groups[groupIdx];
   if (!grp || !grp.subgroups) return;
-  applyCreativeBackground({ navId: currentNav, subId, groupIdx });
+  applyCreativeBackground({ navId: currentNav, stage: 'card', screenKey: `subgroup-cards:${subId}:${groupIdx}:${sgIdx}` });
 
   const sg = grp.subgroups[sgIdx];
   if (!sg) return;
@@ -1818,7 +1810,7 @@ function showGroupCards(subId, groupIdx) {
 
   const grp = data.groups[groupIdx];
   if (!grp) return;
-  applyCreativeBackground({ navId: currentNav, subId, groupIdx });
+  applyCreativeBackground({ navId: currentNav, stage: 'card', screenKey: `group-cards:${subId}:${groupIdx}` });
 
   document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
 
@@ -1962,7 +1954,7 @@ function showCardPage(subId, animate = true) {
   }
 
   const area = document.getElementById('center-area');
-  applyCreativeBackground({ navId: currentNav, subId });
+  applyCreativeBackground({ navId: currentNav, stage: 'card', screenKey: `cards:${subId}` });
 
   // default 숨기기
   document.getElementById('page-default').classList.remove('active');
