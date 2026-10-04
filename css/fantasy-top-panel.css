@@ -311,6 +311,7 @@
     inset 0 -8px 18px rgba(103, 66, 34, .12),
     0 5px 12px rgba(44, 27, 15, .38);
   animation: cardInfoAppear .16s ease-out both;
+  cursor: pointer;
 }
 
 #screen-create .card-info-popover::before {
@@ -419,21 +420,6 @@
     0 0 5px 3px rgba(255, 225, 119, .86),
     0 0 14px 5px rgba(221, 159, 46, .62),
     0 4px 8px rgba(45, 38, 21, .3);
-}
-#screen-create .data-card.locked::after {
-  content: '🔒';
-  position: absolute;
-  z-index: 3;
-  top: 4px;
-  right: 4px;
-  display: grid;
-  place-items: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: rgba(48, 38, 21, .82);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, .4);
-  font-size: 12px;
 }
 @keyframes cardInfoAppear {
   from { opacity: 0; transform: translateY(5px) scale(.98); }
