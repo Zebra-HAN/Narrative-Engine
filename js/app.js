@@ -2605,7 +2605,7 @@ function refreshStatusIfOpen() {
 ════════════════════════════════════════════════ */
 async function partialReset() {
   const label = NAV_DATA[currentNav].label;
-  const ok = await showAppConfirm(`${label} 탭의 선택을 모두 초기화할까요?`);
+  const ok = await showAppConfirm(`${label} 탭의 선택을 모두 초기화하시겠습니까?`);
   if (!ok) return;
   UI_SOUND.play('delete2');
   const subs = NAV_DATA[currentNav].subs;
@@ -2631,7 +2631,7 @@ async function partialReset() {
 }
 
 async function fullReset() {
-  const ok = await showAppConfirm('모든 선택을 초기화할까요?');
+  const ok = await showAppConfirm('모든 선택을 초기화시겠습니까?');
   if (!ok) return;
   UI_SOUND.play('delete');
   selectedCards = {};
