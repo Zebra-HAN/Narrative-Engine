@@ -511,6 +511,41 @@ function cancelRunningBackgroundTransition() {
   runningBackgroundTransition = null;
 }
 
+// A back swipe can interrupt a crossfade between its last animation frame and
+// transitionend cleanup. Pin the last committed image before rebuilding the
+// previous page so cancellation can never leave both buffers transparent.
+// The destination still goes through applyCreativeBackground and its existing
+// preload/decode/crossfade path; this only protects the swipe-back handoff.
+function retainCreativeBackgroundForSwipeBack() {
+  const area = document.getElementById('center-area');
+  if (!area) return;
+
+  backgroundRequestId++;
+  cancelRunningBackgroundTransition();
+
+  const layers = Array.from(area.querySelectorAll('.creative-background-layer'));
+  let retainedLayer = visibleBackgroundLayer >= 0 ? layers[visibleBackgroundLayer] : null;
+  const hasImage = layer => layer && layer.style.backgroundImage && layer.style.backgroundImage !== 'none';
+
+  if (!hasImage(retainedLayer)) {
+    retainedLayer = layers.find(hasImage) || null;
+    if (retainedLayer) visibleBackgroundLayer = layers.indexOf(retainedLayer);
+  }
+
+  // Metadata can outlive inline styles during an interrupted cleanup. Reapply
+  // the already decoded/visible URL rather than selecting or loading a new one.
+  if (!hasImage(retainedLayer) && visibleBackgroundUrl && layers.length > 0) {
+    retainedLayer = layers[visibleBackgroundLayer >= 0 ? visibleBackgroundLayer : 0];
+    retainedLayer.style.backgroundImage = `url(${JSON.stringify(visibleBackgroundUrl)})`;
+    visibleBackgroundLayer = layers.indexOf(retainedLayer);
+  }
+
+  if (retainedLayer) {
+    retainedLayer.classList.remove('is-incoming');
+    retainedLayer.style.opacity = '1';
+  }
+}
+
 function resetCreativeBackgroundActivation() {
   backgroundRequestId++;
   cancelRunningBackgroundTransition();
@@ -789,6 +824,7 @@ function canNavigateBackInTrail() {
 
 function navigateAddressBack() {
   if (!canNavigateBackInTrail()) return false;
+  retainCreativeBackgroundForSwipeBack();
   navigateAddressTag(addressTrail.length - 2);
   return true;
 }
@@ -2606,7 +2642,7 @@ divEl.style.display = 'none';
 
   document.getElementById('detail-overlay').classList.add('active');
   attachSwipeToClose(
-    document.querySelector('.detail-sheet'),
+    document.querySelector('.detail-overlay .popup-swipe-frame'),
     () => document.getElementById('detail-overlay').classList.remove('active')
   );
 }
@@ -2704,7 +2740,7 @@ function openStatusOverlay() {
   renderStatusContent();
   document.getElementById('status-overlay').classList.add('active');
   attachSwipeToClose(
-    document.querySelector('.status-panel'),
+    document.querySelector('.status-overlay .popup-swipe-frame'),
      () => closeStatusOverlay()
   );
 }
