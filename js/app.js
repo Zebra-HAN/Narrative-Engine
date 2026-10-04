@@ -2113,8 +2113,8 @@ function renderCardInfo() {
   panel.setAttribute('aria-label', `${focusedCard.name} 카드 정보`);
   panel.setAttribute('tabindex', '0');
   panel.innerHTML = `
-    <button type="button" class="card-info-close pressable" aria-label="카드 정보 닫기">×</button>
-    <div class="card-info-copy">
+    <button type="button" class="card-info-close pressable" aria-label="카드 정보 닫기"><img class="close-icon" src="images/core/buttons/cancel.webp" alt="" aria-hidden="true" draggable="false"></button>
+    <div class="card-info-copy card-info-open-area">
       <h3 class="card-info-title">${escapeHtml(focusedCard.name)}</h3>
       <p class="card-info-desc">${escapeHtml(focusedCard.desc || '설명 없음')}</p>
     </div>
@@ -2125,7 +2125,17 @@ function renderCardInfo() {
     </div>`;
   page.appendChild(panel);
   const openFocusedCardDetail = () => openDetailSheet('card');
-  panel.addEventListener('click', openFocusedCardDetail);
+  const isPanelAction = target => Boolean(target.closest('button'));
+  panel.addEventListener('click', event => {
+    if (!isPanelAction(event.target)) openFocusedCardDetail();
+  });
+  const releaseBodyPress = () => panel.classList.remove('is-body-pressing');
+  panel.addEventListener('pointerdown', event => {
+    if (!isPanelAction(event.target)) panel.classList.add('is-body-pressing');
+  });
+  panel.addEventListener('pointerup', releaseBodyPress);
+  panel.addEventListener('pointercancel', releaseBodyPress);
+  panel.addEventListener('pointerleave', releaseBodyPress);
   panel.addEventListener('keydown', event => {
     if (event.target !== panel || (event.key !== 'Enter' && event.key !== ' ')) return;
     event.preventDefault();
