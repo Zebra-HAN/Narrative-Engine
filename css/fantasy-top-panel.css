@@ -245,7 +245,7 @@
 #screen-create .info-btn-detail:active,
 #screen-create .info-btn-select:active {
   transform: scale(.94);
-  box-shadow: inset 0 2px 4px rgba(45,22,9,.35);
+  box-shadow: 0 2px 4px rgba(0,0,0,.05);
 }
 
 #screen-create .info-dots {
@@ -313,6 +313,7 @@
   animation: cardInfoAppear .16s ease-out both;
   cursor: default;
   touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   transform-origin: center;
   transition: scale 70ms ease-out, filter 70ms ease-out;
 }
@@ -320,7 +321,6 @@
 /* 상세정보를 여는 본문을 누른 경우에만 패널 전체가 즉각 반응한다. */
 #screen-create .card-info-popover.is-body-pressing {
   scale: .975;
-  filter: brightness(.97);
 }
 
 #screen-create .card-info-popover::before {
@@ -387,11 +387,20 @@
   background: linear-gradient(#d79a4c, #9b5d2e 56%, #4f2d19);
   box-shadow: inset 0 1px rgba(255,225,158,.72), 0 2px 2px rgba(48,25,12,.25);
   font: 700 .64rem/1 'Noto Sans KR', sans-serif;
+  -webkit-tap-highlight-color: transparent;
 }
 #screen-create .card-info-select { background: linear-gradient(#66824b, #3f6039 58%, #29442c); }
 #screen-create .card-info-select.is-selected { background: linear-gradient(#b96045, #873c2d 58%, #60251d); }
 #screen-create .card-info-lock { background: linear-gradient(#71819a, #465a75 58%, #293b55); }
-#screen-create .card-info-lock.is-locked { background: linear-gradient(#b96045, #873c2d 58%, #60251d); }
+#screen-create .card-info-lock.is-locked { background: linear-gradient(#71819a, #465a75 58%, #293b55); }
+#screen-create .card-info-detail:active,
+#screen-create .card-info-detail.is-pressing,
+#screen-create .card-info-select:active,
+#screen-create .card-info-select.is-pressing,
+#screen-create .card-info-lock:active,
+#screen-create .card-info-lock.is-pressing {
+  box-shadow: inset 0 1px rgba(255,225,158,.72), 0 2px 2px rgba(48,25,12,.25);
+}
 #screen-create .card-info-lock:disabled {
   opacity: .48;
   cursor: not-allowed;
@@ -425,14 +434,14 @@
 /* 선택 완료 상태가 정보 열람 상태와 겹쳐도 가장 강한 강조 단계로 유지한다. */
 #screen-create .data-card.selected,
 #screen-create .data-card.selected.card-info-active {
-  border: 2px solid #f4cf65;
+  border: 3px solid #21a9ff;
   box-shadow:
-    inset 0 0 0 2px rgba(255, 247, 207, .92),
-    inset 0 0 9px rgba(255, 218, 105, .48),
-    0 0 0 2px rgba(151, 91, 24, .86),
-    0 0 5px 3px rgba(255, 225, 119, .86),
-    0 0 14px 5px rgba(221, 159, 46, .62),
-    0 4px 8px rgba(45, 38, 21, .3);
+    inset 0 0 0 2px rgba(239, 252, 255, .98),
+    inset 0 0 11px rgba(112, 220, 255, .54),
+    0 0 0 3px rgba(0, 132, 255, .96),
+    0 0 7px 4px rgba(73, 194, 255, .92),
+    0 0 18px 7px rgba(35, 158, 255, .7),
+    0 4px 9px rgba(20, 76, 122, .34);
 }
 @keyframes cardInfoAppear {
   from { opacity: 0; transform: translateY(5px) scale(.98); }
