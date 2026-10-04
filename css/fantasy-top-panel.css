@@ -320,7 +320,7 @@
 /* 위치 계산이 끝난 뒤에만 등장 모션을 시작한다. 따라서 높이 측정을 위한 초기
    layout pass나 빠른 카드 전환이 미완성 transform을 남기지 않는다. */
 #screen-create .card-info-popover.is-positioned {
-  animation: cardInfoAppearAbove 440ms linear both;
+  animation: cardInfoAppearAbove 330ms linear both;
 }
 
 #screen-create .card-info-popover.is-below-card {
@@ -526,12 +526,12 @@
     transform: translateY(5px) scale(.55);
     animation-timing-function: cubic-bezier(.16, .82, .28, 1);
   }
-  52% {
+  46% {
     opacity: 1;
     transform: translateY(-1px) scale(1.05);
     animation-timing-function: cubic-bezier(.38, 0, .56, 1);
   }
-  76% {
+  75% {
     opacity: 1;
     transform: translateY(.5px) scale(.97);
     animation-timing-function: cubic-bezier(.2, .7, .3, 1);
@@ -545,12 +545,12 @@
     transform: translateY(-5px) scale(.55);
     animation-timing-function: cubic-bezier(.16, .82, .28, 1);
   }
-  52% {
+  46% {
     opacity: 1;
     transform: translateY(1px) scale(1.05);
     animation-timing-function: cubic-bezier(.38, 0, .56, 1);
   }
-  76% {
+  75% {
     opacity: 1;
     transform: translateY(-.5px) scale(.97);
     animation-timing-function: cubic-bezier(.2, .7, .3, 1);
