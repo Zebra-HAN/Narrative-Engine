@@ -418,7 +418,6 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
   area.dataset.backgroundStage = stage;
 
   const activationKey = `${navId}:${stage}:${screenKey}`;
-  if (activeBackgroundScreen === activationKey) return;
 
   // 현재 카테고리를 탐색하는 동안에는 화면별 선택값을 보관한다. 덕분에 뒤로
   // 돌아오거나 방금 열었던 그룹에 다시 들어가도 그 화면의 배경이 복원된다.
@@ -428,6 +427,17 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
     if (path) creativeBackgroundMemory.set(activationKey, path);
   }
   if (!path) return;
+  const imageUrl = new URL(path, document.baseURI).href;
+
+  // Do not use activeBackgroundScreen alone as a completion signal. It is set
+  // before load/decode finishes, so A -> B -> A can invalidate A's first
+  // request and then mistake that cancelled request for a visible background.
+  // Only a committed layer (or the exact fade already in progress) may skip
+  // the work. This is especially important for rapid back-swipe navigation.
+  if (activeBackgroundScreen === activationKey
+      && (visibleBackgroundUrl === imageUrl
+        || runningBackgroundTransition?.imageUrl === imageUrl)) return;
+
   activeBackgroundScreen = activationKey;
   const requestId = ++backgroundRequestId;
 
@@ -443,7 +453,6 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
    * 현재 문서 주소를 기준으로 절대 URL을 만든 뒤 넘겨 어느 배포 경로에서도
    * 올바른 이미지 파일을 가리키게 합니다.
    */
-  const imageUrl = new URL(path, document.baseURI).href;
   // 이전 배경/기본색은 새 배경이 실제 디코드될 때까지 그대로 둔다.
   const loaded = await IMAGE_LOADER.load(imageUrl);
   if (!loaded || requestId !== backgroundRequestId || activeBackgroundScreen !== activationKey) return;
