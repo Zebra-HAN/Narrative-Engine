@@ -2803,14 +2803,24 @@ function toggleExtraMenu() {
 
 function getCurrentRandomScope(subId) {
   const location = addressTrail[addressTrail.length - 1];
-  if (!location || location.subId !== subId) return {};
+
+  if (!location || location.subId !== subId) {
+    return {};
+  }
 
   if (location.type === 'subgroup') {
-    return { groupIdx: location.groupIdx, sgIdx: location.sgIdx };
+    return {
+      groupIdx: location.groupIdx,
+      sgIdx: location.sgIdx
+    };
   }
+
   if (location.type === 'group' || location.type === 'groupCards') {
-    return { groupIdx: location.groupIdx };
+    return {
+      groupIdx: location.groupIdx
+    };
   }
+
   return {};
 }
 
@@ -2819,26 +2829,83 @@ function getRandomCandidates(subId, scope = {}) {
   let candidates = [];
 
   if (data && data.groups) {
-    data.groups.forEach((grp, gIdx) => {
-      if (scope.groupIdx !== undefined && gIdx !== scope.groupIdx) return;
+    data.groups.forEach((group, groupIdx) => {
+      if (
+        scope.groupIdx !== undefined &&
+        groupIdx !== scope.groupIdx
+      ) {
+        return;
+      }
 
-      if (grp.subgroups) {
-        grp.subgroups.forEach((sg, sgIdx) => {
-          if (scope.sgIdx !== undefined && sgIdx !== scope.sgIdx) return;
-          sg.cards.forEach((card, cIdx) => {
-            if (isSectionItem(card)) return;
-            candidates.push({ globalIdx: getSubgroupCardGlobalIdx(gIdx, sgIdx, cIdx), path: { type: 'subgroup', groupIdx: gIdx, sgIdx, cardIdx: cIdx }, ...card });
+      if (group.subgroups) {
+        group.subgroups.forEach((subgroup, subgroupIdx) => {
+          if (
+            scope.sgIdx !== undefined &&
+            subgroupIdx !== scope.sgIdx
+          ) {
+            return;
+          }
+
+          subgroup.cards.forEach((card, cardIdx) => {
+            if (isSectionItem(card)) {
+              return;
+            }
+
+            candidates.push({
+              globalIdx: getSubgroupCardGlobalIdx(
+                groupIdx,
+                subgroupIdx,
+                cardIdx
+              ),
+              path: {
+                type: 'subgroup',
+                groupIdx,
+                sgIdx: subgroupIdx,
+                cardIdx
+              },
+              ...card
+            });
           });
         });
-      } else if (grp.cards) {
-        grp.cards.forEach((card, cIdx) => {
-          if (isSectionItem(card)) return;
-          candidates.push({ globalIdx: getGroupCardGlobalIdx(gIdx, cIdx), path: { type: 'group', groupIdx: gIdx, cardIdx: cIdx }, ...card });
+
+        return;
+      }
+
+      if (group.cards) {
+        group.cards.forEach((card, cardIdx) => {
+          if (isSectionItem(card)) {
+            return;
+          }
+
+          candidates.push({
+            globalIdx: getGroupCardGlobalIdx(groupIdx, cardIdx),
+            path: {
+              type: 'group',
+              groupIdx,
+              cardIdx
+            },
+            ...card
+          });
         });
       }
     });
-  } else if (Array.isArray(data)) {
-    candidates = data.map((card, idx) => isSectionItem(card) ? null : ({ globalIdx: idx, ...card })).filter(Boolean);
+
+    return candidates;
+  }
+
+  if (Array.isArray(data)) {
+    candidates = data
+      .map((card, cardIdx) => {
+        if (isSectionItem(card)) {
+          return null;
+        }
+
+        return {
+          globalIdx: cardIdx,
+          ...card
+        };
+      })
+      .filter(Boolean);
   }
 
   return candidates;
@@ -2850,29 +2917,61 @@ async function randomSelectCurrent() {
     showAppNotice('먼저 카테고리를 선택해주세요.');
     return;
   }
+
   const navLabel = NAV_DATA[currentNav].label;
-  const subLabel = NAV_DATA[currentNav].subs.find(s => s.id === currentSubId)?.label || currentSubId;
-  const ok = await showAppConfirm(`[${navLabel} — ${subLabel}]\n랜덤 선택을 하시겠습니까?`, 'selectYes');
-  if (!ok) return;
+  const subLabel =
+    NAV_DATA[currentNav].subs.find(
+      sub => sub.id === currentSubId
+    )?.label || currentSubId;
 
-  const allCards = getRandomCandidates(currentSubId, getCurrentRandomScope(currentSubId));
-  if (allCards.length === 0) return;
+  const ok = await showAppConfirm(
+    `[${navLabel} — ${subLabel}]\n랜덤 선택을 하시겠습니까?`,
+    'selectYes'
+  );
 
-  const pick = allCards[Math.floor(Math.random() * allCards.length)];
-  selectedCards[currentSubId] = new Set([pick.globalIdx]);
-   
+  if (!ok) {
+    return;
+  }
+
+  const scope = getCurrentRandomScope(currentSubId);
+  const allCards = getRandomCandidates(currentSubId, scope);
+
+  if (allCards.length === 0) {
+    return;
+  }
+
+  const pick =
+    allCards[Math.floor(Math.random() * allCards.length)];
+
+  selectedCards[currentSubId] = new Set([
+    pick.globalIdx
+  ]);
 
   // UI 갱신
   showCardPage(currentSubId, false);
   renderSubnav(currentNav, false);
-  const el = document.querySelector(`[data-sub-id="${currentSubId}"]`);
-  if (el) el.classList.add('active');
+
+  const currentSubElement = document.querySelector(
+    `[data-sub-id="${currentSubId}"]`
+  );
+
+  if (currentSubElement) {
+    currentSubElement.classList.add('active');
+  }
 
   // 설명창 갱신
-  focusedCard = { subId: currentSubId, idx: pick.globalIdx, path: pick.path, name: pick.name, icon: pick.icon, img: pick.img };
+  focusedCard = {
+    subId: currentSubId,
+    idx: pick.globalIdx,
+    path: pick.path,
+    name: pick.name,
+    icon: pick.icon,
+    img: pick.img
+  };
+
   updateInfoPanel();
   refreshStatusIfOpen();
-   updateNavBadges();  // ← 여기 추가,  선택한 총량 표시 배지 추가
+  updateNavBadges();
 }
 
 // 현재 탭의 모든 서브(마름모) 각 1개씩 랜덤 선택
