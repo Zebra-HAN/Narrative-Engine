@@ -320,7 +320,7 @@
 /* 위치 계산이 끝난 뒤에만 등장 모션을 시작한다. 따라서 높이 측정을 위한 초기
    layout pass나 빠른 카드 전환이 미완성 transform을 남기지 않는다. */
 #screen-create .card-info-popover.is-positioned {
-  animation: cardInfoAppearAbove 190ms cubic-bezier(.2, .72, .3, 1) both;
+  animation: cardInfoAppearAbove 440ms linear both;
 }
 
 #screen-create .card-info-popover.is-below-card {
@@ -521,14 +521,40 @@
   text-shadow: 0 1px 0 rgba(224, 253, 255, .9);
 }
 @keyframes cardInfoAppearAbove {
-  0%   { opacity: 0; transform: translateY(5px) scale(.94); }
-  64%  { opacity: 1; transform: translateY(-1px) scale(1.035); }
+  0% {
+    opacity: 0;
+    transform: translateY(5px) scale(.55);
+    animation-timing-function: cubic-bezier(.16, .82, .28, 1);
+  }
+  52% {
+    opacity: 1;
+    transform: translateY(-1px) scale(1.05);
+    animation-timing-function: cubic-bezier(.38, 0, .56, 1);
+  }
+  76% {
+    opacity: 1;
+    transform: translateY(.5px) scale(.97);
+    animation-timing-function: cubic-bezier(.2, .7, .3, 1);
+  }
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes cardInfoAppearBelow {
-  0%   { opacity: 0; transform: translateY(-5px) scale(.94); }
-  64%  { opacity: 1; transform: translateY(1px) scale(1.035); }
+  0% {
+    opacity: 0;
+    transform: translateY(-5px) scale(.55);
+    animation-timing-function: cubic-bezier(.16, .82, .28, 1);
+  }
+  52% {
+    opacity: 1;
+    transform: translateY(1px) scale(1.05);
+    animation-timing-function: cubic-bezier(.38, 0, .56, 1);
+  }
+  76% {
+    opacity: 1;
+    transform: translateY(-.5px) scale(.97);
+    animation-timing-function: cubic-bezier(.2, .7, .3, 1);
+  }
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
