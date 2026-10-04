@@ -1025,7 +1025,9 @@ body::after {
       margin-inline: 12px;
     }
     .card-grid.card-grid-layout-d {
-      grid-template-columns: repeat(3, 1fr);
+      /* 긴 카드명이 grid item의 기본 min-content 너비를 통해 특정 열만
+         늘리지 않도록 한다. 0을 최솟값으로 둬도 열 수와 카드 비율은 그대로다. */
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 11px 8px;
       margin-inline: 12px;
     }
@@ -1076,6 +1078,7 @@ body::after {
     .card-grid-layout-d .data-card {
       /* layoutType 2: 더 높은 행으로 길게 줄 바꿈되는 제목에 충분한 공간을 둔다. */
       aspect-ratio: 1.75;
+      min-width: 0;
       padding: 5px;
       flex-direction: row;
       gap: 5px;
