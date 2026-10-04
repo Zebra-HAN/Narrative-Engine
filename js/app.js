@@ -398,6 +398,8 @@ const CREATIVE_BACKGROUNDS = {
 let activeBackgroundScreen = null;
 let backgroundSessionSubId = null;
 const creativeBackgroundMemory = new Map();
+let visibleBackgroundLayer = -1;
+let visibleBackgroundUrl = null;
 
 function getCreativeBackground(navId, stage) {
   const candidates = CREATIVE_BACKGROUNDS[navId]?.[stage];
@@ -436,9 +438,28 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
   // 이전 배경/기본색은 새 배경이 실제 디코드될 때까지 그대로 둔다.
   const loaded = await IMAGE_LOADER.load(imageUrl);
   if (!loaded || activeBackgroundScreen !== activationKey) return;
-  area.style.setProperty('--creative-background-image', `url(${JSON.stringify(imageUrl)})`);
-  area.classList.remove('background-ready');
-  requestAnimationFrame(() => area.classList.add('background-ready'));
+
+  // 이미 화면에 있는 배경이라면 레이어를 다시 교차시켜 깜빡임을 만들지 않는다.
+  if (visibleBackgroundUrl === imageUrl) return;
+  const layers = area.querySelectorAll('.creative-background-layer');
+  if (layers.length < 2) return;
+
+  const nextLayerIndex = visibleBackgroundLayer === 0 ? 1 : 0;
+  const nextLayer = layers[nextLayerIndex];
+  const previousLayer = visibleBackgroundLayer >= 0 ? layers[visibleBackgroundLayer] : null;
+  nextLayer.style.backgroundImage = `url(${JSON.stringify(imageUrl)})`;
+  nextLayer.style.opacity = '0';
+
+  // 스타일을 먼저 확정한 다음 같은 프레임에서 두 레이어를 겹쳐 짧게 dissolve한다.
+  // 이전 레이어는 전환이 끝날 때까지 제거하지 않아 A → 빈 화면 → B가 되지 않는다.
+  void nextLayer.offsetWidth;
+  requestAnimationFrame(() => {
+    if (activeBackgroundScreen !== activationKey) return;
+    nextLayer.style.opacity = '1';
+    if (previousLayer) previousLayer.style.opacity = '0';
+    visibleBackgroundLayer = nextLayerIndex;
+    visibleBackgroundUrl = imageUrl;
+  });
 }
 
 function resetCreativeBackgroundActivation() {
