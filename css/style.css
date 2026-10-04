@@ -72,15 +72,13 @@
       user-select: none;
     }
 
-    /* 다운로드/디코드 전에는 주변 UI와 어울리는 표면을 유지하고 준비된 뒤 즉시 드러낸다. */
+    /* 다운로드/디코드 전에는 이미지만 숨긴다. 컨테이너에 로딩용 색을 칠하면
+       투명 PNG/WebP의 알파 영역까지 사각형으로 드러나므로 시각 상태와 분리한다. */
     img.managed-image {
       opacity: 0;
       transition: opacity 90ms ease-out;
     }
     img.managed-image.image-ready { opacity: 1; }
-    .card-img-frame.has-image,
-    .group-btn-icon,
-    .diamond-btn-icon { background-color: rgba(58, 125, 90, 0.12); }
     @media (prefers-reduced-motion: reduce) {
       img.managed-image { transition: none; }
     }
@@ -905,19 +903,25 @@ body::after {
     /* ── 중앙 영역 ── */
     .center-area {
       --back-swipe-x: 0px;
-      --creative-background-image: none;
       position: absolute;
       inset: 0;
       overflow: hidden;
       touch-action: pan-y;
       background-color: #f2eee5;
-      /* 모든 단계에서 밝은 레이어 없이 원본 JPG를 그대로 표시한다. */
-      background-image: var(--creative-background-image);
+    }
+    /* 두 레이어 중 보이지 않는 쪽에 decode된 다음 배경을 먼저 넣고 교차시킨다.
+       따라서 화면 콘텐츠 렌더링은 기다리지 않으면서도 중간에 빈 프레임이 없다. */
+    .creative-background-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
       background-position: center;
       background-size: cover;
       background-repeat: no-repeat;
-      /* JS가 디코드 완료 뒤에만 값을 교체하므로 빈 배경 프레임이 나타나지 않는다. */
-      transition: filter 90ms ease-out;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 140ms ease-out;
+      will-change: opacity;
     }
     .center-area::before {
       content: '';
@@ -945,6 +949,7 @@ body::after {
     }
     .center-page {
       position: absolute; inset: 0;
+      z-index: 1;
       overflow-y: auto;
       overflow-x: hidden;
       /*
