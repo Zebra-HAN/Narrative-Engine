@@ -1315,16 +1315,18 @@ body::after {
     /* 상세 정보 시트 */
     .detail-overlay {
   position: fixed; inset: 0;
-  background: rgba(0,0,0,0.6);
-
-        backdrop-filter: blur(4px);
+  /* 콘텐츠는 선명하게 유지하고 팝업의 경계만 느껴질 만큼만 어둡힌다. */
+  background: rgba(0, 0, 0, 0.06);
   z-index: 200;
         
   display: flex;
-  align-items: center;      /* 위쪽 정렬 flex-start; */
+  align-items: stretch;
   justify-content: center;
+  padding:
+    max(18px, env(safe-area-inset-top))
+    5%
+    max(28px, env(safe-area-inset-bottom));
   opacity: 0; pointer-events: none;
-  transition: opacity 0.25s ease;
 }
 .detail-overlay.active {
   opacity: 1; pointer-events: all;
@@ -1334,16 +1336,14 @@ body::after {
   position: relative;
        
   /* 1. 상세 정보창 너비를 화면에 꽉 차게 수정 */
-  width: 90%;           /* 앱 화면 폭을 기준으로 모바일 비율 유지 */
+  width: 100%;           /* overlay의 좌우 padding 안에서 모바일 비율 유지 */
   max-width: 600px;    /* PC넓이 안전장치 */
   
   /* 2. 높이를 화면에 꽉 차게 수정 */
-  height: 85vh;         /* 원래 코드: height: 80vh; */
-  max-height: 85vh;     /* 원래 코드 총3줄 : max-height: 80vh;  */
+  height: 100%;
+  max-height: none;
        
   background: linear-gradient(170deg, #ffffff 0%, #f7fbf9 50%, #f2f8f5 100%);
-  backdrop-filter: blur(1px);
-
   border: 1px solid var(--border-gold2);
   border-radius: var(--radius-panel);
   padding: 20px 18px 28px;
@@ -1354,11 +1354,8 @@ body::after {
     0 2px 8px rgba(0,0,0,0.06),
     inset 0 1px 0 rgba(255,255,255,0.9);
 
-  transform: scale(0.95);
   opacity: 0;
-  transition:
-    transform 0.22s ease,
-    opacity 0.22s ease;
+  transform-origin: center center;
 }
 
 /* 상단 그린 포인트 라인 */
@@ -1373,8 +1370,7 @@ body::after {
 }
 
 .detail-overlay.active .detail-sheet {
-  transform: scale(1);
-  opacity: 1;
+  animation: largePopupAppear 350ms linear both;
 }
 
 
@@ -1559,14 +1555,16 @@ body::after {
       position: fixed;
       inset: 0;
       z-index: 600;
-      background: rgba(0, 0, 0, 0.82);
+      background: rgba(0, 0, 0, 0.06);
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 16px;
+      padding:
+        max(18px, env(safe-area-inset-top))
+        16px
+        max(28px, env(safe-area-inset-bottom));
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.3s ease;
     }
     .status-overlay.active {
       opacity: 1;
@@ -1575,7 +1573,8 @@ body::after {
     .status-panel {
       width: 100%;
       max-width: 480px;
-      max-height: 88vh;
+      height: 100%;
+      max-height: none;
       background: linear-gradient(180deg, #ffffff, #f9f9f9);
       border: 1.5px solid var(--border-gold2);
       border-radius: 14px;
@@ -1583,22 +1582,25 @@ body::after {
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      transform: scale(0.96);
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      opacity: 0;
+      transform-origin: center center;
     }
     .status-overlay.active .status-panel {
-      transform: scale(1);
+      animation: largePopupAppear 350ms linear both;
     }
     .status-header {
       flex-shrink: 0;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-start;
       padding: 16px 18px 12px;
       border-bottom: 1.5px solid var(--border-gold);
       background: linear-gradient(180deg, #f4faf7 0%, #eaf5ee 100%);
     }
     .status-title {
+      flex: 0 0 auto;
+      width: max-content;
+      margin-right: 12px;
       font-family: 'Noto Serif KR', serif;
       font-size: 1rem;
       font-weight: 600;
@@ -1606,6 +1608,7 @@ body::after {
       letter-spacing: 0.06em;
     }
     .status-header-actions {
+      margin-left: auto;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -1644,6 +1647,35 @@ body::after {
     }
     .status-body::-webkit-scrollbar { width: 4px; }
     .status-body::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
+
+    /* 큰 팝업은 카드 정보창과 같은 한 번의 탄성 리듬을 더 절제된 scale로 쓴다. */
+    @keyframes largePopupAppear {
+      0% {
+        opacity: 0;
+        transform: scale(.8);
+        animation-timing-function: cubic-bezier(.16, .82, .28, 1);
+      }
+      46% {
+        opacity: 1;
+        transform: scale(1.03);
+        animation-timing-function: cubic-bezier(.38, 0, .56, 1);
+      }
+      76% {
+        opacity: 1;
+        transform: scale(.988);
+        animation-timing-function: cubic-bezier(.2, .7, .3, 1);
+      }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .detail-overlay.active .detail-sheet,
+      .status-overlay.active .status-panel {
+        animation: none;
+        opacity: 1;
+        transform: none;
+      }
+    }
     .status-section {
       margin-bottom: 18px;
       padding-bottom: 14px;
