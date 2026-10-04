@@ -256,34 +256,38 @@
   
   <!-- 상태 오버레이 -->
   <div class="status-overlay" id="status-overlay" onclick="closeStatusOverlay(event)">
-    <div class="status-panel">
-      <div class="status-header">
-        <h2 class="status-title" id="status-title">선택된 아이디어</h2>
-        <div class="status-header-actions">
-          <button type="button" class="status-share-btn pressable" onclick="shareStatus()">공유</button>
-          <button type="button" class="status-close pressable" onclick="closeStatusOverlay()" aria-label="선택된 아이디어 창 닫기">
-            <img class="close-icon" src="images/core/buttons/cancel.webp" alt="" aria-hidden="true" draggable="false">
-          </button>
+    <div class="popup-swipe-frame">
+      <div class="status-panel">
+        <div class="status-header">
+          <h2 class="status-title" id="status-title">선택된 아이디어</h2>
+          <div class="status-header-actions">
+            <button type="button" class="status-share-btn pressable" onclick="shareStatus()">공유</button>
+            <button type="button" class="status-close pressable" onclick="closeStatusOverlay()" aria-label="선택된 아이디어 창 닫기">
+              <img class="close-icon" src="images/core/buttons/cancel.webp" alt="" aria-hidden="true" draggable="false">
+            </button>
+          </div>
         </div>
+        <div class="status-body" id="status-body"></div>
       </div>
-      <div class="status-body" id="status-body"></div>
     </div>
   </div>
 
   <!-- 상세 정보 시트 -->
   <div class="detail-overlay" id="detail-overlay" onclick="closeDetailSheet(event)">
-<div class="detail-sheet">
-  <button type="button" class="detail-close pressable" onclick="closeDetailSheet()" aria-label="상세정보 창 닫기">
-    <img class="close-icon" src="images/core/buttons/cancel.webp" alt="" aria-hidden="true" draggable="false">
-  </button>
-  <div class="detail-content" id="detail-content">
-    <div class="detail-icon" id="detail-icon"></div>
-    <div class="detail-name" id="detail-name"></div>
-    <div class="detail-desc" id="detail-desc"></div>
-    <div class="detail-divider" id="detail-divider"></div>
-    <div class="detail-body" id="detail-body"></div>
-  </div>
-</div>
+    <div class="popup-swipe-frame">
+      <div class="detail-sheet">
+        <button type="button" class="detail-close pressable" onclick="closeDetailSheet()" aria-label="상세정보 창 닫기">
+          <img class="close-icon" src="images/core/buttons/cancel.webp" alt="" aria-hidden="true" draggable="false">
+        </button>
+        <div class="detail-content" id="detail-content">
+          <div class="detail-icon" id="detail-icon"></div>
+          <div class="detail-name" id="detail-name"></div>
+          <div class="detail-desc" id="detail-desc"></div>
+          <div class="detail-divider" id="detail-divider"></div>
+          <div class="detail-body" id="detail-body"></div>
+        </div>
+      </div>
+    </div>
   </div>
 
 </div>
