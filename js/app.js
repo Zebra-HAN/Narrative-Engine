@@ -2269,6 +2269,7 @@ function positionCardInfo(panel, cardEl) {
   panel.style.left = `${left}px`;
   panel.style.top = `${Math.max(4, top)}px`;
   panel.style.setProperty('--card-anchor-x', `${Math.max(18, Math.min(panelWidth - 18, cardRect.left - pageRect.left + page.scrollLeft + cardRect.width / 2 - left))}px`);
+  panel.classList.add('is-positioned');
 }
 
 function renderCardInfo() {

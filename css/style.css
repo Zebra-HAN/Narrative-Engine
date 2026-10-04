@@ -104,11 +104,15 @@ body::after {
       position: fixed;
       top: 0;
       bottom: 0;
-      left: 50%;
+      /* Center the capped desktop canvas with layout rather than a translated
+         50% edge. On odd-width mobile viewports that transform can land the
+         full-width screen on a half pixel and expose the body at the left. */
+      right: 0;
+      left: 0;
       width: 100%;
       max-width: var(--app-max-width);
+      margin-inline: auto;
       height: 100%;
-      transform: translateX(-50%);
       opacity: 0;
       pointer-events: none;
       transition: opacity var(--screen-fade-ms, 300ms) var(--screen-fade-ease, ease);
