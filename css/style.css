@@ -927,6 +927,10 @@ body::after {
       transition: opacity 280ms cubic-bezier(.22, .61, .36, 1);
       will-change: opacity;
     }
+    /* The incoming buffer must always paint above the retained background.
+       DOM order alone makes every other swap occur underneath an opaque layer,
+       which looks like a delayed cut when that old layer is finally removed. */
+    .creative-background-layer.is-incoming { z-index: 1; }
     .center-area::before {
       content: '';
       position: absolute;
@@ -953,7 +957,7 @@ body::after {
     }
     .center-page {
       position: absolute; inset: 0;
-      z-index: 1;
+      z-index: 2;
       overflow-y: auto;
       overflow-x: hidden;
       /*

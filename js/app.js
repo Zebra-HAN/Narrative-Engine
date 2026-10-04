@@ -400,7 +400,8 @@ let backgroundSessionSubId = null;
 const creativeBackgroundMemory = new Map();
 let visibleBackgroundLayer = -1;
 let visibleBackgroundUrl = null;
-let backgroundTransition = Promise.resolve();
+let backgroundRequestId = 0;
+let runningBackgroundTransition = null;
 
 function getCreativeBackground(navId, stage) {
   const candidates = CREATIVE_BACKGROUNDS[navId]?.[stage];
@@ -428,6 +429,13 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
   }
   if (!path) return;
   activeBackgroundScreen = activationKey;
+  const requestId = ++backgroundRequestId;
+
+  // Navigation supersedes an in-flight fade immediately, not after its timer resolves.
+  // Keep the last fully visible layer as the base while the newest image is prepared.
+  // This prevents an obsolete request from extending the navigation by one fade duration
+  // or committing its URL after a quick back/forward gesture.
+  cancelRunningBackgroundTransition();
   /*
    * 이 값은 css/style.css 안에서 실제 background-image로 사용됩니다. 상대 경로를
    * 그대로 넘기면 브라우저가 CSS 파일 위치(css/)를 기준으로 해석하여
@@ -438,12 +446,7 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
   const imageUrl = new URL(path, document.baseURI).href;
   // 이전 배경/기본색은 새 배경이 실제 디코드될 때까지 그대로 둔다.
   const loaded = await IMAGE_LOADER.load(imageUrl);
-  if (!loaded || activeBackgroundScreen !== activationKey) return;
-
-  // 진행 중인 dissolve가 있다면 그 배경을 완전히 불투명하게 만든 뒤 다음 교체를
-  // 시작한다. 두 버퍼를 빠르게 재사용해 반투명 레이어 뒤로 빈 면이 비치는 것을 막는다.
-  await backgroundTransition;
-  if (activeBackgroundScreen !== activationKey) return;
+  if (!loaded || requestId !== backgroundRequestId || activeBackgroundScreen !== activationKey) return;
 
   // 이미 화면에 있는 배경이라면 레이어를 다시 교차시켜 깜빡임을 만들지 않는다.
   if (visibleBackgroundUrl === imageUrl) return;
@@ -455,37 +458,62 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
   const previousLayer = visibleBackgroundLayer >= 0 ? layers[visibleBackgroundLayer] : null;
   nextLayer.style.backgroundImage = `url(${JSON.stringify(imageUrl)})`;
   nextLayer.style.opacity = '0';
+  nextLayer.classList.add('is-incoming');
 
   // 스타일을 먼저 확정한 다음 B만 A 위에서 나타나게 한다. A는 B가 완전히
   // 불투명해진 뒤에만 정리하므로 전환 중 흰색/투명 프레임이 생기지 않는다.
   void nextLayer.offsetWidth;
-  backgroundTransition = new Promise(resolve => {
-    let settled = false;
-    const finish = () => {
-      if (settled) return;
-      settled = true;
-      nextLayer.removeEventListener('transitionend', onTransitionEnd);
-      if (previousLayer) {
-        previousLayer.style.opacity = '0';
-        previousLayer.style.backgroundImage = 'none';
-      }
-      visibleBackgroundLayer = nextLayerIndex;
-      visibleBackgroundUrl = imageUrl;
-      resolve();
-    };
-    const onTransitionEnd = event => {
-      if (event.propertyName === 'opacity') finish();
-    };
-    nextLayer.addEventListener('transitionend', onTransitionEnd);
-    requestAnimationFrame(() => {
-      nextLayer.style.opacity = '1';
-      // transitionend가 생략되는 브라우저/백그라운드 탭에서도 버퍼를 해제한다.
-      setTimeout(finish, 360);
-    });
+  const transition = {
+    requestId,
+    nextLayer,
+    nextLayerIndex,
+    previousLayer,
+    imageUrl,
+    timer: null,
+    onTransitionEnd: null,
+  };
+  const finish = () => finishBackgroundTransition(transition);
+  transition.onTransitionEnd = event => {
+    if (event.propertyName === 'opacity') finish();
+  };
+  runningBackgroundTransition = transition;
+  nextLayer.addEventListener('transitionend', transition.onTransitionEnd);
+  requestAnimationFrame(() => {
+    if (runningBackgroundTransition !== transition || requestId !== backgroundRequestId) return;
+    nextLayer.style.opacity = '1';
+    // transitionend가 생략되는 브라우저/백그라운드 탭에서도 버퍼를 해제한다.
+    transition.timer = setTimeout(finish, 360);
   });
 }
 
+function finishBackgroundTransition(transition) {
+  if (runningBackgroundTransition !== transition || transition.requestId !== backgroundRequestId) return;
+  clearTimeout(transition.timer);
+  transition.nextLayer.removeEventListener('transitionend', transition.onTransitionEnd);
+  transition.nextLayer.classList.remove('is-incoming');
+  if (transition.previousLayer) {
+    transition.previousLayer.style.opacity = '0';
+    transition.previousLayer.style.backgroundImage = 'none';
+  }
+  visibleBackgroundLayer = transition.nextLayerIndex;
+  visibleBackgroundUrl = transition.imageUrl;
+  runningBackgroundTransition = null;
+}
+
+function cancelRunningBackgroundTransition() {
+  const transition = runningBackgroundTransition;
+  if (!transition) return;
+  clearTimeout(transition.timer);
+  transition.nextLayer.removeEventListener('transitionend', transition.onTransitionEnd);
+  transition.nextLayer.classList.remove('is-incoming');
+  transition.nextLayer.style.opacity = '0';
+  transition.nextLayer.style.backgroundImage = 'none';
+  runningBackgroundTransition = null;
+}
+
 function resetCreativeBackgroundActivation() {
+  backgroundRequestId++;
+  cancelRunningBackgroundTransition();
   activeBackgroundScreen = null;
   backgroundSessionSubId = null;
   creativeBackgroundMemory.clear();
