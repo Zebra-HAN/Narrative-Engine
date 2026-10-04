@@ -213,6 +213,10 @@ function initUiSounds() {
       // 선택 버튼의 결과별 효과음은 실제 동작을 처리하는 핸들러에서 재생한다.
       if (target.dataset.sound) UI_SOUND.play(target.dataset.sound);
       return;
+    } else if (target.matches('.card-info-lock')) {
+      // 잠금 해제는 선택 취소와 같은 취소 피드백을 사용하고, 잠금 설정은
+      // 기존의 일반 클릭 효과음을 그대로 유지한다.
+      UI_SOUND.play(target.classList.contains('is-locked') ? 'cancel' : 'click');
     } else if (target.dataset.sound) {
       UI_SOUND.play(target.dataset.sound);
     } else if (target.matches('.card-info-detail, .detail-idea-block, .detail-sub-image-row')) {
@@ -2112,9 +2116,9 @@ function renderCardInfo() {
       <p class="card-info-desc">${escapeHtml(focusedCard.desc || '설명 없음')}</p>
     </div>
     <div class="card-info-actions">
+      <button type="button" class="card-info-lock pressable${locked ? ' is-locked' : ''}" aria-pressed="${locked}"${selected ? '' : ' disabled title="카드를 먼저 선택해주세요."'}>${locked ? '🔓 잠금 해제' : '🔒 잠금'}</button>
       <button type="button" class="card-info-detail pressable">🔍 상세정보</button>
       <button type="button" class="card-info-select pressable${selected ? ' is-selected' : ''}"${locked ? ' disabled title="잠금을 해제한 뒤 선택을 취소할 수 있습니다."' : ''}>✅ ${selected ? '선택 취소' : '선택'}</button>
-      <button type="button" class="card-info-lock pressable${locked ? ' is-locked' : ''}" aria-pressed="${locked}"${selected ? '' : ' disabled title="카드를 먼저 선택해주세요."'}>${locked ? '🔓 잠금 해제' : '🔒 잠금'}</button>
     </div>`;
   page.appendChild(panel);
   panel.querySelector('.card-info-close').addEventListener('click', closeCardInfo);
