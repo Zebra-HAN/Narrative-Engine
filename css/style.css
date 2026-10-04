@@ -1325,7 +1325,8 @@ body::after {
   padding:
     max(18px, env(safe-area-inset-top))
     5%
-    max(112px, calc(env(safe-area-inset-bottom) + 96px));
+    /* 카테고리 행은 덮되 하단 내비게이션 아이콘은 가리지 않는다. */
+    max(78px, calc(env(safe-area-inset-bottom) + 44px));
   opacity: 0; pointer-events: none;
 }
 .detail-overlay.active {
@@ -1574,7 +1575,8 @@ body::after {
       padding:
         max(18px, env(safe-area-inset-top))
         16px
-        max(112px, calc(env(safe-area-inset-bottom) + 96px));
+        /* 상세 시트와 같은 높이로 내비게이션 아이콘 윗선까지 확장한다. */
+        max(78px, calc(env(safe-area-inset-bottom) + 44px));
       opacity: 0;
       pointer-events: none;
     }
