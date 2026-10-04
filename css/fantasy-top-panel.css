@@ -311,7 +311,16 @@
     inset 0 -8px 18px rgba(103, 66, 34, .12),
     0 5px 12px rgba(44, 27, 15, .38);
   animation: cardInfoAppear .16s ease-out both;
-  cursor: pointer;
+  cursor: default;
+  touch-action: manipulation;
+  transform-origin: center;
+  transition: scale 70ms ease-out, filter 70ms ease-out;
+}
+
+/* 상세정보를 여는 본문을 누른 경우에만 패널 전체가 즉각 반응한다. */
+#screen-create .card-info-popover.is-body-pressing {
+  scale: .975;
+  filter: brightness(.97);
 }
 
 #screen-create .card-info-popover::before {
@@ -335,7 +344,15 @@
   border-left: 2px solid #664126;
 }
 
-#screen-create .card-info-copy { min-width: 0; align-self: center; }
+#screen-create .card-info-copy { min-width: 0; align-self: stretch; }
+#screen-create .card-info-open-area {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
 #screen-create .card-info-title {
   margin: 0 20px 5px 0;
   color: #3e2919;
@@ -387,19 +404,15 @@
 #screen-create .card-info-close {
   position: absolute;
   z-index: 2;
-  top: -8px;
-  right: -7px;
+  top: -13px;
+  right: -12px;
   display: grid;
   place-items: center;
-  width: 23px;
-  height: 23px;
-  padding: 0 0 2px;
-  border: 2px solid #f5d6bd;
-  border-radius: 50%;
-  color: #fff8e9;
-  background: linear-gradient(#d95d4e, #902b24);
-  box-shadow: 0 2px 4px rgba(55, 19, 13, .4);
-  font: 700 1rem/1 sans-serif;
+  width: 40px;
+  height: 40px;
+  padding: 5px;
+  border: 0;
+  background: transparent;
 }
 #screen-create .data-card.card-info-active {
   border-color: #2f6845;
