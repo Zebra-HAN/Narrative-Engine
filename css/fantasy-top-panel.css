@@ -435,45 +435,90 @@
   background: transparent;
 }
 #screen-create .data-card.card-info-active {
-  /* 정보 열람 강조도 기존 border 폭을 유지해 카드와 grid가 전혀 움직이지 않는다. */
-  border-color: #b77a16;
+  /* 카드의 box는 그대로 두고 촘촘한 명도 단계와 넓은 광륜을 겹친다. 각 1px 안팎의
+     ring은 따로 보이는 테두리가 아니라 하나의 yellow-white 발광 edge로 합쳐진다. */
+  border-color: #fff9ad;
   box-shadow:
-    inset 0 0 0 1px rgba(255, 242, 176, .94),
-    inset 0 0 7px rgba(255, 210, 73, .18),
-    0 0 0 2px rgba(185, 119, 20, .9),
-    0 0 8px 3px rgba(255, 193, 54, .4),
-    0 0 17px 5px rgba(191, 123, 21, .2),
-    0 3px 7px rgba(78, 49, 12, .22);
+    inset 0 0 0 1px rgba(255, 255, 232, 1),
+    inset 0 0 0 2px rgba(255, 247, 137, .98),
+    inset 0 0 0 3px rgba(255, 218, 51, .80),
+    inset 0 0 8px 3px rgba(255, 196, 20, .46),
+    inset 0 0 19px rgba(255, 145, 0, .27),
+    0 0 0 1px rgba(255, 255, 220, 1),
+    0 0 0 2px rgba(255, 244, 89, .98),
+    0 0 0 3px rgba(255, 213, 28, .94),
+    0 0 0 4px rgba(255, 167, 10, .78),
+    0 0 7px 4px rgba(255, 222, 37, .92),
+    0 0 15px 7px rgba(255, 174, 0, .68),
+    0 0 27px 10px rgba(255, 225, 51, .42),
+    0 0 42px 14px rgba(255, 145, 0, .25);
+  filter: brightness(1.12) saturate(1.11);
 }
 #screen-create .data-card.card-info-active::before {
   content: '';
   position: absolute;
   z-index: 4;
   inset: 0;
-  border: 1px solid rgba(255, 244, 188, .9);
+  border: 1px solid rgba(255, 255, 225, .98);
   border-radius: calc(var(--radius-card) - 1px);
-  background: linear-gradient(135deg, rgba(255, 224, 125, .1), transparent 46%);
+  background:
+    linear-gradient(135deg, rgba(255, 250, 172, .26), rgba(255, 181, 19, .08) 45%, rgba(255, 226, 74, .20)),
+    radial-gradient(ellipse at 50% 15%, rgba(255, 245, 141, .18), transparent 65%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 238, 91, .82),
+    inset 0 0 0 2px rgba(255, 183, 10, .36),
+    inset 0 0 10px 2px rgba(255, 220, 55, .42),
+    inset 0 0 24px rgba(255, 144, 0, .22);
   pointer-events: none;
+}
+
+/* 정보창이 열린 카드의 카드 위 제목만 warm orange로 바꾼다. */
+#screen-create .data-card.card-info-active .card-name {
+  color: #a83b00;
+  font-weight: 500;
+  text-shadow: 0 1px 0 rgba(255, 244, 184, .76);
 }
 
 /* 선택 완료 상태가 정보 열람 상태와 겹쳐도 가장 강한 강조 단계로 유지한다. */
 #screen-create .data-card.selected,
 #screen-create .data-card.selected.card-info-active {
-  border-color: #1779c8;
+  border-color: #eaffff;
   box-shadow:
-    inset 0 0 0 1px rgba(235, 251, 255, .92),
-    inset 0 0 12px rgba(90, 207, 255, .24),
-    0 0 0 2px rgba(16, 126, 220, .92),
-    0 0 9px 3px rgba(50, 174, 255, .5),
-    0 0 20px 6px rgba(24, 126, 224, .25),
-    0 4px 9px rgba(20, 76, 122, .25);
-  filter: brightness(1.055) saturate(1.035);
+    inset 0 0 0 1px rgba(247, 255, 255, 1),
+    inset 0 0 0 2px rgba(190, 250, 255, .98),
+    inset 0 0 0 3px rgba(50, 220, 255, .82),
+    inset 0 0 8px 3px rgba(0, 176, 255, .48),
+    inset 0 0 20px rgba(0, 103, 255, .30),
+    0 0 0 1px rgba(246, 255, 255, 1),
+    0 0 0 2px rgba(181, 248, 255, .99),
+    0 0 0 3px rgba(46, 221, 255, .98),
+    0 0 0 4px rgba(0, 139, 255, .92),
+    0 0 0 5px rgba(0, 75, 224, .76),
+    0 0 8px 5px rgba(53, 225, 255, .92),
+    0 0 17px 8px rgba(0, 153, 255, .72),
+    0 0 30px 12px rgba(0, 104, 255, .47),
+    0 0 47px 16px rgba(0, 80, 236, .28);
+  filter: brightness(1.14) saturate(1.13);
 }
 #screen-create .data-card.selected::before,
 #screen-create .data-card.selected.card-info-active::before {
-  border-color: rgba(241, 253, 255, .88);
-  background: linear-gradient(135deg, rgba(226, 250, 255, .14), transparent 44%, rgba(62, 184, 255, .09));
-  box-shadow: inset 0 0 10px rgba(113, 215, 255, .25);
+  border-color: rgba(244, 255, 255, 1);
+  background:
+    linear-gradient(135deg, rgba(190, 249, 255, .28), rgba(0, 137, 255, .09) 48%, rgba(90, 226, 255, .24)),
+    radial-gradient(ellipse at 50% 12%, rgba(211, 253, 255, .20), transparent 64%);
+  box-shadow:
+    inset 0 0 0 1px rgba(167, 245, 255, .92),
+    inset 0 0 0 2px rgba(24, 194, 255, .52),
+    inset 0 0 11px 2px rgba(42, 215, 255, .48),
+    inset 0 0 26px rgba(0, 103, 255, .28);
+}
+
+/* selected가 card-info-active와 겹치면 이 규칙이 orange 제목까지 덮어 파란 상태만 남긴다. */
+#screen-create .data-card.selected .card-name,
+#screen-create .data-card.selected.card-info-active .card-name {
+  color: #004fb8;
+  font-weight: 500;
+  text-shadow: 0 1px 0 rgba(224, 253, 255, .9);
 }
 @keyframes cardInfoAppearAbove {
   0%   { opacity: 0; transform: translateY(5px) scale(.94); }
