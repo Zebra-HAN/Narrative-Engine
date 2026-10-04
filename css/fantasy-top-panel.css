@@ -359,7 +359,8 @@
   padding-top: 8px;
 }
 #screen-create .card-info-detail,
-#screen-create .card-info-select {
+#screen-create .card-info-select,
+#screen-create .card-info-lock {
   min-height: 27px;
   padding: 3px 5px;
   border: 1px solid #4c2916;
@@ -371,6 +372,17 @@
 }
 #screen-create .card-info-select { background: linear-gradient(#66824b, #3f6039 58%, #29442c); }
 #screen-create .card-info-select.is-selected { background: linear-gradient(#b96045, #873c2d 58%, #60251d); }
+#screen-create .card-info-lock { background: linear-gradient(#71819a, #465a75 58%, #293b55); }
+#screen-create .card-info-lock.is-locked { background: linear-gradient(#c59c42, #8b6823 58%, #604514); }
+#screen-create .card-info-lock:disabled {
+  opacity: .48;
+  cursor: not-allowed;
+  filter: grayscale(.45);
+}
+#screen-create .card-info-select:disabled {
+  opacity: .72;
+  cursor: not-allowed;
+}
 #screen-create .card-info-close {
   position: absolute;
   z-index: 2;
@@ -405,6 +417,21 @@
     0 0 0 1px rgba(190, 151, 66, .5),
     0 0 8px rgba(39, 92, 60, .34),
     0 3px 6px rgba(45, 38, 21, .22);
+}
+#screen-create .data-card.locked::after {
+  content: '🔒';
+  position: absolute;
+  z-index: 3;
+  top: 4px;
+  right: 4px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(48, 38, 21, .82);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .4);
+  font-size: 12px;
 }
 @keyframes cardInfoAppear {
   from { opacity: 0; transform: translateY(5px) scale(.98); }

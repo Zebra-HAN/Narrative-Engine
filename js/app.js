@@ -342,6 +342,7 @@ function beginBackgroundCategorySession(subId) {
 let currentNav   = 'character';
 let currentSubId = null;
 let selectedCards = {};   // { subId: Set<idx> }
+let lockedCards = {};     // { subId: Set<idx> } - random/partial reset에서 유지할 카드
 let selectedDetails = {}; // { "subId__globalIdx": Set<detailItemIdx> }
 let selectedSubImages = {}; // { "subId__globalIdx": true }
 let focusedCard  = null;  // { subId, idx, name, icon }
@@ -1714,8 +1715,9 @@ function showSubgroupCards(subId, groupIdx, sgIdx) {
    // globalIdx = (groupIdx + 1) * 1000000 + sgIdx * 1000 + idx
     const globalIdx = getSubgroupCardGlobalIdx(groupIdx, sgIdx, idx);
     const sel = selectedCards[subId].has(globalIdx) ? ' selected' : '';
+    const locked = lockedCards[subId]?.has(globalIdx) ? ' locked' : '';
     html += `
-      <div class="data-card pressable card-deal${sel}"
+      <div class="data-card pressable card-deal${sel}${locked}"
         style="${getCardRevealDelayStyle()}"
          data-global-idx="${globalIdx}"
         onclick="subgroupCardClick('${subId}', ${groupIdx}, ${sgIdx}, ${idx})"
@@ -1753,6 +1755,7 @@ function subgroupCardDblClick(subId, groupIdx, sgIdx, idx) {
   if (!selectedCards[subId]) selectedCards[subId] = new Set();
 
   if (selectedCards[subId].has(globalIdx)) {
+    if (isCardLocked(subId, globalIdx)) return;
     selectedCards[subId].delete(globalIdx);
   } else {
     selectedCards[subId].add(globalIdx);
@@ -1853,8 +1856,9 @@ function showGroupCards(subId, groupIdx) {
     const idx = rawIdx;
     const globalIdx = getGroupCardGlobalIdx(groupIdx, idx);
     const sel = selectedCards[subId].has(globalIdx) ? ' selected' : '';
+    const locked = lockedCards[subId]?.has(globalIdx) ? ' locked' : '';
     html += `
-  <div class="data-card pressable card-deal${sel}"
+  <div class="data-card pressable card-deal${sel}${locked}"
     style="${getCardRevealDelayStyle()}"
     data-global-idx="${globalIdx}"
     onclick="groupCardClick('${subId}', ${groupIdx}, ${idx})"
@@ -1890,6 +1894,7 @@ function groupCardDblClick(subId, groupIdx, idx) {
   const globalIdx = getGroupCardGlobalIdx(groupIdx, idx);
   if (!selectedCards[subId]) selectedCards[subId] = new Set();
   if (selectedCards[subId].has(globalIdx)) {
+    if (isCardLocked(subId, globalIdx)) return;
     selectedCards[subId].delete(globalIdx);
   } else {
     selectedCards[subId].add(globalIdx);
@@ -2003,10 +2008,11 @@ function showCardPage(subId, animate = true) {
     }
     const idx = rawIdx;       // ← 배열 원본 인덱스
     const sel = selectedCards[subId].has(idx) ? ' selected' : '';
+    const locked = lockedCards[subId]?.has(idx) ? ' locked' : '';
     const deal = animate ? ' card-deal' : '';
     const delay = animate ? ` style="${getCardRevealDelayStyle()}"` : '';
    html += `
-  <div class="data-card pressable${sel}${deal}"${delay}
+  <div class="data-card pressable${sel}${locked}${deal}"${delay}
     data-global-idx="${idx}"
     onclick="cardClick('${subId}', ${idx})"
     ondblclick="openCardDetail('${subId}', ${idx})"
@@ -2094,6 +2100,7 @@ function renderCardInfo() {
 
   cardEl.classList.add('card-info-active');
   const selected = Boolean(selectedCards[focusedCard.subId]?.has(focusedCard.idx));
+  const locked = isCardLocked(focusedCard.subId, focusedCard.idx);
   const panel = document.createElement('section');
   panel.className = 'card-info-popover';
   panel.setAttribute('role', 'dialog');
@@ -2105,13 +2112,15 @@ function renderCardInfo() {
       <p class="card-info-desc">${escapeHtml(focusedCard.desc || '설명 없음')}</p>
     </div>
     <div class="card-info-actions">
-      <button type="button" class="card-info-detail pressable">상세 정보</button>
-      <button type="button" class="card-info-select pressable${selected ? ' is-selected' : ''}">${selected ? '선택 취소' : '선택'}</button>
+      <button type="button" class="card-info-detail pressable">🔍 상세정보</button>
+      <button type="button" class="card-info-select pressable${selected ? ' is-selected' : ''}"${locked ? ' disabled title="잠금을 해제한 뒤 선택을 취소할 수 있습니다."' : ''}>✅ ${selected ? '선택 취소' : '선택'}</button>
+      <button type="button" class="card-info-lock pressable${locked ? ' is-locked' : ''}" aria-pressed="${locked}"${selected ? '' : ' disabled title="카드를 먼저 선택해주세요."'}>${locked ? '🔓 잠금 해제' : '🔒 잠금'}</button>
     </div>`;
   page.appendChild(panel);
   panel.querySelector('.card-info-close').addEventListener('click', closeCardInfo);
   panel.querySelector('.card-info-detail').addEventListener('click', () => openDetailSheet('card'));
   panel.querySelector('.card-info-select').addEventListener('click', selectCurrentCard);
+  panel.querySelector('.card-info-lock').addEventListener('click', toggleCurrentCardLock);
   positionCardInfo(panel, cardEl);
 }
 
@@ -2169,9 +2178,31 @@ function selectCurrentCard() {
   UI_SOUND.play(wasSelected ? 'cancel' : 'category5');
 }
 
+function isCardLocked(subId, idx) {
+  return Boolean(lockedCards[subId]?.has(idx));
+}
+
+function toggleCurrentCardLock() {
+  if (!focusedCard || !selectedCards[focusedCard.subId]?.has(focusedCard.idx)) return;
+
+  const { subId, idx } = focusedCard;
+  if (!lockedCards[subId]) lockedCards[subId] = new Set();
+  if (lockedCards[subId].has(idx)) {
+    lockedCards[subId].delete(idx);
+    if (lockedCards[subId].size === 0) delete lockedCards[subId];
+  } else {
+    lockedCards[subId].add(idx);
+  }
+
+  const cardEl = getFocusedCardElement();
+  if (cardEl) cardEl.classList.toggle('locked', isCardLocked(subId, idx));
+  refreshCardInfo();
+}
+
 function toggleCardSelect(subId, idx) {
   if (!selectedCards[subId]) selectedCards[subId] = new Set();
   if (selectedCards[subId].has(idx)) {
+    if (isCardLocked(subId, idx)) return;
     selectedCards[subId].delete(idx);
   } else {
     selectedCards[subId].add(idx);
@@ -2610,13 +2641,22 @@ async function partialReset() {
   UI_SOUND.play('delete2');
   const subs = NAV_DATA[currentNav].subs;
   subs.forEach(sub => {
-    delete selectedCards[sub.id];
+    const locks = lockedCards[sub.id];
+    if (locks?.size) {
+      selectedCards[sub.id] = new Set(locks);
+    } else {
+      delete selectedCards[sub.id];
+    }
     // 해당 서브의 세부정보와 서브 이미지 선택도 초기화
     Object.keys(selectedDetails).forEach(key => {
-      if (key.startsWith(sub.id + '__')) delete selectedDetails[key];
+      if (key.startsWith(sub.id + '__') && !locks?.has(Number(key.slice((sub.id + '__').length)))) {
+        delete selectedDetails[key];
+      }
     });
      Object.keys(selectedSubImages).forEach(key => {
-      if (key.startsWith(sub.id + '__')) delete selectedSubImages[key];
+      if (key.startsWith(sub.id + '__') && !locks?.has(Number(key.slice((sub.id + '__').length)))) {
+        delete selectedSubImages[key];
+      }
     });
   });
   if (currentSubId) showCardPage(currentSubId, false);
@@ -2631,10 +2671,11 @@ async function partialReset() {
 }
 
 async function fullReset() {
-  const ok = await showAppConfirm('모든 선택을 초기화시겠습니까?');
+  const ok = await showAppConfirm('모든 선택을 초기화하시겠습니까?\n잠금된 카드의 선택 및 잠금 상태도 모두 초기화됩니다.');
   if (!ok) return;
   UI_SOUND.play('delete');
   selectedCards = {};
+  lockedCards = {};
   selectedDetails = {};
    selectedSubImages = {};
   if (currentSubId) showCardPage(currentSubId, false);
@@ -2934,7 +2975,8 @@ async function randomSelectCurrent() {
   }
 
   const scope = getCurrentRandomScope(currentSubId);
-  const allCards = getRandomCandidates(currentSubId, scope);
+  const allCards = getRandomCandidates(currentSubId, scope)
+    .filter(card => !isCardLocked(currentSubId, card.globalIdx));
 
   if (allCards.length === 0) {
     return;
@@ -2943,9 +2985,8 @@ async function randomSelectCurrent() {
   const pick =
     allCards[Math.floor(Math.random() * allCards.length)];
 
-  selectedCards[currentSubId] = new Set([
-    pick.globalIdx
-  ]);
+  selectedCards[currentSubId] = new Set(lockedCards[currentSubId] || []);
+  selectedCards[currentSubId].add(pick.globalIdx);
 
   // UI 갱신
   showCardPage(currentSubId, false);
@@ -2982,30 +3023,12 @@ async function randomSelectAll() {
 
   const subs = NAV_DATA[currentNav].subs;
 subs.forEach(sub => {
-  const data = CARD_DATA[sub.id];
-  let allCards = [];
-  if (data && data.groups) {
-    data.groups.forEach((grp, gIdx) => {
-      if (grp.subgroups) {
-        grp.subgroups.forEach((sg, sgIdx) => {
-          sg.cards.forEach((card, cIdx) => {
-            if (isSectionItem(card)) return;
-            allCards.push({ globalIdx: getSubgroupCardGlobalIdx(gIdx, sgIdx, cIdx) });
-          });
-        });
-      } else if (grp.cards) {
-        grp.cards.forEach((card, cIdx) => {
-          if (isSectionItem(card)) return;
-          allCards.push({ globalIdx: getGroupCardGlobalIdx(gIdx, cIdx) });
-        });
-      }
-    });
-  } else if (Array.isArray(data)) {
-    allCards = data.map((card, idx) => isSectionItem(card) ? null : ({ globalIdx: idx })).filter(Boolean);
-  }
+  const allCards = getRandomCandidates(sub.id)
+    .filter(card => !isCardLocked(sub.id, card.globalIdx));
   if (allCards.length === 0) return;
   const pick = allCards[Math.floor(Math.random() * allCards.length)];
-  selectedCards[sub.id] = new Set([pick.globalIdx]);
+  selectedCards[sub.id] = new Set(lockedCards[sub.id] || []);
+  selectedCards[sub.id].add(pick.globalIdx);
 });
    
 
@@ -3120,6 +3143,7 @@ function startLongPress(evt, el, type, subId, a, b, c) {
     else if (type === 'group') globalIdx = getGroupCardGlobalIdx(a, b);
     else globalIdx = a;
     const wasSelected = Boolean(selectedCards[subId]?.has(globalIdx));
+    if (wasSelected && isCardLocked(subId, globalIdx)) return;
 
     if (type === 'subgroup') subgroupCardDblClick(subId, a, b, c);
     else if (type === 'group') groupCardDblClick(subId, a, b);
