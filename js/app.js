@@ -2801,7 +2801,50 @@ function toggleExtraMenu() {
    무작위 선택
 ════════════════════════════════════════════════ */
 
-// 현재 탭의 현재 서브(마름모) 카드 1개 랜덤 선택
+function getCurrentRandomScope(subId) {
+  const location = addressTrail[addressTrail.length - 1];
+  if (!location || location.subId !== subId) return {};
+
+  if (location.type === 'subgroup') {
+    return { groupIdx: location.groupIdx, sgIdx: location.sgIdx };
+  }
+  if (location.type === 'group' || location.type === 'groupCards') {
+    return { groupIdx: location.groupIdx };
+  }
+  return {};
+}
+
+function getRandomCandidates(subId, scope = {}) {
+  const data = CARD_DATA[subId];
+  let candidates = [];
+
+  if (data && data.groups) {
+    data.groups.forEach((grp, gIdx) => {
+      if (scope.groupIdx !== undefined && gIdx !== scope.groupIdx) return;
+
+      if (grp.subgroups) {
+        grp.subgroups.forEach((sg, sgIdx) => {
+          if (scope.sgIdx !== undefined && sgIdx !== scope.sgIdx) return;
+          sg.cards.forEach((card, cIdx) => {
+            if (isSectionItem(card)) return;
+            candidates.push({ globalIdx: getSubgroupCardGlobalIdx(gIdx, sgIdx, cIdx), path: { type: 'subgroup', groupIdx: gIdx, sgIdx, cardIdx: cIdx }, ...card });
+          });
+        });
+      } else if (grp.cards) {
+        grp.cards.forEach((card, cIdx) => {
+          if (isSectionItem(card)) return;
+          candidates.push({ globalIdx: getGroupCardGlobalIdx(gIdx, cIdx), path: { type: 'group', groupIdx: gIdx, cardIdx: cIdx }, ...card });
+        });
+      }
+    });
+  } else if (Array.isArray(data)) {
+    candidates = data.map((card, idx) => isSectionItem(card) ? null : ({ globalIdx: idx, ...card })).filter(Boolean);
+  }
+
+  return candidates;
+}
+
+// 현재 사용자가 들어가 있는 가장 깊은 범위에서 카드 1개 랜덤 선택
 async function randomSelectCurrent() {
   if (!currentSubId) {
     showAppNotice('먼저 카테고리를 선택해주세요.');
@@ -2812,28 +2855,7 @@ async function randomSelectCurrent() {
   const ok = await showAppConfirm(`[${navLabel} — ${subLabel}]\n랜덤 선택을 하시겠습니까?`, 'selectYes');
   if (!ok) return;
 
-   
-const data = CARD_DATA[currentSubId];
-  let allCards = [];
-  if (data && data.groups) {
-    data.groups.forEach((grp, gIdx) => {
-      if (grp.subgroups) {
-        grp.subgroups.forEach((sg, sgIdx) => {
-          sg.cards.forEach((card, cIdx) => {
-           if (isSectionItem(card)) return;
-            allCards.push({ globalIdx: getSubgroupCardGlobalIdx(gIdx, sgIdx, cIdx), path: { type: 'subgroup', groupIdx: gIdx, sgIdx, cardIdx: cIdx }, ...card });
-          });
-        });
-      } else if (grp.cards) {
-        grp.cards.forEach((card, cIdx) => {
-          if (isSectionItem(card)) return;
-          allCards.push({ globalIdx: getGroupCardGlobalIdx(gIdx, cIdx), path: { type: 'group', groupIdx: gIdx, cardIdx: cIdx }, ...card });
-        });
-      }
-    });
-  } else if (Array.isArray(data)) {
-    allCards = data.map((card, idx) => isSectionItem(card) ? null : ({ globalIdx: idx, ...card })).filter(Boolean);
-  }
+  const allCards = getRandomCandidates(currentSubId, getCurrentRandomScope(currentSubId));
   if (allCards.length === 0) return;
 
   const pick = allCards[Math.floor(Math.random() * allCards.length)];
