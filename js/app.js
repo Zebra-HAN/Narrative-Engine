@@ -400,6 +400,7 @@ let backgroundSessionSubId = null;
 const creativeBackgroundMemory = new Map();
 let visibleBackgroundLayer = -1;
 let visibleBackgroundUrl = null;
+let backgroundTransition = Promise.resolve();
 
 function getCreativeBackground(navId, stage) {
   const candidates = CREATIVE_BACKGROUNDS[navId]?.[stage];
@@ -439,6 +440,11 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
   const loaded = await IMAGE_LOADER.load(imageUrl);
   if (!loaded || activeBackgroundScreen !== activationKey) return;
 
+  // 진행 중인 dissolve가 있다면 그 배경을 완전히 불투명하게 만든 뒤 다음 교체를
+  // 시작한다. 두 버퍼를 빠르게 재사용해 반투명 레이어 뒤로 빈 면이 비치는 것을 막는다.
+  await backgroundTransition;
+  if (activeBackgroundScreen !== activationKey) return;
+
   // 이미 화면에 있는 배경이라면 레이어를 다시 교차시켜 깜빡임을 만들지 않는다.
   if (visibleBackgroundUrl === imageUrl) return;
   const layers = area.querySelectorAll('.creative-background-layer');
@@ -450,15 +456,32 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
   nextLayer.style.backgroundImage = `url(${JSON.stringify(imageUrl)})`;
   nextLayer.style.opacity = '0';
 
-  // 스타일을 먼저 확정한 다음 같은 프레임에서 두 레이어를 겹쳐 짧게 dissolve한다.
-  // 이전 레이어는 전환이 끝날 때까지 제거하지 않아 A → 빈 화면 → B가 되지 않는다.
+  // 스타일을 먼저 확정한 다음 B만 A 위에서 나타나게 한다. A는 B가 완전히
+  // 불투명해진 뒤에만 정리하므로 전환 중 흰색/투명 프레임이 생기지 않는다.
   void nextLayer.offsetWidth;
-  requestAnimationFrame(() => {
-    if (activeBackgroundScreen !== activationKey) return;
-    nextLayer.style.opacity = '1';
-    if (previousLayer) previousLayer.style.opacity = '0';
-    visibleBackgroundLayer = nextLayerIndex;
-    visibleBackgroundUrl = imageUrl;
+  backgroundTransition = new Promise(resolve => {
+    let settled = false;
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      nextLayer.removeEventListener('transitionend', onTransitionEnd);
+      if (previousLayer) {
+        previousLayer.style.opacity = '0';
+        previousLayer.style.backgroundImage = 'none';
+      }
+      visibleBackgroundLayer = nextLayerIndex;
+      visibleBackgroundUrl = imageUrl;
+      resolve();
+    };
+    const onTransitionEnd = event => {
+      if (event.propertyName === 'opacity') finish();
+    };
+    nextLayer.addEventListener('transitionend', onTransitionEnd);
+    requestAnimationFrame(() => {
+      nextLayer.style.opacity = '1';
+      // transitionend가 생략되는 브라우저/백그라운드 탭에서도 버퍼를 해제한다.
+      setTimeout(finish, 360);
+    });
   });
 }
 
