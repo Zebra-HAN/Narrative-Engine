@@ -2119,9 +2119,9 @@ function renderCardInfo() {
       <p class="card-info-desc">${escapeHtml(focusedCard.desc || '설명 없음')}</p>
     </div>
     <div class="card-info-actions">
-      <button type="button" class="card-info-lock pressable${locked ? ' is-locked' : ''}" aria-pressed="${locked}"${selected ? '' : ' disabled title="카드를 먼저 선택해주세요."'}>${locked ? '🔓 잠금 해제' : '🔒 잠금'}</button>
-      <button type="button" class="card-info-detail pressable">🔍 상세정보</button>
-      <button type="button" class="card-info-select pressable${selected ? ' is-selected' : ''}"${locked ? ' disabled title="잠금을 해제한 뒤 선택을 취소할 수 있습니다."' : ''}>✅ ${selected ? '선택 취소' : '선택'}</button>
+      <button type="button" class="card-info-lock pressable${locked ? ' is-locked' : ''}" aria-label="${locked ? '잠금 해제' : '잠금'}" aria-pressed="${locked}"${selected ? '' : ' disabled title="카드를 먼저 선택해주세요."'}><img src="images/core/buttons/${locked ? 'lock-off' : 'lock-on'}.webp" alt="" aria-hidden="true" draggable="false"></button>
+      <button type="button" class="card-info-detail pressable" aria-label="상세정보"><img src="images/core/buttons/detail.webp" alt="" aria-hidden="true" draggable="false"></button>
+      <button type="button" class="card-info-select pressable${selected ? ' is-selected' : ''}" aria-label="${selected ? '선택 취소' : '선택'}" aria-pressed="${selected}"${locked ? ' disabled title="잠금을 해제한 뒤 선택을 취소할 수 있습니다."' : ''}><img src="images/core/buttons/${selected ? 'close' : 'select'}.webp" alt="" aria-hidden="true" draggable="false"></button>
     </div>`;
   page.appendChild(panel);
   const openFocusedCardDetail = () => openDetailSheet('card');

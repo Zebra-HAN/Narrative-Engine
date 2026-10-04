@@ -296,10 +296,10 @@
   z-index: 16;
   box-sizing: border-box;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 82px;
-  gap: 10px;
-  min-height: 92px;
-  padding: 13px 13px 11px 16px;
+  grid-template-columns: minmax(0, 1fr) 100px;
+  gap: 8px;
+  min-height: 0;
+  padding: 8px 12px 7px 14px;
   border: 2px solid #664126;
   border-radius: 10px 13px 10px 13px;
   color: #493522;
@@ -354,7 +354,7 @@
   -webkit-tap-highlight-color: transparent;
 }
 #screen-create .card-info-title {
-  margin: 0 20px 5px 0;
+  margin: 0 20px 3px 0;
   color: #3e2919;
   font: 700 .9rem/1.25 'Noto Serif KR', serif;
 }
@@ -370,36 +370,34 @@
   -webkit-line-clamp: 3;
 }
 #screen-create .card-info-actions {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 7px;
-  padding-top: 8px;
+  position: relative;
+  width: 100px;
+  height: 78px;
+  align-self: center;
 }
 #screen-create .card-info-detail,
 #screen-create .card-info-select,
 #screen-create .card-info-lock {
-  min-height: 27px;
-  padding: 3px 5px;
-  border: 1px solid #4c2916;
-  border-radius: 6px 8px;
-  color: #fff2cf;
-  background: linear-gradient(#d79a4c, #9b5d2e 56%, #4f2d19);
-  box-shadow: inset 0 1px rgba(255,225,158,.72), 0 2px 2px rgba(48,25,12,.25);
-  font: 700 .64rem/1 'Noto Sans KR', sans-serif;
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 2px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
   -webkit-tap-highlight-color: transparent;
+  transition: transform 70ms ease-out;
 }
-#screen-create .card-info-select { background: linear-gradient(#66824b, #3f6039 58%, #29442c); }
-#screen-create .card-info-select.is-selected { background: linear-gradient(#b96045, #873c2d 58%, #60251d); }
-#screen-create .card-info-lock { background: linear-gradient(#71819a, #465a75 58%, #293b55); }
-#screen-create .card-info-lock.is-locked { background: linear-gradient(#71819a, #465a75 58%, #293b55); }
-#screen-create .card-info-detail:active,
-#screen-create .card-info-detail.is-pressing,
-#screen-create .card-info-select:active,
-#screen-create .card-info-select.is-pressing,
-#screen-create .card-info-lock:active,
-#screen-create .card-info-lock.is-pressing {
-  box-shadow: inset 0 1px rgba(255,225,158,.72), 0 2px 2px rgba(48,25,12,.25);
+#screen-create .card-info-lock { top: 0; left: 28px; }
+#screen-create .card-info-detail { bottom: 0; left: 0; }
+#screen-create .card-info-select { right: 0; bottom: 0; }
+#screen-create .card-info-actions img {
+  display: block;
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
 }
 #screen-create .card-info-lock:disabled {
   opacity: .48;
