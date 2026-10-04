@@ -72,6 +72,19 @@
       user-select: none;
     }
 
+    /* 다운로드/디코드 전에는 주변 UI와 어울리는 표면을 유지하고 준비된 뒤 즉시 드러낸다. */
+    img.managed-image {
+      opacity: 0;
+      transition: opacity 90ms ease-out;
+    }
+    img.managed-image.image-ready { opacity: 1; }
+    .card-img-frame.has-image,
+    .group-btn-icon,
+    .diamond-btn-icon { background-color: rgba(58, 125, 90, 0.12); }
+    @media (prefers-reduced-motion: reduce) {
+      img.managed-image { transition: none; }
+    }
+
 body::after {
       content: '';
       position: fixed;
@@ -903,7 +916,8 @@ body::after {
       background-position: center;
       background-size: cover;
       background-repeat: no-repeat;
-      transition: background-image 0.2s ease;
+      /* JS가 디코드 완료 뒤에만 값을 교체하므로 빈 배경 프레임이 나타나지 않는다. */
+      transition: filter 90ms ease-out;
     }
     .center-area::before {
       content: '';

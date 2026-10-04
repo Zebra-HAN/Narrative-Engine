@@ -17,6 +17,117 @@ const CARD_DATA = {
 };
 
 /* ════════════════════════════════════════════════
+   단계적 이미지 준비
+   동일 URL의 요청/디코드를 한 Promise로 합쳐 재방문 때 재사용하고, 짧은 유휴 시간에
+   다음 화면만 준비한다. 전체 이미지 디렉터리를 한꺼번에 읽지는 않는다.
+════════════════════════════════════════════════ */
+const IMAGE_LOADER = (() => {
+  const jobs = new Map();
+  const ready = new Set();
+  const idle = window.requestIdleCallback
+    ? callback => window.requestIdleCallback(callback, { timeout: 1200 })
+    : callback => setTimeout(callback, 80);
+
+  function normalize(src) {
+    if (!src) return null;
+    try { return new URL(src, document.baseURI).href; } catch (_) { return null; }
+  }
+
+  function load(src) {
+    const url = normalize(src);
+    if (!url) return Promise.resolve(false);
+    if (jobs.has(url)) return jobs.get(url);
+
+    const job = new Promise(resolve => {
+      const image = new Image();
+      image.decoding = 'async';
+      const finish = async loaded => {
+        if (!loaded) return resolve(false);
+        try { if (image.decode) await image.decode(); } catch (_) { /* decoded by load fallback */ }
+        ready.add(url);
+        resolve(true);
+      };
+      image.addEventListener('load', () => finish(true), { once: true });
+      image.addEventListener('error', () => finish(false), { once: true });
+      image.src = url;
+      if (image.complete) finish(image.naturalWidth > 0);
+    });
+    jobs.set(url, job);
+    return job;
+  }
+
+  function preload(sources, { background = true, limit = 6 } = {}) {
+    const queue = [...new Set(sources.filter(Boolean))];
+    const run = async () => {
+      for (let index = 0; index < queue.length; index += limit) {
+        await Promise.all(queue.slice(index, index + limit).map(load));
+      }
+    };
+    if (!background) return run();
+    idle(run);
+    return Promise.resolve();
+  }
+
+  async function reveal(element) {
+    element.classList.add('managed-image');
+    const url = normalize(element.currentSrc || element.src);
+    if (!url) return;
+    const loaded = ready.has(url) || await load(url);
+    if (loaded && element.isConnected) element.classList.add('image-ready');
+  }
+
+  function watch(root = document) {
+    root.querySelectorAll('img').forEach(reveal);
+  }
+
+  new MutationObserver(records => records.forEach(record => record.addedNodes.forEach(node => {
+    if (!(node instanceof Element)) return;
+    if (node.matches('img')) reveal(node);
+    watch(node);
+  }))).observe(document.documentElement, { childList: true, subtree: true });
+
+  return { load, preload, reveal, watch };
+})();
+
+const CORE_IMAGE_SOURCES = [
+  'images/core/home/forestglow.jpg', 'images/core/home/royal-banner.webp',
+  'images/core/buttons/top_panel.webp', 'images/core/buttons/top_icon.webp',
+  'images/core/buttons/bottom_panel.jpg', 'images/core/buttons/check.webp',
+  'images/core/buttons/lock.webp', 'images/core/buttons/cancel.webp',
+  'images/core/buttons/select.webp', 'images/core/buttons/detail.webp',
+  'images/core/buttons/close.webp', 'images/core/buttons/lock-on.webp',
+  'images/core/buttons/lock-off.webp', 'images/core/buttons/menu-button-on.webp',
+  'images/core/buttons/menu-button-off.webp',
+  ...['character', 'story', 'idea', 'world', 'compass'].flatMap(name => [
+    `images/core/buttons/nav_${name}-a.webp`, `images/core/buttons/nav_${name}-b.webp`
+  ])
+];
+
+function imageSources(items) {
+  return items.flatMap(item => item ? [item.img, item.subImg] : []).filter(Boolean);
+}
+
+function preloadNavImages(navId) {
+  const subs = NAV_DATA[navId]?.subs || [];
+  IMAGE_LOADER.preload(imageSources(subs));
+  IMAGE_LOADER.preload(CREATIVE_BACKGROUNDS[navId]?.top?.map(file => `images/core/home/${file}`) || []);
+}
+
+function preloadGroupDestinations(subId) {
+  const groups = CARD_DATA[subId]?.groups || [];
+  IMAGE_LOADER.preload(imageSources(groups));
+  // 각 그룹의 첫 화면에 보일 카드 일부만 준비하여 데이터/메모리 폭증을 막는다.
+  const nearby = groups.flatMap(group => group.subgroups
+    ? imageSources(group.subgroups).concat(imageSources(group.subgroups[0]?.cards?.slice(0, 12) || []))
+    : imageSources(group.cards?.slice(0, 12) || []));
+  IMAGE_LOADER.preload(nearby);
+}
+
+function preloadCards(cards) {
+  IMAGE_LOADER.preload(imageSources((cards || []).filter(card => card?.type !== 'section').slice(0, 24)));
+}
+
+/* ════════════════════════════════════════════════
    효과음
    모든 UI 오디오는 이 작은 컨트롤러를 통과하므로 나중에 한 곳에서 음량 및 음소거
    제어를 추가할 수 있다. 시작할 때 파일을 가져와 디코딩하므로 클릭이 확정되면
@@ -295,7 +406,7 @@ function getCreativeBackground(navId, stage) {
   return `images/core/home/${filename}`;
 }
 
-function applyCreativeBackground({ navId = currentNav, stage, screenKey }) {
+async function applyCreativeBackground({ navId = currentNav, stage, screenKey }) {
   const area = document.getElementById('center-area');
   if (!area || !stage || !screenKey) return;
 
@@ -322,7 +433,12 @@ function applyCreativeBackground({ navId = currentNav, stage, screenKey }) {
    * 올바른 이미지 파일을 가리키게 합니다.
    */
   const imageUrl = new URL(path, document.baseURI).href;
+  // 이전 배경/기본색은 새 배경이 실제 디코드될 때까지 그대로 둔다.
+  const loaded = await IMAGE_LOADER.load(imageUrl);
+  if (!loaded || activeBackgroundScreen !== activationKey) return;
   area.style.setProperty('--creative-background-image', `url(${JSON.stringify(imageUrl)})`);
+  area.classList.remove('background-ready');
+  requestAnimationFrame(() => area.classList.add('background-ready'));
 }
 
 function resetCreativeBackgroundActivation() {
@@ -853,12 +969,23 @@ window.addEventListener('load', () => {
 */
 
 // 앱 시작: 첫 프레임은 흰색으로 유지하고, 기다림 없이 홈 화면이 부드럽게 떠오르게 한다.
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
   SCENE_SOUND.playOpeningOnce();
-  setTimeout(() => {
-     switchScreen('screen-home', null, { type: 'launch', duration: FADE_MS_LAUNCH });
-  }, 10);
+  IMAGE_LOADER.watch();
+  // 홈의 두 장만 첫 전환 전에 기다리고, 공통 UI는 홈을 보는 동안 준비한다.
+  await Promise.race([
+    IMAGE_LOADER.preload(CORE_IMAGE_SOURCES.slice(0, 2), { background: false, limit: 2 }),
+    new Promise(resolve => setTimeout(resolve, 1200))
+  ]);
+  switchScreen('screen-home', null, { type: 'launch', duration: FADE_MS_LAUNCH });
+  IMAGE_LOADER.preload(CORE_IMAGE_SOURCES.slice(2));
+  preloadNavImages('character');
 });
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js')
+    .catch(error => console.warn('Service worker registration failed:', error)));
+}
 
 
 
@@ -1403,6 +1530,7 @@ function switchNav(navId, skipAnimation, options = {}) {
 
   // 서브 메뉴 렌더
   renderSubnav(navId, !skipAnimation && prev !== navId);
+  preloadNavImages(navId);
 
   // 중앙 기본 상태로
   closeCardInfo();
@@ -1451,6 +1579,9 @@ function selectSub(subId, navId) {
   const same = currentSubId === subId;
   currentSubId = subId;
   showCardPage(subId, !same);
+  const data = CARD_DATA[subId];
+  if (data?.groups) preloadGroupDestinations(subId);
+  else preloadCards(data);
   updateInfoPanel();
     setSubAddress(subId, navId || currentNav);
 }
@@ -1637,6 +1768,8 @@ function showSubgroupPage(subId, groupIdx) {
 
   const grp = data.groups[groupIdx];
   if (!grp || !grp.subgroups) return;
+  IMAGE_LOADER.preload(imageSources(grp.subgroups));
+  grp.subgroups.forEach(sg => preloadCards(sg.cards));
   applyCreativeBackground({ navId: currentNav, stage: 'group', screenKey: `subgroup:${subId}:${groupIdx}` });
 
   document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
@@ -1699,6 +1832,7 @@ function showSubgroupCards(subId, groupIdx, sgIdx) {
 
   const sg = grp.subgroups[sgIdx];
   if (!sg) return;
+  preloadCards(sg.cards);
 
   document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
 
@@ -1839,6 +1973,7 @@ function showGroupCards(subId, groupIdx) {
 
   const grp = data.groups[groupIdx];
   if (!grp) return;
+  preloadCards(grp.cards);
   applyCreativeBackground({ navId: currentNav, stage: 'card', screenKey: `group-cards:${subId}:${groupIdx}` });
 
   document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
@@ -2754,7 +2889,7 @@ function updateNavBadges() {
 ════════════════════════════════════════════════ */
 function renderIcon(icon, img, className) {
   if (img) {
-    return `<img src="${img}" class="${className}" alt="">`;
+    return `<img src="${img}" class="${className} managed-image" alt="" decoding="async">`;
   }
   return icon || '';
 }
