@@ -185,7 +185,7 @@ function initUiSounds() {
   }
 
   function playActivationSound(event) {
-    const target = event.target.closest('button, [role="button"], [onclick], .pressable');
+    const target = event.target.closest('button, [role="button"], [onclick], .pressable, .card-info-popover');
     if (!target || target.disabled) return;
 
     // 완료된 `click`에서만 피드백을 재생한다. 특히 pointerdown/touchstart는 손가락이
@@ -219,7 +219,7 @@ function initUiSounds() {
       UI_SOUND.play(target.classList.contains('is-locked') ? 'cancel' : 'click');
     } else if (target.dataset.sound) {
       UI_SOUND.play(target.dataset.sound);
-    } else if (target.matches('.card-info-detail, .detail-idea-block, .detail-sub-image-row')) {
+    } else if (target.matches('.card-info-detail, .card-info-popover, .detail-idea-block, .detail-sub-image-row')) {
       UI_SOUND.play('touch');
     } else if (target.matches('#nav-idea')) {
       UI_SOUND.play('click');
@@ -1730,6 +1730,7 @@ function showSubgroupCards(subId, groupIdx, sgIdx) {
         ontouchstart="startLongPress(event,this,'subgroup','${subId}',${groupIdx},${sgIdx},${idx})"
         onmouseup="cancelLongPress()" ontouchend="handleCardTouchEnd(event,'subgroup','${subId}',${groupIdx},${sgIdx},${idx})"
         onmouseleave="cancelLongPress()" ontouchcancel="cancelLongPress()">
+        <img class="card-lock-mark" src="images/core/buttons/lock.webp" alt="잠금됨" draggable="false">
         <div class="card-img-frame ${card.img ? 'has-image' : 'has-icon'}">${renderIcon(card.icon, card.img, 'card-img')}</div>
         <div class="card-name"><span class="card-name-text">${card.name}</span></div>
       </div>
@@ -1871,6 +1872,7 @@ function showGroupCards(subId, groupIdx) {
     ontouchstart="startLongPress(event,this,'group','${subId}',${groupIdx},${idx})"
     onmouseup="cancelLongPress()" ontouchend="handleCardTouchEnd(event,'group','${subId}',${groupIdx},${idx})"
     onmouseleave="cancelLongPress()" ontouchcancel="cancelLongPress()">
+        <img class="card-lock-mark" src="images/core/buttons/lock.webp" alt="잠금됨" draggable="false">
         <div class="card-img-frame ${card.img ? 'has-image' : 'has-icon'}">${renderIcon(card.icon, card.img, 'card-img')}</div>
         <div class="card-name"><span class="card-name-text">${card.name}</span></div>
       </div>
@@ -2024,7 +2026,7 @@ function showCardPage(subId, animate = true) {
     ontouchstart="startLongPress(event,this,'card','${subId}',${idx})"
     onmouseup="cancelLongPress()"  ontouchend="handleCardTouchEnd(event,'card','${subId}',${idx})"
     onmouseleave="cancelLongPress()" ontouchcancel="cancelLongPress()">
-    
+        <img class="card-lock-mark" src="images/core/buttons/lock.webp" alt="잠금됨" draggable="false">
         <div class="card-img-frame ${card.img ? 'has-image' : 'has-icon'}">${renderIcon(card.icon, card.img, 'card-img')}</div>
         <div class="card-name"><span class="card-name-text">${card.name}</span></div>
       </div>
@@ -2109,6 +2111,7 @@ function renderCardInfo() {
   panel.className = 'card-info-popover';
   panel.setAttribute('role', 'dialog');
   panel.setAttribute('aria-label', `${focusedCard.name} 카드 정보`);
+  panel.setAttribute('tabindex', '0');
   panel.innerHTML = `
     <button type="button" class="card-info-close pressable" aria-label="카드 정보 닫기">×</button>
     <div class="card-info-copy">
@@ -2121,10 +2124,23 @@ function renderCardInfo() {
       <button type="button" class="card-info-select pressable${selected ? ' is-selected' : ''}"${locked ? ' disabled title="잠금을 해제한 뒤 선택을 취소할 수 있습니다."' : ''}>✅ ${selected ? '선택 취소' : '선택'}</button>
     </div>`;
   page.appendChild(panel);
-  panel.querySelector('.card-info-close').addEventListener('click', closeCardInfo);
-  panel.querySelector('.card-info-detail').addEventListener('click', () => openDetailSheet('card'));
-  panel.querySelector('.card-info-select').addEventListener('click', selectCurrentCard);
-  panel.querySelector('.card-info-lock').addEventListener('click', toggleCurrentCardLock);
+  const openFocusedCardDetail = () => openDetailSheet('card');
+  panel.addEventListener('click', openFocusedCardDetail);
+  panel.addEventListener('keydown', event => {
+    if (event.target !== panel || (event.key !== 'Enter' && event.key !== ' ')) return;
+    event.preventDefault();
+    openFocusedCardDetail();
+  });
+  const bindAction = (selector, action) => {
+    panel.querySelector(selector).addEventListener('click', event => {
+      event.stopPropagation();
+      action();
+    });
+  };
+  bindAction('.card-info-close', closeCardInfo);
+  bindAction('.card-info-detail', openFocusedCardDetail);
+  bindAction('.card-info-select', selectCurrentCard);
+  bindAction('.card-info-lock', toggleCurrentCardLock);
   positionCardInfo(panel, cardEl);
 }
 
