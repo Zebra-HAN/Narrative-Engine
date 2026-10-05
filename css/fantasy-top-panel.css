@@ -339,8 +339,12 @@
   margin: 0;
   pointer-events: none;
   transform-origin: var(--card-tail-origin-x) var(--card-tail-origin-y);
-  animation: cardInfoCollapseIntoTail 165ms cubic-bezier(.2, .72, .24, 1) both;
-  will-change: transform, opacity, filter;
+  /* 약 14개의 실제 화면 갱신(60Hz 기준)을 확보하면서, 완만한 ease-in으로
+     첫 축소부터 보이게 하고 후반으로 갈수록 꼬리 쪽 수렴 속도를 높인다. */
+  animation:
+    cardInfoCollapseIntoTail 230ms cubic-bezier(.32, .04, .72, .5) both,
+    cardInfoFadeAtTail 230ms linear both;
+  will-change: transform, opacity;
 }
 
 /* 상세정보를 여는 본문을 누른 경우에만 패널 전체가 즉각 반응한다. */
@@ -572,21 +576,24 @@
 
 @keyframes cardInfoCollapseIntoTail {
   0% {
-    opacity: 1;
     transform: scale(1);
-    filter: blur(0);
-    animation-timing-function: cubic-bezier(.15, .78, .2, 1);
   }
-  72% {
-    opacity: .92;
-    transform: scale(.14);
-    filter: blur(.25px);
-    animation-timing-function: cubic-bezier(.55, 0, 1, .45);
+  100% {
+    transform: scale(.01);
+  }
+}
+
+/* 형태가 축소되는 동안은 선명하게 유지하고 꼬리에 거의 닿은 마지막 구간에서만
+   빠르게 지운다. transform과 분리해 opacity가 가속 곡선을 방해하지 않게 한다. */
+@keyframes cardInfoFadeAtTail {
+  0%, 78% {
+    opacity: 1;
+  }
+  86% {
+    opacity: .9;
   }
   100% {
     opacity: 0;
-    transform: scale(.015);
-    filter: blur(1px);
   }
 }
 
