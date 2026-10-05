@@ -2380,22 +2380,26 @@ function closeCardInfo() {
     return;
   }
 
-  // 패널을 스크롤 페이지에서 분리해 고정 좌표에 둔다. 닫히는 동안 카드 목록이
-  // 다시 렌더링되더라도 이 DOM은 유지되어, 카드까지 돌아가는 모션이 끊기지 않는다.
+  // 패널을 스크롤 페이지에서 분리해 고정 좌표에 둔다. 축소의 원점은 카드가
+  // 아니라 패널에 붙은 마름모 꼬리의 중심으로 잡아 몸체가 꼬리 안으로 접히게 한다.
   const panelRect = panel.getBoundingClientRect();
-  const cardRect = cardEl.getBoundingClientRect();
-  const translateX = cardRect.left + cardRect.width / 2 - (panelRect.left + panelRect.width / 2);
-  const translateY = cardRect.top + cardRect.height / 2 - (panelRect.top + panelRect.height / 2);
+  const isBelowCard = panel.classList.contains('is-below-card');
+  const anchorX = Number.parseFloat(getComputedStyle(panel).getPropertyValue('--card-anchor-x'))
+    || panelRect.width / 2;
+  // ::before의 16px 마름모는 위/아래 경계에서 10px만큼 바깥에 놓인다.
+  // 그 중심은 아래 꼬리에서는 height - 2px, 위 꼬리에서는 2px 지점이다.
+  const tailCenterY = isBelowCard ? 2 : panelRect.height - 2;
   const screen = document.getElementById('screen-create');
 
-  panel.classList.remove('is-positioned', 'is-below-card', 'is-body-pressing');
+  // 꼬리가 위에 달린 첫 행 패널도 닫히는 동안 방향을 그대로 유지한다.
+  panel.classList.remove('is-positioned', 'is-body-pressing');
   panel.classList.add('is-closing');
   panel.style.left = `${panelRect.left}px`;
   panel.style.top = `${panelRect.top}px`;
   panel.style.width = `${panelRect.width}px`;
   panel.style.height = `${panelRect.height}px`;
-  panel.style.setProperty('--card-return-x', `${translateX}px`);
-  panel.style.setProperty('--card-return-y', `${translateY}px`);
+  panel.style.setProperty('--card-tail-origin-x', `${anchorX}px`);
+  panel.style.setProperty('--card-tail-origin-y', `${tailCenterY}px`);
   screen.appendChild(panel);
 
   cardEl.classList.remove('card-info-active');
@@ -2409,7 +2413,7 @@ function closeCardInfo() {
   };
   panel.addEventListener('animationend', removePanel, { once: true });
   // background tabs can suppress animation events, so never leave a stale panel behind.
-  setTimeout(removePanel, 450);
+  setTimeout(removePanel, 300);
 }
 
 function getFocusedCardElement() {
