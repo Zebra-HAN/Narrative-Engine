@@ -595,7 +595,7 @@ const MAIN_CATEGORY_INFO = {
 const MAIN_CATEGORY_IMAGE = {
   character:  'images/core/buttons/nav_character-a.webp',
   narrative2: 'images/core/buttons/nav_story-a.webp',
-  world:      'images/core/buttons/nav_world-a.png',
+  world:      'images/core/buttons/nav_world-a.webp',
   compass:    'images/core/buttons/nav_compass-a.webp'
 };
 
