@@ -2370,10 +2370,10 @@ body::after {
   min-height: 0;
 }
 
-/* 6개일 때만 2열 × 3행, 가로 4 : 세로 3 비율을 사용한다. */
+/* 6개일 때도 2열 × 3행 배치를 유지하면서 정사각형 프레임을 사용한다. */
 .group-layout-six .group-select-btn {
   min-height: 0;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 1 / 1;
   flex-direction: column;
   justify-content: center;
   text-align: center;
