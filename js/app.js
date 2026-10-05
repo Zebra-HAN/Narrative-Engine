@@ -395,6 +395,12 @@ const CREATIVE_BACKGROUNDS = {
   },
 };
 
+const CREATIVE_BACKGROUND_SOURCES = [...new Set(
+  Object.values(CREATIVE_BACKGROUNDS).flatMap(stages =>
+    Object.values(stages).flatMap(files => files.map(file => `images/core/home/${file}`))
+  )
+)];
+
 let activeBackgroundScreen = null;
 let backgroundSessionSubId = null;
 const creativeBackgroundMemory = new Map();
@@ -402,6 +408,21 @@ let visibleBackgroundLayer = -1;
 let visibleBackgroundUrl = null;
 let backgroundRequestId = 0;
 let runningBackgroundTransition = null;
+let currentBackgroundDescriptor = null;
+
+function backgroundCssValue(imageUrl) {
+  return `url(${JSON.stringify(imageUrl)})`;
+}
+
+function layerHasBackground(layer) {
+  return Boolean(layer?.style.backgroundImage && layer.style.backgroundImage !== 'none');
+}
+
+function layerShowsBackground(layer, imageUrl) {
+  return layerHasBackground(layer)
+    && layer.style.opacity !== '0'
+    && layer.style.backgroundImage === backgroundCssValue(imageUrl);
+}
 
 function getCreativeBackground(navId, stage) {
   const candidates = CREATIVE_BACKGROUNDS[navId]?.[stage];
@@ -418,6 +439,7 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
   area.dataset.backgroundStage = stage;
 
   const activationKey = `${navId}:${stage}:${screenKey}`;
+  currentBackgroundDescriptor = { navId, stage, screenKey };
 
   // 현재 카테고리를 탐색하는 동안에는 화면별 선택값을 보관한다. 덕분에 뒤로
   // 돌아오거나 방금 열었던 그룹에 다시 들어가도 그 화면의 배경이 복원된다.
@@ -434,9 +456,12 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
   // request and then mistake that cancelled request for a visible background.
   // Only a committed layer (or the exact fade already in progress) may skip
   // the work. This is especially important for rapid back-swipe navigation.
+  const layers = Array.from(area.querySelectorAll('.creative-background-layer'));
+  const committedLayer = visibleBackgroundLayer >= 0 ? layers[visibleBackgroundLayer] : null;
   if (activeBackgroundScreen === activationKey
-      && (visibleBackgroundUrl === imageUrl
-        || runningBackgroundTransition?.imageUrl === imageUrl)) return;
+      && (layerShowsBackground(committedLayer, imageUrl)
+        || (runningBackgroundTransition?.imageUrl === imageUrl
+          && layerHasBackground(runningBackgroundTransition.nextLayer)))) return;
 
   activeBackgroundScreen = activationKey;
   const requestId = ++backgroundRequestId;
@@ -458,14 +483,20 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
   if (!loaded || requestId !== backgroundRequestId || activeBackgroundScreen !== activationKey) return;
 
   // 이미 화면에 있는 배경이라면 레이어를 다시 교차시켜 깜빡임을 만들지 않는다.
-  if (visibleBackgroundUrl === imageUrl) return;
-  const layers = area.querySelectorAll('.creative-background-layer');
+  if (visibleBackgroundUrl === imageUrl) {
+    const restoredLayer = committedLayer || layers[0];
+    if (!restoredLayer) return;
+    restoredLayer.style.backgroundImage = backgroundCssValue(imageUrl);
+    restoredLayer.style.opacity = '1';
+    visibleBackgroundLayer = layers.indexOf(restoredLayer);
+    return;
+  }
   if (layers.length < 2) return;
 
   const nextLayerIndex = visibleBackgroundLayer === 0 ? 1 : 0;
   const nextLayer = layers[nextLayerIndex];
   const previousLayer = visibleBackgroundLayer >= 0 ? layers[visibleBackgroundLayer] : null;
-  nextLayer.style.backgroundImage = `url(${JSON.stringify(imageUrl)})`;
+  nextLayer.style.backgroundImage = backgroundCssValue(imageUrl);
   nextLayer.style.opacity = '0';
   nextLayer.classList.add('is-incoming');
 
@@ -534,7 +565,7 @@ function retainCreativeBackgroundForSwipeBack() {
 
   const layers = Array.from(area.querySelectorAll('.creative-background-layer'));
   let retainedLayer = visibleBackgroundLayer >= 0 ? layers[visibleBackgroundLayer] : null;
-  const hasImage = layer => layer && layer.style.backgroundImage && layer.style.backgroundImage !== 'none';
+  const hasImage = layerHasBackground;
 
   if (!hasImage(retainedLayer)) {
     retainedLayer = layers.find(hasImage) || null;
@@ -545,7 +576,7 @@ function retainCreativeBackgroundForSwipeBack() {
   // the already decoded/visible URL rather than selecting or loading a new one.
   if (!hasImage(retainedLayer) && visibleBackgroundUrl && layers.length > 0) {
     retainedLayer = layers[visibleBackgroundLayer >= 0 ? visibleBackgroundLayer : 0];
-    retainedLayer.style.backgroundImage = `url(${JSON.stringify(visibleBackgroundUrl)})`;
+    retainedLayer.style.backgroundImage = backgroundCssValue(visibleBackgroundUrl);
     visibleBackgroundLayer = layers.indexOf(retainedLayer);
   }
 
@@ -560,14 +591,32 @@ function resetCreativeBackgroundActivation() {
   cancelRunningBackgroundTransition();
   activeBackgroundScreen = null;
   backgroundSessionSubId = null;
+  currentBackgroundDescriptor = null;
   creativeBackgroundMemory.clear();
 }
 
+// Safari can restore a PWA page from its back/forward cache without rerunning the
+// render functions. Inline compositor state is not always restored with the JS
+// heap, so reassert the selected URL on pageshow/foreground instead of choosing
+// another random image. applyCreativeBackground also verifies the actual layer,
+// rather than trusting metadata that may have survived a discarded WebKit layer.
+function restoreCreativeBackgroundAfterPageResume() {
+  const createScreen = document.getElementById('screen-create');
+  if (!createScreen?.classList.contains('active') || !currentBackgroundDescriptor) return;
+  retainCreativeBackgroundForSwipeBack();
+  applyCreativeBackground(currentBackgroundDescriptor);
+}
+
+window.addEventListener('pageshow', restoreCreativeBackgroundAfterPageResume);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') restoreCreativeBackgroundAfterPageResume();
+});
+
 function beginBackgroundCategorySession(subId) {
-  if (backgroundSessionSubId !== null && backgroundSessionSubId !== subId) {
-    activeBackgroundScreen = null;
-    creativeBackgroundMemory.clear();
-  }
+  // Keep every route's selection for the lifetime of the creative session.
+  // The activation key already contains nav/stage/path, so retaining entries
+  // cannot leak one category's image into another. Clearing here used to make
+  // a revisited group pick a new random card background instead of restoring it.
   backgroundSessionSubId = subId;
 }
 
@@ -1089,6 +1138,14 @@ window.addEventListener('load', () => {
 window.addEventListener('load', async () => {
   SCENE_SOUND.playOpeningOnce();
   IMAGE_LOADER.watch();
+  // Backgrounds are few and are used on every creative route. Start all requests
+  // at launch so the first group/card visit never becomes their first network hit.
+  // This warms both the browser cache and the service worker image cache without
+  // consuming random choices or changing the existing per-screen selection rules.
+  const creativeBackgroundWarmup = IMAGE_LOADER.preload(CREATIVE_BACKGROUND_SOURCES, {
+    background: false,
+    limit: 8,
+  });
   // 홈의 두 장만 첫 전환 전에 기다리고, 공통 UI는 홈을 보는 동안 준비한다.
   await Promise.race([
     IMAGE_LOADER.preload(CORE_IMAGE_SOURCES.slice(0, 2), { background: false, limit: 2 }),
@@ -1097,6 +1154,7 @@ window.addEventListener('load', async () => {
   switchScreen('screen-home', null, { type: 'launch', duration: FADE_MS_LAUNCH });
   IMAGE_LOADER.preload(CORE_IMAGE_SOURCES.slice(2));
   preloadNavImages('character');
+  await creativeBackgroundWarmup;
 });
 
 if ('serviceWorker' in navigator) {
