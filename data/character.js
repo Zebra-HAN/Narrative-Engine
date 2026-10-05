@@ -552,6 +552,27 @@ race: {   /* ═══  [종족]  ═══ */
       { icon:'🦊', name:'협상에 능숙한' },
       { icon:'🌱', name:'실수를 인정하는' },
       { icon:'⚡', name:'결단이 빠른' }
+    ]},
+    { id:'personality_social', label:'대인 관계 성격', icon:'🤝', cards:[
+      { icon:'💬', name:'사교적인' },
+      { icon:'👂', name:'경청하는' },
+      { icon:'🎁', name:'배려심 깊은' },
+      { icon:'🧱', name:'경계심이 강한' },
+      { icon:'🕊️', name:'갈등을 중재하는' }
+    ]},
+    { id:'personality_emotion', label:'감정 표현 성격', icon:'💗', cards:[
+      { icon:'😊', name:'감정이 풍부한' },
+      { icon:'🎭', name:'감정을 숨기는' },
+      { icon:'🔥', name:'쉽게 흥분하는' },
+      { icon:'🌊', name:'감정 기복이 큰' },
+      { icon:'🪷', name:'평정심을 유지하는' }
+    ]},
+    { id:'personality_values', label:'가치관별 성격', icon:'🧭', cards:[
+      { icon:'⚖️', name:'원칙을 중시하는' },
+      { icon:'🏆', name:'성취를 추구하는' },
+      { icon:'🗽', name:'자유를 사랑하는' },
+      { icon:'🛡️', name:'책임감이 강한' },
+      { icon:'🔍', name:'진실을 탐구하는' }
     ]}
   ]
 },
