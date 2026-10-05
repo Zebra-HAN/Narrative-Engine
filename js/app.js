@@ -349,8 +349,6 @@ function initUiSounds() {
       UI_SOUND.play(target.dataset.sound);
     } else if (target.matches('.card-info-detail, .card-info-popover, .detail-idea-block, .detail-sub-image-row')) {
       UI_SOUND.play('touch');
-    } else if (target.matches('#nav-idea')) {
-      UI_SOUND.play('click');
     } else if (target.closest('.bottom-nav')) {
       UI_SOUND.play('nav');
     } else {
