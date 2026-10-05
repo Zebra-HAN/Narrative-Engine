@@ -103,6 +103,8 @@ const IMAGE_LOADER = (() => {
   return { load, preload, reveal, watch };
 })();
 
+const NAV_IMAGE_VERSION = '20261005-1';
+
 const CORE_IMAGE_SOURCES = [
   'images/core/home/forestglow.jpg', 'images/core/home/royal-banner.webp',
   'images/core/buttons/top_panel.webp', 'images/core/buttons/top_icon.webp',
@@ -113,7 +115,8 @@ const CORE_IMAGE_SOURCES = [
   'images/core/buttons/lock-off.webp', 'images/core/buttons/menu-button-on.webp',
   'images/core/buttons/menu-button-off.webp',
   ...['character', 'story', 'idea', 'world', 'compass'].flatMap(name => [
-    `images/core/buttons/nav_${name}-a.webp`, `images/core/buttons/nav_${name}-b.webp`
+    `images/core/buttons/nav_${name}-a.webp?v=${NAV_IMAGE_VERSION}`,
+    `images/core/buttons/nav_${name}-b.webp?v=${NAV_IMAGE_VERSION}`
   ])
 ];
 
@@ -688,10 +691,10 @@ const MAIN_CATEGORY_INFO = {
 
 /* 하단 내비게이션의 선택 상태 이미지(-a)를 상단 패널에서도 그대로 사용한다. */
 const MAIN_CATEGORY_IMAGE = {
-  character:  'images/core/buttons/nav_character-a.webp',
-  narrative2: 'images/core/buttons/nav_story-a.webp',
-  world:      'images/core/buttons/nav_world-a.webp',
-  compass:    'images/core/buttons/nav_compass-a.webp'
+  character:  `images/core/buttons/nav_character-a.webp?v=${NAV_IMAGE_VERSION}`,
+  narrative2: `images/core/buttons/nav_story-a.webp?v=${NAV_IMAGE_VERSION}`,
+  world:      `images/core/buttons/nav_world-a.webp?v=${NAV_IMAGE_VERSION}`,
+  compass:    `images/core/buttons/nav_compass-a.webp?v=${NAV_IMAGE_VERSION}`
 };
 
 
