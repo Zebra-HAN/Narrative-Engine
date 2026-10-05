@@ -428,8 +428,18 @@ function layerHasBackground(layer) {
 
 function layerShowsBackground(layer, imageUrl) {
   return layerHasBackground(layer)
-    && layer.style.opacity !== '0'
+    && layer.classList.contains('is-active')
     && layer.style.backgroundImage === backgroundCssValue(imageUrl);
+}
+
+function setBackgroundLayerActive(layers, activeLayer) {
+  layers.forEach(layer => {
+    const isActive = layer === activeLayer;
+    layer.classList.toggle('is-active', isActive);
+    layer.classList.toggle('is-inactive', !isActive);
+    layer.classList.remove('is-incoming');
+    layer.style.opacity = isActive ? '1' : '0';
+  });
 }
 
 function getCreativeBackground(navId, stage) {
@@ -449,12 +459,11 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
   const activationKey = `${navId}:${stage}:${screenKey}`;
   currentBackgroundDescriptor = { navId, stage, screenKey };
 
-  // 현재 카테고리를 탐색하는 동안에는 화면별 선택값을 보관한다. 덕분에 뒤로
-  // 돌아오거나 방금 열었던 그룹에 다시 들어가도 그 화면의 배경이 복원된다.
+  // 화면별 선택 기억과 이미지 로더의 요청 캐시는 별개다. 여기에는 실제 로딩에
+  // 성공한 선택만 저장하며, 실패하거나 취소된 후보는 다음 방문을 막지 않는다.
   let path = creativeBackgroundMemory.get(activationKey);
   if (!path) {
     path = getCreativeBackground(navId, stage);
-    if (path) creativeBackgroundMemory.set(activationKey, path);
   }
   if (!path) return;
   let imageUrl = new URL(path, document.baseURI).href;
@@ -502,20 +511,24 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
       if (requestId !== backgroundRequestId || activeBackgroundScreen !== activationKey) return;
       if (loaded) {
         imageUrl = alternativeUrl;
-        creativeBackgroundMemory.set(activationKey, alternativeUrl);
         break;
       }
     }
   }
   if (!loaded) return;
 
+  // A successful URL belongs to this route for the rest of this creative
+  // session, independently of whether a later navigation cancels its fade.
+  creativeBackgroundMemory.set(activationKey, imageUrl);
+
   // 이미 화면에 있는 배경이라면 레이어를 다시 교차시켜 깜빡임을 만들지 않는다.
   if (visibleBackgroundUrl === imageUrl) {
     const restoredLayer = committedLayer || layers[0];
     if (!restoredLayer) return;
     restoredLayer.style.backgroundImage = backgroundCssValue(imageUrl);
-    restoredLayer.style.opacity = '1';
+    setBackgroundLayerActive(layers, restoredLayer);
     visibleBackgroundLayer = layers.indexOf(restoredLayer);
+    activeBackgroundScreen = activationKey;
     return;
   }
   if (layers.length < 2) return;
@@ -523,6 +536,7 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
   const nextLayerIndex = visibleBackgroundLayer === 0 ? 1 : 0;
   const nextLayer = layers[nextLayerIndex];
   const previousLayer = visibleBackgroundLayer >= 0 ? layers[visibleBackgroundLayer] : null;
+  nextLayer.classList.remove('is-active', 'is-inactive');
   nextLayer.style.backgroundImage = backgroundCssValue(imageUrl);
   nextLayer.style.opacity = '0';
   nextLayer.classList.add('is-incoming');
@@ -557,10 +571,12 @@ function finishBackgroundTransition(transition) {
   if (runningBackgroundTransition !== transition || transition.requestId !== backgroundRequestId) return;
   clearTimeout(transition.timer);
   transition.nextLayer.removeEventListener('transitionend', transition.onTransitionEnd);
-  transition.nextLayer.classList.remove('is-incoming');
-  if (transition.previousLayer) {
-    transition.previousLayer.style.opacity = '0';
-  }
+  const area = transition.nextLayer.closest('.center-area');
+  const layers = Array.from(area?.querySelectorAll('.creative-background-layer') || []);
+  // Mark every non-owner inactive while the new owner is still above it. The
+  // inactive class suppresses opacity transitions, so an old retained bitmap
+  // cannot fade over (or flash after) the newly committed background.
+  setBackgroundLayerActive(layers, transition.nextLayer);
   visibleBackgroundLayer = transition.nextLayerIndex;
   visibleBackgroundUrl = transition.imageUrl;
   runningBackgroundTransition = null;
@@ -571,8 +587,14 @@ function cancelRunningBackgroundTransition() {
   if (!transition) return;
   clearTimeout(transition.timer);
   transition.nextLayer.removeEventListener('transitionend', transition.onTransitionEnd);
-  transition.nextLayer.classList.remove('is-incoming');
+  transition.nextLayer.classList.remove('is-incoming', 'is-active');
+  transition.nextLayer.classList.add('is-inactive');
   transition.nextLayer.style.opacity = '0';
+  if (transition.previousLayer) {
+    transition.previousLayer.classList.remove('is-incoming', 'is-inactive');
+    transition.previousLayer.classList.add('is-active');
+    transition.previousLayer.style.opacity = '1';
+  }
   runningBackgroundTransition = null;
 }
 
@@ -607,10 +629,7 @@ function retainCreativeBackgroundForSwipeBack() {
     visibleBackgroundLayer = layers.indexOf(retainedLayer);
   }
 
-  if (retainedLayer) {
-    retainedLayer.classList.remove('is-incoming');
-    retainedLayer.style.opacity = '1';
-  }
+  if (retainedLayer) setBackgroundLayerActive(layers, retainedLayer);
 }
 
 function resetCreativeBackgroundActivation() {

@@ -932,10 +932,21 @@ body::after {
       transition: opacity 280ms cubic-bezier(.22, .61, .36, 1);
       will-change: opacity;
     }
+    /* A committed screen owns exactly one buffer. Inactive buffers may retain
+       their decoded bitmap, but cannot animate or rise into the paint order. */
+    .creative-background-layer.is-active {
+      z-index: 1;
+      opacity: 1;
+    }
+    .creative-background-layer.is-inactive {
+      z-index: 0;
+      opacity: 0 !important;
+      transition: none;
+    }
     /* The incoming buffer must always paint above the retained background.
        DOM order alone makes every other swap occur underneath an opaque layer,
        which looks like a delayed cut when that old layer is finally removed. */
-    .creative-background-layer.is-incoming { z-index: 1; }
+    .creative-background-layer.is-incoming { z-index: 2; }
     .center-area::before {
       content: '';
       position: absolute;
