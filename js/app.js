@@ -3003,8 +3003,221 @@ function renderStatusContent() {
   `;
 }
 
-function shareStatus() {
-  showAppNotice('공유 기능은 다음 업데이트 예정입니다.');
+async function shareStatus() {
+  const format = await showAppDialog('선택된 아이디어를 어떻게 저장할까요?', [
+    { label: '이미지로 저장', className: 'app-dialog-btn-confirm', value: 'png' },
+    { label: 'PDF로 저장', className: 'app-dialog-btn-confirm', value: 'pdf' },
+    { label: '취소', className: 'app-dialog-btn-cancel', value: false }
+  ]);
+  if (format === 'png') exportStatusAsPng();
+  if (format === 'pdf') exportStatusAsPdf();
+}
+
+function statusExportFilename(extension, part) {
+  const now = new Date();
+  const date = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, '0'), String(now.getDate()).padStart(2, '0')].join('-');
+  return `아이디어통합_${date}${part ? `_${part}` : ''}.${extension}`;
+}
+
+function createStatusExportClone() {
+  const source = document.querySelector('.status-panel');
+  const clone = source.cloneNode(true);
+  clone.removeAttribute('style');
+  clone.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
+  clone.classList.add('status-export-panel');
+  clone.style.width = `${source.getBoundingClientRect().width}px`;
+  clone.style.height = 'auto';
+  clone.style.maxHeight = 'none';
+  clone.style.opacity = '1';
+  clone.style.transform = 'none';
+  clone.style.overflow = 'visible';
+  const body = clone.querySelector('.status-body');
+  body.style.height = 'auto';
+  body.style.overflow = 'visible';
+  body.style.flex = 'none';
+  return clone;
+}
+
+async function waitForExportImages(root) {
+  await Promise.all(Array.from(root.querySelectorAll('img')).map(img => {
+    if (img.complete && img.naturalWidth) return Promise.resolve();
+    return new Promise(resolve => {
+      img.addEventListener('load', resolve, { once: true });
+      img.addEventListener('error', resolve, { once: true });
+    });
+  }));
+  if (document.fonts?.ready) await document.fonts.ready;
+}
+
+async function imageToDataUrl(url) {
+  if (!url || url.startsWith('data:') || url.startsWith('blob:')) return url;
+  try {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    return await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch (_) {
+    return url;
+  }
+}
+
+async function prepareCloneForSvg(root) {
+  const sourceRoot = document.querySelector('.status-panel');
+  const originals = document.querySelectorAll('.status-panel *');
+  const clones = root.querySelectorAll('*');
+  // foreignObject is isolated from the page stylesheet, so preserve the exact
+  // computed appearance on every node rather than changing the visible panel.
+  const copyComputedStyle = (original, node) => {
+    const computed = getComputedStyle(original);
+    node.style.cssText = Array.from(computed).map(prop => `${prop}:${computed.getPropertyValue(prop)};`).join('');
+  };
+  copyComputedStyle(sourceRoot, root);
+  clones.forEach((node, i) => {
+    const original = originals[i];
+    if (!original) return;
+    copyComputedStyle(original, node);
+  });
+  root.style.width = `${sourceRoot.getBoundingClientRect().width}px`;
+  root.style.height = 'auto';
+  root.style.maxHeight = 'none';
+  root.style.opacity = '1';
+  root.style.transform = 'none';
+  root.style.overflow = 'visible';
+  const body = root.querySelector('.status-body');
+  body.style.height = 'auto';
+  body.style.overflow = 'visible';
+  body.style.flex = 'none';
+  await Promise.all(Array.from(root.querySelectorAll('img')).map(async img => {
+    img.src = await imageToDataUrl(img.currentSrc || img.src);
+  }));
+}
+
+function canvasToBlob(canvas) {
+  return new Promise((resolve, reject) => canvas.toBlob(
+    blob => blob ? resolve(blob) : reject(new Error('PNG 이미지를 만들지 못했습니다.')),
+    'image/png'
+  ));
+}
+
+async function renderStatusSlice(root, width, top, height, scale) {
+  const serialized = new XMLSerializer().serializeToString(root);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width * scale}" height="${height * scale}" viewBox="0 0 ${width} ${height}"><foreignObject width="${width}" height="${height}"><div xmlns="http://www.w3.org/1999/xhtml" style="width:${width}px;transform:translateY(-${top}px);transform-origin:top left">${serialized}</div></foreignObject></svg>`;
+  const blobUrl = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }));
+  try {
+    const image = new Image();
+    await new Promise((resolve, reject) => {
+      image.onload = resolve;
+      image.onerror = () => reject(new Error('캡처 이미지를 렌더링하지 못했습니다.'));
+      image.src = blobUrl;
+    });
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.ceil(width * scale);
+    canvas.height = Math.ceil(height * scale);
+    const context = canvas.getContext('2d');
+    context.fillStyle = '#f9f9f9';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    return canvasToBlob(canvas);
+  } finally {
+    URL.revokeObjectURL(blobUrl);
+  }
+}
+
+async function deliverExportFiles(files) {
+  if (navigator.share && navigator.canShare) {
+    const shareFiles = files.map(item => new File([item.blob], item.name, { type: item.blob.type }));
+    if (navigator.canShare({ files: shareFiles })) {
+      try {
+        await navigator.share({ files: shareFiles, title: '선택된 아이디어' });
+        return;
+      } catch (error) {
+        if (error.name === 'AbortError') return;
+      }
+    }
+  }
+  files.forEach((item, index) => setTimeout(() => {
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(item.blob);
+    link.download = item.name;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(link.href), 30000);
+  }, index * 250));
+}
+
+async function exportStatusAsPng() {
+  const button = document.querySelector('.status-share-btn');
+  const originalLabel = button.textContent;
+  button.disabled = true;
+  button.textContent = '준비 중…';
+  const stage = document.createElement('div');
+  stage.className = 'status-export-stage';
+  const clone = createStatusExportClone();
+  stage.appendChild(clone);
+  document.body.appendChild(stage);
+  try {
+    await waitForExportImages(clone);
+    await prepareCloneForSvg(clone);
+    clone.querySelector('.status-header-actions')?.remove();
+    const width = Math.ceil(clone.scrollWidth);
+    const fullHeight = Math.ceil(clone.scrollHeight);
+    // 16 MP / 8192 px stays below conservative iOS Safari canvas limits.
+    const scale = Math.min(2, 8192 / width, Math.sqrt(16000000 / (width * Math.min(fullHeight, 7000))));
+    const sliceHeight = Math.max(1, Math.floor(Math.min(7000, 8192 / scale)));
+    const count = Math.ceil(fullHeight / sliceHeight);
+    const files = [];
+    for (let index = 0; index < count; index += 1) {
+      const top = index * sliceHeight;
+      const height = Math.min(sliceHeight, fullHeight - top);
+      const blob = await renderStatusSlice(clone, width, top, height, scale);
+      files.push({ blob, name: statusExportFilename('png', count > 1 ? `${index + 1}-${count}` : '') });
+    }
+    const isAppleTouchDevice = /iPad|iPhone|iPod/.test(navigator.userAgent)
+      || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (isAppleTouchDevice && navigator.share && navigator.canShare) {
+      // Rendering consumes the original click's transient user activation.
+      // A final tap gives Safari/PWA a fresh activation for the native share sheet.
+      await showAppDialog('이미지가 준비되었습니다.', [
+        { label: '공유 시트 열기', className: 'app-dialog-btn-single', value: true }
+      ]);
+    }
+    await deliverExportFiles(files);
+  } catch (error) {
+    console.error(error);
+    showAppNotice('이미지 저장에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+  } finally {
+    stage.remove();
+    button.disabled = false;
+    button.textContent = originalLabel;
+  }
+}
+
+function exportStatusAsPdf() {
+  const printRoot = document.createElement('div');
+  printRoot.id = 'status-print-export';
+  printRoot.appendChild(createStatusExportClone());
+  printRoot.querySelector('.status-header-actions')?.remove();
+  document.body.appendChild(printRoot);
+  const previousTitle = document.title;
+  document.title = statusExportFilename('pdf').replace(/\.pdf$/, '');
+  document.body.classList.add('status-printing');
+  const cleanup = () => {
+    document.body.classList.remove('status-printing');
+    printRoot.remove();
+    document.title = previousTitle;
+    window.removeEventListener('afterprint', cleanup);
+  };
+  window.addEventListener('afterprint', cleanup);
+  requestAnimationFrame(() => requestAnimationFrame(() => window.print()));
+  // Some iOS/PWA versions do not dispatch afterprint.
+  setTimeout(() => {
+    if (document.body.contains(printRoot) && !window.matchMedia('print').matches) cleanup();
+  }, 60000);
 }
 
 /* ════════════════════════════════════════════════
