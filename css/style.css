@@ -1683,6 +1683,40 @@ body::after {
     .status-body::-webkit-scrollbar { width: 4px; }
     .status-body::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
 
+    .status-export-stage {
+      position: fixed;
+      left: -20000px;
+      top: 0;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    #status-print-export { display: none; }
+
+    @media print {
+      @page { size: A4 portrait; margin: 12mm; }
+      body.status-printing > *:not(#status-print-export) { display: none !important; }
+      body.status-printing #status-print-export { display: block; }
+      body.status-printing .status-export-panel {
+        width: 100% !important;
+        max-width: none !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        opacity: 1 !important;
+        transform: none !important;
+        box-shadow: none !important;
+        border: 0 !important;
+      }
+      body.status-printing .status-body { overflow: visible !important; height: auto !important; }
+      body.status-printing .status-two-col { align-items: flex-start; }
+      body.status-printing .status-section,
+      body.status-printing .status-sub,
+      body.status-printing .status-chip-wrap,
+      body.status-printing .status-chip { break-inside: avoid; page-break-inside: avoid; }
+      body.status-printing img { break-inside: avoid; page-break-inside: avoid; }
+    }
+
     /* 큰 팝업은 카드 정보창과 같은 한 번의 탄성 리듬을 더 절제된 scale로 쓴다. */
     @keyframes largePopupAppear {
       0% {
