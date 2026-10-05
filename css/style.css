@@ -2955,7 +2955,12 @@ body::after {
   display: none;
 }
 /* 기본/활성 아이콘은 한 번에 한 장만 보이도록 이 블록을 항상 .nav-img 기본값보다 뒤에 둡니다. */
-.nav-tab .nav-img-default:not([src=""]) { display: block; }
+.nav-tab .nav-img-default:not([src=""]) {
+  display: block;
+}
+.nav-tab .nav-img-default[src$="-b.webp"] {
+  opacity: 0.85;
+}
 .nav-tab .nav-img-active { display: none; }
 .nav-tab.active .nav-img-default { display: none; }
 .nav-tab.active .nav-img-active:not([src=""]) { display: block; }
