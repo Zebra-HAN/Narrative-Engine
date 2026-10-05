@@ -331,6 +331,22 @@
   animation-name: cardInfoAppearBelow;
 }
 
+/* 닫힐 때는 패널을 viewport 좌표에 고정한 뒤 카드 중심까지 빠르게 되감는다.
+   별도 클래스로 등장 애니메이션과 완전히 분리해 기존 '뽀용' 모션은 건드리지 않는다. */
+#screen-create .card-info-popover.is-closing {
+  position: fixed;
+  z-index: 100;
+  margin: 0;
+  pointer-events: none;
+  transform-origin: center;
+  animation: cardInfoReturnToCard 300ms cubic-bezier(.55, .02, .82, .38) both;
+  will-change: transform, opacity, filter;
+}
+
+#screen-create .card-info-popover.is-closing::before {
+  opacity: 0;
+}
+
 /* 상세정보를 여는 본문을 누른 경우에만 패널 전체가 즉각 반응한다. */
 #screen-create .card-info-popover.is-body-pressing {
   scale: .975;
@@ -558,8 +574,26 @@
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+@keyframes cardInfoReturnToCard {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+    filter: blur(0);
+  }
+  72% { opacity: .82; }
+  100% {
+    opacity: 0;
+    transform: translate(var(--card-return-x), var(--card-return-y)) scale(.025);
+    filter: blur(1px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   #screen-create .card-info-popover.is-positioned {
     animation: none;
+  }
+
+  #screen-create .card-info-popover.is-closing {
+    animation-duration: 1ms;
   }
 }

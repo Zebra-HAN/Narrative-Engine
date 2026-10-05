@@ -2312,9 +2312,46 @@ function openCardDetail(subId, idx) {
 }
 
 function closeCardInfo() {
-  document.querySelectorAll('.card-info-popover').forEach(panel => panel.remove());
-  document.querySelectorAll('.data-card.card-info-active').forEach(card => card.classList.remove('card-info-active'));
+  const panel = document.querySelector('.card-info-popover:not(.is-closing)');
+  const cardEl = getFocusedCardElement();
+
+  if (!panel || !cardEl) {
+    panel?.remove();
+    document.querySelectorAll('.data-card.card-info-active').forEach(card => card.classList.remove('card-info-active'));
+    focusedCard = null;
+    return;
+  }
+
+  // 패널을 스크롤 페이지에서 분리해 고정 좌표에 둔다. 닫히는 동안 카드 목록이
+  // 다시 렌더링되더라도 이 DOM은 유지되어, 카드까지 돌아가는 모션이 끊기지 않는다.
+  const panelRect = panel.getBoundingClientRect();
+  const cardRect = cardEl.getBoundingClientRect();
+  const translateX = cardRect.left + cardRect.width / 2 - (panelRect.left + panelRect.width / 2);
+  const translateY = cardRect.top + cardRect.height / 2 - (panelRect.top + panelRect.height / 2);
+  const screen = document.getElementById('screen-create');
+
+  panel.classList.remove('is-positioned', 'is-below-card', 'is-body-pressing');
+  panel.classList.add('is-closing');
+  panel.style.left = `${panelRect.left}px`;
+  panel.style.top = `${panelRect.top}px`;
+  panel.style.width = `${panelRect.width}px`;
+  panel.style.height = `${panelRect.height}px`;
+  panel.style.setProperty('--card-return-x', `${translateX}px`);
+  panel.style.setProperty('--card-return-y', `${translateY}px`);
+  screen.appendChild(panel);
+
+  cardEl.classList.remove('card-info-active');
   focusedCard = null;
+
+  let removed = false;
+  const removePanel = () => {
+    if (removed) return;
+    removed = true;
+    panel.remove();
+  };
+  panel.addEventListener('animationend', removePanel, { once: true });
+  // background tabs can suppress animation events, so never leave a stale panel behind.
+  setTimeout(removePanel, 450);
 }
 
 function getFocusedCardElement() {
@@ -2346,7 +2383,7 @@ function positionCardInfo(panel, cardEl) {
 }
 
 function renderCardInfo() {
-  document.querySelectorAll('.card-info-popover').forEach(panel => panel.remove());
+  document.querySelectorAll('.card-info-popover:not(.is-closing)').forEach(panel => panel.remove());
   document.querySelectorAll('.data-card.card-info-active').forEach(card => card.classList.remove('card-info-active'));
   if (!focusedCard) return;
 
