@@ -912,6 +912,11 @@ body::after {
       overflow: hidden;
       touch-action: pan-y;
       background-color: #f2eee5;
+      /* JS 배경이 아직 준비되지 않았거나 모바일 브라우저가 합성 레이어를
+         폐기해도 창작 화면이 흰색으로 비지 않도록 항상 남는 안전 배경. */
+      background-image: url('../images/core/home/forestglow.jpg');
+      background-position: center;
+      background-size: cover;
     }
     /* 두 레이어 중 보이지 않는 쪽에 decode된 다음 배경을 먼저 넣고 교차시킨다.
        따라서 화면 콘텐츠 렌더링은 기다리지 않으면서도 중간에 빈 프레임이 없다. */
