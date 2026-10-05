@@ -1,5 +1,5 @@
-const SHELL_CACHE = 'narrative-shell-v2';
-const IMAGE_CACHE = 'narrative-images-v2';
+const SHELL_CACHE = 'narrative-shell-v3';
+const IMAGE_CACHE = 'narrative-images-v3';
 const SHELL = ['./', './index.html', './css/style.css', './css/layout-3.css',
   './css/fantasy-bottom-ui.css', './css/fantasy-top-panel.css', './js/app.js'];
 

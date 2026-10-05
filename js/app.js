@@ -41,7 +41,10 @@ const IMAGE_LOADER = (() => {
     const job = new Promise(resolve => {
       const image = new Image();
       image.decoding = 'async';
+      let settled = false;
       const finish = async loaded => {
+        if (settled) return;
+        settled = true;
         if (!loaded) return resolve(false);
         try { if (image.decode) await image.decode(); } catch (_) { /* decoded by load fallback */ }
         ready.add(url);
@@ -53,6 +56,11 @@ const IMAGE_LOADER = (() => {
       if (image.complete) finish(image.naturalWidth > 0);
     });
     jobs.set(url, job);
+    // A temporary network/service-worker failure must not poison this URL for
+    // the rest of the app session. The next render is allowed to try it again.
+    job.then(loaded => {
+      if (!loaded && jobs.get(url) === job) jobs.delete(url);
+    });
     return job;
   }
 
@@ -73,7 +81,13 @@ const IMAGE_LOADER = (() => {
     const url = normalize(element.currentSrc || element.src);
     if (!url) return;
     const loaded = ready.has(url) || await load(url);
-    if (loaded && element.isConnected) element.classList.add('image-ready');
+    // On failure leave the native img rendering path visible. Keeping the
+    // loader's opacity:0 class here turned one transient request failure into a
+    // permanently blank card/group button.
+    if (element.isConnected) {
+      if (loaded) element.classList.add('image-ready');
+      else element.classList.remove('managed-image');
+    }
   }
 
   function watch(root = document) {
@@ -395,12 +409,6 @@ const CREATIVE_BACKGROUNDS = {
   },
 };
 
-const CREATIVE_BACKGROUND_SOURCES = [...new Set(
-  Object.values(CREATIVE_BACKGROUNDS).flatMap(stages =>
-    Object.values(stages).flatMap(files => files.map(file => `images/core/home/${file}`))
-  )
-)];
-
 let activeBackgroundScreen = null;
 let backgroundSessionSubId = null;
 const creativeBackgroundMemory = new Map();
@@ -449,7 +457,7 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
     if (path) creativeBackgroundMemory.set(activationKey, path);
   }
   if (!path) return;
-  const imageUrl = new URL(path, document.baseURI).href;
+  let imageUrl = new URL(path, document.baseURI).href;
 
   // Do not use activeBackgroundScreen alone as a completion signal. It is set
   // before load/decode finishes, so A -> B -> A can invalidate A's first
@@ -479,8 +487,27 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
    * 올바른 이미지 파일을 가리키게 합니다.
    */
   // 이전 배경/기본색은 새 배경이 실제 디코드될 때까지 그대로 둔다.
-  const loaded = await IMAGE_LOADER.load(imageUrl);
-  if (!loaded || requestId !== backgroundRequestId || activeBackgroundScreen !== activationKey) return;
+  let loaded = await IMAGE_LOADER.load(imageUrl);
+  if (requestId !== backgroundRequestId || activeBackgroundScreen !== activationKey) return;
+
+  // Do not strand the page on its plain fallback because one randomly chosen
+  // file had a transient cache/network failure. Try the remaining images for
+  // this stage and remember the first usable replacement for this route.
+  if (!loaded) {
+    const alternatives = (CREATIVE_BACKGROUNDS[navId]?.[stage] || [])
+      .map(file => new URL(`images/core/home/${file}`, document.baseURI).href)
+      .filter(url => url !== imageUrl);
+    for (const alternativeUrl of alternatives) {
+      loaded = await IMAGE_LOADER.load(alternativeUrl);
+      if (requestId !== backgroundRequestId || activeBackgroundScreen !== activationKey) return;
+      if (loaded) {
+        imageUrl = alternativeUrl;
+        creativeBackgroundMemory.set(activationKey, alternativeUrl);
+        break;
+      }
+    }
+  }
+  if (!loaded) return;
 
   // 이미 화면에 있는 배경이라면 레이어를 다시 교차시켜 깜빡임을 만들지 않는다.
   if (visibleBackgroundUrl === imageUrl) {
@@ -533,7 +560,6 @@ function finishBackgroundTransition(transition) {
   transition.nextLayer.classList.remove('is-incoming');
   if (transition.previousLayer) {
     transition.previousLayer.style.opacity = '0';
-    transition.previousLayer.style.backgroundImage = 'none';
   }
   visibleBackgroundLayer = transition.nextLayerIndex;
   visibleBackgroundUrl = transition.imageUrl;
@@ -547,7 +573,6 @@ function cancelRunningBackgroundTransition() {
   transition.nextLayer.removeEventListener('transitionend', transition.onTransitionEnd);
   transition.nextLayer.classList.remove('is-incoming');
   transition.nextLayer.style.opacity = '0';
-  transition.nextLayer.style.backgroundImage = 'none';
   runningBackgroundTransition = null;
 }
 
@@ -568,7 +593,9 @@ function retainCreativeBackgroundForSwipeBack() {
   const hasImage = layerHasBackground;
 
   if (!hasImage(retainedLayer)) {
-    retainedLayer = layers.find(hasImage) || null;
+    retainedLayer = layers.find(layer => hasImage(layer) && layer.style.opacity !== '0')
+      || layers.find(hasImage)
+      || null;
     if (retainedLayer) visibleBackgroundLayer = layers.indexOf(retainedLayer);
   }
 
@@ -1138,14 +1165,6 @@ window.addEventListener('load', () => {
 window.addEventListener('load', async () => {
   SCENE_SOUND.playOpeningOnce();
   IMAGE_LOADER.watch();
-  // Backgrounds are few and are used on every creative route. Start all requests
-  // at launch so the first group/card visit never becomes their first network hit.
-  // This warms both the browser cache and the service worker image cache without
-  // consuming random choices or changing the existing per-screen selection rules.
-  const creativeBackgroundWarmup = IMAGE_LOADER.preload(CREATIVE_BACKGROUND_SOURCES, {
-    background: false,
-    limit: 8,
-  });
   // 홈의 두 장만 첫 전환 전에 기다리고, 공통 UI는 홈을 보는 동안 준비한다.
   await Promise.race([
     IMAGE_LOADER.preload(CORE_IMAGE_SOURCES.slice(0, 2), { background: false, limit: 2 }),
@@ -1154,7 +1173,6 @@ window.addEventListener('load', async () => {
   switchScreen('screen-home', null, { type: 'launch', duration: FADE_MS_LAUNCH });
   IMAGE_LOADER.preload(CORE_IMAGE_SOURCES.slice(2));
   preloadNavImages('character');
-  await creativeBackgroundWarmup;
 });
 
 if ('serviceWorker' in navigator) {
