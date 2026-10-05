@@ -412,6 +412,22 @@ const CREATIVE_BACKGROUNDS = {
   },
 };
 
+// 배경 후보의 단일 원본은 CREATIVE_BACKGROUNDS로 유지한다. 화면에서 어떤 배경을
+// 선택할지는 기존 getCreativeBackground가 진입 시점에 결정하고, 이 목록은 파일을
+// 미리 다운로드/디코드하는 데만 사용한다.
+const CREATIVE_BACKGROUND_SOURCES = [...new Set(
+  Object.values(CREATIVE_BACKGROUNDS).flatMap(stages =>
+    Object.values(stages).flatMap(files =>
+      files.map(file => `images/core/home/${file}`)))
+)];
+
+function preloadCreativeBackgrounds() {
+  // 모바일에서 한꺼번에 수십 장을 디코드하지 않도록 작은 묶음으로 진행한다.
+  // IMAGE_LOADER는 개별 실패를 false로 처리하고 실패한 작업을 캐시에서 제거하므로
+  // 나중에 실제 화면이 요청할 때 같은 URL을 다시 시도할 수 있다.
+  return IMAGE_LOADER.preload(CREATIVE_BACKGROUND_SOURCES, { limit: 4 });
+}
+
 let activeBackgroundScreen = null;
 let backgroundSessionSubId = null;
 const creativeBackgroundMemory = new Map();
@@ -1193,6 +1209,9 @@ window.addEventListener('load', async () => {
     new Promise(resolve => setTimeout(resolve, 1200))
   ]);
   switchScreen('screen-home', null, { type: 'launch', duration: FADE_MS_LAUNCH });
+  // 첫 화면 전환을 먼저 시작한 뒤 유휴 시간에 모든 창작 화면 배경을 준비한다.
+  // 배경 선택/화면별 기억 로직에는 관여하지 않는다.
+  preloadCreativeBackgrounds();
   IMAGE_LOADER.preload(CORE_IMAGE_SOURCES.slice(2));
   preloadNavImages('character');
 });
