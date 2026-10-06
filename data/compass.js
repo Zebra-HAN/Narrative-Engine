@@ -19,6 +19,9 @@ const COMPASS_NAV = {
   subs: [
     { id: 'type',     label: '유형',  img:'images/core/sub-nav/comp/type.webp', type:'group' },
     { id: 'genre',    label: '장르',  img:'images/core/sub-nav/comp/genre.webp', type:'group' },
+    { id: 'experience', label: '경험', img:'images/core/sub-nav/comp/genre.webp', type:'group' },
+    { id: 'scenery',  label: '광경',  img:'images/core/sub-nav/comp/genre.webp', type:'group' },
+    { id: 'appearance', label: '모습', img:'images/core/sub-nav/comp/genre.webp', type:'group' },
     { id: 'message',  label: '메시지', img:'images/core/sub-nav/comp/message.webp', type:'group' },
     { id: 'theme',    label: '테마',  img:'images/core/sub-nav/comp/theme.webp', type:'group' },
     { id: 'quote',    label: '명언',  img:'images/core/sub-nav/comp/quote.webp', type:'group' },
@@ -94,6 +97,45 @@ const COMPASS_CARDS = {
       { icon:'👻', name:'호러 코미디' },
       { icon:'🏛️', name:'역사 스릴러' },
       { icon:'🌿', name:'힐링 어드벤처' }
+    ]}
+  ]
+},
+
+  experience: {
+  groups: [
+    { id:'experience_daily', label:'일상의 경험', icon:'☕', cards:[
+      { icon:'🤝', name:'새로운 만남', desc:'낯선 사람과 대화를 나누는 경험.', detail:'【상세】우연한 만남에서 새로운 인연이 시작된다.' },
+      { icon:'🍳', name:'첫 요리', desc:'처음으로 직접 음식을 만드는 경험.', detail:'【상세】서툰 도전 속에서 작은 성취를 느낀다.' }
+    ]},
+    { id:'experience_adventure', label:'모험의 경험', icon:'🧭', cards:[
+      { icon:'🥾', name:'낯선 길 탐험', desc:'처음 가는 길을 따라 걷는 경험.', detail:'【상세】익숙한 곳을 떠나 새로운 가능성을 발견한다.' },
+      { icon:'🏕️', name:'숲속 야영', desc:'숲에서 하룻밤을 보내는 경험.', detail:'【상세】자연의 소리를 들으며 두려움과 설렘을 함께 느낀다.' }
+    ]}
+  ]
+},
+
+  scenery: {
+  groups: [
+    { id:'scenery_nature', label:'자연의 광경', icon:'🌿', cards:[
+      { icon:'🌅', name:'바다의 일출', desc:'수평선 위로 해가 떠오르는 광경.', detail:'【상세】붉은 햇빛이 잔잔한 바다를 물들인다.' },
+      { icon:'🌌', name:'별이 가득한 밤', desc:'밤하늘을 수많은 별이 채운 광경.', detail:'【상세】어두운 들판 위로 은하수가 길게 펼쳐진다.' }
+    ]},
+    { id:'scenery_city', label:'도시의 광경', icon:'🏙️', cards:[
+      { icon:'🌃', name:'빛나는 야경', desc:'도시의 불빛이 켜진 밤의 광경.', detail:'【상세】건물과 거리의 불빛이 서로 다른 색으로 반짝인다.' },
+      { icon:'🚉', name:'분주한 역', desc:'사람들이 오가는 기차역의 광경.', detail:'【상세】떠나는 사람과 도착한 사람이 플랫폼에서 스쳐 간다.' }
+    ]}
+  ]
+},
+
+  appearance: {
+  groups: [
+    { id:'appearance_expression', label:'표정과 모습', icon:'🙂', cards:[
+      { icon:'😊', name:'밝은 미소', desc:'기쁨이 드러나는 환한 모습.', detail:'【상세】반가운 소식에 눈과 입가가 함께 웃는다.' },
+      { icon:'🤔', name:'깊은 생각', desc:'고민에 잠긴 진지한 모습.', detail:'【상세】말없이 시선을 낮추며 다음 선택을 생각한다.' }
+    ]},
+    { id:'appearance_attire', label:'차림과 모습', icon:'👕', cards:[
+      { icon:'🧥', name:'여행자의 차림', desc:'긴 여정을 준비한 실용적인 모습.', detail:'【상세】튼튼한 외투와 작은 배낭에 여행의 흔적이 남아 있다.' },
+      { icon:'🎩', name:'축제의 차림', desc:'축제를 위해 꾸민 화려한 모습.', detail:'【상세】색색의 장식과 모자가 즐거운 분위기를 더한다.' }
     ]}
   ]
 },
