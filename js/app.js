@@ -493,7 +493,7 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
   // Only a committed layer (or the exact fade already in progress) may skip
   // the work. This is especially important for rapid back-swipe navigation.
   const layers = Array.from(area.querySelectorAll('.creative-background-layer'));
-  const committedLayer = visibleBackgroundLayer >= 0 ? layers[visibleBackgroundLayer] : null;
+  let committedLayer = visibleBackgroundLayer >= 0 ? layers[visibleBackgroundLayer] : null;
   if (activeBackgroundScreen === activationKey
       && (layerShowsBackground(committedLayer, imageUrl)
         || (runningBackgroundTransition?.imageUrl === imageUrl
@@ -503,10 +503,11 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
   const requestId = ++backgroundRequestId;
 
   // Navigation supersedes an in-flight fade immediately, not after its timer resolves.
-  // Keep the last fully visible layer as the base while the newest image is prepared.
+  // Keep the latest prepared layer as the base while the newest image is prepared.
   // This prevents an obsolete request from extending the navigation by one fade duration
   // or committing its URL after a quick back/forward gesture.
   cancelRunningBackgroundTransition();
+  committedLayer = visibleBackgroundLayer >= 0 ? layers[visibleBackgroundLayer] : null;
   /*
    * 이 값은 css/style.css 안에서 실제 background-image로 사용됩니다. 상대 경로를
    * 그대로 넘기면 브라우저가 CSS 파일 위치(css/)를 기준으로 해석하여
@@ -606,19 +607,21 @@ function cancelRunningBackgroundTransition() {
   if (!transition) return;
   clearTimeout(transition.timer);
   transition.nextLayer.removeEventListener('transitionend', transition.onTransitionEnd);
-  transition.nextLayer.classList.remove('is-incoming', 'is-active');
-  transition.nextLayer.classList.add('is-inactive');
-  transition.nextLayer.style.opacity = '0';
-  if (transition.previousLayer) {
-    transition.previousLayer.classList.remove('is-incoming', 'is-inactive');
-    transition.previousLayer.classList.add('is-active');
-    transition.previousLayer.style.opacity = '1';
-  }
+  // 다음 배경은 이미 로딩/디코딩을 마쳤다. 중간 이동이 발생해도 그 배경으로
+  // 전환을 마무리해야 이전 NAV/단계의 배경이 다시 튀어나오지 않는다.
+  const area = transition.nextLayer.closest('.center-area');
+  const layers = Array.from(area?.querySelectorAll('.creative-background-layer') || []);
+  transition.nextLayer.style.transition = 'none';
+  setBackgroundLayerActive(layers, transition.nextLayer);
+  void transition.nextLayer.offsetWidth;
+  transition.nextLayer.style.removeProperty('transition');
+  visibleBackgroundLayer = transition.nextLayerIndex;
+  visibleBackgroundUrl = transition.imageUrl;
   runningBackgroundTransition = null;
 }
 
 // A back swipe can interrupt a crossfade between its last animation frame and
-// transitionend cleanup. Pin the last committed image before rebuilding the
+// transitionend cleanup. Pin the latest prepared image before rebuilding the
 // previous page so cancellation can never leave both buffers transparent.
 // The destination still goes through applyCreativeBackground and its existing
 // preload/decode/crossfade path; this only protects the swipe-back handoff.
