@@ -1035,6 +1035,12 @@ body::after {
   line-height: 1.65;
 }
 
+/* 인접한 세로 margin은 겹치므로 실제 카드 끝 → 명패 간격은 27px → 35px
+   (약 1.3배). 첫 섹션과 명패 아래 간격은 유지한다. */
+.card-grid:has(.data-card) + .card-section-header {
+  margin-top: 35px;
+}
+
 /* [앞부분] 헤더 타이틀 - 크고 진하게 */
 .card-section-title {
   font-family: 'Noto Serif KR', serif;
