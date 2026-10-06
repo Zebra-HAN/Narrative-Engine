@@ -1852,25 +1852,35 @@ const CARD_REVEAL_DURATION_MS = 450;
 const CARD_REVEAL_WAVE_GAP_MS = 80;
 const CARD_REVEAL_BURST_CARD_INDEX = 11;
 const CARD_REVEAL_EXTRA_WAVE_STEPS = 2;
-// Seven or more groups use a cumulative, accelerating reveal. These are the
-// gaps *before* each following button: the opening order remains legible, then
-// contracts into a quick stream. Every button after the tenth uses the final
-// short gap, so a large group never turns into a long one-by-one sequence.
+// 13개(욕망)의 리듬을 기준으로 작은 그리드도 끝부분의 가속까지 경험하게 한다.
+// 13개 이상은 기존 간격을 그대로 사용한다.
 const GROUP_REVEAL_ACCELERATING_GAPS_MS = [80, 65, 55, 48, 42, 38, 32, 25, 18];
 const GROUP_REVEAL_TAIL_GAP_MS = 12;
+const GROUP_REVEAL_REFERENCE_COUNT = 13;
+
+function getGroupRevealClass(count) {
+  return count === 4 || count >= 6 ? ' group-reveal-flow group-reveal-accelerating' : '';
+}
 
 function getGroupRevealDelayMs(index, count) {
   const groupIndex = Math.max(0, Number(index) || 0);
   const groupCount = Math.max(0, Number(count) || 0);
 
-  // 2~6개는 같은 그리드/목록 계열의 기존 등장 간격을 유지한다.
-  if (groupCount <= 6) return groupIndex * 140;
+  // 두 개짜리 및 세로 목록(3/5개)은 기존 연출을 유지한다.
+  if (!getGroupRevealClass(groupCount)) return groupIndex * 140;
 
   let delay = 0;
   for (let step = 0; step < groupIndex; step++) {
-    delay += GROUP_REVEAL_ACCELERATING_GAPS_MS[step] ?? GROUP_REVEAL_TAIL_GAP_MS;
+    const referenceStep = groupCount < GROUP_REVEAL_REFERENCE_COUNT
+      ? step * (GROUP_REVEAL_REFERENCE_COUNT - 2) / (groupCount - 2)
+      : step;
+    const lower = Math.floor(referenceStep);
+    const fraction = referenceStep - lower;
+    const startGap = GROUP_REVEAL_ACCELERATING_GAPS_MS[lower] ?? GROUP_REVEAL_TAIL_GAP_MS;
+    const endGap = GROUP_REVEAL_ACCELERATING_GAPS_MS[lower + 1] ?? GROUP_REVEAL_TAIL_GAP_MS;
+    delay += startGap + (endGap - startGap) * fraction;
   }
-  return delay;
+  return Math.round(delay * 10) / 10;
 }
 
 function getCardRevealDelayStyle() {
@@ -1942,9 +1952,7 @@ function showGroupPage(subId, animate = true) {
   page.id = 'page-' + subId;
 
   const groupLayoutClass = getGroupLayoutClass(data.groups.length);
-  const groupRevealClass = data.groups.length >= 7
-    ? ' group-reveal-flow group-reveal-accelerating'
-    : '';
+  const groupRevealClass = getGroupRevealClass(data.groups.length);
   let html = `<div class="group-select-wrap ${groupLayoutClass}${groupRevealClass}">`;
   data.groups.forEach((grp, i) => {
     // This page is rebuilt whenever it becomes visible. Always restoring the
@@ -2016,7 +2024,7 @@ function showSubgroupPage(subId, groupIdx) {
 
    const subgroupLayoutClass = getGroupLayoutClass(grp.subgroups.length);
   let html = `<div class="section-label">${formatLabel(grp.label, grp.icon)}</div>`;
-  html += `<div class="group-select-wrap ${subgroupLayoutClass}">`;
+  html += `<div class="group-select-wrap ${subgroupLayoutClass}${getGroupRevealClass(grp.subgroups.length)}">`;
 
   grp.subgroups.forEach((sg, sgIdx) => {
   // 서브그룹 배지: globalIdx = (groupIdx + 1) * 1000000 + sgIdx * 1000 + cIdx
@@ -2026,7 +2034,7 @@ function showSubgroupPage(subId, groupIdx) {
       if (selectedCards[subId]?.has(getSubgroupCardGlobalIdx(groupIdx, sgIdx, cIdx))) sgCount++;
     });
 
-     const delay = `style="animation-delay:${sgIdx * 0.14}s"`;
+     const delay = `style="animation-delay:${getGroupRevealDelayMs(sgIdx, grp.subgroups.length)}ms"`;
      
     html += `
       <button
