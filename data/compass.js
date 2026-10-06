@@ -4,23 +4,26 @@
    - COMPASS_CARDS: 나침반 탭 카드 데이터
 
    
+섹션 헤더   { type: 'section' ,  label: ' 헤더 — 추가 내용 ' },  
 
-섹션 헤더
-{ type: 'section' ,  label: ' 헤더 — 추가 설명 ' },  
-
-카드 코드
-{ name:'이름' ,img:'images/Peep.png', subImg:'images/Giant_Elf.jpg',  desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'  },
+카드 코드  { icon:'🔮', name:'이름' ,img:'images/Peep.png', subImg:'images/Giant_Elf.jpg',  desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'  },
 
 
-layoutType: '3',   ← 여기에 5/4/3/2 중 하나를 입력하면 그룹 카드 목록에 고정 적용됨. 카드 가로 개수, 기본=3
+layoutType: '3',   ← 5/4/3/2  카드배열 고정적용 / 기본=3  / 3= 큰카드3 / 2= 작은카드3개씩 배열
 
-그룹 버튼 이미지
-      img: 'images/character/group/animal.jpg',    
+
+\n 하나는 줄바꿈,  \n\n 분리,  기본 C 방식은 detail 하나만 쓰면됨,  detailLayout/detailMode: 'AB' 
+또는 detailB/detailRight 입력이 있으면 A/B 2열 방식으로 표시. A열은 detailA/detailLeft/detail, B열은 detailB/detailRight로 직접 제어할 수 있음.
 
     detailMode: 'AB',
     detailA: ' ',
     detailB: ' '},
 
+코딩에서 줄바꿔서 보기좋게 정리 하려면 ''이거속에 넣어서 플러스 입력하면됨.
+desc: '설명'+ 
+      '설명'+   ←이렇게  ''+ ←얘네 속에 입력하면 됨. \n\n ←얘네들이 있어도 가능함.
+
+      
 ════════════════════════════════════════════════ */
 
 
