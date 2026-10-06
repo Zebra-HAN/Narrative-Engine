@@ -19,9 +19,9 @@ const COMPASS_NAV = {
   subs: [
     { id: 'type',     label: '유형',  img:'images/core/sub-nav/comp/type.webp', type:'group' },
     { id: 'genre',    label: '장르',  img:'images/core/sub-nav/comp/genre.webp', type:'group' },
-    { id: 'experience', label: '경험', img:'images/core/sub-nav/comp/genre.webp', type:'group' },
-    { id: 'scenery',  label: '광경',  img:'images/core/sub-nav/comp/genre.webp', type:'group' },
-    { id: 'appearance', label: '모습', img:'images/core/sub-nav/comp/genre.webp', type:'group' },
+    { id: 'experience', label: '경험', img:'images/core/sub-nav/comp/experience.webp', type:'group' },
+    { id: 'scenery',  label: '광경',  img:'images/core/sub-nav/comp/scenery.webp', type:'group' },
+    { id: 'appearance', label: '모습', img:'images/core/sub-nav/comp/appearance.webp', type:'group' },
     { id: 'message',  label: '메시지', img:'images/core/sub-nav/comp/message.webp', type:'group' },
     { id: 'theme',    label: '테마',  img:'images/core/sub-nav/comp/theme.webp', type:'group' },
     { id: 'quote',    label: '명언',  img:'images/core/sub-nav/comp/quote.webp', type:'group' },
