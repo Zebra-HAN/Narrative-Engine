@@ -2585,8 +2585,9 @@ function getInfoPanelContext() {
   // 랜덤/초기화가 카테고리 목록을 다시 그려도 이전 그룹 경로를 설명하지 않는다.
   const activePage = document.querySelector('#center-area .center-page.active');
   const isCategoryPage = sub && activePage?.id === `page-${sub.id}`;
+  let group = null;
   if (sub && !isCategoryPage && location?.subId === currentSubId) {
-    const group = CARD_DATA[currentSubId]?.groups?.[location.groupIdx];
+    group = CARD_DATA[currentSubId]?.groups?.[location.groupIdx];
     if (group) items.push(group);
     if (location.type === 'subgroup') {
       const subgroup = group?.subgroups?.[location.sgIdx];
@@ -2595,18 +2596,19 @@ function getInfoPanelContext() {
   }
   const description = [...items].reverse().find(item => item.description?.trim())?.description || '';
   const detail = [...items].reverse().find(item => item.detail?.trim())?.detail || '';
-  return { item: items[items.length - 1], description, detail };
+  return { item: items[items.length - 1], group, description, detail };
 }
 
 function updateInfoPanel() {
   const nav = NAV_DATA[currentNav];
   const info = MAIN_CATEGORY_INFO[currentNav] || {};
   const sub = currentSubId ? nav?.subs.find(item => item.id === currentSubId) : null;
-  const image = sub?.img || MAIN_CATEGORY_IMAGE[currentNav];
-  const icon = sub?.icon || info.icon || '◆';
+  const context = getInfoPanelContext();
+  // 그룹 버튼과 동일한 img/icon을 사용하며 서브그룹에서도 부모 그룹을 유지한다.
+  const image = context.group ? context.group.img : sub?.img || MAIN_CATEGORY_IMAGE[currentNav];
+  const icon = context.group?.icon || sub?.icon || info.icon || '◆';
 
   setInfoVisual(document.getElementById('info-cat-icon'), image, icon);
-  const context = getInfoPanelContext();
   document.getElementById('info-cat-name').textContent = context.item?.label || '';
   document.getElementById('info-cat-desc').textContent = context.description;
   document.getElementById('info-panel').setAttribute('aria-label', `${context.item?.label || ''} 상세정보`);
@@ -2615,25 +2617,46 @@ function updateInfoPanel() {
 
 function initInfoPanelAction() {
   const panel = document.getElementById('info-panel');
+  const visual = panel.querySelector('.info-slider-wrap');
   let start = null;
   let dragged = false;
+  let feedback = null;
+  const release = () => panel.classList.remove('is-info-pressed');
+  const activate = () => {
+    release();
+    feedback?.cancel();
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      feedback = visual.animate([{ scale: '0.975' }, { scale: '1' }], {
+        duration: 160, easing: 'ease-out'
+      });
+    }
+    openLocationInfo();
+  };
   panel.addEventListener('pointerdown', event => {
+    if (!event.isPrimary || event.button !== 0) return;
     start = { x: event.clientX, y: event.clientY };
     dragged = false;
+    feedback?.cancel();
+    panel.classList.add('is-info-pressed');
   });
   panel.addEventListener('pointermove', event => {
-    if (start && Math.hypot(event.clientX - start.x, event.clientY - start.y) > 8) dragged = true;
+    if (start && Math.hypot(event.clientX - start.x, event.clientY - start.y) > 8) {
+      dragged = true;
+      release();
+    }
   });
-  panel.addEventListener('pointercancel', () => { dragged = true; start = null; });
-  panel.addEventListener('pointerup', () => { start = null; });
+  panel.addEventListener('pointercancel', () => { dragged = true; start = null; release(); });
+  panel.addEventListener('pointerleave', release);
+  window.addEventListener('pointerup', () => { start = null; release(); });
+  window.addEventListener('blur', release);
   panel.addEventListener('click', event => {
     if (dragged && event.detail !== 0) return;
-    openLocationInfo();
+    activate();
   });
   panel.addEventListener('keydown', event => {
     if (event.key !== 'Enter' && event.key !== ' ') return;
     event.preventDefault();
-    if (!event.repeat) openLocationInfo();
+    if (!event.repeat) activate();
   });
 }
 

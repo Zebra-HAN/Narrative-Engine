@@ -52,6 +52,21 @@
   line-height: 1.75;
 }
 
+/* 눌림은 내부 표시층에만 적용해 바깥 패널의 숨김/등장 transform을 보존한다. */
+#screen-create .info-slider-wrap {
+  transition: scale 120ms ease-out;
+  transform-origin: center;
+}
+
+#screen-create .info-panel.is-info-pressed .info-slider-wrap {
+  scale: 0.975;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #screen-create .info-slider-wrap { transition: none; }
+  #screen-create .info-panel.is-info-pressed .info-slider-wrap { scale: 1; }
+}
+
 #screen-create .info-slider-wrap,
 #screen-create .info-slider-viewport,
 #screen-create .info-slider-track {
@@ -111,7 +126,7 @@
   position: absolute;
   z-index: 1;
   left: 13%;
-  top: 13.5%;
+  top: 11.5%;
   width: 74%;
   height: 74%;
   border-radius: 50%;
@@ -123,7 +138,7 @@
   object-fit: cover;
   object-position: center;
   /* 원형 장식 안의 삽화를 크게 보여 주되 가장자리는 프레임 아래로 자연스럽게 숨긴다. */
-  transform: scale(1.08);
+  transform: scale(1.188);
 }
 
 #screen-create .info-visual.has-icon { display: block; }
@@ -135,6 +150,7 @@
   font-size: clamp(2.7rem, 11vw, 3.7rem);
   line-height: 1;
   background: #ead8ae;
+  transform: scale(1.1);
 }
 
 /* 원본 종횡비(1729 / 983)를 유지한다. 천을 왼쪽으로 당기면 원형 프레임의
