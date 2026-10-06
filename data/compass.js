@@ -170,7 +170,8 @@ const COMPASS_CARDS = {
      
 /* ════════════════════════════════════════════════     🔻 경험 - 판타지 경험 🔻     ════════════════════════════════════════════════ */
 
-    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'fantasy_experience', label:'판타지 경험', icon:'🧭', layoutType: '2',cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'fantasy_experience', label:'판타지 경험', icon:'🧭', 
+     layoutType: '2', img:'images/compass/group/experience-fantasy.jpg', cards:[
 
 
 { type:'section', label:'발견 · 탐험 — 아직 알려지지 않은 장소와 존재, 세계의 경계를 직접 찾아내고 미지의 영역으로 들어가는 경험' },
@@ -350,7 +351,7 @@ const COMPASS_CARDS = {
   scenery: {
   groups: [
     { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'real_scenery', 
-     label:'현실의 풍경', icon:'🌿', cards:[
+     label:'현실의 풍경', layoutType: '2', icon:'🌿', cards:[
       { icon:'🌅', name:'바다의 일출', desc:'수평선 위로 해가 떠오르는 광경.', detail:'【상세】붉은 햇빛이 잔잔한 바다를 물들인다.' },
       { icon:'🌌', name:'별이 가득한 밤', desc:'밤하늘을 수많은 별이 채운 광경.', detail:'【상세】어두운 들판 위로 은하수가 길게 펼쳐진다.' }
     ]},
@@ -360,7 +361,7 @@ const COMPASS_CARDS = {
   
      
     { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'scenery_city', 
-     label:'판타지 광경', icon:'🏙️', cards:[
+     label:'판타지 광경', layoutType: '2',  img:'images/compass/group/scenery-fantasy.jpg',  icon:'🏙️', cards:[
 
 
 { type:'section', label:'거대한 자연 · 지형 — 현실의 규모와 법칙을 넘어선 압도적인 자연과 세계의 형태' },
@@ -566,7 +567,7 @@ const COMPASS_CARDS = {
    /* ════════════════════════════════════════════════     🔻 판타지 모습  🔻     ════════════════════════════════════════════════ */
   
     {
-      id: 'fantasy_appearance', label: '판타지 모습', icon: '👕', layoutType: '2',
+      id: 'fantasy_appearance', label: '판타지 모습', icon: '👕', layoutType: '2',  img:'images/compass/group/appearance-fantasy.jpg',
       description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
       detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
       subgroups: [
