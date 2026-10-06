@@ -697,10 +697,10 @@ let focusedCard  = null;  // { subId, idx, name, icon }
 let addressTrail = [];
 
 const MAIN_CATEGORY_INFO = {
-  character:  { icon: '🛡️', description: '인물의 원형, 종족, 직업, 성격과 관계를 설계합니다.' },
-  narrative2: { icon: '📜', description: '이야기의 목표, 갈등, 사건과 흐름을 구성합니다.' },
-  world:      { icon: '🌍', description: '작품의 배경이 되는 세계와 사회, 환경을 만듭니다.' },
-  compass:    { icon: '🧭', description: '창작의 방향을 점검하고 이야기의 가능성을 탐색합니다.' }
+  character:  { icon: '🛡️' },
+  narrative2: { icon: '📜' },
+  world:      { icon: '🌍' },
+  compass:    { icon: '🧭' }
 };
 
 /* 하단 내비게이션의 선택 상태 이미지(-a)를 상단 패널에서도 그대로 사용한다. */
@@ -898,10 +898,7 @@ function getCardDescription(name) {
 }
 
 function getSubDescription(subId) {
-  const navInfo = Object.values(NAV_DATA).find(n => n.subs.find(s => s.id === subId));
-  const sub = navInfo ? navInfo.subs.find(s => s.id === subId) : null;
-  const label = sub ? sub.label : subId;
-  return `[${label}] 카테고리에 대한 설명이 여기에 표시됩니다. 추후 카테고리별 가이드와 활용 예시가 추가될 예정입니다.`;
+  return getSubInfo(subId)?.description || '';
 }
 
 function getSubInfo(subId) {
@@ -915,6 +912,7 @@ function getSubInfo(subId) {
 function setAddressTrail(trail) {
   addressTrail = trail.filter(item => item && item.label);
   renderAddressTrail();
+  updateInfoPanel();
 }
 
 function renderAddressTrail() {
@@ -1223,6 +1221,7 @@ if ('serviceWorker' in navigator) {
 
 initCenterBackSwipe();
 initScrollResponsiveChrome();
+initInfoPanelAction();
 initInfoTextAutoFit();
 initUiSounds();
 
@@ -2576,6 +2575,29 @@ function refreshCardInfo() {
   if (focusedCard) renderCardInfo();
 }
 
+// 가장 깊은 현재 위치를 표시하고, 설명이 비어 있을 때만 상위 설명을 사용한다.
+// 카드/focusedCard와 무관한 NAV → 카테고리 → 그룹 → 서브그룹 경로이다.
+function getInfoPanelContext() {
+  const nav = NAV_DATA[currentNav];
+  const sub = currentSubId ? getSubInfo(currentSubId) : null;
+  const items = [nav, sub].filter(Boolean);
+  const location = addressTrail[addressTrail.length - 1];
+  // 랜덤/초기화가 카테고리 목록을 다시 그려도 이전 그룹 경로를 설명하지 않는다.
+  const activePage = document.querySelector('#center-area .center-page.active');
+  const isCategoryPage = sub && activePage?.id === `page-${sub.id}`;
+  if (sub && !isCategoryPage && location?.subId === currentSubId) {
+    const group = CARD_DATA[currentSubId]?.groups?.[location.groupIdx];
+    if (group) items.push(group);
+    if (location.type === 'subgroup') {
+      const subgroup = group?.subgroups?.[location.sgIdx];
+      if (subgroup) items.push(subgroup);
+    }
+  }
+  const description = [...items].reverse().find(item => item.description?.trim())?.description || '';
+  const detail = [...items].reverse().find(item => item.detail?.trim())?.detail || '';
+  return { item: items[items.length - 1], description, detail };
+}
+
 function updateInfoPanel() {
   const nav = NAV_DATA[currentNav];
   const info = MAIN_CATEGORY_INFO[currentNav] || {};
@@ -2584,11 +2606,54 @@ function updateInfoPanel() {
   const icon = sub?.icon || info.icon || '◆';
 
   setInfoVisual(document.getElementById('info-cat-icon'), image, icon);
-  document.getElementById('info-cat-name').textContent = sub?.label || nav?.label || '';
-  document.getElementById('info-cat-desc').textContent = sub
-    ? getSubDescription(sub.id)
-    : (info.description || '');
+  const context = getInfoPanelContext();
+  document.getElementById('info-cat-name').textContent = context.item?.label || '';
+  document.getElementById('info-cat-desc').textContent = context.description;
+  document.getElementById('info-panel').setAttribute('aria-label', `${context.item?.label || ''} 상세정보`);
   requestInfoTextAutoFit();
+}
+
+function initInfoPanelAction() {
+  const panel = document.getElementById('info-panel');
+  let start = null;
+  let dragged = false;
+  panel.addEventListener('pointerdown', event => {
+    start = { x: event.clientX, y: event.clientY };
+    dragged = false;
+  });
+  panel.addEventListener('pointermove', event => {
+    if (start && Math.hypot(event.clientX - start.x, event.clientY - start.y) > 8) dragged = true;
+  });
+  panel.addEventListener('pointercancel', () => { dragged = true; start = null; });
+  panel.addEventListener('pointerup', () => { start = null; });
+  panel.addEventListener('click', event => {
+    if (dragged && event.detail !== 0) return;
+    openLocationInfo();
+  });
+  panel.addEventListener('keydown', event => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    if (!event.repeat) openLocationInfo();
+  });
+}
+
+// 표시와 닫기 동작만 공유하고 카드 선택 데이터는 읽거나 변경하지 않는다.
+function openLocationInfo() {
+  const { item, description, detail } = getInfoPanelContext();
+  if (!item) return;
+  const image = item === NAV_DATA[currentNav] ? MAIN_CATEGORY_IMAGE[currentNav] : item.img;
+  const icon = item.icon || MAIN_CATEGORY_INFO[currentNav]?.icon;
+  document.getElementById('detail-icon').innerHTML = renderIcon(icon, image, 'detail-card-img');
+  document.getElementById('detail-name').textContent = item.label;
+  document.getElementById('detail-desc').textContent = description;
+  document.getElementById('detail-divider').style.display = detail ? '' : 'none';
+  const body = document.getElementById('detail-body');
+  body.replaceChildren();
+  const content = document.createElement('div');
+  content.className = 'location-info-detail';
+  content.textContent = detail;
+  body.appendChild(content);
+  showDetailOverlay();
 }
 
 function selectCurrentCard() {
@@ -2805,6 +2870,10 @@ divEl.style.display = 'none';
     bodyEl.textContent  = '';
   }
 
+  showDetailOverlay();
+}
+
+function showDetailOverlay() {
   document.getElementById('detail-overlay').classList.add('active');
   attachSwipeToClose(
     document.querySelector('.detail-overlay .popup-swipe-frame'),

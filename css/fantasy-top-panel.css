@@ -38,6 +38,18 @@
   border-radius: 0;
   background: transparent;
   box-shadow: none;
+  cursor: pointer;
+}
+
+#screen-create .info-panel:focus-visible {
+  outline: 2px solid #e9d2ab;
+  outline-offset: -4px;
+}
+
+.location-info-detail {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.75;
 }
 
 #screen-create .info-slider-wrap,
