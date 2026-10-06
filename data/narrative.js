@@ -1,3 +1,5 @@
+// 정보 패널: NAV 객체, subs의 카테고리, groups/ subgroups의 각 객체에
+// description(짧은 설명), detail(상세 설명)을 입력합니다. detail의 \n은 줄바꿈입니다.
 /* ════════════════════════════════════════════════
    스토리 데이터
    - NARRATIVE_NAV  : 스토리 탭 네비게이션 정의
@@ -24,17 +26,43 @@ layoutType: '3',   ← 여기에 5/4/3/2 중 하나를 입력하면 됨. 카드 
 ════════════════════════════════════════════════ */
 
 const NARRATIVE_NAV = {
+  description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+  detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
   label: '스토리',
   resetLabel: '스토리 초기화',
   subs: [
-    { id:'goal',    label:'목표', img:'images/core/sub-nav/stry/goal.webp', type:'group' },
-    { id:'want',  label:'욕망', img:'images/core/sub-nav/stry/desire.webp',   type:'group'   },
-    { id:'conflict',label:'갈등', img:'images/core/sub-nav/stry/conflict.webp', type:'group' },
-    { id:'distort', label:'왜곡', img:'images/core/sub-nav/stry/distort.webp', type:'group' },
-    { id:'event',   label:'사건', img:'images/core/sub-nav/stry/event.webp', type:'group' },
-    { id:'choice',  label:'선택', img:'images/core/sub-nav/stry/choice.webp', type:'group' },
-    { id:'twist',   label:'반전', img:'images/core/sub-nav/stry/twist.webp', type:'group' },
-    { id:'ending',  label:'결말', img:'images/core/sub-nav/stry/ending.webp', type:'group' },
+    { id:'goal',    label:'목표', img:'images/core/sub-nav/stry/goal.webp', type:'group',
+      description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+      detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.'
+    },
+    { id:'want',  label:'욕망', img:'images/core/sub-nav/stry/desire.webp',   type:'group'  ,
+      description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+      detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.'
+    },
+    { id:'conflict',label:'갈등', img:'images/core/sub-nav/stry/conflict.webp', type:'group',
+      description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+      detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.'
+    },
+    { id:'distort', label:'왜곡', img:'images/core/sub-nav/stry/distort.webp', type:'group',
+      description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+      detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.'
+    },
+    { id:'event',   label:'사건', img:'images/core/sub-nav/stry/event.webp', type:'group',
+      description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+      detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.'
+    },
+    { id:'choice',  label:'선택', img:'images/core/sub-nav/stry/choice.webp', type:'group',
+      description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+      detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.'
+    },
+    { id:'twist',   label:'반전', img:'images/core/sub-nav/stry/twist.webp', type:'group',
+      description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+      detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.'
+    },
+    { id:'ending',  label:'결말', img:'images/core/sub-nav/stry/ending.webp', type:'group',
+      description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+      detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.'
+    },
   ]
 };
 
@@ -46,7 +74,7 @@ const NARRATIVE_CARDS = {
 
   goal: {
   groups: [
-    { id:'goal_existing', label:'기존 목표', icon:'📚', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'goal_existing', label:'기존 목표', icon:'📚', cards:[
     { icon:'🏆', name:'최강'       }, { icon:'👑', name:'왕위'       }, { icon:'💎', name:'보물'   },
     { icon:'🔮', name:'진실'       }, { icon:'🌅', name:'평화'       }, { icon:'💀', name:'복수'   },
     { icon:'❤',  name:'사랑'       }, { icon:'🌿', name:'생존'       }, { icon:'🌌', name:'신'     },
@@ -55,7 +83,7 @@ const NARRATIVE_CARDS = {
     { icon:'🌙', name:'기억'       }, { icon:'👥', name:'가족'       }, { icon:'⚖',  name:'정의'  },
     { icon:'🎭', name:'인정'       }, { icon:'🌱', name:'성장'       },
   ] },
-    { id:'goal_new', label:'숨겨진 목표', icon:'🎯', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'goal_new', label:'숨겨진 목표', icon:'🎯', cards:[
       { icon:'🗝️', name:'봉인된 문 열기' },
       { icon:'📖', name:'잊힌 이름 되찾기' },
       { icon:'🏠', name:'안전한 터전 만들기' },
@@ -73,6 +101,8 @@ const NARRATIVE_CARDS = {
     want: { /*  욕망 카테고리  */
     groups: [
       {
+        description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+        detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
 
                    
 /* ════════════════════════════════════════════════     🔻 생존 안전 🔻     ════════════════════════════════════════════════ */  
@@ -154,6 +184,8 @@ const NARRATIVE_CARDS = {
         ]
       },
       {
+        description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+        detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
 
      
 /* ════════════════════════════════════════════════     🔻 힘 지배 🔻     ════════════════════════════════════════════════ */  
@@ -234,6 +266,8 @@ const NARRATIVE_CARDS = {
         ]
       },
       {
+        description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+        detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
 
 /* ════════════════════════════════════════════════     🔻 자유 해방 🔻     ════════════════════════════════════════════════ */  
  
@@ -315,6 +349,8 @@ const NARRATIVE_CARDS = {
         ]
       },
    {
+     description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+     detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
      
 
 /* ════════════════════════════════════════════════     🔻 4 쾌락·경험·향유 🔻     ════════════════════════════════════════════════ */  
@@ -404,6 +440,8 @@ const NARRATIVE_CARDS = {
         
       },
       {
+        description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+        detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
 
          
 /* ════════════════════════════════════════════════     🔻 5 사랑·소속 🔻     ════════════════════════════════════════════════ */  
@@ -486,6 +524,8 @@ const NARRATIVE_CARDS = {
         ]
       },
    {
+     description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+     detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
 
       
 /* ════════════════════════════════════════════════     🔻 6 인정·명예 🔻     ════════════════════════════════════════════════ */  
@@ -559,6 +599,8 @@ const NARRATIVE_CARDS = {
         ]
       },
    {
+     description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+     detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
       
 /* ════════════════════════════════════════════════     🔻 7 소유·성공 🔻     ════════════════════════════════════════════════ */  
  
@@ -641,6 +683,8 @@ const NARRATIVE_CARDS = {
         ]
       },
    {
+     description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+     detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
       
 /* ════════════════════════════════════════════════     🔻 8 성장·자아실현 🔻     ════════════════════════════════════════════════ */  
  
@@ -759,6 +803,8 @@ const NARRATIVE_CARDS = {
        ]
       },
    {
+     description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+     detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
       
 /* ════════════════════════════════════════════════     🔻 9 창조·표현 🔻     ════════════════════════════════════════════════ */  
  
@@ -827,6 +873,8 @@ const NARRATIVE_CARDS = {
         ]
       },
    {
+     description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+     detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
       
 /* ════════════════════════════════════════════════     🔻 10 상실·회복  🔻     ════════════════════════════════════════════════ */  
  
@@ -898,6 +946,8 @@ const NARRATIVE_CARDS = {
         ]
       },
    {
+     description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+     detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
       
 /* ════════════════════════════════════════════════     🔻 11 정의·복수 🔻     ════════════════════════════════════════════════ */  
  
@@ -991,6 +1041,8 @@ const NARRATIVE_CARDS = {
         ]
       },
    {
+     description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+     detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
       
 /* ════════════════════════════════════════════════     🔻 12 진실·수수께끼 🔻     ════════════════════════════════════════════════ */  
  
@@ -1085,6 +1137,8 @@ const NARRATIVE_CARDS = {
         ]
       },
    {
+     description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+     detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
       
 /* ════════════════════════════════════════════════     🔻 13 초월·의미·구원 🔻     ════════════════════════════════════════════════ */  
  
@@ -1176,7 +1230,7 @@ const NARRATIVE_CARDS = {
 
   conflict: {
   groups: [
-    { id:'conflict_existing', label:'기존 갈등', icon:'📚', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'conflict_existing', label:'기존 갈등', icon:'📚', cards:[
     { icon:'⚔',  name:'인간 vs 인간'     }, { icon:'🌊', name:'인간 vs 자연'   },
     { icon:'🤖', name:'인간 vs 기계'     }, { icon:'🌑', name:'인간 vs 어둠'   },
     { icon:'💫', name:'자아 vs 자아'     }, { icon:'👑', name:'개인 vs 사회'   },
@@ -1188,7 +1242,7 @@ const NARRATIVE_CARDS = {
     { icon:'🌊', name:'혁명 vs 질서'    }, { icon:'💎', name:'희생 vs 이익'   },
     { icon:'👥', name:'집단 vs 개인'    }, { icon:'⚡', name:'전통 vs 변화'    },
   ] },
-    { id:'conflict_new', label:'복합 갈등', icon:'⚔️', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'conflict_new', label:'복합 갈등', icon:'⚔️', cards:[
       { icon:'🌊', name:'생존과 신념의 충돌' },
       { icon:'👥', name:'동료 사이의 불신' },
       { icon:'⌛', name:'시간과의 경쟁' },
@@ -1200,7 +1254,7 @@ const NARRATIVE_CARDS = {
 
   distort: {
   groups: [
-    { id:'distort_existing', label:'기존 왜곡', icon:'📚', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'distort_existing', label:'기존 왜곡', icon:'📚', cards:[
     { icon:'🎭', name:'거짓 믿음'    }, { icon:'🌑', name:'자기부정'     },
     { icon:'💀', name:'트라우마'     }, { icon:'🔗', name:'집착'         },
     { icon:'🌀', name:'망상'         }, { icon:'⚖',  name:'합리화'      },
@@ -1212,7 +1266,7 @@ const NARRATIVE_CARDS = {
     { icon:'👑', name:'자만'         }, { icon:'🐾', name:'공포'         },
     { icon:'🎵', name:'유혹'         }, { icon:'🔮', name:'예언의 굴레'  },
   ] },
-    { id:'distort_new', label:'인식의 왜곡', icon:'🌀', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'distort_new', label:'인식의 왜곡', icon:'🌀', cards:[
       { icon:'🌫️', name:'선택적 기억' },
       { icon:'🎭', name:'거짓된 자기상' },
       { icon:'🔍', name:'확증 편향' },
@@ -1224,7 +1278,7 @@ const NARRATIVE_CARDS = {
 
   event: {
   groups: [
-    { id:'event_existing', label:'기존 사건', icon:'📚', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'event_existing', label:'기존 사건', icon:'📚', cards:[
     { icon:'🌋', name:'대재앙'       }, { icon:'💥', name:'충돌'         },
     { icon:'👑', name:'왕의 죽음'    }, { icon:'🔮', name:'예언 성취'    },
     { icon:'❤',  name:'첫 만남'     }, { icon:'💀', name:'배신'         },
@@ -1236,7 +1290,7 @@ const NARRATIVE_CARDS = {
     { icon:'🔥', name:'혁명'         }, { icon:'⚖',  name:'재판'        },
     { icon:'🌑', name:'봉인 해제'    }, { icon:'✨', name:'기적'          },
   ] },
-    { id:'event_new', label:'촉발 사건', icon:'💥', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'event_new', label:'촉발 사건', icon:'💥', cards:[
       { icon:'📨', name:'정체불명의 초대장' },
       { icon:'🌑', name:'도시 전체의 정전' },
       { icon:'🧳', name:'낯선 유산의 도착' },
@@ -1248,7 +1302,7 @@ const NARRATIVE_CARDS = {
 
   choice: {
   groups: [
-    { id:'choice_existing', label:'기존 선택', icon:'📚', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'choice_existing', label:'기존 선택', icon:'📚', cards:[
     { icon:'⚖',  name:'희생 vs 생존'     }, { icon:'❤',  name:'사랑 vs 의무'     },
     { icon:'👑', name:'권력 vs 양심'      }, { icon:'💀', name:'복수 vs 용서'      },
     { icon:'🌊', name:'도피 vs 직면'      }, { icon:'🔗', name:'자유 vs 안전'      },
@@ -1260,7 +1314,7 @@ const NARRATIVE_CARDS = {
     { icon:'🌱', name:'성장 vs 안주'      }, { icon:'👥', name:'혼자 vs 함께'      },
     { icon:'🔮', name:'운명 수용 vs 저항' }, { icon:'⚡', name:'행동 vs 침묵'       },
   ] },
-    { id:'choice_new', label:'결정적 선택', icon:'⚖️', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'choice_new', label:'결정적 선택', icon:'⚖️', cards:[
       { icon:'🛡️', name:'한 사람과 모두 중 선택' },
       { icon:'🗝️', name:'진실 공개와 은폐' },
       { icon:'🔥', name:'힘의 사용과 포기' },
@@ -1272,7 +1326,7 @@ const NARRATIVE_CARDS = {
 
   twist: {
   groups: [
-    { id:'twist_existing', label:'기존 반전', icon:'📚', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'twist_existing', label:'기존 반전', icon:'📚', cards:[
     { icon:'🎭', name:'적이 아군'     }, { icon:'💀', name:'아군이 적'     },
     { icon:'🔮', name:'예언의 반전'   }, { icon:'👁',  name:'정체 폭로'   },
     { icon:'🌑', name:'선인의 타락'   }, { icon:'⚔',  name:'악인의 구원' },
@@ -1284,7 +1338,7 @@ const NARRATIVE_CARDS = {
     { icon:'👑', name:'왕의 비밀'     }, { icon:'🐍', name:'내부의 적'    },
     { icon:'🔥', name:'신의 거짓'     }, { icon:'✨', name:'기적의 대가'   },
   ] },
-    { id:'twist_new', label:'관계의 반전', icon:'🎭', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'twist_new', label:'관계의 반전', icon:'🎭', cards:[
       { icon:'🛡️', name:'추적자가 보호자' },
       { icon:'🧬', name:'적과 같은 혈통' },
       { icon:'📜', name:'의뢰인의 진짜 목적' },
@@ -1296,7 +1350,7 @@ const NARRATIVE_CARDS = {
 
   ending: {
   groups: [
-    { id:'ending_existing', label:'기존 결말', icon:'📚', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'ending_existing', label:'기존 결말', icon:'📚', cards:[
     { icon:'🌅', name:'완전한 승리'     }, { icon:'⚖',  name:'쓸쓸한 승리' },
     { icon:'💀', name:'비극적 결말'     }, { icon:'🌱', name:'열린 결말'    },
     { icon:'🔗', name:'순환의 결말'     }, { icon:'🌊', name:'희생의 결말'  },
@@ -1308,7 +1362,7 @@ const NARRATIVE_CARDS = {
     { icon:'🔥', name:'자기 파멸'       }, { icon:'✨', name:'구원'          },
     { icon:'⚔',  name:'끝나지 않은 싸움'}, { icon:'🌸', name:'평화'         },
   ] },
-    { id:'ending_new', label:'여운 있는 결말', icon:'🌅', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'ending_new', label:'여운 있는 결말', icon:'🌅', cards:[
       { icon:'🕯️', name:'작은 희망의 계승' },
       { icon:'🚶', name:'이름 없는 귀환' },
       { icon:'🌱', name:'폐허에서의 재건' },

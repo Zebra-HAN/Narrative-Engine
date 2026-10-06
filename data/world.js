@@ -1,3 +1,5 @@
+// 정보 패널: NAV 객체, subs의 카테고리, groups/ subgroups의 각 객체에
+// description(짧은 설명), detail(상세 설명)을 입력합니다. detail의 \n은 줄바꿈입니다.
 /* ═════════════════════════════════════════════════════════════════════
    스토리 데이터
    - NARRATIVE_NAV  : 스토리 탭 네비게이션 정의
@@ -26,20 +28,52 @@ desc: '설명'+
 
 
 const WORLD_NAV = {
+  description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+  detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
   label: '세계관',
   resetLabel: '세계관 초기화',
   subs: [
      
-    { id: 'obstacle',  label: '장애물',  img:'images/core/sub-nav/wrld/obstacle.webp',   type:'group' },
-    { id: 'setting',   label: '배경',    img:'images/core/sub-nav/wrld/setting.webp', type:'group' },
-    { id: 'location',  label: '장소',    img:'images/core/sub-nav/wrld/location.webp', type:'group' },
-    { id: 'item',      label: '아이템',  img:'images/core/sub-nav/wrld/item.webp', type:'group' },
-    { id: 'tool',      label: '도구',    img:'images/core/sub-nav/wrld/tool.webp', type:'group' },
-    { id: 'resource',  label: '자원',    img:'images/core/sub-nav/wrld/resource.webp', type:'group' },
-    { id: 'tech',      label: '기술',    img:'images/core/sub-nav/wrld/tech.webp', type:'group' },
-    { id: 'skill',     label: '스킬',    img:'images/core/sub-nav/wrld/skill.webp', type:'group' },
-    { id: 'culture',   label: '문화',    img:'images/core/sub-nav/wrld/culture.webp', type:'group' },
-    { id: 'costume',   label: '의상',    img:'images/core/sub-nav/wrld/costume.webp', type:'group' },
+    { id: 'obstacle',  label: '장애물',  img:'images/core/sub-nav/wrld/obstacle.webp',   type:'group',
+      description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+      detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.'
+    },
+    { id: 'setting',   label: '배경',    img:'images/core/sub-nav/wrld/setting.webp', type:'group',
+      description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+      detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.'
+    },
+    { id: 'location',  label: '장소',    img:'images/core/sub-nav/wrld/location.webp', type:'group',
+      description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+      detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.'
+    },
+    { id: 'item',      label: '아이템',  img:'images/core/sub-nav/wrld/item.webp', type:'group',
+      description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+      detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.'
+    },
+    { id: 'tool',      label: '도구',    img:'images/core/sub-nav/wrld/tool.webp', type:'group',
+      description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+      detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.'
+    },
+    { id: 'resource',  label: '자원',    img:'images/core/sub-nav/wrld/resource.webp', type:'group',
+      description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+      detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.'
+    },
+    { id: 'tech',      label: '기술',    img:'images/core/sub-nav/wrld/tech.webp', type:'group',
+      description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+      detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.'
+    },
+    { id: 'skill',     label: '스킬',    img:'images/core/sub-nav/wrld/skill.webp', type:'group',
+      description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+      detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.'
+    },
+    { id: 'culture',   label: '문화',    img:'images/core/sub-nav/wrld/culture.webp', type:'group',
+      description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+      detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.'
+    },
+    { id: 'costume',   label: '의상',    img:'images/core/sub-nav/wrld/costume.webp', type:'group',
+      description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+      detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.'
+    },
      
   ]
 };
@@ -58,7 +92,7 @@ const WORLD_CARDS = {
     groups: [
 /* ════════════════════════════════════════════════     🔻 장애물 - 1 인간·사회: society🔻     ════════════════════════════════════════════════ */
        
-    { id: 'society',
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id: 'society',
       label: '인간·사회',
       layoutType: '2',
       img: 'images/world/group/society.jpg',
@@ -744,7 +778,7 @@ const WORLD_CARDS = {
     },
 
 /* ════════════════════════════════════════════════     🔻 장애물 - 2  세계·환경: environment 🔻     ════════════════════════════════════════════════ */
-    { id: 'environment',
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id: 'environment',
       label: '세계·환경',
       layoutType: '2',
       img: 'images/world/group/environment.jpg',
@@ -1205,7 +1239,7 @@ const WORLD_CARDS = {
        
 /* ════════════════════════════════════════════════     🔻 장애물 - 3 생존·자원·수단: survival🔻     ════════════════════════════════════════════════ */
        
-    { id: 'survival',
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id: 'survival',
       label: '생존·자원·수단',
       layoutType: '2',
       img: 'images/world/group/survival.jpg',
@@ -1326,7 +1360,7 @@ const WORLD_CARDS = {
        
 /* ════════════════════════════════════════════════     🔻 장애물 - 4 정보·시간·상황: context 🔻     ════════════════════════════════════════════════ */
        
-    { id: 'context',
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id: 'context',
       label: '정보·시간·상황',
       layoutType: '2',
       img: 'images/world/group/context.jpg',
@@ -1340,7 +1374,7 @@ const WORLD_CARDS = {
        
 /* ════════════════════════════════════════════════     🔻 장애물 - 5 세계 법칙: lars 🔻     ════════════════════════════════════════════════ */
        
-    { id: 'lars',
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id: 'lars',
       label: '세계 법칙',
       layoutType: '2',
       img: 'images/world/group/laws.jpg',
@@ -1354,7 +1388,7 @@ const WORLD_CARDS = {
        
 /* ════════════════════════════════════════════════     🔻 장애물 - 6 초자연: supernatural 🔻     ════════════════════════════════════════════════ */
        
-    { id: 'supernatural',
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id: 'supernatural',
       label: '초자연',
       layoutType: '2',
       img: 'images/world/group/supernatural.jpg',
@@ -1372,7 +1406,7 @@ const WORLD_CARDS = {
 /* ════════════════════════════════════════════════      세팅 = 배경     ════════════════════════════════════════════════ */  
   setting: {
   groups: [
-    { id:'setting_existing', label:'기존 배경', icon:'📚', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'setting_existing', label:'기존 배경', icon:'📚', cards:[
 
     /* 헤더 */
     { type: 'section' ,  label: ' 헤더 — 추가 내용1 ' },  
@@ -1399,7 +1433,7 @@ const WORLD_CARDS = {
     { icon:'⚙', name:'스팀펑크 도시' }, { icon:'🎭', name:'환상 무대' },
     { icon:'🌸', name:'평화로운 마을' }, { icon:'🌑', name:'암흑 지대' },
   ] },
-    { id:'setting_new', label:'경계의 배경', icon:'🗺️', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'setting_new', label:'경계의 배경', icon:'🗺️', cards:[
       { icon:'🌒', name:'낮과 밤의 경계 도시' },
       { icon:'🌊', name:'침수되어 가는 왕국' },
       { icon:'☁️', name:'구름 위의 군도' },
@@ -1414,7 +1448,7 @@ const WORLD_CARDS = {
 
   location: {
   groups: [
-    { id:'location_existing', label:'기존 장소', icon:'📚', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'location_existing', label:'기존 장소', icon:'📚', cards:[
      
     { icon:'🏰', name:'고성' },
     { icon:'🌲', name:'고대 숲' },
@@ -1425,7 +1459,7 @@ const WORLD_CARDS = {
     { icon:'🚢', name:'해상 도시' },
     { icon:'🌌', name:'우주 정거장' },
   ] },
-    { id:'location_new', label:'비밀 장소', icon:'📍', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'location_new', label:'비밀 장소', icon:'📍', cards:[
       { icon:'🚪', name:'주인 없는 여관' },
       { icon:'🗼', name:'봉인된 관측탑' },
       { icon:'🌉', name:'두 세계의 다리' },
@@ -1440,7 +1474,7 @@ const WORLD_CARDS = {
 
   item: {
   groups: [
-    { id:'item_existing', label:'기존 아이템', icon:'📚', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'item_existing', label:'기존 아이템', icon:'📚', cards:[
      
     { icon:'💎', name:'마력 보석' },
     { icon:'📜', name:'고대 문서' },
@@ -1451,7 +1485,7 @@ const WORLD_CARDS = {
     { icon:'⚔', name:'전설의 검' },
     { icon:'📦', name:'수수께끼 상자' },
   ] },
-    { id:'item_new', label:'수수께끼 아이템', icon:'💎', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'item_new', label:'수수께끼 아이템', icon:'💎', cards:[
       { icon:'🧭', name:'거짓을 가리키는 나침반' },
       { icon:'🔔', name:'꿈을 깨우는 종' },
       { icon:'🪞', name:'과거를 비추는 거울' },
@@ -1466,7 +1500,7 @@ const WORLD_CARDS = {
 
   tool: {
   groups: [
-    { id:'tool_existing', label:'기존 도구', icon:'📚', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'tool_existing', label:'기존 도구', icon:'📚', cards:[
      
     { icon:'🔨', name:'대장장이 망치' },
     { icon:'🪓', name:'벌목 도끼' },
@@ -1477,7 +1511,7 @@ const WORLD_CARDS = {
     { icon:'🛠', name:'만능 공구' },
     { icon:'⚒', name:'제작 도구' },
   ] },
-    { id:'tool_new', label:'탐험 도구', icon:'🧰', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'tool_new', label:'탐험 도구', icon:'🧰', cards:[
       { icon:'🏮', name:'마력을 밝히는 등불' },
       { icon:'🪝', name:'공간을 잇는 갈고리' },
       { icon:'🔭', name:'시간을 보는 망원경' },
@@ -1492,7 +1526,7 @@ const WORLD_CARDS = {
 
   resource: {
   groups: [
-    { id:'resource_existing', label:'기존 자원', icon:'📚', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'resource_existing', label:'기존 자원', icon:'📚', cards:[
      
     { icon:'⛏', name:'철광석' },
     { icon:'💎', name:'마정석' },
@@ -1503,7 +1537,7 @@ const WORLD_CARDS = {
     { icon:'🔥', name:'연료' },
     { icon:'🔋', name:'에너지 결정' },
   ] },
-    { id:'resource_new', label:'희귀 자원', icon:'⛏️', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'resource_new', label:'희귀 자원', icon:'⛏️', cards:[
       { icon:'💠', name:'별빛 결정' },
       { icon:'🌿', name:'회복의 이끼' },
       { icon:'🔥', name:'꺼지지 않는 석탄' },
@@ -1518,7 +1552,7 @@ const WORLD_CARDS = {
 
   tech: {
   groups: [
-    { id:'tech_existing', label:'기존 기술', icon:'📚', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'tech_existing', label:'기존 기술', icon:'📚', cards:[
      
     { icon:'⚙', name:'증기 기술', img:'images/Giant_Elf.jpg', subImg:'images/Peep.png' }, 
     { icon:'💡', name:'전기 문명' },
@@ -1538,7 +1572,7 @@ const WORLD_CARDS = {
     { icon:'⚗', name:'연금술' },
     { icon:'📡', name:'통신망' },
   ] },
-    { id:'tech_new', label:'금지된 기술', icon:'⚙️', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'tech_new', label:'금지된 기술', icon:'⚙️', cards:[
       { icon:'🧠', name:'기억 편집술' },
       { icon:'🌀', name:'공간 접기 장치' },
       { icon:'🧬', name:'생명 복제 공정' },
@@ -1553,7 +1587,7 @@ const WORLD_CARDS = {
 
   skill: {
   groups: [
-    { id:'skill_existing', label:'기존 스킬', icon:'📚', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'skill_existing', label:'기존 스킬', icon:'📚', cards:[
      
     { icon:'⚔', name:'검술' },
     { icon:'🏹', name:'궁술' },
@@ -1564,7 +1598,7 @@ const WORLD_CARDS = {
     { icon:'🧠', name:'전략 전술' },
     { icon:'🐉', name:'용 조련' },
   ] },
-    { id:'skill_new', label:'희귀 스킬', icon:'✨', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'skill_new', label:'희귀 스킬', icon:'✨', cards:[
       { icon:'👁️', name:'감정의 흔적 읽기' },
       { icon:'🫥', name:'존재감 지우기' },
       { icon:'🧵', name:'끊어진 인연 잇기' },
@@ -1579,7 +1613,7 @@ const WORLD_CARDS = {
 
   culture: {
   groups: [
-    { id:'culture_existing', label:'기존 문화', icon:'📚', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'culture_existing', label:'기존 문화', icon:'📚', cards:[
      
     { icon:'👑', name:'군주제' }, { icon:'⚖', name:'공화제' },
     { icon:'🌿', name:'자연 숭배' }, { icon:'🔥', name:'전쟁 문화' },
@@ -1601,7 +1635,7 @@ const WORLD_CARDS = {
     { icon:'🎨', name:'예술 도시' },
     { icon:'👑', name:'귀족 사회' },
   ] },
-    { id:'culture_new', label:'생활과 의례', icon:'🏛️', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'culture_new', label:'생활과 의례', icon:'🏛️', cards:[
       { icon:'🌕', name:'보름달 이름짓기' },
       { icon:'🍞', name:'첫 수확 나눔' },
       { icon:'🎭', name:'신분 교환 축제' },
@@ -1616,7 +1650,7 @@ const WORLD_CARDS = {
 
   costume: {
   groups: [
-    { id:'costume_existing', label:'기존 의상', icon:'📚', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'costume_existing', label:'기존 의상', icon:'📚', cards:[
      
     { icon:'👑', name:'왕족 의복' },
     { icon:'🛡', name:'기사 갑옷' },
@@ -1627,7 +1661,7 @@ const WORLD_CARDS = {
     { icon:'🦾', name:'강화 슈트' },
     { icon:'🤖', name:'기계 장갑' },
   ] },
-    { id:'costume_new', label:'기능성 의상', icon:'👘', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'costume_new', label:'기능성 의상', icon:'👘', cards:[
       { icon:'🌧️', name:'빗물을 튕기는 망토' },
       { icon:'🪽', name:'활공용 날개옷' },
       { icon:'🌡️', name:'기온 적응 예복' },

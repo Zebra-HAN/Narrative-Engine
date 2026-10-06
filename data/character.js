@@ -1,3 +1,5 @@
+// 정보 패널: NAV 객체, subs의 카테고리, groups/ subgroups의 각 객체에
+// description(짧은 설명), detail(상세 설명)을 입력합니다. detail의 \n은 줄바꿈입니다.
 /* ══════════════════════════════════════════════
    캐릭터 데이터
    - CHARACTER_NAV  : 캐릭터 탭 네비게이션 정의
@@ -23,16 +25,39 @@ layoutType: '3',   ← 여기에 5/4/3/2 중 하나를 입력하면 그룹 카�
 ══════════════════════════════════════════════════════════════════════════════════════════ */
 
 const CHARACTER_NAV = {
+  description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+  detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
   label: '캐릭터',
   resetLabel: '캐릭터 초기화',
   subs: [
-    { id:'archetype',   label:'원형', img:'images/core/sub-nav/char/archetype.webp', type:'group' },
-    { id:'race',        label:'종족', img:'images/core/sub-nav/char/race.webp', type:'group'    },
-    { id:'job',         label:'직업', img:'images/core/sub-nav/char/job.webp',  type:'group'    },
-    { id:'personality', label:'성격', img:'images/core/sub-nav/char/personality.webp', type:'group' },
-    { id:'attribute',   label:'속성', img:'images/core/sub-nav/char/attribute.webp'  ,type:'group'   },
-    { id:'ability',     label:'능력', img:'images/core/sub-nav/char/ability.webp' ,type:'group'   },
-    { id:'relation',    label:'관계', img:'images/core/sub-nav/char/relation.webp', type:'group' },
+    { id:'archetype',   label:'원형', img:'images/core/sub-nav/char/archetype.webp', type:'group',
+      description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+      detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.'
+    },
+    { id:'race',        label:'종족', img:'images/core/sub-nav/char/race.webp', type:'group'   ,
+      description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+      detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.'
+    },
+    { id:'job',         label:'직업', img:'images/core/sub-nav/char/job.webp',  type:'group'   ,
+      description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+      detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.'
+    },
+    { id:'personality', label:'성격', img:'images/core/sub-nav/char/personality.webp', type:'group',
+      description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+      detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.'
+    },
+    { id:'attribute',   label:'속성', img:'images/core/sub-nav/char/attribute.webp'  ,type:'group'  ,
+      description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+      detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.'
+    },
+    { id:'ability',     label:'능력', img:'images/core/sub-nav/char/ability.webp' ,type:'group'  ,
+      description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+      detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.'
+    },
+    { id:'relation',    label:'관계', img:'images/core/sub-nav/char/relation.webp', type:'group',
+      description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+      detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.'
+    },
   ]
 };
 
@@ -46,7 +71,7 @@ const CHARACTER_CARDS = {
    layoutType: '4',
    archetype: {
   groups: [
-    { id:'archetype_existing', label:'기존 원형', icon:'📚', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'archetype_existing', label:'기존 원형', icon:'📚', cards:[
       
       
       // 서브 이미지를 추가하려면 카드 객체 안에 subImg:'images/파일명.png' 를 넣으세요.
@@ -90,7 +115,7 @@ name:'수호자' , img:'images/core/sub-nav/stry/goal.jpg'     },
     { icon:'☀',  name:'빛의 자' ,   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
     { icon:'☀',  name:'빛의 자' ,   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
   ] },
-    { id:'archetype_new', label:'새로운 원형', icon:'🎭', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'archetype_new', label:'새로운 원형', icon:'🎭', cards:[
       { icon:'🧭', name:'길잡이' },
       { icon:'🪞', name:'거울' },
       { icon:'🔥', name:'개혁가' },
@@ -116,6 +141,8 @@ race: {   /* ═══  [종족]  ═══ */
 /* ════════════════════════════════════════════════     🔻 인간형 🔻     ════════════════════════════════════════════════ */  
      
     {
+      description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+      detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
       id: 'race_human',     /* ─  메인 메뉴 ─ */
       label: '인간형', 
       layoutType: '3',  /* ← 여기에 '5'/'4'/'3'/'2' 중 원하는 가로 카드 개수를 입력하면 이 그룹 카드 목록에 고정 적용됨 */
@@ -123,6 +150,8 @@ race: {   /* ═══  [종족]  ═══ */
       img: 'images/character/group/human.jpg',   /* ─  그룹 이미지 ─ */
       subgroups: [
         {
+          description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+          detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
           id: 'race_human_skin',   /* 🟥🟥🟥🟥🟥🟥🟥 소그룹  1 🟥🟥🟥🟥🟥🟥🟥 */
           label: '피부',
           icon: '🟫', img: 'images/golem.png',
@@ -144,6 +173,8 @@ race: {   /* ═══  [종족]  ═══ */
           ]  /* ───────────────── 카드1 ───────────────── */
         },
         {
+          description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+          detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
           id: 'race_human_hair',     /* 🟧🟧🟧🟧🟧🟧🟧 소그룹  2 🟧🟧🟧🟧🟧🟧🟧 */
           label: '모발 이름 테스트중 이건 엄청길게 함 해보자',
           icon: '💇',
@@ -155,6 +186,8 @@ race: {   /* ═══  [종족]  ═══ */
           ]  /* ───────────────── 카드2 ───────────────── */
         },
         {
+          description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+          detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
           id: 'race_human_eye',    /* 🟨🟨🟨🟨🟨🟨🟨  소그룹  3  🟨🟨🟨🟨🟨🟨🟨 */
           label: '눈 도 한번',
           icon: '👁',
@@ -166,6 +199,8 @@ race: {   /* ═══  [종족]  ═══ */
           ]   /* ───────────────── 카드3 ───────────────── */
         },
         {
+          description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+          detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
           id: 'race_human_body',   /* 🟩🟩🟩🟩🟩🟩🟩 소그룹  4  🟩🟩🟩🟩🟩🟩🟩 */
           label: '신체이름 테스트중 길게해',
           icon: '💪',
@@ -185,12 +220,16 @@ race: {   /* ═══  [종족]  ═══ */
 
     /* ── 의인화 계열 ── */
     {
+      description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+      detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
       id: 'race_animal',
       label: '의인화',
       layoutType: '2',
       img: 'images/character/group/animal.jpg',     /* ─  그룹 이미지 ─ */
       subgroups: [
         {
+          description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+          detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
           id: 'race_animal_land',
           label: '육지 동물길어지면',
           icon: '🐺',
@@ -202,6 +241,8 @@ race: {   /* ═══  [종족]  ═══ */
           ]
         },
         {
+          description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+          detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
           id: 'race_animal_sea',
           label: '초월·성장 — 넘어서고 싶다, 완성되고 싶다, 다른 존재가 되고 싶다',
           icon: '🐟',
@@ -242,6 +283,8 @@ race: {   /* ═══  [종족]  ═══ */
           ]
         },
         {
+          description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+          detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
           id: 'race_animal_insect',
           label: '곤충도 엄청 길어지면 어케될까요?이거 엄청길게하는거임 모두가 빵빵',
           icon: '🐛',
@@ -253,6 +296,8 @@ race: {   /* ═══  [종족]  ═══ */
           ]
         },
         {
+          description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+          detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
           id: 'race_animal_plant',
           label: '식물',
           icon: '🌿',
@@ -271,6 +316,8 @@ race: {   /* ═══  [종족]  ═══ */
 /* ════════════════════════════════════════════════      🔻 판타지 종족 🔻    ════════════════════════════════════════════════ */
 
     {
+      description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+      detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
       id: 'race_fantasy',
       label: '판타지',
       icon: '  ',
@@ -473,6 +520,8 @@ race: {   /* ═══  [종족]  ═══ */
      job: {
     groups: [
       {
+        description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+        detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
         id: 'job_1',
         label: '직업1',
         layoutType: '5',  
@@ -507,6 +556,8 @@ race: {   /* ═══  [종족]  ═══ */
       },
 
        {
+         description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+         detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
         id: 'job_3',
         label: '직업3',
         layoutType: '4',  
@@ -537,7 +588,7 @@ race: {   /* ═══  [종족]  ═══ */
    ════════════════════════════════════════════════ */  
   personality: {
   groups: [
-    { id:'personality_existing', label:'기존 성격', icon:'📚', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'personality_existing', label:'기존 성격', icon:'📚', cards:[
     { icon:'🔥', name:'열정적'   }, { icon:'❄',  name:'냉정한'    }, { icon:'🌊', name:'유연한'   },
     { icon:'🪨', name:'완고한'   }, { icon:'🌟', name:'낙관적'     }, { icon:'🌑', name:'비관적'   },
     { icon:'💫', name:'충동적'   }, { icon:'⚖',  name:'신중한'    }, { icon:'🎭', name:'이중적'   },
@@ -546,28 +597,28 @@ race: {   /* ═══  [종족]  ═══ */
     { icon:'🔬', name:'분석적'   }, { icon:'🎨', name:'예술적'     }, { icon:'🤝', name:'친화적'   },
     { icon:'👤', name:'고독한'   }, { icon:'✨', name:'신비로운'    },
   ] },
-    { id:'personality_new', label:'상황별 성격', icon:'🧠', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'personality_new', label:'상황별 성격', icon:'🧠', cards:[
       { icon:'🧊', name:'위기에도 침착한' },
       { icon:'🌞', name:'낯선 이에게 다정한' },
       { icon:'🦊', name:'협상에 능숙한' },
       { icon:'🌱', name:'실수를 인정하는' },
       { icon:'⚡', name:'결단이 빠른' }
     ]},
-    { id:'personality_social', label:'대인 관계 성격', icon:'🤝', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'personality_social', label:'대인 관계 성격', icon:'🤝', cards:[
       { icon:'💬', name:'사교적인' },
       { icon:'👂', name:'경청하는' },
       { icon:'🎁', name:'배려심 깊은' },
       { icon:'🧱', name:'경계심이 강한' },
       { icon:'🕊️', name:'갈등을 중재하는' }
     ]},
-    { id:'personality_emotion', label:'감정 표현 성격', icon:'💗', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'personality_emotion', label:'감정 표현 성격', icon:'💗', cards:[
       { icon:'😊', name:'감정이 풍부한' },
       { icon:'🎭', name:'감정을 숨기는' },
       { icon:'🔥', name:'쉽게 흥분하는' },
       { icon:'🌊', name:'감정 기복이 큰' },
       { icon:'🪷', name:'평정심을 유지하는' }
     ]},
-    { id:'personality_values', label:'가치관별 성격', icon:'🧭', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'personality_values', label:'가치관별 성격', icon:'🧭', cards:[
       { icon:'⚖️', name:'원칙을 중시하는' },
       { icon:'🏆', name:'성취를 추구하는' },
       { icon:'🗽', name:'자유를 사랑하는' },
@@ -586,6 +637,8 @@ race: {   /* ═══  [종족]  ═══ */
  attribute: {　 /* 속성  카테고리 */
     groups: [
       {
+        description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+        detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
         id: 'attribute_1',
         label: '속성의 이름이 엄청 길어서 어떻게 될지 테스트', /*그룹 이름*/
         layoutType: '4', 
@@ -605,6 +658,8 @@ race: {   /* ═══  [종족]  ═══ */
         ]
       },
       {
+        description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+        detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
         id: 'attribute_2',
         label: '이쪽도 좀 길게',
         layoutType: '2', 
@@ -616,6 +671,8 @@ race: {   /* ═══  [종족]  ═══ */
         ]
       },
       {
+        description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+        detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
         id: 'attribute_3',
         label: '속성 3',
         layoutType: '5',  
@@ -626,6 +683,8 @@ race: {   /* ═══  [종족]  ═══ */
         ]
       },
    {
+     description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+     detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
         id: 'attribute_4',
         label: '속성 4',
         icon: '🐾',
@@ -636,6 +695,8 @@ race: {   /* ═══  [종족]  ═══ */
         ]
       },
       {
+        description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+        detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
         id: 'attribute_5',
         label: '속성 5',
         icon: '✨',
@@ -645,6 +706,8 @@ race: {   /* ═══  [종족]  ═══ */
         ]
       },
    {
+     description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+     detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
         id: 'attribute_6',
         label: '속성 6번',
         icon: '🐾',  img:'images/Peep.png',
@@ -666,6 +729,8 @@ race: {   /* ═══  [종족]  ═══ */
  ability: {　 /*  능력  카테고리 */
     groups: [
       {
+        description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+        detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
         id: 'attribute_1',
         label: '속성의 이름이 엄청 길어서 어떻게 될지 테스트', /*그룹 이름*/
         icon: '👤',
@@ -680,6 +745,8 @@ race: {   /* ═══  [종족]  ═══ */
         ]
       },
       {
+        description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+        detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
         id: 'attribute_2',
         label: '이쪽도 좀 길게',
         icon: '🐾',
@@ -690,6 +757,8 @@ race: {   /* ═══  [종족]  ═══ */
         ]
       },
       {
+        description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+        detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
         id: 'attribute_3',
         label: '속성 3',
         icon: '✨',
@@ -699,6 +768,8 @@ race: {   /* ═══  [종족]  ═══ */
         ]
       },
    {
+     description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
+     detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
         id: 'attribute_4',
         label: '속성 4',
         icon: '🐾',
@@ -718,7 +789,7 @@ race: {   /* ═══  [종족]  ═══ */
    ════════════════════════════════════════════════ */  
   relation: {
   groups: [
-    { id:'relation_existing', label:'기존 관계', icon:'📚', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'relation_existing', label:'기존 관계', icon:'📚', cards:[
     { icon:'👥', name:'체크 02:17→02:43',   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용'},
      { type: 'section' ,  label: ' 헤더 — 추가 내용 ' }, 
      { icon:'❤',  name:'연인' ,   desc:'내용' ,   detail:'【상세】 정보\n【상세】\n\n내용' },
@@ -730,7 +801,7 @@ race: {   /* ═══  [종족]  ═══ */
     { icon:'🔮', name:'예언의 관계'  }, { icon:'💫', name:'전생인연'        }, { icon:'🌿', name:'치유자와 상처'},
     { icon:'⚖', name:'거래관계'     }, { icon:'🌑', name:'어둠의 계약'     },
   ] },
-    { id:'relation_new', label:'변화하는 관계', icon:'🔗', cards:[
+    { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'relation_new', label:'변화하는 관계', icon:'🔗', cards:[
       { icon:'🫱🏻‍🫲🏼', name:'불편한 동맹' },
       { icon:'🪢', name:'공동의 비밀' },
       { icon:'🌉', name:'화해를 잇는 사이' },
