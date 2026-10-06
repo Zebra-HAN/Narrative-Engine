@@ -103,7 +103,7 @@
   width: 100%;
   aspect-ratio: 1;
   overflow: visible;
-  opacity: 0;
+  opacity: 1;
   pointer-events: none;
   -webkit-mask-image: none;
   mask-image: none;

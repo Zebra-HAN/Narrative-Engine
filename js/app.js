@@ -77,6 +77,8 @@ const IMAGE_LOADER = (() => {
   }
 
   async function reveal(element) {
+    // 이미 로딩/디코딩을 마친 패널 이미지는 다시 요청하거나 숨기지 않는다.
+    if (element.classList.contains('image-ready') && element.complete && element.naturalWidth > 0) return;
     element.classList.add('managed-image');
     const url = normalize(element.currentSrc || element.src);
     if (!url) return;
@@ -2604,9 +2606,9 @@ function updateInfoPanel() {
   const info = MAIN_CATEGORY_INFO[currentNav] || {};
   const sub = currentSubId ? nav?.subs.find(item => item.id === currentSubId) : null;
   const context = getInfoPanelContext();
-  // 그룹 버튼과 동일한 img/icon을 사용하며 서브그룹에서도 부모 그룹을 유지한다.
-  const image = context.group ? context.group.img : sub?.img || MAIN_CATEGORY_IMAGE[currentNav];
-  const icon = context.group?.icon || sub?.icon || info.icon || '◆';
+  // 설명은 현재 깊은 위치를 따르되 이미지는 NAV/카테고리만 표시한다.
+  const image = sub?.img || MAIN_CATEGORY_IMAGE[currentNav];
+  const icon = sub?.icon || info.icon || '◆';
 
   setInfoVisual(document.getElementById('info-cat-icon'), image, icon);
   document.getElementById('info-cat-name').textContent = context.item?.label || '';
@@ -3473,25 +3475,29 @@ function renderIcon(icon, img, className) {
   return icon || '';
 }
 
-/* 상단 패널에서 이미지를 우선하고, 이미지가 없거나 로드에 실패하면 카드 아이콘을 표시한다. */
+/* 같은 이미지의 DOM을 유지하고, 변경 시에는 준비된 이미지만 한 번에 교체한다. */
+const infoVisualRequests = new WeakMap();
+
 function setInfoVisual(container, img, icon) {
   if (!container) return;
-  container.replaceChildren();
-  container.classList.remove('has-image', 'has-icon');
+  const previous = infoVisualRequests.get(container);
+  if (previous?.img === img && previous?.icon === icon && previous.status !== 'failed') return;
+  const request = { img, icon, status: 'pending' };
+  infoVisualRequests.set(container, request);
+  const isCurrent = () => infoVisualRequests.get(container) === request;
 
   const showIcon = () => {
-    container.replaceChildren();
-    container.classList.remove('has-image');
-    if (!icon) return;
-
+    if (!isCurrent()) return;
     const iconElement = document.createElement('span');
     iconElement.className = 'info-icon-text';
-    iconElement.textContent = icon;
-    container.appendChild(iconElement);
+    iconElement.textContent = icon || '';
+    container.replaceChildren(iconElement);
+    container.classList.remove('has-image');
     container.classList.add('has-icon');
   };
 
   if (!img) {
+    request.status = 'ready';
     showIcon();
     return;
   }
@@ -3500,15 +3506,22 @@ function setInfoVisual(container, img, icon) {
   image.className = 'info-icon-img';
   image.alt = '';
   image.draggable = false;
-  image.addEventListener('load', () => {
-    if (image.parentElement === container) container.classList.add('has-image');
+  image.addEventListener('load', async () => {
+    try { await image.decode(); } catch (_) { /* load 이벤트가 성공한 이미지 사용 */ }
+    if (!isCurrent()) return;
+    request.status = 'ready';
+    // 공통 이미지 감시기가 이미 디코딩한 패널 이미지를 다시 숨기지 않게 한다.
+    image.classList.add('image-ready');
+    container.replaceChildren(image);
+    container.classList.remove('has-icon');
+    container.classList.add('has-image');
   }, { once: true });
   image.addEventListener('error', () => {
-    if (image.parentElement !== container) return;
+    if (!isCurrent()) return;
+    request.status = 'failed';
     showIcon();
   }, { once: true });
   image.src = img;
-  container.appendChild(image);
 }
 
 function formatLabel(label, icon) {
