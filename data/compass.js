@@ -115,6 +115,11 @@ const COMPASS_CARDS = {
   ]
 },
 
+
+   
+/* ════════════════════════════════════════════════     🔻 경험 - experience 🔻     ════════════════════════════════════════════════ */
+
+   
   experience: {
   groups: [
     { id:'experience_daily', label:'일상의 경험', icon:'☕', cards:[
@@ -128,6 +133,10 @@ const COMPASS_CARDS = {
   ]
 },
 
+
+/* ════════════════════════════════════════════════     🔻 광경 - scenery 🔻     ════════════════════════════════════════════════ */
+
+   
   scenery: {
   groups: [
     { id:'scenery_nature', label:'자연의 광경', icon:'🌿', cards:[
@@ -141,6 +150,10 @@ const COMPASS_CARDS = {
   ]
 },
 
+
+/* ════════════════════════════════════════════════     🔻 모습 - appearance 🔻     ════════════════════════════════════════════════ */
+
+   
   appearance: {
   groups: [
     { id:'appearance_expression', label:'표정과 모습', icon:'🙂', cards:[
@@ -154,6 +167,10 @@ const COMPASS_CARDS = {
   ]
 },
 
+
+/* ════════════════════════════════════════════════     🔻 메시지 - message 🔻     ════════════════════════════════════════════════ */
+
+   
   message: {
   groups: [
     { id:'message_existing', label:'기존 메시지', icon:'📚', cards:[
