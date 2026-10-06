@@ -2389,14 +2389,14 @@ body::after {
   animation-name: groupBtnSlideFromRight, groupBtnFadeIn;
 }
 
-/* 7개 이상의 이동과 착지 흐름은 다수 그룹에만 적용한다. */
+/* 4개/6개와 다수 그룹은 같은 이동·착지 흐름을 사용한다. */
 .group-reveal-flow .group-select-btn {
   animation-name: groupBtnRiseFlow, groupBtnFadeIn;
   animation-duration: 0.41s, 0.82s;
   animation-timing-function: linear, linear;
 }
 
-/* 7개 이상에서만 이동을 충분히 보여 주되, fade의 duration/곡선은 건드리지 않는다. */
+/* 욕망 13개의 이동·착지 곡선을 공유하고, fade의 duration/곡선은 유지한다. */
 .group-reveal-accelerating .group-select-btn {
   animation-name: groupBtnRiseAccelerating, groupBtnFadeIn;
   animation-duration: 0.76s, 0.82s;
