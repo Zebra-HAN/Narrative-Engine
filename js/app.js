@@ -1801,11 +1801,9 @@ function getGroupLayoutClass(count) {
   return 'group-layout-list';
 }
 
-function renderGroupNameSheet(group, count) {
-  if (count !== 3 && count !== 5) return '';
-  return `<span class="group-name-sheet">
-    <img src="images/core/group_sheet.webp" alt="" draggable="false" decoding="async">
-    <span class="group-name-sheet-label">${escapeHtml(group.label)}</span>
+function renderGroupTitle(group) {
+  return `<span class="group-title-banner" title="${escapeHtml(group.label)}">
+    <span class="group-title-text">${escapeHtml(group.label)}</span>
   </span>`;
 }
 
@@ -1943,13 +1941,13 @@ sg.cards.forEach((card, cIdx) => {
       type="button"
         class="group-select-btn pressable"
         ${delay}
+        aria-label="${escapeHtml(grp.label)}"
         data-group-action="${grp.subgroups ? 'subgroups' : 'cards'}"
         data-sub-id="${subId}"
         data-group-idx="${i}"
       >
         <span class="group-btn-icon">${renderIcon(grp.icon, grp.img, 'group-btn-img')}</span>
-        ${grp.img ? '' : `<span class="group-btn-label">${grp.label}</span>`}
-        ${renderGroupNameSheet(grp, data.groups.length)}
+        ${renderGroupTitle(grp)}
         ${grpCount > 0 ? `<div class="group-badge">${grpCount}</div>` : ''}
       </button>
     `;
@@ -2003,14 +2001,14 @@ function showSubgroupPage(subId, groupIdx) {
       type="button"
         class="group-select-btn pressable"
         ${delay}
+        aria-label="${escapeHtml(sg.label)}"
         data-group-action="subgroup-cards"
         data-sub-id="${subId}"
         data-group-idx="${groupIdx}"
         data-subgroup-idx="${sgIdx}"
       >
         <span class="group-btn-icon">${renderIcon(sg.icon, sg.img, 'group-btn-img')}</span>
-        ${sg.img ? '' : `<span class="group-btn-label">${sg.label}</span>`}
-        ${renderGroupNameSheet(sg, grp.subgroups.length)}
+        ${renderGroupTitle(sg)}
         ${sgCount > 0 ? `<div class="group-badge">${sgCount}</div>` : ''}
       </button>
     `;
