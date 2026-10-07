@@ -2368,29 +2368,29 @@ body::after {
 
 /* 그룹/서브그룹 공통 금속 프레임: 기존 NAV 상태를 읽으며 데이터와 배치는 유지한다. */
 #screen-create {
-  --group-metal-light: #b9d4ac;
-  --group-metal-mid: #477b50;
+  --group-metal-light: #b5ddb0;
+  --group-metal-mid: #57965d;
   --group-metal-shade: #244633;
   --group-metal-edge: #172b21;
 }
 
 #screen-create:has(#bottom-nav[data-active-nav="character"]) {
-  --group-metal-light: #edb4a1;
-  --group-metal-mid: #b84d46;
+  --group-metal-light: #f3b0a1;
+  --group-metal-mid: #d05b50;
   --group-metal-shade: #6b302d;
   --group-metal-edge: #35201d;
 }
 
 #screen-create:has(#bottom-nav[data-active-nav="narrative2"]) {
-  --group-metal-light: #d9c2e4;
-  --group-metal-mid: #856099;
+  --group-metal-light: #dbc0f0;
+  --group-metal-mid: #a575bf;
   --group-metal-shade: #4b355d;
   --group-metal-edge: #292131;
 }
 
 #screen-create:has(#bottom-nav[data-active-nav="world"]) {
-  --group-metal-light: #b8d8e7;
-  --group-metal-mid: #47799b;
+  --group-metal-light: #b1daf3;
+  --group-metal-mid: #568fb8;
   --group-metal-shade: #29485f;
   --group-metal-edge: #1b2933;
 }
