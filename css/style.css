@@ -2366,6 +2366,71 @@ body::after {
   box-shadow: 0 2px 10px rgba(128, 101, 62, 0.10);
 }
 
+/* 그룹/서브그룹 공통 금속 프레임: 기존 NAV 상태를 읽으며 데이터와 배치는 유지한다. */
+#screen-create {
+  --group-metal-light: #b9d4ac;
+  --group-metal-mid: #477b50;
+  --group-metal-shade: #244633;
+  --group-metal-edge: #172b21;
+}
+
+#screen-create:has(#bottom-nav[data-active-nav="character"]) {
+  --group-metal-light: #edb4a1;
+  --group-metal-mid: #b84d46;
+  --group-metal-shade: #6b302d;
+  --group-metal-edge: #35201d;
+}
+
+#screen-create:has(#bottom-nav[data-active-nav="narrative2"]) {
+  --group-metal-light: #d9c2e4;
+  --group-metal-mid: #856099;
+  --group-metal-shade: #4b355d;
+  --group-metal-edge: #292131;
+}
+
+#screen-create:has(#bottom-nav[data-active-nav="world"]) {
+  --group-metal-light: #b8d8e7;
+  --group-metal-mid: #47799b;
+  --group-metal-shade: #29485f;
+  --group-metal-edge: #1b2933;
+}
+
+/* 3px의 가장자리만 덮는 금속 띠. 이미지의 크기/crop, 배지, 클릭 영역에는 영향이 없다.
+   두 레이어 모두 버튼의 둥근 모서리와 등장/눌림 transform을 그대로 따라간다. */
+.group-select-btn::before,
+.group-select-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.group-select-btn::before {
+  padding: 3px;
+  background: linear-gradient(135deg,
+    var(--group-metal-light) 0%,
+    var(--group-metal-mid) 19%,
+    var(--group-metal-light) 32%,
+    var(--group-metal-mid) 43%,
+    var(--group-metal-shade) 72%,
+    var(--group-metal-mid) 84%,
+    var(--group-metal-shade) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+}
+
+.group-select-btn::after {
+  box-shadow:
+    inset 0 0 0 1px var(--group-metal-edge),
+    inset 1px 1px 0 1px rgba(255, 244, 219, 0.48),
+    inset -1px -1px 0 1px rgba(24, 20, 18, 0.54),
+    inset 0 0 0 3px rgba(24, 20, 18, 0.18);
+}
+
 .group-select-btn.group-appear-done {
   opacity: 1;
   animation: none;
