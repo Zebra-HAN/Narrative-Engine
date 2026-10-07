@@ -226,6 +226,7 @@
 }
 
 #screen-create .nav-img-default {
+  opacity: 0.9;
   filter: sepia(0.3) saturate(0.72) brightness(1.35) contrast(0.88);
 }
 
