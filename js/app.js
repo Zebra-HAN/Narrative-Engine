@@ -154,6 +154,8 @@ function preloadCards(cards) {
 ════════════════════════════════════════════════ */
 const UI_SOUND = (() => {
   const sources = {
+    // 기존 파일명을 유지하지만 재생 방식은 다른 버튼과 같은 단발성 SFX다.
+    start: 'sounds/bgm_start.mp3',
     touch: 'sounds/se_touch.mp3',
     page: 'sounds/se_page.mp3',
     nav: 'sounds/se_nav.mp3',
@@ -177,13 +179,20 @@ const UI_SOUND = (() => {
     pong4: 'sounds/se_pong4.mp3',
     pong5: 'sounds/se_pong5.mp3'
   };
+  // 지원되는 Safari/PWA에서는 외부 음악과 혼합하는 세션을 요청한다.
+  // 지원하지 않는 브라우저에서는 표준 Web Audio 효과음으로 동작한다.
+  try {
+    if (navigator.audioSession) navigator.audioSession.type = 'ambient';
+  } catch (error) {
+    console.warn('Unable to configure ambient audio session', error);
+  }
   const AudioContextClass = window.AudioContext || window.webkitAudioContext;
   const context = AudioContextClass ? new AudioContextClass({ latencyHint: 'interactive' }) : null;
   const output = context ? context.createGain() : null;
   const buffers = new Map();
+  let startReady;
   let muted = false;
   let volume = 0.7;
-  let unlockHandled = false;
 
   if (output) {
     output.gain.value = volume;
@@ -195,7 +204,7 @@ const UI_SOUND = (() => {
   // decodeAudioData의 콜백은 이전 버전의 iOS Safari도 지원한다.
   if (context) {
     Object.entries(sources).forEach(([name, src]) => {
-      fetch(src)
+      const ready = fetch(src)
         .then(response => {
           if (!response.ok) throw new Error(`Unable to load sound: ${src}`);
           return response.arrayBuffer();
@@ -205,31 +214,29 @@ const UI_SOUND = (() => {
         }))
         .then(buffer => buffers.set(name, buffer))
         .catch(error => console.warn(error));
+      if (name === 'start') startReady = ready;
     });
   }
 
-  const unlockEvents = ['pointerdown', 'touchstart', 'mousedown', 'keydown', 'click'];
-
-  function unlock() {
-    if (unlockHandled) return;
-    unlockHandled = true;
-    unlockEvents.forEach(type => document.removeEventListener(type, unlock, true));
-
-    // iOS Safari/PWA는 사용자 제스처 안에서만 이 상태 전환을 허용한다. 이후의 클릭 확정
-    // 핸들러보다 앞서 첫 상호작용에서 한 번 수행한다.
-    if (context && context.state === 'suspended') {
-      context.resume().catch(error => console.warn(error));
-    }
-  }
-
-  unlockEvents.forEach(type => document.addEventListener(type, unlock, {
-    capture: true,
-    passive: true
-  }));
-
   function play(name) {
     const buffer = buffers.get(name);
-    if (muted || !context || !buffer) return;
+    if (muted || !context) return;
+    if (!buffer && name !== 'start') return;
+
+    // 스크롤/첫 터치로 오디오 세션을 활성화하지 않는다. 실제 효과음 요청에서만
+    // Safari의 사용자 제스처 제한을 해제하고, 복귀 후 suspended 상태도 처리한다.
+    if (context.state === 'suspended') {
+      context.resume().catch(error => console.warn(error));
+    }
+
+    // 느린 연결에서 준비 전에 누른 시작 버튼도 1회 재생한다. 사용자 제스처 안의
+    // resume 호출은 위에서 먼저 수행하고, 파일 준비 자체는 자동 재생을 유발하지 않는다.
+    if (!buffer) {
+      if (startReady) startReady.then(() => {
+        if (buffers.has(name)) play(name);
+      });
+      return;
+    }
 
     // AudioBufferSourceNode는 의도적으로 한 번만 사용한다. 클릭마다 새 노드를 만들면
     // 즉시 시작되며 아무리 빠른 연속 입력도 겹쳐서 재생할 수 있다.
@@ -250,61 +257,6 @@ const UI_SOUND = (() => {
   };
 })();
 
-/* ════════════════════════════════════════════════
-   단발성 상황음
-   파일명과 관계없이 두 음원은 반복하거나 화면 사이에서 이어 재생하지 않는다.
-════════════════════════════════════════════════ */
-const SCENE_SOUND = (() => {
-  const opening = new Audio('sounds/bgm_opening1.mp3');
-  const start = new Audio('sounds/bgm_start.mp3');
-  const retryEvents = ['pointerdown', 'touchstart', 'keydown'];
-  let openingStarted = false;
-  let openingRetryUsed = false;
-
-  [opening, start].forEach(audio => {
-    audio.preload = 'auto';
-    audio.volume = 0.7;
-  });
-
-  function removeOpeningRetry() {
-    retryEvents.forEach(type => document.removeEventListener(type, retryOpening, true));
-  }
-
-  function retryOpening() {
-    if (openingStarted || openingRetryUsed) return;
-    openingRetryUsed = true;
-    removeOpeningRetry();
-    opening.play()
-      .then(() => { openingStarted = true; })
-      .catch(() => {});
-  }
-
-  function playOpeningOnce() {
-    if (openingStarted) return;
-    opening.play()
-      .then(() => {
-        openingStarted = true;
-        removeOpeningRetry();
-      })
-      .catch(() => {
-        // 자동 재생이 차단된 경우에만 최초 사용자 입력에서 딱 한 번 다시 시도한다.
-        retryEvents.forEach(type => document.addEventListener(type, retryOpening, {
-          capture: true,
-          once: true,
-          passive: true
-        }));
-      });
-  }
-
-  function playStart() {
-    start.pause();
-    start.currentTime = 0;
-    start.play().catch(() => {});
-  }
-
-  return { playOpeningOnce, playStart };
-})();
-
 function initUiSounds() {
   const cardSounds = ['pong1', 'pong2', 'pong3', 'pong4', 'pong5'];
   const categorySounds = ['card', 'card1', 'card2'];
@@ -320,7 +272,10 @@ function initUiSounds() {
 
     // 완료된 `click`에서만 피드백을 재생한다. 특히 pointerdown/touchstart는 손가락이
     // 닿는 즉시뿐 아니라 스크롤이나 길게 누르기를 시작할 때도 발생하므로 사용하지 않는다.
-    if (target.matches('.data-card')) {
+    if (target.matches('#btn-create')) {
+      // 코드로 실행한 이동이나 합성 클릭에서는 시작 효과음을 재생하지 않는다.
+      if (event.isTrusted) UI_SOUND.play('start');
+    } else if (target.matches('.data-card')) {
       // 브라우저의 더블클릭은 보통 click 두 번 뒤에 dblclick 한 번을 보낸다.
       // 각 click에 한 번만 재생하면 일반 클릭은 1회, 더블클릭은 정확히 2회가 된다.
       // 일부 환경이 click을 하나만 보낼 경우 아래 dblclick 보정기가 빠진 한 번만 채운다.
@@ -1202,7 +1157,6 @@ window.addEventListener('load', () => {
 
 // 앱 시작: 첫 프레임은 흰색으로 유지하고, 기다림 없이 홈 화면이 부드럽게 떠오르게 한다.
 window.addEventListener('load', async () => {
-  SCENE_SOUND.playOpeningOnce();
   IMAGE_LOADER.watch();
   // 홈의 두 장만 첫 전환 전에 기다리고, 공통 UI는 홈을 보는 동안 준비한다.
   await Promise.race([
@@ -1718,7 +1672,6 @@ function goToNarrative() {
   switchScreen('screen-narrative', null, { type: 'instant' });
 }
 function goToCreate() {
-  SCENE_SOUND.playStart();
 
   // 이전 방문에서 열린 메뉴가 닫히는 애니메이션이 첫 프레임에 보이지 않도록 즉시 초기화
   closeExtraMenu({ instant: true });
