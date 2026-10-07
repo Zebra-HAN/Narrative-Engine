@@ -2539,32 +2539,28 @@ body::after {
   -webkit-user-drag: none;
 }
 
-/* 프레임에 연결된 이름 명판. 고정된 두 줄 높이로 긴 이름도 행 정렬을 유지한다.
-   하단 돌출량을 버튼 margin에 예약하므로 다음 이미지/행과 겹치지 않는다. */
+/* 명판 중심을 이미지 하단선에 맞춘다. 기존 16px gap을 활용하고,
+   돌출 부분 뒤에 4px만 남도록 필요한 최소 여백을 추가한다. */
 .group-select-wrap {
-  --group-title-height: 54px;
-  --group-title-overlap: 12px;
-  --group-title-width: 84%;
+  --group-title-height: 42px;
+  --group-title-width: 80%;
   --group-title-font: 18px;
-  --group-title-outset: calc(var(--group-title-height) - var(--group-title-overlap));
+  --group-title-outset: calc(var(--group-title-height) / 2);
 }
 
 .group-layout-two,
 .group-layout-four,
 .group-layout-six {
-  --group-title-width: 96%;
   --group-title-font: 17px;
 }
 
 .group-layout-grid {
-  --group-title-height: 48px;
-  --group-title-overlap: 10px;
-  --group-title-width: 100%;
+  --group-title-height: 38px;
   --group-title-font: 16px;
 }
 
 .group-select-btn {
-  margin-bottom: var(--group-title-outset);
+  margin-bottom: max(0px, calc(var(--group-title-outset) - 12px));
   flex-shrink: 0;
 }
 
@@ -2576,7 +2572,7 @@ body::after {
   width: var(--group-title-width);
   max-width: 310px;
   height: var(--group-title-height);
-  padding: 5px 10px;
+  padding: 1px 5px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2609,7 +2605,7 @@ body::after {
   font-family: 'Noto Sans KR', sans-serif;
   font-size: var(--group-title-font);
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.1;
   text-align: center;
   color: #fff4df;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
