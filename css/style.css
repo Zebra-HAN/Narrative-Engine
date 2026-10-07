@@ -2539,7 +2539,41 @@ body::after {
   -webkit-user-drag: none;
 }
 
-/* 이미지 그룹 버튼은 JS에서 텍스트 라벨을 렌더링하지 않는다. */
+/* 이름 시트는 3개/5개 렌더링에서만 추가되는 장식이며 버튼의 배치 공간을 차지하지 않는다. */
+.group-name-sheet {
+  position: absolute;
+  left: 50%;
+  bottom: -10px;
+  transform: translateX(-50%);
+  width: 68%;
+  max-width: 230px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.group-name-sheet > img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.group-name-sheet-label {
+  position: absolute;
+  left: 50%;
+  top: 54%;
+  transform: translate(-50%, -50%);
+  width: 64%;
+  color: #493522;
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: clamp(12px, 3.4vw, 14px);
+  font-weight: 600;
+  line-height: 1.15;
+  text-align: center;
+  overflow-wrap: anywhere;
+  text-shadow: 0 1px rgba(255, 247, 229, 0.8);
+}
+
+/* 이미지 버튼의 기본 라벨은 생략하며, 3개/5개일 때만 위 이름 시트로 표시한다. */
 
 .group-btn-label { font-size: 0.9rem; color: var(--ivory); letter-spacing: 0.05em; }
 .group-layout-four .group-btn-label,
