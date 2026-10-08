@@ -641,3 +641,18 @@
   padding-top: calc(8px + (var(--top-chrome-height) - 10px) * (1 - var(--top-chrome-progress, 0)));
   padding-bottom: calc(8px + var(--bottom-chrome-height) * (1 - var(--chrome-progress, 0)));
 }
+
+/* 7개 이상은 실제 스크롤 뷰포트 안에서 목록 전체를 가운데 놓는다.
+   flex-shrink:0으로 큰 목록은 높이를 유지해 첫 행부터 정상 스크롤된다.
+   패널은 이 영역 위로 겹치므로 표시/숨김 중에도 목록의 중앙은 움직이지 않는다. */
+#screen-create .center-page[data-chrome-view]:has(> .group-layout-grid) {
+  display: flex;
+  flex-direction: column;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+#screen-create .center-page[data-chrome-view] > .group-layout-grid {
+  flex: 1 0 auto;
+  align-content: center;
+}
