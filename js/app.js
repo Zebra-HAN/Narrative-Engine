@@ -1673,6 +1673,7 @@ function initScrollResponsiveChrome() {
   let previousView = 'top';
   let ignoreLayoutScrollUntil = 0;
   let activeChromePage = null;
+  let groupSpacingMotion = null;
 
   function updateGroupChromeSpacing() {
     // 7개 이상 그리드는 고정 여백을 사용한다. 카드 트리에는 진행값을 전달하지 않는다.
@@ -1680,6 +1681,39 @@ function initScrollResponsiveChrome() {
         || activeChromePage.querySelector(':scope > .group-layout-grid')) return;
     activeChromePage.style.setProperty('--chrome-progress', renderedBottomProgress.toFixed(4));
     activeChromePage.style.setProperty('--top-chrome-progress', renderedTopProgress.toFixed(4));
+  }
+
+  function clearGroupSpacingMotion() {
+    if (!groupSpacingMotion) return;
+    groupSpacingMotion.wrap.style.removeProperty('transform');
+    groupSpacingMotion.wrap.style.removeProperty('will-change');
+    groupSpacingMotion = null;
+  }
+
+  function prepareGroupSpacing(topProgress, bottomProgress) {
+    const page = activeChromePage;
+    const wrap = ['group', 'subgroup'].includes(page?.dataset.chromeView)
+      ? page.querySelector(':scope > .group-select-wrap:not(.group-layout-grid)') : null;
+    const firstButton = wrap?.querySelector('.group-select-btn');
+    if (!firstButton) {
+      clearGroupSpacingMotion();
+      return;
+    }
+
+    // FLIP: the current visual position includes any interrupted spacing motion.
+    // Resolve the destination padding once, then compensate on the list itself.
+    // Button sizes, the scroll container and the reveal animations stay intact.
+    const previousTop = firstButton.getBoundingClientRect().top;
+    clearGroupSpacingMotion();
+    page.style.setProperty('--chrome-progress', bottomProgress.toFixed(4));
+    page.style.setProperty('--top-chrome-progress', topProgress.toFixed(4));
+    const offset = previousTop - firstButton.getBoundingClientRect().top;
+    // A shorter destination may clamp scrollTop. Do not mistake that layout
+    // adjustment for a new user gesture; direct wheel/touch input remains active.
+    scrollPositions.set(page, page.scrollTop);
+    wrap.style.willChange = 'transform';
+    wrap.style.transform = `translate3d(0, ${offset}px, 0)`;
+    groupSpacingMotion = { wrap, offset };
   }
 
   area.querySelectorAll('.center-page').forEach(page => {
@@ -1711,7 +1745,9 @@ function initScrollResponsiveChrome() {
     // transform는 상속되지 않으므로 패널 밖 카드의 스타일을 무효화하지 않는다.
     infoPanel.style.transform = `translate3d(0, ${renderedTopProgress * -100}%, 0)`;
     bottomChrome.style.transform = `translate3d(0, ${renderedBottomProgress * 100}%, 0)`;
-    updateGroupChromeSpacing();
+    if (groupSpacingMotion) {
+      groupSpacingMotion.wrap.style.transform = `translate3d(0, ${groupSpacingMotion.offset * (1 - easedProgress)}px, 0)`;
+    }
     infoPanel.classList.toggle('top-chrome-hidden', renderedTopProgress > 0.98);
     bottomChrome.classList.toggle('bottom-chrome-hidden', renderedBottomProgress > 0.98);
     if (timeProgress < 1) {
@@ -1720,6 +1756,7 @@ function initScrollResponsiveChrome() {
       renderedTopProgress = targetTopProgress;
       renderedBottomProgress = targetBottomProgress;
       animationFrame = 0;
+      clearGroupSpacingMotion();
     }
   }
 
@@ -1736,6 +1773,7 @@ function initScrollResponsiveChrome() {
     targetBottomProgress = nextBottomProgress;
     animationStartTopProgress = renderedTopProgress;
     animationStartBottomProgress = renderedBottomProgress;
+    prepareGroupSpacing(nextTopProgress, nextBottomProgress);
     animationStartedAt = performance.now();
     if (animationFrame) cancelAnimationFrame(animationFrame);
     animationFrame = requestAnimationFrame(renderChrome);
@@ -1847,6 +1885,7 @@ function initScrollResponsiveChrome() {
     const activePage = area.querySelector('.center-page.active[data-chrome-view]')
       || area.querySelector('.center-page.active');
     if (activePage) scrollPositions.set(activePage, activePage.scrollTop);
+    clearGroupSpacingMotion();
     activeChromePage = activePage;
     updateGroupChromeSpacing();
     const view = activePage?.dataset.chromeView || 'top';
