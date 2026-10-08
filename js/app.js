@@ -1693,19 +1693,21 @@ function initScrollResponsiveChrome() {
     lastGestureAt = 0;
   }
 
-  function renderChrome(timestamp) {
-    const elapsed = timestamp - animationStartedAt;
+  function renderChrome() {
+    // RAF의 프레임 시각은 같은 프레임에서 저장한 시작 시각보다 앞설 수 있다.
+    // 시작과 갱신 모두 같은 현재 시각을 사용하고 진행률의 양끝을 제한한다.
+    const elapsed = Math.max(0, performance.now() - animationStartedAt);
     const travelDistance = Math.max(
       Math.abs(targetTopProgress - animationStartTopProgress),
       Math.abs(targetBottomProgress - animationStartBottomProgress)
     );
     const duration = ANIMATION_DURATION * travelDistance;
-    const timeProgress = duration ? Math.min(1, elapsed / duration) : 1;
+    const timeProgress = duration ? Math.max(0, Math.min(1, elapsed / duration)) : 1;
     const easedProgress = 1 - Math.pow(1 - timeProgress, 3);
-    renderedTopProgress = animationStartTopProgress
-      + (targetTopProgress - animationStartTopProgress) * easedProgress;
-    renderedBottomProgress = animationStartBottomProgress
-      + (targetBottomProgress - animationStartBottomProgress) * easedProgress;
+    renderedTopProgress = Math.max(0, Math.min(1, animationStartTopProgress
+      + (targetTopProgress - animationStartTopProgress) * easedProgress));
+    renderedBottomProgress = Math.max(0, Math.min(1, animationStartBottomProgress
+      + (targetBottomProgress - animationStartBottomProgress) * easedProgress));
     // transform는 상속되지 않으므로 패널 밖 카드의 스타일을 무효화하지 않는다.
     infoPanel.style.transform = `translate3d(0, ${renderedTopProgress * -100}%, 0)`;
     bottomChrome.style.transform = `translate3d(0, ${renderedBottomProgress * 100}%, 0)`;
