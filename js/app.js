@@ -1437,6 +1437,8 @@ function initScrollResponsiveChrome() {
   let animationStartTopProgress = 0;
   let animationStartBottomProgress = 0;
   let lastDirectInputAt = -Infinity;
+  let previousView = 'top';
+  let ignoreLayoutScrollUntil = 0;
 
   area.querySelectorAll('.center-page').forEach(page => {
     scrollPositions.set(page, page.scrollTop);
@@ -1463,6 +1465,7 @@ function initScrollResponsiveChrome() {
     renderedBottomProgress = animationStartBottomProgress
       + (targetBottomProgress - animationStartBottomProgress) * easedProgress;
     screen.style.setProperty('--chrome-progress', renderedBottomProgress.toFixed(4));
+    screen.style.setProperty('--top-chrome-progress', renderedTopProgress.toFixed(4));
     screen.style.setProperty('--top-chrome-offset', `${renderedTopProgress * -100}%`);
     screen.style.setProperty('--bottom-chrome-offset', `${renderedBottomProgress * 100}%`);
     screen.classList.toggle('top-chrome-hidden', renderedTopProgress > 0.98);
@@ -1529,7 +1532,9 @@ function initScrollResponsiveChrome() {
     const previousTop = scrollPositions.get(page) ?? currentTop;
     scrollPositions.set(page, currentTop);
     // wheel/touch와 그 결과로 발생한 scroll 이벤트를 중복 계산하지 않는다.
-    if (performance.now() - lastDirectInputAt < 100) return;
+    if (performance.now() < ignoreLayoutScrollUntil
+        || performance.now() - lastDirectInputAt < 100
+        || currentTop === previousTop) return;
     if (currentTop <= 0) setProgress(0);
     else trackGesture(currentTop - previousTop, event.timeStamp);
   }
@@ -1593,11 +1598,16 @@ function initScrollResponsiveChrome() {
   infoPanel.addEventListener('touchend', onChromeTouchEnd, { passive: true });
   infoPanel.addEventListener('touchcancel', onChromeTouchEnd, { passive: true });
 
-  // 새 카테고리/그룹 페이지는 항상 최상단에서 시작하므로 기본 패널 상태도 복원한다.
+  // 같은 스크롤/애니메이션 상태를 화면 종류별 기본 정책에도 사용한다.
   const pageObserver = new MutationObserver(() => {
-    const activePage = area.querySelector('.center-page.active');
+    const activePage = area.querySelector('.center-page.active[data-chrome-view]')
+      || area.querySelector('.center-page.active');
     if (activePage) scrollPositions.set(activePage, activePage.scrollTop);
-    setProgress(0);
+    const view = activePage?.dataset.chromeView || 'top';
+    ignoreLayoutScrollUntil = performance.now() + ANIMATION_DURATION + 80;
+    if (view === 'group' || (view === 'subgroup' && previousView === 'cards')) setProgress(1);
+    else if (view !== 'subgroup') setProgress(0);
+    previousView = view;
     resetGesture();
   });
   pageObserver.observe(area, { childList: true });
@@ -1970,6 +1980,7 @@ function showGroupPage(subId, animate = true) {
 
   const page = document.createElement('div');
   page.className = 'center-page active';
+  page.dataset.chromeView = 'group';
   page.id = 'page-' + subId;
 
   const groupLayoutClass = getGroupLayoutClass(data.groups.length);
@@ -2042,6 +2053,7 @@ function showSubgroupPage(subId, groupIdx) {
 
   const page = document.createElement('div');
   page.className = 'center-page active';
+  page.dataset.chromeView = 'subgroup';
   page.id = 'page-' + subId + '_sg_' + grp.id;
 
    const subgroupLayoutClass = getGroupLayoutClass(grp.subgroups.length);
@@ -2105,6 +2117,7 @@ function showSubgroupCards(subId, groupIdx, sgIdx) {
 
   const page = document.createElement('div');
   page.className = 'center-page active';
+  page.dataset.chromeView = 'cards';
   page.id = `page-${subId}_sgc_${grp.id}_${sg.id}`;
 
   if (!selectedCards[subId]) selectedCards[subId] = new Set();
@@ -2247,6 +2260,7 @@ function showGroupCards(subId, groupIdx) {
 
   const page = document.createElement('div');
   page.className = 'center-page active';
+  page.dataset.chromeView = 'cards';
   page.id = 'page-' + subId + '_' + grp.id;
 
   if (!selectedCards[subId]) selectedCards[subId] = new Set();
@@ -2398,6 +2412,7 @@ function showCardPage(subId, animate = true) {
 
   const page = document.createElement('div');
   page.className = 'center-page active';
+  page.dataset.chromeView = 'cards';
   page.id = 'page-' + subId;
 
   const cards = CARD_DATA[subId] || [];
