@@ -2539,13 +2539,14 @@ body::after {
   -webkit-user-drag: none;
 }
 
-/* 명판 중심을 이미지 하단선에 맞춘다. 기존 16px gap을 활용하고,
-   돌출 부분 뒤에 4px만 남도록 필요한 최소 여백을 추가한다. */
+/* 명판의 65%는 이미지 안쪽, 35%는 바깥쪽에 걸친다.
+   버튼 여백은 명판 위치/높이와 분리해 기존 행 간격을 유지한다. */
 .group-select-wrap {
-  --group-title-height: 42px;
+  --group-title-height: 33.6px;
   --group-title-width: 80%;
   --group-title-font: 18px;
-  --group-title-outset: calc(var(--group-title-height) / 2);
+  --group-title-outset: calc(var(--group-title-height) * 0.35);
+  --group-title-clearance: 9px;
 }
 
 .group-layout-two,
@@ -2555,12 +2556,13 @@ body::after {
 }
 
 .group-layout-grid {
-  --group-title-height: 38px;
+  --group-title-height: 30.4px;
+  --group-title-clearance: 7px;
   --group-title-font: 16px;
 }
 
 .group-select-btn {
-  margin-bottom: max(0px, calc(var(--group-title-outset) - 12px));
+  margin-bottom: var(--group-title-clearance);
   flex-shrink: 0;
 }
 
