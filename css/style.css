@@ -912,9 +912,7 @@ body::after {
       overflow: hidden;
       touch-action: pan-y;
       background-color: #f2eee5;
-      /* JS 배경이 아직 준비되지 않았거나 모바일 브라우저가 합성 레이어를
-         폐기해도 창작 화면이 흰색으로 비지 않도록 항상 남는 안전 배경. */
-      background-image: url('../images/core/home/forestglow.jpg');
+      /* forestglow는 홈 전용이다. 창작 배경은 준비된 두 레이어로 연속 유지한다. */
       background-position: center;
       background-size: cover;
     }
@@ -3248,4 +3246,9 @@ body {
 
 .extra-btn:has(.extra-btn-img[src]:not([src=""])) .extra-btn-label {
   display: none;
+}
+
+/* 배경을 준비하는 동안 이전 페이지는 유지하되 이전 버튼으로 잘못 진입하지 않게 한다. */
+.center-area.is-background-pending > .center-page {
+  pointer-events: none;
 }

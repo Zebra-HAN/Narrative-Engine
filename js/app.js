@@ -358,12 +358,12 @@ const CREATIVE_BACKGROUNDS = {
   world: {
     top: ['top_world-1.jpg', 'top_world-2.jpg', 'top_world-3.jpg'],
     group: ['group_world-1.jpg', 'group_world-2.jpg'],
-    card: ['bg_map.jpg', 'card_world-1.jpg', 'card_world-2.jpg', 'card_world-3.jpg', 'card_world-5.jpg', 'card_world-6.jpg'],
+    card: ['bg_map.jpg', 'card_world-1.jpg', 'card_world-2.jpg', 'card_world-3.jpg', 'card_world-4.jpg', 'card_world-5.jpg', 'card_world-6.jpg'],
   },
   compass: {
     top: ['top_comp.jpg'],
     group: ['group_comp-1.jpg', 'group_comp-2.jpg', 'group_comp-3.jpg'],
-    card: ['card_comp-1.jpg', 'card_comp-2.jpg', 'card_comp-3.jpg', 'card_comp-4.jpg', 'card_world-4.jpg'],
+    card: ['card_comp-1.jpg', 'card_comp-2.jpg', 'card_comp-3.jpg', 'card_comp-4.jpg'],
   },
 };
 
@@ -391,6 +391,7 @@ let visibleBackgroundUrl = null;
 let backgroundRequestId = 0;
 let runningBackgroundTransition = null;
 let currentBackgroundDescriptor = null;
+const backgroundLayerDescriptors = new WeakMap();
 
 function backgroundCssValue(imageUrl) {
   return `url(${JSON.stringify(imageUrl)})`;
@@ -429,12 +430,14 @@ function clearCreativeBackgroundLayers() {
     clearTimeout(transition.timer);
     transition.nextLayer.removeEventListener('transitionend', transition.onTransitionEnd);
     runningBackgroundTransition = null;
+    transition.resolveReady?.(false);
   }
   const layers = Array.from(document.querySelectorAll('#center-area .creative-background-layer'));
   setBackgroundLayerActive(layers, null);
   layers.forEach(layer => {
     layer.style.backgroundImage = 'none';
     delete layer.dataset.backgroundOwner;
+    backgroundLayerDescriptors.delete(layer);
   });
   visibleBackgroundLayer = -1;
   visibleBackgroundUrl = null;
@@ -455,12 +458,10 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
   area.dataset.backgroundStage = stage;
 
   const activationKey = `${navId}:${stage}:${screenKey}`;
+  // 진행 중이던 목적지를 먼저 확정한다. 이후 새 요청이 준비되는 동안 이
+  // 불투명 레이어가 outgoing 소유자로 남아 최하단 CSS 배경을 노출하지 않는다.
+  if (activeBackgroundScreen !== activationKey) cancelRunningBackgroundTransition();
   currentBackgroundDescriptor = { navId, stage, screenKey };
-  if (activeBackgroundScreen !== activationKey) {
-    // 새 화면의 첫 렌더 전에 이전 화면 이미지를 제거한다. 준비 동안에는 공통 기본 배경을 사용한다.
-    backgroundRequestId++;
-    clearCreativeBackgroundLayers();
-  }
 
   // 화면별 선택 기억과 이미지 로더의 요청 캐시는 별개다. 여기에는 실제 로딩에
   // 성공한 선택만 저장하며, 실패하거나 취소된 후보는 다음 방문을 막지 않는다.
@@ -483,14 +484,13 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
         || (runningBackgroundTransition?.imageUrl === imageUrl
           && runningBackgroundTransition.activationKey === activationKey
           && runningBackgroundTransition.nextLayer.dataset.backgroundOwner === activationKey
-          && layerHasBackground(runningBackgroundTransition.nextLayer)))) return;
+          && layerHasBackground(runningBackgroundTransition.nextLayer)))) return runningBackgroundTransition?.ready || true;
 
   activeBackgroundScreen = activationKey;
   const requestId = ++backgroundRequestId;
+  area.classList.add('is-background-pending');
 
-  // 같은 화면의 진행 중 전환만 확정할 수 있다. 화면이 달라진 레이어는
-  // 위에서 이미 제거됐으며, 이전 비동기 결과는 요청 ID로 무효화한다.
-  cancelRunningBackgroundTransition();
+  // 이전 비동기 결과는 요청 ID로 무효화하되, 준비된 outgoing 레이어는 유지한다.
   committedLayer = visibleBackgroundLayer >= 0 ? layers[visibleBackgroundLayer] : null;
   /*
    * 이 값은 css/style.css 안에서 실제 background-image로 사용됩니다. 상대 경로를
@@ -499,7 +499,7 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
    * 현재 문서 주소를 기준으로 절대 URL을 만든 뒤 넘겨 어느 배포 경로에서도
    * 올바른 이미지 파일을 가리키게 합니다.
    */
-  // 같은 화면의 유효한 배경/공통 기본 배경만 디코드 완료까지 유지한다.
+  // 새 이미지가 준비될 때까지 검증된 outgoing 이미지가 계속 불투명하게 남는다.
   let loaded = await IMAGE_LOADER.load(imageUrl);
   if (requestId !== backgroundRequestId || activeBackgroundScreen !== activationKey) return;
 
@@ -529,18 +529,37 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
   if (visibleBackgroundUrl === imageUrl) {
     const restoredLayer = committedLayer || layers[0];
     if (!restoredLayer) return;
+    backgroundLayerDescriptors.set(restoredLayer, currentBackgroundDescriptor);
     restoredLayer.dataset.backgroundOwner = activationKey;
     restoredLayer.style.backgroundImage = backgroundCssValue(imageUrl);
+    restoredLayer.style.transition = 'none';
     setBackgroundLayerActive(layers, restoredLayer);
+    void restoredLayer.offsetWidth;
+    restoredLayer.style.removeProperty('transition');
     visibleBackgroundLayer = layers.indexOf(restoredLayer);
     activeBackgroundScreen = activationKey;
-    return;
+    area.classList.remove('is-background-pending');
+    return true;
   }
   if (layers.length < 2) return;
 
   const nextLayerIndex = visibleBackgroundLayer === 0 ? 1 : 0;
   const nextLayer = layers[nextLayerIndex];
   const previousLayer = visibleBackgroundLayer >= 0 ? layers[visibleBackgroundLayer] : null;
+  if (!previousLayer || !layerHasBackground(previousLayer)) {
+    backgroundLayerDescriptors.set(nextLayer, currentBackgroundDescriptor);
+    nextLayer.dataset.backgroundOwner = activationKey;
+    nextLayer.style.backgroundImage = backgroundCssValue(imageUrl);
+    nextLayer.style.transition = 'none';
+    setBackgroundLayerActive(layers, nextLayer);
+    void nextLayer.offsetWidth;
+    nextLayer.style.removeProperty('transition');
+    visibleBackgroundLayer = nextLayerIndex;
+    visibleBackgroundUrl = imageUrl;
+    area.classList.remove('is-background-pending');
+    return true;
+  }
+  backgroundLayerDescriptors.set(nextLayer, currentBackgroundDescriptor);
   nextLayer.dataset.backgroundOwner = activationKey;
   nextLayer.classList.remove('is-active', 'is-inactive');
   nextLayer.style.backgroundImage = backgroundCssValue(imageUrl);
@@ -550,7 +569,11 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
   // 스타일을 먼저 확정한 다음 B만 A 위에서 나타나게 한다. A는 B가 완전히
   // 불투명해진 뒤에만 정리하므로 전환 중 흰색/투명 프레임이 생기지 않는다.
   void nextLayer.offsetWidth;
+  let resolveReady;
+  const ready = new Promise(resolve => { resolveReady = resolve; });
   const transition = {
+    ready,
+    resolveReady,
     activationKey,
     requestId,
     nextLayer,
@@ -575,6 +598,7 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
     // transitionend가 생략되는 브라우저/백그라운드 탭에서도 버퍼를 해제한다.
     transition.timer = setTimeout(finish, 360);
   });
+  return ready;
 }
 
 function finishBackgroundTransition(transition) {
@@ -589,10 +613,16 @@ function finishBackgroundTransition(transition) {
   // Mark every non-owner inactive while the new owner is still above it. The
   // inactive class suppresses opacity transitions, so an old retained bitmap
   // cannot fade over (or flash after) the newly committed background.
+  transition.nextLayer.style.transition = 'none';
+  transition.nextLayer.style.opacity = '1';
+  void transition.nextLayer.offsetWidth;
   setBackgroundLayerActive(layers, transition.nextLayer);
+  transition.nextLayer.style.removeProperty('transition');
   visibleBackgroundLayer = transition.nextLayerIndex;
   visibleBackgroundUrl = transition.imageUrl;
   runningBackgroundTransition = null;
+  area?.classList.remove('is-background-pending');
+  transition.resolveReady(true);
 }
 
 function cancelRunningBackgroundTransition() {
@@ -617,6 +647,7 @@ function cancelRunningBackgroundTransition() {
   visibleBackgroundLayer = transition.nextLayerIndex;
   visibleBackgroundUrl = transition.imageUrl;
   runningBackgroundTransition = null;
+  transition.resolveReady(false);
 }
 
 // 스와이프/PWA 복원에서는 현재 화면 소유의 유효한 레이어만 유지한다.
@@ -629,16 +660,16 @@ function retainCreativeBackgroundForSwipeBack() {
   cancelRunningBackgroundTransition();
 
   const layers = Array.from(area.querySelectorAll('.creative-background-layer'));
-  const retainedLayer = layers.find(layer => layer.dataset.backgroundOwner === activeBackgroundScreen
-    && layerHasBackground(layer) && layerShowsBackground(layer, visibleBackgroundUrl)
-    && isAllowedCreativeBackground(visibleBackgroundUrl));
-  if (retainedLayer) setBackgroundLayerActive(layers, retainedLayer);
-  else clearCreativeBackgroundLayers();
+  const retainedLayer = layers[visibleBackgroundLayer];
+  const descriptor = retainedLayer && backgroundLayerDescriptors.get(retainedLayer);
+  const valid = layerHasBackground(retainedLayer)
+    && isAllowedCreativeBackground(visibleBackgroundUrl, descriptor);
+  if (valid) setBackgroundLayerActive(layers, retainedLayer);
 }
 
 function resetCreativeBackgroundActivation() {
   backgroundRequestId++;
-  clearCreativeBackgroundLayers();
+  cancelRunningBackgroundTransition();
   activeBackgroundScreen = null;
   backgroundSessionSubId = null;
   currentBackgroundDescriptor = null;
@@ -653,6 +684,22 @@ function resetCreativeBackgroundActivation() {
 function restoreCreativeBackgroundAfterPageResume() {
   const createScreen = document.getElementById('screen-create');
   if (!createScreen?.classList.contains('active') || !currentBackgroundDescriptor) return;
+  const area = document.getElementById('center-area');
+  if (area?.classList.contains('is-background-pending')) {
+    // 준비 중인 페이지 렌더 요청을 취소하지 않는다. outgoing 합성 상태만 재확정한다.
+    const layer = area.querySelectorAll('.creative-background-layer')[visibleBackgroundLayer];
+    if (layer && visibleBackgroundUrl
+        && isAllowedCreativeBackground(visibleBackgroundUrl, backgroundLayerDescriptors.get(layer))) {
+      layer.style.transition = 'none';
+      layer.style.backgroundImage = backgroundCssValue(visibleBackgroundUrl);
+      layer.style.opacity = '1';
+      layer.classList.add('is-active');
+      layer.classList.remove('is-inactive');
+      void layer.offsetWidth;
+      layer.style.removeProperty('transition');
+    }
+    return;
+  }
   retainCreativeBackgroundForSwipeBack();
   applyCreativeBackground(currentBackgroundDescriptor);
 }
@@ -1770,13 +1817,16 @@ function goHome() {
 function goToNarrative() {
   switchScreen('screen-narrative', null, { type: 'instant' });
 }
-function goToCreate() {
+async function goToCreate() {
 
   // 이전 방문에서 열린 메뉴가 닫히는 애니메이션이 첫 프레임에 보이지 않도록 즉시 초기화
   closeExtraMenu({ instant: true });
 
+  const entryToken = screenTransitionToken;
+  if (!document.getElementById('screen-create').classList.contains('active')) clearCreativeBackgroundLayers();
+  const ready = await switchNav('character', true, { silentAddress: true });
+  if (!ready || entryToken !== screenTransitionToken) return;
   switchScreen('screen-create', () => {
-    switchNav('character', true, { silentAddress: true });
     setAddressTrail([]);
     restartCreateIntro();
   }, { type: 'instant' });
@@ -1822,9 +1872,10 @@ function switchNav(navId, skipAnimation, options = {}) {
 
   // 중앙 기본 상태로
   closeCardInfo();
-  showDefaultCenter();
+  const backgroundReady = showDefaultCenter();
   updateInfoPanel();
    if (!options.silentAddress) setNavAddress(navId);
+  return backgroundReady;
 }
 
 function renderSubnav(navId, animate) {
@@ -1877,16 +1928,18 @@ function selectSub(subId, navId) {
 /* ════════════════════════════════════════════════
    중앙 표시 영역
 ════════════════════════════════════════════════ */
-function showDefaultCenter() {
+async function showDefaultCenter() {
   closeCardInfo();
   const area = document.getElementById('center-area');
+
+  if (!await applyCreativeBackground({ navId: currentNav, stage: 'top', screenKey: 'top' })) return false;
 
   // 기존 동적 페이지 제거
   area.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
 
   const def = document.getElementById('page-default');
   def.classList.add('active');
-  applyCreativeBackground({ navId: currentNav, stage: 'top', screenKey: 'top' });
+  return true;
 }
 
 
@@ -1995,15 +2048,14 @@ function setupCardRevealAnimations(page) {
    ─ groups 배열에 항목 추가만 하면 버튼 자동 생성
    ─ 그룹 안에 subgroups 배열이 있으면 → 2단계(서브그룹) 구조로 동작
 ════════════════════════════════════════════════ */
-function showGroupPage(subId, animate = true) {
+async function showGroupPage(subId, animate = true) {
   closeCardInfo();
   const area = document.getElementById('center-area');
 
-  document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
-
   const data = CARD_DATA[subId];
   if (!data || !data.groups) return;
-  applyCreativeBackground({ navId: currentNav, stage: 'group', screenKey: `group:${subId}` });
+  if (!await applyCreativeBackground({ navId: currentNav, stage: 'group', screenKey: `group:${subId}` })) return;
+  document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
 
   const page = document.createElement('div');
   page.className = 'center-page active';
@@ -2064,7 +2116,7 @@ sg.cards.forEach((card, cIdx) => {
    서브그룹 선택 화면 렌더 (2단계)
    ─ 그룹 안에 subgroups 배열이 있을 때 그룹 버튼 클릭 시 열림
 ════════════════════════════════════════════════ */
-function showSubgroupPage(subId, groupIdx) {
+async function showSubgroupPage(subId, groupIdx) {
   closeCardInfo();
   const area = document.getElementById('center-area');
   const data = CARD_DATA[subId];
@@ -2074,7 +2126,7 @@ function showSubgroupPage(subId, groupIdx) {
   if (!grp || !grp.subgroups) return;
   IMAGE_LOADER.preload(imageSources(grp.subgroups));
   grp.subgroups.forEach(sg => preloadCards(sg.cards));
-  applyCreativeBackground({ navId: currentNav, stage: 'group', screenKey: `subgroup:${subId}:${groupIdx}` });
+  if (!await applyCreativeBackground({ navId: currentNav, stage: 'group', screenKey: `subgroup:${subId}:${groupIdx}` })) return;
 
   document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
 
@@ -2126,7 +2178,7 @@ function showSubgroupPage(subId, groupIdx) {
 /* ════════════════════════════════════════════════
    서브그룹 카드 목록 렌더 (2단계 → 카드)
 ════════════════════════════════════════════════ */
-function showSubgroupCards(subId, groupIdx, sgIdx) {
+async function showSubgroupCards(subId, groupIdx, sgIdx) {
   closeCardInfo();
   const area = document.getElementById('center-area');
   const data = CARD_DATA[subId];
@@ -2134,7 +2186,7 @@ function showSubgroupCards(subId, groupIdx, sgIdx) {
 
   const grp = data.groups[groupIdx];
   if (!grp || !grp.subgroups) return;
-  applyCreativeBackground({ navId: currentNav, stage: 'card', screenKey: `subgroup-cards:${subId}:${groupIdx}:${sgIdx}` });
+  if (!await applyCreativeBackground({ navId: currentNav, stage: 'card', screenKey: `subgroup-cards:${subId}:${groupIdx}:${sgIdx}` })) return;
 
   const sg = grp.subgroups[sgIdx];
   if (!sg) return;
@@ -2272,7 +2324,7 @@ function updateSubgroupBadges(subId, groupIdx) {
 /* ════════════════════════════════════════════════
    그룹 버튼 클릭 → 해당 그룹의 카드 목록 열기 (1단계 그룹용)
 ════════════════════════════════════════════════ */
-function showGroupCards(subId, groupIdx) {
+async function showGroupCards(subId, groupIdx) {
   closeCardInfo();
   const area = document.getElementById('center-area');
   const data = CARD_DATA[subId];
@@ -2281,7 +2333,7 @@ function showGroupCards(subId, groupIdx) {
   const grp = data.groups[groupIdx];
   if (!grp) return;
   preloadCards(grp.cards);
-  applyCreativeBackground({ navId: currentNav, stage: 'card', screenKey: `group-cards:${subId}:${groupIdx}` });
+  if (!await applyCreativeBackground({ navId: currentNav, stage: 'card', screenKey: `group-cards:${subId}:${groupIdx}` })) return;
 
   document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
 
@@ -2417,19 +2469,18 @@ function updateGroupBadges(subId) {
 }
 
 
-function showCardPage(subId, animate = true) {
+async function showCardPage(subId, animate = true) {
   closeCardInfo();
 
   // type:'group' 인 경우 그룹 선택 화면을 열고 종료
   const navInfo2 = Object.values(NAV_DATA).find(n => n.subs.find(s => s.id === subId));
   const subCheck = navInfo2 ? navInfo2.subs.find(s => s.id === subId) : null;
   if (subCheck && subCheck.type === 'group') {
-    showGroupPage(subId, animate);
-    return;
+    return showGroupPage(subId, animate);
   }
 
   const area = document.getElementById('center-area');
-  applyCreativeBackground({ navId: currentNav, stage: 'card', screenKey: `cards:${subId}` });
+  if (!await applyCreativeBackground({ navId: currentNav, stage: 'card', screenKey: `cards:${subId}` })) return;
 
   // default 숨기기
   document.getElementById('page-default').classList.remove('active');
