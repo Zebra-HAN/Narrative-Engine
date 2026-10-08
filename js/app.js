@@ -1289,6 +1289,68 @@ function initCardTitleAutoFit() {
 // 벗어난 뒤에만 초기화한다.
 initCardTitleAutoFit();
 
+/* 그룹 명판은 실제 렌더링 폭으로 맞춘다. 기존 기본 크기를 상한으로 유지한다. */
+let groupTitleFitFrame = 0;
+const groupTitleResizeObserver = new ResizeObserver(requestGroupTitleAutoFit);
+
+function fitGroupTitle(banner) {
+  const text = banner.querySelector('.group-title-text');
+  if (!text || !banner.clientWidth || !banner.clientHeight) return;
+  const style = getComputedStyle(banner);
+  const width = banner.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+  const height = banner.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom) - 4;
+  text.style.removeProperty('font-size');
+  text.style.whiteSpace = 'nowrap';
+  const base = parseFloat(getComputedStyle(text).fontSize);
+  const oneLineMinimum = Math.max(12, base * 0.8);
+  const fits = () => text.scrollWidth <= width + 0.5 && text.scrollHeight <= height + 0.5;
+  for (let size = base; size >= oneLineMinimum; size -= 0.25) {
+    text.style.fontSize = `${size}px`;
+    if (fits()) {
+      return;
+    }
+  }
+  text.style.whiteSpace = 'normal';
+  for (let size = base; size >= 12; size -= 0.25) {
+    text.style.fontSize = `${size}px`;
+    const lineHeight = parseFloat(getComputedStyle(text).lineHeight);
+    if (fits() && text.getBoundingClientRect().height <= lineHeight * 2 + 0.5) {
+      return;
+    }
+  }
+  // 사용자가 허용한 예외: 극단적으로 긴 이름도 생략하지 않고 두 줄 안에 전부 넣는다.
+  // 기본/일반 제목에는 적용하지 않으며, 가능한 가장 큰 크기를 이진 탐색한다.
+  let low = 0;
+  let high = 12;
+  for (let i = 0; i < 16; i++) {
+    const size = (low + high) / 2;
+    text.style.fontSize = `${size}px`;
+    const lineHeight = parseFloat(getComputedStyle(text).lineHeight);
+    if (fits() && text.getBoundingClientRect().height <= lineHeight * 2 + 0.5) low = size;
+    else high = size;
+  }
+  text.style.fontSize = `${Math.floor(low * 100) / 100}px`;
+}
+
+function requestGroupTitleAutoFit() {
+  if (groupTitleFitFrame) return;
+  groupTitleFitFrame = requestAnimationFrame(() => {
+    groupTitleFitFrame = 0;
+    document.querySelectorAll('.group-title-banner').forEach(fitGroupTitle);
+  });
+}
+
+function observeGroupTitles(container) {
+  groupTitleResizeObserver.disconnect();
+  container.querySelectorAll('.group-title-banner').forEach(banner => groupTitleResizeObserver.observe(banner));
+  requestGroupTitleAutoFit();
+}
+
+if (document.fonts) {
+  document.fonts.ready.then(requestGroupTitleAutoFit);
+  document.fonts.addEventListener('loadingdone', requestGroupTitleAutoFit);
+}
+
 /* ════════════════════════════════════════════════
    정보 패널 문구 자동 맞춤
    패널 높이는 그대로 둔 채 실제 렌더링 영역을 넘는 텍스트만 단계적으로 축소한다.
@@ -3805,6 +3867,7 @@ subs.forEach(sub => {
 ════════════════════════════════════════════════ */
 
 function setupGroupButtonActions(containerEl) {
+  observeGroupTitles(containerEl);
   containerEl.querySelectorAll('.group-select-btn').forEach(btn => {
     const usesFastReveal = btn.closest('.group-reveal-flow');
     const finishReveal = (event) => {
