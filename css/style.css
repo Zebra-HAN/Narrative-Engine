@@ -2580,8 +2580,8 @@ body::after {
   justify-content: center;
   z-index: 2;
   /* 양끝을 작게 깎아 이미지 프레임에 걸친 금속 명판 형태를 만든다. */
-  clip-path: polygon(0 9px, 8px 0, calc(100% - 8px) 0, 100% 9px,
-    100% calc(100% - 9px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 9px));
+  clip-path: polygon(0 5px, 6px 0, calc(100% - 6px) 0, 100% 5px,
+    100% calc(100% - 5px), calc(100% - 6px) 100%, 6px 100%, 0 calc(100% - 5px));
   background: linear-gradient(135deg, var(--group-metal-light), var(--group-metal-mid) 35%,
     var(--group-metal-shade) 75%, var(--group-metal-mid));
 }
@@ -2589,12 +2589,13 @@ body::after {
 .group-title-banner::before {
   content: '';
   position: absolute;
-  inset: 2px;
-  clip-path: inherit;
+  inset: 1px;
+  clip-path: polygon(0 4.5px, 5.5px 0, calc(100% - 5.5px) 0, 100% 4.5px,
+    100% calc(100% - 4.5px), calc(100% - 5.5px) 100%, 5.5px 100%, 0 calc(100% - 4.5px));
   background:
     linear-gradient(180deg, rgba(255, 244, 219, 0.12), transparent 45%, rgba(0, 0, 0, 0.12)),
     linear-gradient(135deg, var(--group-metal-shade), var(--group-metal-edge));
-  box-shadow: inset 0 1px rgba(255, 244, 219, 0.3);
+  box-shadow: inset 0 1px rgba(255, 244, 219, 0.22);
 }
 
 .group-title-text {
