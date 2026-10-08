@@ -840,21 +840,22 @@ function getCardGridOpenTag(group) {
   return `<div class="card-grid ${getCardGridLayoutClass(group)}">`;
 }
 
-function markFirstCardRow(page) {
-  // 첫 카드보다 앞에 섹션이 나타나 초기 그리드가 비어 있을 수 있다. 페이지에서
-  // 첫 번째로 *실제로 표시되는* 행만 최상단 행이며, 이후 섹션 헤더 다음에 시작되는 행은
-  // 팝오버를 계속 카드 위에 표시해야 한다.
-  const grids = Array.from(page.querySelectorAll('.card-grid'));
-  const firstCards = grids
-    .map(grid => Array.from(grid.querySelectorAll('.data-card')))
-    .find(cards => cards.length > 0);
-  const cards = firstCards || [];
-  if (cards.length === 0) return;
+// 실제 CSS 열 수: legacy d도 현재는 3열이다. 카드의 화면 좌표를 읽지 않는다.
+function getRenderedCardGridColumns(grid) {
+  if (grid.classList.contains('card-grid-layout-b')) return 4;
+  if (grid.classList.contains('card-grid-layout-c') || grid.classList.contains('card-grid-layout-d')) return 3;
+  return 5;
+}
 
-  const firstRowTop = cards[0].offsetTop;
-  cards.forEach(card => {
-    card.classList.toggle('first-row-card', card.offsetTop === firstRowTop);
-  });
+function markFirstCardRow(page) {
+  // 빈 그리드/섹션을 건너뛰고 첫 실제 그리드의 첫 행만 표시한다.
+  for (const grid of page.querySelectorAll('.card-grid')) {
+    const cards = Array.from(grid.querySelectorAll('.data-card'));
+    if (!cards.length) continue;
+    const columns = getRenderedCardGridColumns(grid);
+    cards.forEach((card, index) => card.classList.toggle('first-row-card', index < columns));
+    break;
+  }
 }
 
 function isSectionItem(item) {
@@ -2089,26 +2090,17 @@ function getCardRevealDelayStyle() {
 
 function setupCardRevealAnimations(page) {
   const cards = Array.from(page.querySelectorAll('.card-deal'));
-  const rows = [];
-
-  // 실제 배치 좌표로 행과 열을 찾으므로 3·4·5열과 섹션으로 나뉜 그리드에 모두 대응한다.
-  cards.forEach(card => {
-    const rect = card.getBoundingClientRect();
-    let row = rows.find(candidate => Math.abs(candidate.top - rect.top) < 1);
-    if (!row) {
-      row = { top: rect.top, cards: [] };
-      rows.push(row);
-    }
-    row.cards.push({ card, left: rect.left });
-  });
-
-  rows.sort((a, b) => a.top - b.top);
   const waveSteps = new Map();
-  rows.forEach((row, rowIndex) => {
-    row.cards.sort((a, b) => a.left - b.left);
-    row.cards.forEach(({ card }, columnIndex) => {
-      waveSteps.set(card, rowIndex + columnIndex);
+  let rowOffset = 0;
+  // CSS Grid는 고정 열 수와 DOM 순서로 배치한다. 섹션별 행 수를 누적하면
+  // 기존 row+column 파동을 레이아웃 측정/좌표 정렬 없이 그대로 얻을 수 있다.
+  page.querySelectorAll('.card-grid').forEach(grid => {
+    const gridCards = Array.from(grid.querySelectorAll('.card-deal'));
+    const columns = getRenderedCardGridColumns(grid);
+    gridCards.forEach((card, index) => {
+      waveSteps.set(card, rowOffset + Math.floor(index / columns) + index % columns);
     });
+    rowOffset += Math.ceil(gridCards.length / columns);
   });
 
   // 12번째 카드의 파동 뒤 두 단계를 더 보여 준 다음, 남은 카드도 같은 flip으로 함께 시작한다.
@@ -2321,10 +2313,9 @@ function showSubgroupCards(subId, groupIdx, sgIdx) {
   html += '</div>';
 
   page.innerHTML = html;
-  area.appendChild(page);
-
   markFirstCardRow(page);
   setupCardRevealAnimations(page);
+  area.appendChild(page);
    setSubgroupAddress(subId, groupIdx, sgIdx);
 }
 
@@ -2464,10 +2455,9 @@ function showGroupCards(subId, groupIdx) {
   });
   html += '</div>';
   page.innerHTML = html;
-  area.appendChild(page);
-
   markFirstCardRow(page);
   setupCardRevealAnimations(page);
+  area.appendChild(page);
    setGroupAddress(subId, groupIdx, true);
 }
 
@@ -2619,11 +2609,10 @@ function showCardPage(subId, animate = true) {
 
   html += '</div>';
   page.innerHTML = html;
-  area.appendChild(page);
-
   markFirstCardRow(page);
   // card-deal 애니메이션 끝난 뒤 클래스 제거 → pressable 눌림효과 항상 작동
   setupCardRevealAnimations(page);
+  area.appendChild(page);
 }
 
 
