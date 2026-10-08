@@ -2597,10 +2597,11 @@ body::after {
 
 .group-title-text {
   position: relative;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  flex-shrink: 0;
+  white-space: nowrap;
   overflow-wrap: anywhere;
   font-family: 'Noto Sans KR', sans-serif;
   font-size: var(--group-title-font);
