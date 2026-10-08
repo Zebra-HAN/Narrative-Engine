@@ -89,7 +89,7 @@ const COMPASS_CARDS = {
   type: {
   groups: [
     { description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.', detail: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',  id:'type_existing', 
-     label:'체크중 기본유형', icon:'📚', cards:[
+     label:'기본유형', icon:'📚', cards:[
      
 { type: 'section' ,  label: ' 드래곤 종족　　— 추가 내용 샬라샬라 ㅇㅋ1234 ' },  
     { icon:'🌟', name:'영웅 서사'    }, { icon:'💀', name:'비극'         },
