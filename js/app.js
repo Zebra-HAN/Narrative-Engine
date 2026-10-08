@@ -1513,6 +1513,15 @@ function initScrollResponsiveChrome() {
   let lastDirectInputAt = -Infinity;
   let previousView = 'top';
   let ignoreLayoutScrollUntil = 0;
+  let activeChromePage = null;
+
+  function updateGroupChromeSpacing() {
+    // 7개 이상 그리드는 고정 여백을 사용한다. 카드 트리에는 진행값을 전달하지 않는다.
+    if (!activeChromePage || !['group', 'subgroup'].includes(activeChromePage.dataset.chromeView)
+        || activeChromePage.querySelector(':scope > .group-layout-grid')) return;
+    activeChromePage.style.setProperty('--chrome-progress', renderedBottomProgress.toFixed(4));
+    activeChromePage.style.setProperty('--top-chrome-progress', renderedTopProgress.toFixed(4));
+  }
 
   area.querySelectorAll('.center-page').forEach(page => {
     scrollPositions.set(page, page.scrollTop);
@@ -1538,12 +1547,12 @@ function initScrollResponsiveChrome() {
       + (targetTopProgress - animationStartTopProgress) * easedProgress;
     renderedBottomProgress = animationStartBottomProgress
       + (targetBottomProgress - animationStartBottomProgress) * easedProgress;
-    screen.style.setProperty('--chrome-progress', renderedBottomProgress.toFixed(4));
-    screen.style.setProperty('--top-chrome-progress', renderedTopProgress.toFixed(4));
-    screen.style.setProperty('--top-chrome-offset', `${renderedTopProgress * -100}%`);
-    screen.style.setProperty('--bottom-chrome-offset', `${renderedBottomProgress * 100}%`);
-    screen.classList.toggle('top-chrome-hidden', renderedTopProgress > 0.98);
-    screen.classList.toggle('bottom-chrome-hidden', renderedBottomProgress > 0.98);
+    // transform는 상속되지 않으므로 패널 밖 카드의 스타일을 무효화하지 않는다.
+    infoPanel.style.transform = `translate3d(0, ${renderedTopProgress * -100}%, 0)`;
+    bottomChrome.style.transform = `translate3d(0, ${renderedBottomProgress * 100}%, 0)`;
+    updateGroupChromeSpacing();
+    infoPanel.classList.toggle('top-chrome-hidden', renderedTopProgress > 0.98);
+    bottomChrome.classList.toggle('bottom-chrome-hidden', renderedBottomProgress > 0.98);
     if (timeProgress < 1) {
       animationFrame = requestAnimationFrame(renderChrome);
     } else {
@@ -1677,6 +1686,8 @@ function initScrollResponsiveChrome() {
     const activePage = area.querySelector('.center-page.active[data-chrome-view]')
       || area.querySelector('.center-page.active');
     if (activePage) scrollPositions.set(activePage, activePage.scrollTop);
+    activeChromePage = activePage;
+    updateGroupChromeSpacing();
     const view = activePage?.dataset.chromeView || 'top';
     ignoreLayoutScrollUntil = performance.now() + ANIMATION_DURATION + 80;
     if (view === 'group' || (view === 'subgroup' && previousView === 'cards')) setProgress(1);

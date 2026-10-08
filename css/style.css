@@ -443,11 +443,8 @@ body::after {
        메인 창작 페이지
     ═══════════════════════════════════════════════ */
     #screen-create {
-      --chrome-progress: 0;
       --top-chrome-height: 96px;
       --bottom-chrome-height: 149px;
-      --top-chrome-offset: 0%;
-      --bottom-chrome-offset: 0%;
       background: var(--bg-deepest);
       display: flex;
       flex-direction: column;
@@ -497,7 +494,7 @@ body::after {
       display: flex;
       flex-direction: column;
       opacity: 1;
-      transform: translate3d(0, var(--bottom-chrome-offset), 0);
+      transform: translate3d(0, 0, 0);
       will-change: transform, opacity;
     }
 
@@ -519,12 +516,12 @@ body::after {
       /* 영역 자체는 빈 공간의 입력을 무시하지만, 보이는 패널과 그 안의 모든 버튼 및
          스와이프 영역은 계속 상호작용할 수 있다. */
       pointer-events: auto;
-      transform: translate3d(0, var(--top-chrome-offset), 0);
+      transform: translate3d(0, 0, 0);
       opacity: 1;
       will-change: transform, opacity;
     }
-    #screen-create.top-chrome-hidden .info-panel { pointer-events: none; }
-    #screen-create.bottom-chrome-hidden .create-chrome-bottom { pointer-events: none; }
+    #screen-create .info-panel.top-chrome-hidden { pointer-events: none; }
+    #screen-create .create-chrome-bottom.bottom-chrome-hidden { pointer-events: none; }
     @media (prefers-reduced-motion: reduce) {
       #screen-create { scroll-behavior: auto; }
     }
