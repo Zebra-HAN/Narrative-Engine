@@ -358,12 +358,12 @@ const CREATIVE_BACKGROUNDS = {
   world: {
     top: ['top_world-1.jpg', 'top_world-2.jpg', 'top_world-3.jpg'],
     group: ['group_world-1.jpg', 'group_world-2.jpg'],
-    card: ['bg_map.jpg', 'card_world-1.jpg', 'card_world-2.jpg', 'card_world-3.jpg', 'card_world-4.jpg', 'card_world-5.jpg', 'card_world-6.jpg'],
+    card: ['bg_map.jpg', 'card_world-1.jpg', 'card_world-2.jpg', 'card_world-3.jpg', 'card_world-5.jpg', 'card_world-6.jpg'],
   },
   compass: {
     top: ['top_comp.jpg'],
     group: ['group_comp-1.jpg', 'group_comp-2.jpg', 'group_comp-3.jpg'],
-    card: ['card_comp-1.jpg', 'card_comp-2.jpg', 'card_comp-3.jpg', 'card_comp-4.jpg'],
+    card: ['card_comp-1.jpg', 'card_comp-2.jpg', 'card_comp-3.jpg', 'card_comp-4.jpg', 'card_world-4.jpg'],
   },
 };
 
@@ -402,6 +402,7 @@ function layerHasBackground(layer) {
 
 function layerShowsBackground(layer, imageUrl) {
   return layerHasBackground(layer)
+    && layer.dataset.backgroundOwner === activeBackgroundScreen
     && layer.classList.contains('is-active')
     && layer.style.backgroundImage === backgroundCssValue(imageUrl);
 }
@@ -414,6 +415,29 @@ function setBackgroundLayerActive(layers, activeLayer) {
     layer.classList.remove('is-incoming');
     layer.style.opacity = isActive ? '1' : '0';
   });
+}
+
+// 배경 선택 메모리와 DOM 레이어 모두 현재 화면의 소유권/후보 목록을 검증한다.
+function isAllowedCreativeBackground(imageUrl, descriptor = currentBackgroundDescriptor) {
+  return Boolean(descriptor && (CREATIVE_BACKGROUNDS[descriptor.navId]?.[descriptor.stage] || [])
+    .some(file => new URL(`images/core/home/${file}`, document.baseURI).href === new URL(imageUrl, document.baseURI).href));
+}
+
+function clearCreativeBackgroundLayers() {
+  const transition = runningBackgroundTransition;
+  if (transition) {
+    clearTimeout(transition.timer);
+    transition.nextLayer.removeEventListener('transitionend', transition.onTransitionEnd);
+    runningBackgroundTransition = null;
+  }
+  const layers = Array.from(document.querySelectorAll('#center-area .creative-background-layer'));
+  setBackgroundLayerActive(layers, null);
+  layers.forEach(layer => {
+    layer.style.backgroundImage = 'none';
+    delete layer.dataset.backgroundOwner;
+  });
+  visibleBackgroundLayer = -1;
+  visibleBackgroundUrl = null;
 }
 
 function getCreativeBackground(navId, stage) {
@@ -432,11 +456,16 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
 
   const activationKey = `${navId}:${stage}:${screenKey}`;
   currentBackgroundDescriptor = { navId, stage, screenKey };
+  if (activeBackgroundScreen !== activationKey) {
+    // 새 화면의 첫 렌더 전에 이전 화면 이미지를 제거한다. 준비 동안에는 공통 기본 배경을 사용한다.
+    backgroundRequestId++;
+    clearCreativeBackgroundLayers();
+  }
 
   // 화면별 선택 기억과 이미지 로더의 요청 캐시는 별개다. 여기에는 실제 로딩에
   // 성공한 선택만 저장하며, 실패하거나 취소된 후보는 다음 방문을 막지 않는다.
   let path = creativeBackgroundMemory.get(activationKey);
-  if (!path) {
+  if (!path || !isAllowedCreativeBackground(path)) {
     path = getCreativeBackground(navId, stage);
   }
   if (!path) return;
@@ -452,15 +481,15 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
   if (activeBackgroundScreen === activationKey
       && (layerShowsBackground(committedLayer, imageUrl)
         || (runningBackgroundTransition?.imageUrl === imageUrl
+          && runningBackgroundTransition.activationKey === activationKey
+          && runningBackgroundTransition.nextLayer.dataset.backgroundOwner === activationKey
           && layerHasBackground(runningBackgroundTransition.nextLayer)))) return;
 
   activeBackgroundScreen = activationKey;
   const requestId = ++backgroundRequestId;
 
-  // Navigation supersedes an in-flight fade immediately, not after its timer resolves.
-  // Keep the latest prepared layer as the base while the newest image is prepared.
-  // This prevents an obsolete request from extending the navigation by one fade duration
-  // or committing its URL after a quick back/forward gesture.
+  // 같은 화면의 진행 중 전환만 확정할 수 있다. 화면이 달라진 레이어는
+  // 위에서 이미 제거됐으며, 이전 비동기 결과는 요청 ID로 무효화한다.
   cancelRunningBackgroundTransition();
   committedLayer = visibleBackgroundLayer >= 0 ? layers[visibleBackgroundLayer] : null;
   /*
@@ -470,7 +499,7 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
    * 현재 문서 주소를 기준으로 절대 URL을 만든 뒤 넘겨 어느 배포 경로에서도
    * 올바른 이미지 파일을 가리키게 합니다.
    */
-  // 이전 배경/기본색은 새 배경이 실제 디코드될 때까지 그대로 둔다.
+  // 같은 화면의 유효한 배경/공통 기본 배경만 디코드 완료까지 유지한다.
   let loaded = await IMAGE_LOADER.load(imageUrl);
   if (requestId !== backgroundRequestId || activeBackgroundScreen !== activationKey) return;
 
@@ -490,7 +519,7 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
       }
     }
   }
-  if (!loaded) return;
+  if (!loaded || !isAllowedCreativeBackground(imageUrl)) return;
 
   // A successful URL belongs to this route for the rest of this creative
   // session, independently of whether a later navigation cancels its fade.
@@ -500,6 +529,7 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
   if (visibleBackgroundUrl === imageUrl) {
     const restoredLayer = committedLayer || layers[0];
     if (!restoredLayer) return;
+    restoredLayer.dataset.backgroundOwner = activationKey;
     restoredLayer.style.backgroundImage = backgroundCssValue(imageUrl);
     setBackgroundLayerActive(layers, restoredLayer);
     visibleBackgroundLayer = layers.indexOf(restoredLayer);
@@ -511,6 +541,7 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
   const nextLayerIndex = visibleBackgroundLayer === 0 ? 1 : 0;
   const nextLayer = layers[nextLayerIndex];
   const previousLayer = visibleBackgroundLayer >= 0 ? layers[visibleBackgroundLayer] : null;
+  nextLayer.dataset.backgroundOwner = activationKey;
   nextLayer.classList.remove('is-active', 'is-inactive');
   nextLayer.style.backgroundImage = backgroundCssValue(imageUrl);
   nextLayer.style.opacity = '0';
@@ -520,6 +551,7 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
   // 불투명해진 뒤에만 정리하므로 전환 중 흰색/투명 프레임이 생기지 않는다.
   void nextLayer.offsetWidth;
   const transition = {
+    activationKey,
     requestId,
     nextLayer,
     nextLayerIndex,
@@ -535,7 +567,10 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
   runningBackgroundTransition = transition;
   nextLayer.addEventListener('transitionend', transition.onTransitionEnd);
   requestAnimationFrame(() => {
-    if (runningBackgroundTransition !== transition || requestId !== backgroundRequestId) return;
+    if (runningBackgroundTransition !== transition || requestId !== backgroundRequestId
+        || transition.activationKey !== activeBackgroundScreen
+        || nextLayer.dataset.backgroundOwner !== activeBackgroundScreen
+        || !isAllowedCreativeBackground(imageUrl)) return;
     nextLayer.style.opacity = '1';
     // transitionend가 생략되는 브라우저/백그라운드 탭에서도 버퍼를 해제한다.
     transition.timer = setTimeout(finish, 360);
@@ -543,7 +578,10 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
 }
 
 function finishBackgroundTransition(transition) {
-  if (runningBackgroundTransition !== transition || transition.requestId !== backgroundRequestId) return;
+  if (runningBackgroundTransition !== transition || transition.requestId !== backgroundRequestId
+      || transition.activationKey !== activeBackgroundScreen
+      || transition.nextLayer.dataset.backgroundOwner !== activeBackgroundScreen
+      || !isAllowedCreativeBackground(transition.imageUrl)) return;
   clearTimeout(transition.timer);
   transition.nextLayer.removeEventListener('transitionend', transition.onTransitionEnd);
   const area = transition.nextLayer.closest('.center-area');
@@ -560,6 +598,12 @@ function finishBackgroundTransition(transition) {
 function cancelRunningBackgroundTransition() {
   const transition = runningBackgroundTransition;
   if (!transition) return;
+  if (transition.activationKey !== activeBackgroundScreen
+      || transition.nextLayer.dataset.backgroundOwner !== activeBackgroundScreen
+      || !isAllowedCreativeBackground(transition.imageUrl)) {
+    clearCreativeBackgroundLayers();
+    return;
+  }
   clearTimeout(transition.timer);
   transition.nextLayer.removeEventListener('transitionend', transition.onTransitionEnd);
   // 다음 배경은 이미 로딩/디코딩을 마쳤다. 중간 이동이 발생해도 그 배경으로
@@ -575,11 +619,8 @@ function cancelRunningBackgroundTransition() {
   runningBackgroundTransition = null;
 }
 
-// A back swipe can interrupt a crossfade between its last animation frame and
-// transitionend cleanup. Pin the latest prepared image before rebuilding the
-// previous page so cancellation can never leave both buffers transparent.
-// The destination still goes through applyCreativeBackground and its existing
-// preload/decode/crossfade path; this only protects the swipe-back handoff.
+// 스와이프/PWA 복원에서는 현재 화면 소유의 유효한 레이어만 유지한다.
+// 목적지 화면이 바뀌면 applyCreativeBackground가 이를 제거하고 기억된 배경을 복원한다.
 function retainCreativeBackgroundForSwipeBack() {
   const area = document.getElementById('center-area');
   if (!area) return;
@@ -588,30 +629,16 @@ function retainCreativeBackgroundForSwipeBack() {
   cancelRunningBackgroundTransition();
 
   const layers = Array.from(area.querySelectorAll('.creative-background-layer'));
-  let retainedLayer = visibleBackgroundLayer >= 0 ? layers[visibleBackgroundLayer] : null;
-  const hasImage = layerHasBackground;
-
-  if (!hasImage(retainedLayer)) {
-    retainedLayer = layers.find(layer => hasImage(layer) && layer.style.opacity !== '0')
-      || layers.find(hasImage)
-      || null;
-    if (retainedLayer) visibleBackgroundLayer = layers.indexOf(retainedLayer);
-  }
-
-  // Metadata can outlive inline styles during an interrupted cleanup. Reapply
-  // the already decoded/visible URL rather than selecting or loading a new one.
-  if (!hasImage(retainedLayer) && visibleBackgroundUrl && layers.length > 0) {
-    retainedLayer = layers[visibleBackgroundLayer >= 0 ? visibleBackgroundLayer : 0];
-    retainedLayer.style.backgroundImage = backgroundCssValue(visibleBackgroundUrl);
-    visibleBackgroundLayer = layers.indexOf(retainedLayer);
-  }
-
+  const retainedLayer = layers.find(layer => layer.dataset.backgroundOwner === activeBackgroundScreen
+    && layerHasBackground(layer) && layerShowsBackground(layer, visibleBackgroundUrl)
+    && isAllowedCreativeBackground(visibleBackgroundUrl));
   if (retainedLayer) setBackgroundLayerActive(layers, retainedLayer);
+  else clearCreativeBackgroundLayers();
 }
 
 function resetCreativeBackgroundActivation() {
   backgroundRequestId++;
-  cancelRunningBackgroundTransition();
+  clearCreativeBackgroundLayers();
   activeBackgroundScreen = null;
   backgroundSessionSubId = null;
   currentBackgroundDescriptor = null;
