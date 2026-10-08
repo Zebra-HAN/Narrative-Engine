@@ -1348,6 +1348,10 @@ let cardTitleFitFrame = 0;
 let titleFontRevision = 0;
 const cardTitleFitCache = new WeakMap();
 const groupTitleFitCache = new WeakMap();
+// Rebuilt group/subgroup pages can reuse the same exact fitted text styles.
+// The key includes content, space, typography and font-loading revision.
+const groupTitleFitResults = new Map();
+const GROUP_TITLE_FIT_RESULT_LIMIT = 256;
 
 function titleFitKey(container, text, group = false) {
   const style = getComputedStyle(container);
@@ -1486,15 +1490,26 @@ function fitGroupTitle(banner) {
 function fitGroupTitles(banners) {
   // 모든 측정 조건을 먼저 읽는다. 이미 맞춘 제목은 DOM을 쓰지 않고 재사용한다.
   const jobs = [];
+  const reused = [];
   banners.forEach(banner => {
     const text = banner.querySelector('.group-title-text');
     if (!text || !banner.clientWidth || !banner.clientHeight) return;
     const key = titleFitKey(banner, text, true);
     if (groupTitleFitCache.get(banner) === key) return;
+    const result = groupTitleFitResults.get(key);
+    if (result) {
+      reused.push({ banner, text, key, result });
+      return;
+    }
     const style = getComputedStyle(banner);
     jobs.push({ banner, text, key,
       width: banner.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight),
       height: banner.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom) - 4 });
+  });
+  reused.forEach(({ banner, text, key, result }) => {
+    text.style.fontSize = result.fontSize;
+    text.style.whiteSpace = result.whiteSpace;
+    groupTitleFitCache.set(banner, key);
   });
   jobs.forEach(({ text }) => { text.style.removeProperty('font-size'); text.style.whiteSpace = 'nowrap'; });
   jobs.forEach(job => {
@@ -1548,6 +1563,12 @@ function fitGroupTitles(banners) {
   jobs.forEach(job => {
     if (job.finalSize !== undefined) job.text.style.fontSize = `${job.finalSize}px`;
     groupTitleFitCache.set(job.banner, job.key);
+    groupTitleFitResults.set(job.key, {
+      fontSize: job.text.style.fontSize, whiteSpace: job.text.style.whiteSpace
+    });
+    if (groupTitleFitResults.size > GROUP_TITLE_FIT_RESULT_LIMIT) {
+      groupTitleFitResults.delete(groupTitleFitResults.keys().next().value);
+    }
   });
 }
 
