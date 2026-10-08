@@ -2483,10 +2483,10 @@ body::after {
   min-height: 0;
 }
 
-/* 6개일 때도 2열 × 3행 배치를 유지하면서 정사각형 프레임을 사용한다. */
+/* 정확히 6개일 때만 2열 × 3행과 가로폭을 유지하며 4:3 이미지 버튼을 사용한다. */
 .group-layout-six .group-select-btn {
   min-height: 0;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 4 / 3;
   flex-direction: column;
   justify-content: center;
   text-align: center;
@@ -2559,6 +2559,13 @@ body::after {
   --group-title-height: 30.4px;
   --group-title-clearance: 7px;
   --group-title-font: 16px;
+}
+
+/* 목록형 중 정확히 3개/5개일 때만 기존 80% 명판 폭의 70%를 사용한다.
+   테두리와 모서리는 px 단위로 그리므로 폭이 줄어도 두께/장식이 압축되지 않는다. */
+.group-layout-list:has(> .group-select-btn:nth-child(3):last-child),
+.group-layout-list:has(> .group-select-btn:nth-child(5):last-child) {
+  --group-title-width: 56%;
 }
 
 .group-select-btn {
