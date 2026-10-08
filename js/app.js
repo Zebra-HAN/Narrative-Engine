@@ -1348,6 +1348,17 @@ let cardTitleFitFrame = 0;
 let titleFontRevision = 0;
 const cardTitleFitCache = new WeakMap();
 const groupTitleFitCache = new WeakMap();
+// 노드 대신 맞춤 결과만 제한된 개수로 보관한다. 화면/카드 DOM은 보관하지 않는다.
+const cardTitleResults = new Map();
+const groupTitleResults = new Map();
+const infoTextResults = new Map();
+const TITLE_RESULT_CACHE_LIMIT = 2048;
+
+function rememberTitleResult(cache, key, result) {
+  cache.delete(key);
+  cache.set(key, result);
+  if (cache.size > TITLE_RESULT_CACHE_LIMIT) cache.delete(cache.keys().next().value);
+}
 
 function titleFitKey(container, text, group = false) {
   const style = getComputedStyle(container);
@@ -1357,7 +1368,8 @@ function titleFitKey(container, text, group = false) {
     group ? style.getPropertyValue('--group-title-font') : style.fontSize,
     group ? window.innerWidth : style.lineHeight,
     type.fontFamily, type.fontWeight, type.fontStyle, type.letterSpacing,
-    type.wordBreak, type.overflowWrap, titleFontRevision].join('|');
+    type.wordBreak, type.overflowWrap, container.className,
+    container.closest('.card-grid, .group-select-wrap')?.className, titleFontRevision].join('|');
 }
 
 function getCardTitleAvailableSize(container) {
@@ -1395,46 +1407,71 @@ function applyCardTitleSize(text, fontSize, lineHeight) {
 }
 
 function fitCardTitle(container) {
-  const text = container.querySelector('.card-name-text');
-  if (!text || container.clientWidth <= 0 || container.clientHeight <= 0) return;
+  fitCardTitles([container]);
+}
 
-  const key = titleFitKey(container, text);
-  if (cardTitleFitCache.get(container) === key) return;
-  cardTitleFitCache.set(container, key);
-  text.style.removeProperty('font-size');
-  text.style.removeProperty('line-height');
-
-  const { height } = getCardTitleAvailableSize(container);
-  const standardStyle = getComputedStyle(container);
-  const standardSize = parseFloat(standardStyle.fontSize);
-  const standardLineHeightPx = parseFloat(standardStyle.lineHeight);
-  if (!standardSize || !standardLineHeightPx) return;
-
-  // 문구가 양피지 경계에 바로 닿게 두지 않고 적당한 세로 안전 영역을 유지한다.
-  // 문구 레이어의 CSS 너비가 이에 맞는 가로 안전 영역을 제공한다.
-  const availableHeight = height - Math.max(3, height * 0.1);
-  const standardLineHeight = standardLineHeightPx / standardSize;
-  const candidates = getCardTitleCandidates(standardSize);
-
-  for (const size of candidates) {
-    applyCardTitleSize(text, size, standardLineHeight);
-    if (cardTitleFits(text, availableHeight)) return;
+function fitCardTitles(containers) {
+  const jobs = [];
+  const restored = [];
+  // 전체 카드의 측정 조건을 읽기 전에 글자 크기를 쓰지 않는다.
+  containers.forEach(container => {
+    const text = container.querySelector('.card-name-text');
+    if (!text || !container.clientWidth || !container.clientHeight) return;
+    const key = titleFitKey(container, text);
+    if (cardTitleFitCache.get(container) === key) return;
+    const result = cardTitleResults.get(key);
+    if (result) restored.push({ container, text, key, result });
+    else jobs.push({ container, text, key });
+  });
+  jobs.forEach(({ text }) => {
+    text.style.removeProperty('font-size');
+    text.style.removeProperty('line-height');
+  });
+  jobs.forEach(job => {
+    const { height } = getCardTitleAvailableSize(job.container);
+    const style = getComputedStyle(job.container);
+    const base = parseFloat(style.fontSize);
+    const lineHeight = parseFloat(style.lineHeight) / base;
+    job.height = height - Math.max(3, height * 0.1);
+    job.lineHeight = lineHeight;
+    job.candidates = base && Number.isFinite(lineHeight)
+      ? getCardTitleCandidates(base).map(size => ({ size, lineHeight })) : [];
+    if (job.candidates.length) job.candidates.push({ size: base * CARD_TITLE_MIN_SCALE,
+      lineHeight: lineHeight * CARD_TITLE_COMPACT_LINE_HEIGHT_SCALE });
+    job.index = 0;
+  });
+  // 기본 CSS 크기로 맞는 항목은 쓰기 없이 먼저 판정한다.
+  let pending = jobs.filter(job => job.candidates.length
+    && !cardTitleFits(job.text, job.height));
+  pending.forEach(job => { job.index = 1; });
+  while (pending.length) {
+    pending.forEach(job => {
+      const candidate = job.candidates[job.index];
+      applyCardTitleSize(job.text, candidate.size, candidate.lineHeight);
+    });
+    pending = pending.filter(job => {
+      if (cardTitleFits(job.text, job.height) || job.index === job.candidates.length - 1) return false;
+      job.index++;
+      return true;
+    });
   }
-
-  // 최소 크기에서도 여전히 넘치는 극단적으로 긴 제목에만 줄 간격을 조금 좁게 적용한다.
-  // 일반적인 한 줄 및 여러 줄 카드는 레이아웃별로 같은 여유로운 간격을 공유한다.
-  const minimumSize = candidates[candidates.length - 1];
-  const compactLineHeight = standardLineHeight * CARD_TITLE_COMPACT_LINE_HEIGHT_SCALE;
-  applyCardTitleSize(text, minimumSize, compactLineHeight);
-  if (cardTitleFits(text, availableHeight)) return;
-
-  // 극단적으로 긴 제목은 양피지 밖으로 벗어나지 않고 .card-name에서 잘린다.
-  applyCardTitleSize(text, minimumSize, compactLineHeight);
+  jobs.forEach(({ container, text, key, candidates, index }) => {
+    if (!candidates.length) return;
+    if (index === 0) applyCardTitleSize(text, candidates[0].size, candidates[0].lineHeight);
+    rememberTitleResult(cardTitleResults, key, {
+      fontSize: text.style.fontSize, lineHeight: text.style.lineHeight });
+    cardTitleFitCache.set(container, key);
+  });
+  restored.forEach(({ container, text, key, result }) => {
+    text.style.fontSize = result.fontSize;
+    text.style.lineHeight = result.lineHeight;
+    cardTitleFitCache.set(container, key);
+  });
 }
 
 function fitAllCardTitles() {
   if (!document.getElementById('screen-create').classList.contains('active')) return;
-  document.querySelectorAll('#center-area .center-page.active .card-name').forEach(fitCardTitle);
+  fitCardTitles(document.querySelectorAll('#center-area .center-page.active .card-name'));
 }
 
 function requestCardTitleAutoFit() {
@@ -1486,11 +1523,14 @@ function fitGroupTitle(banner) {
 function fitGroupTitles(banners) {
   // 모든 측정 조건을 먼저 읽는다. 이미 맞춘 제목은 DOM을 쓰지 않고 재사용한다.
   const jobs = [];
+  const restored = [];
   banners.forEach(banner => {
     const text = banner.querySelector('.group-title-text');
     if (!text || !banner.clientWidth || !banner.clientHeight) return;
     const key = titleFitKey(banner, text, true);
     if (groupTitleFitCache.get(banner) === key) return;
+    const result = groupTitleResults.get(key);
+    if (result) { restored.push({ banner, text, key, result }); return; }
     const style = getComputedStyle(banner);
     jobs.push({ banner, text, key,
       width: banner.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight),
@@ -1505,6 +1545,10 @@ function fitGroupTitles(banners) {
     job.low = 0;
     job.high = 12;
     job.steps = 0;
+    job.lowerIndex = 0;
+    job.upperIndex = Math.floor((job.base - job.minimum + 1e-9) / 0.25);
+    job.index = 0;
+    job.bestIndex = null;
   });
   let pending = jobs;
   while (pending.length) {
@@ -1522,23 +1566,37 @@ function fitGroupTitles(banners) {
       if (job.phase === 'binary') {
         if (fits && twoLines) job.low = job.size;
         else job.high = job.size;
-        if (++job.steps === 16) {
+        if (++job.steps === 16 || Math.floor(job.low * 100) === Math.floor(job.high * 100)) {
           job.finalSize = Math.floor(job.low * 100) / 100;
           return;
         }
         job.size = (job.low + job.high) / 2;
-      } else if (fits && twoLines) {
-        return;
       } else {
-        job.size -= 0.25;
-        if (job.size < (job.phase === 'one' ? job.minimum : 12)) {
+        // 후보 값은 기존 base - n * 0.25 그대로다. 가장 큰 맞는 후보를 찾는다.
+        if (fits && twoLines) {
+          job.bestIndex = job.index;
+          job.upperIndex = job.index - 1;
+        } else {
+          job.lowerIndex = job.index + 1;
+        }
+        if (job.lowerIndex > job.upperIndex) {
+          if (job.bestIndex !== null) {
+            job.finalSize = job.base - job.bestIndex * 0.25;
+            return;
+          }
           if (job.phase === 'one' && job.base >= 12) {
             job.phase = 'two';
+            job.lowerIndex = 0;
+            job.upperIndex = Math.floor((job.base - 12 + 1e-9) / 0.25);
+            job.index = 0;
             job.size = job.base;
           } else {
             job.phase = 'binary';
             job.size = 6;
           }
+        } else {
+          job.index = Math.floor((job.lowerIndex + job.upperIndex) / 2);
+          job.size = job.base - job.index * 0.25;
         }
       }
       next.push(job);
@@ -1547,7 +1605,14 @@ function fitGroupTitles(banners) {
   }
   jobs.forEach(job => {
     if (job.finalSize !== undefined) job.text.style.fontSize = `${job.finalSize}px`;
+    rememberTitleResult(groupTitleResults, job.key, {
+      fontSize: job.text.style.fontSize, whiteSpace: job.text.style.whiteSpace });
     groupTitleFitCache.set(job.banner, job.key);
+  });
+  restored.forEach(({ banner, text, key, result }) => {
+    text.style.fontSize = result.fontSize;
+    text.style.whiteSpace = result.whiteSpace;
+    groupTitleFitCache.set(banner, key);
   });
 }
 
@@ -1597,30 +1662,46 @@ function elementHasVerticalOverflow(element) {
 }
 
 function fitInfoTextElement(element) {
-  if (!element) return;
+  fitInfoTextElements([element]);
+}
 
-  // 이전 카드에서 적용된 축소를 먼저 지워 짧은 텍스트가 항상 기본 크기로 돌아오게 한다.
-  element.style.removeProperty('font-size');
-  const baseSize = parseFloat(getComputedStyle(element).fontSize);
-  if (!baseSize || !elementHasVerticalOverflow(element)) return;
-
-  const minimumSize = baseSize * INFO_TEXT_MIN_SCALE;
-  let nextSize = baseSize;
-  while (elementHasVerticalOverflow(element) && nextSize > minimumSize) {
-    nextSize = Math.max(minimumSize, nextSize - INFO_TEXT_STEP_PX);
-    element.style.fontSize = `${nextSize}px`;
+function fitInfoTextElements(elements) {
+  const jobs = elements.filter(Boolean).map(element => ({ element }));
+  jobs.forEach(({ element }) => element.style.removeProperty('font-size'));
+  jobs.forEach(job => {
+    const style = getComputedStyle(job.element);
+    job.base = parseFloat(style.fontSize);
+    job.size = job.base;
+    job.minimum = job.base * INFO_TEXT_MIN_SCALE;
+    job.key = [job.element.textContent, job.element.className,
+      job.element.clientWidth, job.element.clientHeight, style.fontSize,
+      style.lineHeight, style.fontFamily, style.fontWeight, style.fontStyle, style.letterSpacing,
+      style.padding, style.wordBreak, style.overflowWrap, style.whiteSpace, titleFontRevision].join('|');
+    job.cached = infoTextResults.get(job.key);
+  });
+  let pending = jobs.filter(job => !job.cached && job.base);
+  while (pending.length) {
+    const next = pending.filter(job => elementHasVerticalOverflow(job.element)
+      && job.size > job.minimum);
+    next.forEach(job => {
+      job.size = Math.max(job.minimum, job.size - INFO_TEXT_STEP_PX);
+      job.element.style.fontSize = `${job.size}px`;
+    });
+    pending = next;
   }
+  jobs.forEach(job => {
+    if (job.cached) job.element.style.fontSize = job.cached.fontSize;
+    else rememberTitleResult(infoTextResults, job.key, { fontSize: job.element.style.fontSize });
+  });
 }
 
 function fitInfoPanelText() {
-  document.querySelectorAll('.info-slide').forEach(slide => {
-    // 제목과 설명은 각자의 실제 clientHeight/scrollHeight를 별도로 비교한다.
-    fitInfoTextElement(slide.querySelector('.info-name'));
-    fitInfoTextElement(slide.querySelector('.info-desc'));
-
-    // 제목 축소로 설명 영역이 달라질 수 있으므로 최종 레이아웃에서 한 번 더 확인한다.
-    fitInfoTextElement(slide.querySelector('.info-desc'));
-  });
+  const slides = Array.from(document.querySelectorAll('.info-slide'));
+  // 제목 확정 후 설명 높이를 읽는다. 기존 두 번째 설명 확인도 같은 순서로 유지한다.
+  fitInfoTextElements(slides.map(slide => slide.querySelector('.info-name')));
+  const descriptions = slides.map(slide => slide.querySelector('.info-desc'));
+  fitInfoTextElements(descriptions);
+  fitInfoTextElements(descriptions);
 }
 
 function requestInfoTextAutoFit() {
