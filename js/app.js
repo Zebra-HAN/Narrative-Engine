@@ -1817,16 +1817,13 @@ function goHome() {
 function goToNarrative() {
   switchScreen('screen-narrative', null, { type: 'instant' });
 }
-async function goToCreate() {
+function goToCreate() {
 
   // 이전 방문에서 열린 메뉴가 닫히는 애니메이션이 첫 프레임에 보이지 않도록 즉시 초기화
   closeExtraMenu({ instant: true });
 
-  const entryToken = screenTransitionToken;
-  if (!document.getElementById('screen-create').classList.contains('active')) clearCreativeBackgroundLayers();
-  const ready = await switchNav('character', true, { silentAddress: true });
-  if (!ready || entryToken !== screenTransitionToken) return;
   switchScreen('screen-create', () => {
+    switchNav('character', true, { silentAddress: true });
     setAddressTrail([]);
     restartCreateIntro();
   }, { type: 'instant' });
@@ -1928,11 +1925,11 @@ function selectSub(subId, navId) {
 /* ════════════════════════════════════════════════
    중앙 표시 영역
 ════════════════════════════════════════════════ */
-async function showDefaultCenter() {
+function showDefaultCenter() {
   closeCardInfo();
   const area = document.getElementById('center-area');
 
-  if (!await applyCreativeBackground({ navId: currentNav, stage: 'top', screenKey: 'top' })) return false;
+  void applyCreativeBackground({ navId: currentNav, stage: 'top', screenKey: 'top' });
 
   // 기존 동적 페이지 제거
   area.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
@@ -2048,13 +2045,13 @@ function setupCardRevealAnimations(page) {
    ─ groups 배열에 항목 추가만 하면 버튼 자동 생성
    ─ 그룹 안에 subgroups 배열이 있으면 → 2단계(서브그룹) 구조로 동작
 ════════════════════════════════════════════════ */
-async function showGroupPage(subId, animate = true) {
+function showGroupPage(subId, animate = true) {
   closeCardInfo();
   const area = document.getElementById('center-area');
 
   const data = CARD_DATA[subId];
   if (!data || !data.groups) return;
-  if (!await applyCreativeBackground({ navId: currentNav, stage: 'group', screenKey: `group:${subId}` })) return;
+  void applyCreativeBackground({ navId: currentNav, stage: 'group', screenKey: `group:${subId}` });
   document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
 
   const page = document.createElement('div');
@@ -2116,7 +2113,7 @@ sg.cards.forEach((card, cIdx) => {
    서브그룹 선택 화면 렌더 (2단계)
    ─ 그룹 안에 subgroups 배열이 있을 때 그룹 버튼 클릭 시 열림
 ════════════════════════════════════════════════ */
-async function showSubgroupPage(subId, groupIdx) {
+function showSubgroupPage(subId, groupIdx) {
   closeCardInfo();
   const area = document.getElementById('center-area');
   const data = CARD_DATA[subId];
@@ -2126,7 +2123,7 @@ async function showSubgroupPage(subId, groupIdx) {
   if (!grp || !grp.subgroups) return;
   IMAGE_LOADER.preload(imageSources(grp.subgroups));
   grp.subgroups.forEach(sg => preloadCards(sg.cards));
-  if (!await applyCreativeBackground({ navId: currentNav, stage: 'group', screenKey: `subgroup:${subId}:${groupIdx}` })) return;
+  void applyCreativeBackground({ navId: currentNav, stage: 'group', screenKey: `subgroup:${subId}:${groupIdx}` });
 
   document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
 
@@ -2178,7 +2175,7 @@ async function showSubgroupPage(subId, groupIdx) {
 /* ════════════════════════════════════════════════
    서브그룹 카드 목록 렌더 (2단계 → 카드)
 ════════════════════════════════════════════════ */
-async function showSubgroupCards(subId, groupIdx, sgIdx) {
+function showSubgroupCards(subId, groupIdx, sgIdx) {
   closeCardInfo();
   const area = document.getElementById('center-area');
   const data = CARD_DATA[subId];
@@ -2186,7 +2183,7 @@ async function showSubgroupCards(subId, groupIdx, sgIdx) {
 
   const grp = data.groups[groupIdx];
   if (!grp || !grp.subgroups) return;
-  if (!await applyCreativeBackground({ navId: currentNav, stage: 'card', screenKey: `subgroup-cards:${subId}:${groupIdx}:${sgIdx}` })) return;
+  void applyCreativeBackground({ navId: currentNav, stage: 'card', screenKey: `subgroup-cards:${subId}:${groupIdx}:${sgIdx}` });
 
   const sg = grp.subgroups[sgIdx];
   if (!sg) return;
@@ -2324,7 +2321,7 @@ function updateSubgroupBadges(subId, groupIdx) {
 /* ════════════════════════════════════════════════
    그룹 버튼 클릭 → 해당 그룹의 카드 목록 열기 (1단계 그룹용)
 ════════════════════════════════════════════════ */
-async function showGroupCards(subId, groupIdx) {
+function showGroupCards(subId, groupIdx) {
   closeCardInfo();
   const area = document.getElementById('center-area');
   const data = CARD_DATA[subId];
@@ -2333,7 +2330,7 @@ async function showGroupCards(subId, groupIdx) {
   const grp = data.groups[groupIdx];
   if (!grp) return;
   preloadCards(grp.cards);
-  if (!await applyCreativeBackground({ navId: currentNav, stage: 'card', screenKey: `group-cards:${subId}:${groupIdx}` })) return;
+  void applyCreativeBackground({ navId: currentNav, stage: 'card', screenKey: `group-cards:${subId}:${groupIdx}` });
 
   document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
 
@@ -2469,7 +2466,7 @@ function updateGroupBadges(subId) {
 }
 
 
-async function showCardPage(subId, animate = true) {
+function showCardPage(subId, animate = true) {
   closeCardInfo();
 
   // type:'group' 인 경우 그룹 선택 화면을 열고 종료
@@ -2480,7 +2477,7 @@ async function showCardPage(subId, animate = true) {
   }
 
   const area = document.getElementById('center-area');
-  if (!await applyCreativeBackground({ navId: currentNav, stage: 'card', screenKey: `cards:${subId}` })) return;
+  void applyCreativeBackground({ navId: currentNav, stage: 'card', screenKey: `cards:${subId}` });
 
   // default 숨기기
   document.getElementById('page-default').classList.remove('active');
