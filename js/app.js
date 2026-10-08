@@ -1003,15 +1003,77 @@ function initCenterBackSwipe() {
   let furthestX = 0;
   let isDragging = false;
   let isVerticalGesture = false;
+  let dragPage = null;
+  let dragOffset = 0;
+  let dragOrigin = 0;
+  let gestureWidth = 0;
+  let returnAnimation = null;
+  let returnPage = null;
+
+  const activePage = () => area.querySelector('.center-page.active[data-chrome-view]')
+    || area.querySelector('.center-page.active');
+  // 좌표만 기억한다. 이전 페이지 DOM/이미지/선택 데이터는 캐시하지 않는다.
+  const pageKeys = new WeakMap();
+  const scrollMemory = new Map();
+  const rememberPage = page => {
+    if (!page) return;
+    const key = `${currentNav}:${page.id}`;
+    pageKeys.set(page, key);
+    if (scrollMemory.has(key)) page.scrollTop = scrollMemory.get(key);
+  };
+  rememberPage(activePage());
+  area.addEventListener('scroll', event => {
+    const page = event.target;
+    const key = pageKeys.get(page);
+    if (key) scrollMemory.set(key, page.scrollTop);
+  }, { capture: true, passive: true });
+  new MutationObserver(() => {
+    const page = activePage();
+    if (page && !pageKeys.has(page)) rememberPage(page);
+  }).observe(area, { childList: true });
+
+  function returnToRest(page, offset) {
+    if (!page) return;
+    page.style.removeProperty('transition');
+    page.style.removeProperty('transform');
+    if (!page.isConnected || !offset) return;
+    returnAnimation?.cancel();
+    returnPage = page;
+    // 기존 취소 복귀의 180ms/ease를 재사용한다. 화면 교체는 즉시 완료한다.
+    const animation = page.animate([
+      { transform: `translateX(${offset}px)` }, { transform: 'translateX(0px)' }
+    ], { duration: 180, easing: 'ease' });
+    returnAnimation = animation;
+    animation.onfinish = () => {
+      if (returnAnimation === animation) { returnAnimation = null; returnPage = null; }
+    };
+  }
 
   function resetDragStyles() {
     area.classList.remove('is-back-swiping');
-    area.style.removeProperty('--back-swipe-x');
+    returnToRest(dragPage, dragOffset);
+    dragPage = null;
+    dragOffset = 0;
+    dragOrigin = 0;
   }
 
   function onTouchStart(e) {
     if (e.touches.length !== 1 || !canNavigateBackInTrail()) return;
     const touch = e.touches[0];
+    dragPage = activePage();
+    gestureWidth = area.clientWidth;
+    dragOrigin = 0;
+    if (returnAnimation && returnPage === dragPage && returnAnimation.playState === 'running') {
+      dragOrigin = new DOMMatrixReadOnly(getComputedStyle(dragPage).transform).m41;
+    }
+    returnAnimation?.cancel();
+    returnAnimation = null;
+    returnPage = null;
+    dragOffset = dragOrigin;
+    if (dragPage) {
+      dragPage.style.transition = 'none';
+      if (dragOrigin) dragPage.style.transform = `translateX(${dragOrigin}px)`;
+    }
     startX = touch.clientX;
     startY = touch.clientY;
     lastX = startX;
@@ -1024,6 +1086,7 @@ function initCenterBackSwipe() {
 
   function onTouchMove(e) {
     if (startX === null || isVerticalGesture || e.touches.length !== 1) return;
+    if (dragPage !== activePage()) { resetDragStyles(); startX = null; return; }
 
     const touch = e.touches[0];
     const dx = touch.clientX - startX;
@@ -1048,12 +1111,13 @@ function initCenterBackSwipe() {
 
     if (isDragging) {
       e.preventDefault();
-      area.style.setProperty('--back-swipe-x', `${Math.min(dx * 0.35, 42)}px`);
+      dragOffset = Math.min(dragOrigin + dx * 0.35, 42);
+      if (dragPage) dragPage.style.transform = `translateX(${dragOffset}px)`;
     }
   }
 
   function onTouchEnd(e) {
-    if (startX === null || isVerticalGesture) {
+    if (startX === null || isVerticalGesture || dragPage !== activePage()) {
       resetDragStyles();
       startX = null;
       startY = null;
@@ -1068,14 +1132,16 @@ function initCenterBackSwipe() {
     const elapsed = Math.max(performance.now() - startTime, 1);
     const distanceThreshold = Math.max(
       MIN_BACK_DISTANCE,
-      Math.min(80, area.clientWidth * BACK_DISTANCE_RATIO)
+      Math.min(80, gestureWidth * BACK_DISTANCE_RATIO)
     );
     const isFastFlick = furthestX >= FLICK_MIN_DISTANCE && furthestX / elapsed >= FLICK_VELOCITY;
     // 끝에서 손가락이 조금 되돌아와도 사용자가 도달한 최대 이동 거리를 인정한다.
     const shouldGoBack = isDragging && Math.abs(dy) < furthestX * 1.5 &&
       (furthestX >= distanceThreshold || isFastFlick);
 
-    resetDragStyles();
+    const sourcePage = dragPage;
+    const offset = dragOffset;
+    if (!shouldGoBack) resetDragStyles();
     startX = null;
     startY = null;
     lastX = null;
@@ -1085,8 +1151,19 @@ function initCenterBackSwipe() {
     isVerticalGesture = false;
 
     if (shouldGoBack) {
+      area.classList.remove('is-back-swiping');
       UI_SOUND.play('page');
+      const key = pageKeys.get(sourcePage);
+      if (key) scrollMemory.set(key, sourcePage.scrollTop);
       navigateAddressBack();
+      // 사라질 이전 페이지를 먼저 원점으로 튕기지 않는다. 새 페이지는 같은
+      // 드래그 위치에서 기존 복귀 곡선을 따라 원점에 안착한다.
+      sourcePage?.style.removeProperty('transform');
+      sourcePage?.style.removeProperty('transition');
+      dragPage = null;
+      dragOffset = 0;
+      dragOrigin = 0;
+      returnToRest(activePage(), offset);
     }
   }
 
