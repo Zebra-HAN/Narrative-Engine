@@ -903,7 +903,6 @@ body::after {
 
     /* ── 중앙 영역 ── */
     .center-area {
-      --back-swipe-x: 0px;
       position: absolute;
       inset: 0;
       overflow: hidden;
@@ -982,14 +981,11 @@ body::after {
       scrollbar-color: var(--gold-dim) transparent;
       opacity: 1;
       pointer-events: all;
-      transform: translateX(var(--back-swipe-x));
+      transform: translateX(0px);
       transition: transform 0.18s ease;
       will-change: transform;
       /* 배경 그림 위에서 카드/버튼 사이의 여백은 투명하게 유지합니다. */
       background: transparent;
-    }
-    .center-area.is-back-swiping .center-page {
-      transition: none;
     }
     .center-page::-webkit-scrollbar { width: 3px; }
     .center-page::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
