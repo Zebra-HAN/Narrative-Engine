@@ -2189,10 +2189,13 @@ function setupCardRevealAnimations(page) {
     : twelfthCardWave + CARD_REVEAL_EXTRA_WAVE_STEPS;
   const burstWave = lastSequentialWave + 1;
 
+  let lastDelay = 0;
   cards.forEach(card => {
     const naturalWave = waveSteps.get(card) || 0;
     const wave = naturalWave > lastSequentialWave ? burstWave : naturalWave;
-    card.style.animationDelay = `${wave * CARD_REVEAL_WAVE_GAP_MS}ms`;
+    const delay = wave * CARD_REVEAL_WAVE_GAP_MS;
+    card.style.animationDelay = `${delay}ms`;
+    lastDelay = Math.max(lastDelay, delay);
 
     // 각 카드는 이후 순차 공개를 기다리는 다른 카드와 관계없이 자신의 공개가
     // 시작되는 순간 사용할 수 있게 된다.
@@ -2200,6 +2203,132 @@ function setupCardRevealAnimations(page) {
     card.addEventListener('animationend', () => card.classList.remove('card-deal', 'card-interactive'), { once: true });
     card.addEventListener('animationcancel', () => card.classList.remove('card-deal', 'card-interactive'), { once: true });
   });
+  // 소형 화면은 기존 경로 그대로. 큰 목록만 화면 밖 합성 준비를 제한한다.
+  if (cards.length > 32 && page.animate && Element.prototype.getAnimations
+      && window.ResizeObserver) {
+    scopeCardRevealAnimations(page, cards, lastDelay + CARD_REVEAL_DURATION_MS);
+  }
+}
+
+function scopeCardRevealAnimations(page, cards, duration) {
+  const area = document.getElementById('center-area');
+  const waiting = new Set(cards);
+  cards.forEach(card => card.classList.add('card-reveal-suspended'));
+  let clock = null;
+  let records = [];
+  let height = 0;
+  let width = 0;
+  let outerHeight = 0;
+  let lastScrollTop = 0;
+  let finished = false;
+  const gridSizes = new Map();
+
+  function stop() {
+    if (finished) return;
+    finished = true;
+    mountObserver.disconnect();
+    resizeObserver.disconnect();
+    page.removeEventListener('scroll', updateScope);
+    // 페이지가 살아 있다면 전체 타임라인의 종료 상태를 한 번만 확정한다.
+    waiting.forEach(card => card.classList.remove('card-deal', 'card-interactive', 'card-reveal-suspended'));
+    waiting.clear();
+    clock?.cancel();
+  }
+
+  function measure() {
+    // 초기/실제 크기 변경 때만 읽기 일괄. transform과 무관한 레이아웃 좌표를 보관한다.
+    height = page.clientHeight;
+    width = page.offsetWidth;
+    outerHeight = page.offsetHeight;
+    lastScrollTop = page.scrollTop;
+    const offsets = new Map([[page, 0]]);
+    function topOf(node) {
+      if (!node || node === page) return 0;
+      if (!offsets.has(node)) offsets.set(node, node.offsetTop + topOf(node.offsetParent));
+      return offsets.get(node);
+    }
+    let previousBottom = 0;
+    records = cards.map(card => {
+      const top = topOf(card);
+      previousBottom = Math.max(previousBottom, top + card.offsetHeight);
+      return { card, top, bottom: previousBottom };
+    });
+    page.querySelectorAll('.card-grid').forEach(grid => gridSizes.set(grid, {
+      width: grid.offsetWidth, height: grid.offsetHeight }));
+  }
+
+  function updateScope() {
+    if (finished || !clock) return;
+    if (!page.isConnected || clock.currentTime >= duration) { stop(); return; }
+    const scrollTop = page.scrollTop;
+    const delta = scrollTop - lastScrollTop;
+    lastScrollTop = scrollTop;
+    // 빠른 이동 방향에는 더 준비하되, 좌표 재측정 없이 최대 두 화면까지 확장한다.
+    const ahead = Math.min(height * 2, Math.abs(delta) * 2);
+    const top = scrollTop - height * 0.5 - (delta < 0 ? ahead : 0);
+    const bottom = scrollTop + height * 1.5 + (delta > 0 ? ahead : 0);
+    // 끝 좌표는 누적 최댓값이다. 스크롤 시 가시/완충 구간만 방문한다.
+    let low = 0;
+    let high = records.length;
+    while (low < high) {
+      const middle = (low + high) >> 1;
+      if (records[middle].bottom < top) low = middle + 1;
+      else high = middle;
+    }
+    const entering = [];
+    for (let index = low; index < records.length && records[index].top <= bottom; index++) {
+      const card = records[index].card;
+      if (waiting.delete(card)) entering.push(card);
+    }
+    const elapsed = clock.currentTime ?? 0;
+    const playing = new Set(entering.filter(card => elapsed
+      < parseFloat(card.style.animationDelay) + CARD_REVEAL_DURATION_MS));
+    entering.forEach(card => {
+      card.classList.remove('card-reveal-suspended');
+      if (!playing.has(card)) card.classList.remove('card-deal', 'card-interactive');
+    });
+    // 스타일 쓰기와 애니메이션 조회를 분리한다. 기존 cardFlip/450ms/delay를 재사용한다.
+    const animations = Array.from(playing).flatMap(card => card.getAnimations()
+      .filter(animation => animation.animationName === 'cardFlip'));
+    const align = () => {
+      if (finished || clock.startTime === null) return;
+      animations.forEach(animation => { animation.startTime = clock.startTime; });
+    };
+    if (clock.startTime === null) clock.ready.then(align, () => {});
+    else align();
+  }
+
+  const resizeObserver = new ResizeObserver(entries => {
+    if (!clock || finished) return;
+    const changed = entries.some(entry => {
+      if (entry.target === page) {
+        const box = entry.borderBoxSize?.[0];
+        return Math.abs((box?.inlineSize ?? page.offsetWidth) - width) > 1
+          || Math.abs((box?.blockSize ?? page.offsetHeight) - outerHeight) > 1;
+      }
+      const old = gridSizes.get(entry.target);
+      return old && (Math.abs(entry.contentRect.width - old.width) > 1
+        || Math.abs(entry.contentRect.height - old.height) > 1);
+    });
+    if (changed) { measure(); updateScope(); }
+  });
+  const mountObserver = new MutationObserver(changes => {
+    if (!page.isConnected) {
+      if (clock || changes.some(change => Array.from(change.removedNodes).includes(page))) stop();
+      return;
+    }
+    if (clock || finished) return;
+    // 기존 스크롤 복원 observer 뒤, 첫 화면을 그리기 전에 준비한다.
+    measure();
+    // 빈 효과는 그릴 속성이 없고, CSS와 같은 document timeline의 시각만 공유한다.
+    clock = page.animate([], { duration });
+    clock.finished.then(stop, () => {});
+    page.addEventListener('scroll', updateScope, { passive: true });
+    resizeObserver.observe(page);
+    gridSizes.forEach((_, grid) => resizeObserver.observe(grid));
+    updateScope();
+  });
+  mountObserver.observe(area, { childList: true });
 }
 
 /* ════════════════════════════════════════════════

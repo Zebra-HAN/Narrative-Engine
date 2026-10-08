@@ -1143,6 +1143,14 @@ body::after {
       animation: cardFlip var(--card-reveal-duration, 0.45s) cubic-bezier(0.4, 0, 0.2, 1) forwards;
       transform-origin: center center;
     }
+    /* 화면 밖 대기 카드도 DOM/자리/시간 순서는 유지한다. 별도 3D 합성만 준비하지 않는다. */
+    .data-card.card-deal.card-reveal-suspended {
+      animation: none;
+      transform: none;
+    }
+    .card-reveal-suspended .card-img {
+      transition: none;
+    }
     .data-card.card-deal.card-interactive {
       pointer-events: auto;
     }
