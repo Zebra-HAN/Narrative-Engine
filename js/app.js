@@ -1267,6 +1267,20 @@ const CARD_TITLE_SIZE_STEP_PX = 0.5;
 const CARD_TITLE_MIN_SCALE = 0.72;
 const CARD_TITLE_COMPACT_LINE_HEIGHT_SCALE = 0.92;
 let cardTitleFitFrame = 0;
+let titleFontRevision = 0;
+const cardTitleFitCache = new WeakMap();
+const groupTitleFitCache = new WeakMap();
+
+function titleFitKey(container, text, group = false) {
+  const style = getComputedStyle(container);
+  const type = getComputedStyle(text);
+  return [text.textContent, container.clientWidth, container.clientHeight,
+    style.paddingTop, style.paddingBottom, style.paddingLeft, style.paddingRight,
+    group ? style.getPropertyValue('--group-title-font') : style.fontSize,
+    group ? window.innerWidth : style.lineHeight,
+    type.fontFamily, type.fontWeight, type.fontStyle, type.letterSpacing,
+    type.wordBreak, type.overflowWrap, titleFontRevision].join('|');
+}
 
 function getCardTitleAvailableSize(container) {
   const style = getComputedStyle(container);
@@ -1306,6 +1320,9 @@ function fitCardTitle(container) {
   const text = container.querySelector('.card-name-text');
   if (!text || container.clientWidth <= 0 || container.clientHeight <= 0) return;
 
+  const key = titleFitKey(container, text);
+  if (cardTitleFitCache.get(container) === key) return;
+  cardTitleFitCache.set(container, key);
   text.style.removeProperty('font-size');
   text.style.removeProperty('line-height');
 
@@ -1338,24 +1355,41 @@ function fitCardTitle(container) {
 }
 
 function fitAllCardTitles() {
-  document.querySelectorAll('.card-name').forEach(fitCardTitle);
+  if (!document.getElementById('screen-create').classList.contains('active')) return;
+  document.querySelectorAll('#center-area .center-page.active .card-name').forEach(fitCardTitle);
 }
 
 function requestCardTitleAutoFit() {
-  if (cardTitleFitFrame) cancelAnimationFrame(cardTitleFitFrame);
+  if (cardTitleFitFrame) return;
   cardTitleFitFrame = requestAnimationFrame(() => {
     cardTitleFitFrame = 0;
     fitAllCardTitles();
   });
 }
 
+const cardTitleResizeObserver = new ResizeObserver(requestCardTitleAutoFit);
 function initCardTitleAutoFit() {
   window.addEventListener('resize', requestCardTitleAutoFit, { passive: true });
-  new MutationObserver(requestCardTitleAutoFit).observe(document.body, {
-    childList: true,
-    subtree: true
-  });
-  if (document.fonts?.ready) document.fonts.ready.then(requestCardTitleAutoFit);
+  const area = document.getElementById('center-area');
+  new MutationObserver(records => {
+    let changed = false;
+    const observe = node => {
+      if (!(node instanceof Element)) return;
+      const titles = node.matches('.card-name') ? [node] : node.querySelectorAll('.card-name');
+      titles.forEach(title => { cardTitleResizeObserver.observe(title); changed = true; });
+    };
+    records.forEach(record => {
+      const target = record.target instanceof Element ? record.target : record.target.parentElement;
+      if (target?.closest('.card-name')) changed = true;
+      record.removedNodes.forEach(node => {
+        if (!(node instanceof Element)) return;
+        if (node.matches('.card-name')) cardTitleResizeObserver.unobserve(node);
+        node.querySelectorAll('.card-name').forEach(title => cardTitleResizeObserver.unobserve(title));
+      });
+      record.addedNodes.forEach(observe);
+    });
+    if (changed) requestCardTitleAutoFit();
+  }).observe(area, { childList: true, subtree: true, characterData: true });
   requestCardTitleAutoFit();
 }
 
@@ -1368,49 +1402,83 @@ let groupTitleFitFrame = 0;
 const groupTitleResizeObserver = new ResizeObserver(requestGroupTitleAutoFit);
 
 function fitGroupTitle(banner) {
-  const text = banner.querySelector('.group-title-text');
-  if (!text || !banner.clientWidth || !banner.clientHeight) return;
-  const style = getComputedStyle(banner);
-  const width = banner.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
-  const height = banner.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom) - 4;
-  text.style.removeProperty('font-size');
-  text.style.whiteSpace = 'nowrap';
-  const base = parseFloat(getComputedStyle(text).fontSize);
-  const oneLineMinimum = Math.max(12, base * 0.8);
-  const fits = () => text.scrollWidth <= width + 0.5 && text.scrollHeight <= height + 0.5;
-  for (let size = base; size >= oneLineMinimum; size -= 0.25) {
-    text.style.fontSize = `${size}px`;
-    if (fits()) {
-      return;
-    }
+  fitGroupTitles([banner]);
+}
+
+function fitGroupTitles(banners) {
+  // 모든 측정 조건을 먼저 읽는다. 이미 맞춘 제목은 DOM을 쓰지 않고 재사용한다.
+  const jobs = [];
+  banners.forEach(banner => {
+    const text = banner.querySelector('.group-title-text');
+    if (!text || !banner.clientWidth || !banner.clientHeight) return;
+    const key = titleFitKey(banner, text, true);
+    if (groupTitleFitCache.get(banner) === key) return;
+    const style = getComputedStyle(banner);
+    jobs.push({ banner, text, key,
+      width: banner.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight),
+      height: banner.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom) - 4 });
+  });
+  jobs.forEach(({ text }) => { text.style.removeProperty('font-size'); text.style.whiteSpace = 'nowrap'; });
+  jobs.forEach(job => {
+    job.base = parseFloat(getComputedStyle(job.text).fontSize);
+    job.size = job.base;
+    job.phase = 'one';
+    job.minimum = Math.max(12, job.base * 0.8);
+    job.low = 0;
+    job.high = 12;
+    job.steps = 0;
+  });
+  let pending = jobs;
+  while (pending.length) {
+    // 같은 탐색 단계를 쓰기 일괄 → 읽기 일괄로 처리한다. 후보/허용 오차는 기존과 같다.
+    pending.forEach(job => {
+      job.text.style.whiteSpace = job.phase === 'one' ? 'nowrap' : 'normal';
+      job.text.style.fontSize = `${job.size}px`;
+    });
+    const next = [];
+    pending.forEach(job => {
+      const fits = job.text.scrollWidth <= job.width + 0.5
+        && job.text.scrollHeight <= job.height + 0.5;
+      const twoLines = job.phase === 'one' || job.text.getBoundingClientRect().height
+        <= parseFloat(getComputedStyle(job.text).lineHeight) * 2 + 0.5;
+      if (job.phase === 'binary') {
+        if (fits && twoLines) job.low = job.size;
+        else job.high = job.size;
+        if (++job.steps === 16) {
+          job.finalSize = Math.floor(job.low * 100) / 100;
+          return;
+        }
+        job.size = (job.low + job.high) / 2;
+      } else if (fits && twoLines) {
+        return;
+      } else {
+        job.size -= 0.25;
+        if (job.size < (job.phase === 'one' ? job.minimum : 12)) {
+          if (job.phase === 'one' && job.base >= 12) {
+            job.phase = 'two';
+            job.size = job.base;
+          } else {
+            job.phase = 'binary';
+            job.size = 6;
+          }
+        }
+      }
+      next.push(job);
+    });
+    pending = next;
   }
-  text.style.whiteSpace = 'normal';
-  for (let size = base; size >= 12; size -= 0.25) {
-    text.style.fontSize = `${size}px`;
-    const lineHeight = parseFloat(getComputedStyle(text).lineHeight);
-    if (fits() && text.getBoundingClientRect().height <= lineHeight * 2 + 0.5) {
-      return;
-    }
-  }
-  // 사용자가 허용한 예외: 극단적으로 긴 이름도 생략하지 않고 두 줄 안에 전부 넣는다.
-  // 기본/일반 제목에는 적용하지 않으며, 가능한 가장 큰 크기를 이진 탐색한다.
-  let low = 0;
-  let high = 12;
-  for (let i = 0; i < 16; i++) {
-    const size = (low + high) / 2;
-    text.style.fontSize = `${size}px`;
-    const lineHeight = parseFloat(getComputedStyle(text).lineHeight);
-    if (fits() && text.getBoundingClientRect().height <= lineHeight * 2 + 0.5) low = size;
-    else high = size;
-  }
-  text.style.fontSize = `${Math.floor(low * 100) / 100}px`;
+  jobs.forEach(job => {
+    if (job.finalSize !== undefined) job.text.style.fontSize = `${job.finalSize}px`;
+    groupTitleFitCache.set(job.banner, job.key);
+  });
 }
 
 function requestGroupTitleAutoFit() {
   if (groupTitleFitFrame) return;
   groupTitleFitFrame = requestAnimationFrame(() => {
     groupTitleFitFrame = 0;
-    document.querySelectorAll('.group-title-banner').forEach(fitGroupTitle);
+    if (!document.getElementById('screen-create').classList.contains('active')) return;
+    fitGroupTitles(document.querySelectorAll('#center-area .center-page.active .group-title-banner'));
   });
 }
 
@@ -1420,9 +1488,22 @@ function observeGroupTitles(container) {
   requestGroupTitleAutoFit();
 }
 
+// 제목 내용 변경만 감시한다. 이미지·주소·패널 변경은 그룹 맞춤을 예약하지 않는다.
+new MutationObserver(records => {
+  if (records.some(record => {
+    const target = record.target instanceof Element ? record.target : record.target.parentElement;
+    return target?.closest('.group-title-text');
+  })) requestGroupTitleAutoFit();
+}).observe(document.getElementById('center-area'), { childList: true, subtree: true, characterData: true });
+
 if (document.fonts) {
-  document.fonts.ready.then(requestGroupTitleAutoFit);
-  document.fonts.addEventListener('loadingdone', requestGroupTitleAutoFit);
+  const fontChanged = () => {
+    titleFontRevision++;
+    requestCardTitleAutoFit();
+    requestGroupTitleAutoFit();
+  };
+  document.fonts.ready.then(fontChanged);
+  document.fonts.addEventListener('loadingdone', fontChanged);
 }
 
 /* ════════════════════════════════════════════════
