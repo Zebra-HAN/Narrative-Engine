@@ -260,7 +260,6 @@ const UI_SOUND = (() => {
 function initUiSounds() {
   const cardSounds = ['pong1', 'pong2', 'pong3', 'pong4', 'pong5'];
   const categorySounds = ['card', 'card1', 'card2'];
-  const cardClickCounts = new WeakMap();
 
   function playRandom(sounds) {
     UI_SOUND.play(sounds[Math.floor(Math.random() * sounds.length)]);
@@ -276,13 +275,7 @@ function initUiSounds() {
       // 코드로 실행한 이동이나 합성 클릭에서는 시작 효과음을 재생하지 않는다.
       if (event.isTrusted) UI_SOUND.play('start');
     } else if (target.matches('.data-card')) {
-      // 브라우저의 더블클릭은 보통 click 두 번 뒤에 dblclick 한 번을 보낸다.
-      // 각 click에 한 번만 재생하면 일반 클릭은 1회, 더블클릭은 정확히 2회가 된다.
-      // 일부 환경이 click을 하나만 보낼 경우 아래 dblclick 보정기가 빠진 한 번만 채운다.
       playRandom(cardSounds);
-      const now = performance.now();
-      const count = event.detail >= 2 ? 2 : 1;
-      cardClickCounts.set(target, { count, time: now });
     } else if (target.matches('#btn-extra-menu')) {
       UI_SOUND.play(extraMenuOpen ? 'category4' : 'category3');
     } else if (target.matches('.extra-btn-home')) {
@@ -291,7 +284,7 @@ function initUiSounds() {
       UI_SOUND.play('click');
     } else if (target.matches('.subnav-item')) {
       playRandom(categorySounds);
-    } else if (target.matches('.app-dialog-btn-cancel, .card-info-close, .status-close, .detail-close')) {
+    } else if (target.matches('.app-dialog-btn-cancel, .status-close, .detail-close')) {
       UI_SOUND.play('cancel');
     } else if (target.matches('.app-dialog-btn-confirm, .card-info-select')) {
       // 확인 버튼에 지정된 효과음은 클릭이 확정되는 즉시 재생한다. 별도 효과음이 없는
@@ -320,24 +313,9 @@ function initUiSounds() {
   document.addEventListener('click', event => {
     const card = event.target.closest('.data-card');
     if (card && _lpDidFire) return;
-    if (card && _suppressedTouchClick?.card === card
-        && performance.now() - _suppressedTouchClick.time < 600) {
-      _suppressedTouchClick = null;
-      return;
-    }
     playActivationSound(event);
   }, { capture: true });
 
-  document.addEventListener('dblclick', event => {
-    const card = event.target.closest('.data-card');
-    if (!card) return;
-    const recent = cardClickCounts.get(card);
-    const count = recent && performance.now() - recent.time < 600 ? recent.count : 0;
-    for (let i = count; i < 2; i++) {
-      setTimeout(() => playRandom(cardSounds), i * 70);
-    }
-    cardClickCounts.delete(card);
-  }, { capture: true });
 }
 
 /* ════════════════════════════════════════════════
@@ -2515,10 +2493,9 @@ function showSubgroupCards(subId, groupIdx, sgIdx) {
         style="${getCardRevealDelayStyle()}"
          data-global-idx="${globalIdx}"
         onclick="subgroupCardClick('${subId}', ${groupIdx}, ${sgIdx}, ${idx})"
-        ondblclick="openSubgroupCardDetail('${subId}', ${groupIdx}, ${sgIdx}, ${idx})"
         onmousedown="startLongPress(event,this,'subgroup','${subId}',${groupIdx},${sgIdx},${idx})"
         ontouchstart="startLongPress(event,this,'subgroup','${subId}',${groupIdx},${sgIdx},${idx})"
-        onmouseup="cancelLongPress()" ontouchend="handleCardTouchEnd(event,'subgroup','${subId}',${groupIdx},${sgIdx},${idx})"
+        onmouseup="cancelLongPress()" ontouchend="cancelLongPress()"
         onmouseleave="cancelLongPress()" ontouchcancel="cancelLongPress()">
         <img class="card-lock-mark" src="images/core/buttons/lock.webp" alt="잠금됨" draggable="false">
         <div class="card-img-frame ${card.img ? 'has-image' : 'has-icon'}">${renderIcon(card.icon, card.img, 'card-img')}</div>
@@ -2583,13 +2560,6 @@ function subgroupCardDblClick(subId, groupIdx, sgIdx, idx) {
   refreshStatusIfOpen();
 }
 
-/* 서브그룹 카드 더블클릭 — 상세 정보 열기 */
-function openSubgroupCardDetail(subId, groupIdx, sgIdx, idx) {
-  const card = CARD_DATA[subId].groups[groupIdx].subgroups[sgIdx].cards[idx];
-  focusedCard = { subId, idx: getSubgroupCardGlobalIdx(groupIdx, sgIdx, idx), path: { type: 'subgroup', groupIdx, sgIdx, cardIdx: idx }, ...card };
-  renderCardInfo();
-  openDetailSheet('card');
-}
 
 /* 서브그룹 페이지 배지 갱신 */
 function updateSubgroupBadges(subId, groupIdx) {
@@ -2658,10 +2628,9 @@ function showGroupCards(subId, groupIdx) {
     style="${getCardRevealDelayStyle()}"
     data-global-idx="${globalIdx}"
     onclick="groupCardClick('${subId}', ${groupIdx}, ${idx})"
-    ondblclick="openGroupCardDetail('${subId}', ${groupIdx}, ${idx})"
     onmousedown="startLongPress(event,this,'group','${subId}',${groupIdx},${idx})"
     ontouchstart="startLongPress(event,this,'group','${subId}',${groupIdx},${idx})"
-    onmouseup="cancelLongPress()" ontouchend="handleCardTouchEnd(event,'group','${subId}',${groupIdx},${idx})"
+    onmouseup="cancelLongPress()" ontouchend="cancelLongPress()"
     onmouseleave="cancelLongPress()" ontouchcancel="cancelLongPress()">
         <img class="card-lock-mark" src="images/core/buttons/lock.webp" alt="잠금됨" draggable="false">
         <div class="card-img-frame ${card.img ? 'has-image' : 'has-icon'}">${renderIcon(card.icon, card.img, 'card-img')}</div>
@@ -2717,13 +2686,6 @@ function groupCardDblClick(subId, groupIdx, idx) {
   refreshStatusIfOpen();
 }
 
-/* 그룹 카드 더블클릭 — 상세 정보 열기 */
-function openGroupCardDetail(subId, groupIdx, idx) {
-  const card = CARD_DATA[subId].groups[groupIdx].cards[idx];
-  focusedCard = { subId, idx: getGroupCardGlobalIdx(groupIdx, idx), path: { type: 'group', groupIdx, cardIdx: idx }, ...card };
-  renderCardInfo();
-  openDetailSheet('card');
-}
 
 function updateGroupBadges(subId) {
   const data = CARD_DATA[subId];
@@ -2811,10 +2773,9 @@ function showCardPage(subId, animate = true) {
   <div class="data-card pressable${sel}${locked}${deal}"${delay}
     data-global-idx="${idx}"
     onclick="cardClick('${subId}', ${idx})"
-    ondblclick="openCardDetail('${subId}', ${idx})"
     onmousedown="startLongPress(event,this,'card','${subId}',${idx})"
     ontouchstart="startLongPress(event,this,'card','${subId}',${idx})"
-    onmouseup="cancelLongPress()"  ontouchend="handleCardTouchEnd(event,'card','${subId}',${idx})"
+    onmouseup="cancelLongPress()"  ontouchend="cancelLongPress()"
     onmouseleave="cancelLongPress()" ontouchcancel="cancelLongPress()">
         <img class="card-lock-mark" src="images/core/buttons/lock.webp" alt="잠금됨" draggable="false">
         <div class="card-img-frame ${card.img ? 'has-image' : 'has-icon'}">${renderIcon(card.icon, card.img, 'card-img')}</div>
@@ -2840,13 +2801,6 @@ function cardClick(subId, idx) {
   toggleCardInfo({ subId, idx, name: card.name, icon: card.icon, img: card.img, desc: card.desc });
 }
 
-/* 일반 카드 더블클릭 — 상세 정보 열기 */
-function openCardDetail(subId, idx) {
-  const card = CARD_DATA[subId][idx];
-  focusedCard = { subId, idx, name: card.name, icon: card.icon, img: card.img, desc: card.desc };
-  renderCardInfo();
-  openDetailSheet('card');
-}
 
 function closeCardInfo() {
   const panel = document.querySelector('.card-info-popover:not(.is-closing)');
@@ -2944,15 +2898,14 @@ function renderCardInfo() {
   panel.setAttribute('aria-label', `${focusedCard.name} 카드 정보`);
   panel.setAttribute('tabindex', '0');
   panel.innerHTML = `
-    <button type="button" class="card-info-close pressable" aria-label="카드 정보 닫기"><img class="close-icon" src="images/core/buttons/cancel.webp" alt="" aria-hidden="true" draggable="false"></button>
     <div class="card-info-copy card-info-open-area">
       <h3 class="card-info-title">${escapeHtml(focusedCard.name)}</h3>
       <p class="card-info-desc">${escapeHtml(focusedCard.desc || '설명 없음')}</p>
     </div>
     <div class="card-info-actions">
-      <button type="button" class="card-info-lock pressable${locked ? ' is-locked' : ''}" aria-label="${locked ? '잠금 해제' : '잠금'}" aria-pressed="${locked}"${selected ? '' : ' disabled title="카드를 먼저 선택해주세요."'}><img src="images/core/buttons/${locked ? 'lock-off' : 'lock-on'}.webp" alt="" aria-hidden="true" draggable="false"></button>
-      <button type="button" class="card-info-detail pressable" aria-label="상세정보"><img src="images/core/buttons/detail.webp" alt="" aria-hidden="true" draggable="false"></button>
-      <button type="button" class="card-info-select pressable${selected ? ' is-selected' : ''}" aria-label="${selected ? '선택 취소' : '선택'}" aria-pressed="${selected}"${locked ? ' disabled title="잠금을 해제한 뒤 선택을 취소할 수 있습니다."' : ''}><img src="images/core/buttons/${selected ? 'close' : 'select'}.webp" alt="" aria-hidden="true" draggable="false"></button>
+      <button type="button" class="card-info-lock pressable${locked ? ' is-locked' : ''}" aria-label="${locked ? '잠금 해제' : '잠금'}" aria-pressed="${locked}"${selected ? '' : ' disabled title="카드를 먼저 선택해주세요."'}><img src="images/core/buttons/detail-${locked ? 'lock-off' : 'lock-on'}.webp" alt="" aria-hidden="true" draggable="false"></button>
+      <button type="button" class="card-info-detail pressable" aria-label="상세정보"><img src="images/core/buttons/detail-detail.webp" alt="" aria-hidden="true" draggable="false"></button>
+      <button type="button" class="card-info-select pressable${selected ? ' is-selected' : ''}" aria-label="${selected ? '선택 취소' : '선택'}" aria-pressed="${selected}"${locked ? ' disabled title="잠금을 해제한 뒤 선택을 취소할 수 있습니다."' : ''}><img src="images/core/buttons/detail-${selected ? 'close' : 'select'}.webp" alt="" aria-hidden="true" draggable="false"></button>
     </div>`;
   page.appendChild(panel);
   const openFocusedCardDetail = () => openDetailSheet('card');
@@ -2978,7 +2931,6 @@ function renderCardInfo() {
       action();
     });
   };
-  bindAction('.card-info-close', closeCardInfo);
   bindAction('.card-info-detail', openFocusedCardDetail);
   bindAction('.card-info-select', selectCurrentCard);
   bindAction('.card-info-lock', toggleCurrentCardLock);
@@ -4302,10 +4254,7 @@ let _lpTimer = null;
 let _lpStartX = 0;
 let _lpStartY = 0;
 let _lpDidFire = false;
-let _lastCardTap = null;
-let _suppressedTouchClick = null;
 const LONG_PRESS_MS = 480; // 꾹 누르는 시간 (ms)
-const DOUBLE_TAP_MS = 320; // 모바일 더블터치 인식 시간 (ms)
 
 function startLongPress(evt, el, type, subId, a, b, c) {
   cancelLongPress();
@@ -4338,35 +4287,6 @@ function cancelLongPress() {
   if (_lpTimer) { clearTimeout(_lpTimer); _lpTimer = null; }
 }
 
-function handleCardTouchEnd(evt, type, subId, a, b, c) {
-  cancelLongPress();
-  if (_lpDidFire) {
-    _lastCardTap = null;
-    return;
-  }
-
-  const key = [type, subId, a, b, c].filter(value => value !== undefined).join(':');
-  const now = Date.now();
-  const isDoubleTap = _lastCardTap
-    && _lastCardTap.key === key
-    && now - _lastCardTap.time <= DOUBLE_TAP_MS;
-
-  if (isDoubleTap) {
-    evt.preventDefault();
-    _lastCardTap = null;
-    // 첫 탭의 합성 click에서 이미 한 번 재생되므로, 네이티브 dblclick이 없는
-    // 터치 환경에서는 여기서 두 번째 소리만 더한다.
-    const cardSounds = ['pong1', 'pong2', 'pong3', 'pong4', 'pong5'];
-    UI_SOUND.play(cardSounds[Math.floor(Math.random() * cardSounds.length)]);
-    _suppressedTouchClick = { card: evt.currentTarget, time: performance.now() };
-    if (type === 'subgroup') openSubgroupCardDetail(subId, a, b, c);
-    else if (type === 'group') openGroupCardDetail(subId, a, b);
-    else openCardDetail(subId, a);
-    return;
-  }
-
-  _lastCardTap = { key, time: now };
-}
 
 /* ════════════════════════════════════════════════
    컨텍스트 메뉴 / 텍스트 선택 차단 (앱처럼)  꾸욱 눌렀을때 전체선택되며뜨는거 차단
