@@ -117,7 +117,8 @@ const fixtures = [
     const bounds = await controls.locator('section').boundingBox();
     assert(bounds.x >= 0 && bounds.x + bounds.width <= 320, 'developer controls fit narrow iPhone width');
     await page.goto(base);
-    assert.equal(await page.evaluate(() => !!window.APP_PERF), true, 'explicit opt-in persists');
+    assert.equal(await page.evaluate(() => !!window.APP_PERF), false, 'normal URL must never inherit opt-in');
+    await page.goto(base + '/?perf=1');
     await controls.locator('#disable').click();
     await page.waitForURL('**perf=0');
     await page.waitForLoadState();
@@ -126,6 +127,6 @@ const fixtures = [
     assert.equal(await page.evaluate(() => !!window.APP_PERF), false, 'disable clears persisted opt-in');
     assert.deepEqual(errors, []);
     await context.close();
-    console.log('PASS opt-in/off, frozen/bounded logs, isolated sessions, clipboard and fallback; no JS errors');
+    console.log('PASS query-only opt-in/off, frozen/bounded logs, isolated sessions, clipboard and fallback; no JS errors');
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

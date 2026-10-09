@@ -303,13 +303,7 @@
 <!-- Opt-in only: no diagnostic script, observers or RAF loop on normal visits. -->
 <script>
 (() => {
-  const option = new URLSearchParams(location.search).get('perf');
-  let enabled = option === '1';
-  try {
-    if (option === '1') localStorage.setItem('narrative-perf', '1');
-    if (option === '0') localStorage.removeItem('narrative-perf');
-    if (option === null) enabled = localStorage.getItem('narrative-perf') === '1';
-  } catch (_) { /* Query activation also works when storage is unavailable. */ }
+  const enabled = new URLSearchParams(location.search).get('perf') === '1';
   if (enabled) document.write('<script src="js/perf-diagnostics.js"><\/script>');
 })();
 </script>

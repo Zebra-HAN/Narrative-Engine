@@ -14,7 +14,7 @@ Use the deployed **Draft PR build**. Main does not contain this feature yet.
    note. If clipboard access is denied, the report appears in a selected text box;
    use the native Select All/Copy menu. No report is sent to a server.
 4. Tap **진단 끄기** to reload without diagnostics. `?perf=0` also explicitly
-   disables it. Opt-in persists in localStorage when available; recordings do not.
+   disables it. Opt-in is URL-only: normal URLs never inherit activation. Recordings are not persisted.
 
 For PWA measurements, add the diagnostic URL to the Home Screen and launch that
 icon. Confirm the developer controls are visible and the report's `standalone`
