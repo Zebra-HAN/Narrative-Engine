@@ -473,7 +473,8 @@
 #screen-create .card-info-select:disabled {
   opacity: 1;
   cursor: not-allowed;
-  filter: saturate(.2) brightness(1.066) contrast(.9);
+  /* Blend grayscale artwork halfway toward white without changing alpha. */
+  filter: grayscale(1) brightness(.5) contrast(.5) brightness(2);
 }
 #screen-create .data-card.card-info-active {
   /* 카드의 box는 그대로 두고 촘촘한 명도 단계와 넓은 광륜을 겹친다. 각 1px 안팎의
