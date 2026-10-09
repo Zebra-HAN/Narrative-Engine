@@ -3257,3 +3257,10 @@ body {
 .extra-btn:has(.extra-btn-img[src]:not([src=""])) .extra-btn-label {
   display: none;
 }
+
+/* Explicit developer experiment only; retain all reveal setup/measurement work. */
+#page-race_race_fantasy[data-perf-fantasy-flip="off"] .data-card.card-deal {
+  animation: none !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}

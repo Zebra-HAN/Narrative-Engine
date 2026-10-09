@@ -1,5 +1,8 @@
 // Undefined on normal visits; diagnostic code is loaded only by explicit opt-in.
 const APP_PERF = window.APP_PERF;
+// Query-only experiment: ordinary visits always keep the existing reveal.
+const PERF_FANTASY_NO_FLIP = Boolean(APP_PERF)
+  && new URLSearchParams(location.search).get('fantasyFlip') === 'off';
 
 /* ════════════════════════════════════════════════
    데이터 조립
@@ -2229,6 +2232,13 @@ function getCardRevealDelayStyle() {
 }
 
 function setupCardRevealAnimations(page) {
+  if (APP_PERF && page.id === 'page-race_race_fantasy') {
+    if (PERF_FANTASY_NO_FLIP) page.dataset.perfFantasyFlip = 'off';
+    APP_PERF.mark('experiment.fantasy-flip', { enabled: !PERF_FANTASY_NO_FLIP });
+  }
+  // Keep title fitting, image preparation, reveal geometry and observers on
+  // both paths; the experiment overrides only card reveal styling.
+
   const cards = Array.from(page.querySelectorAll('.card-deal'));
   const waveSteps = new Map();
   let rowOffset = 0;
