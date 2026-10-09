@@ -324,11 +324,11 @@
   z-index: 16;
   box-sizing: border-box;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 100px;
-  gap: 8px;
-  min-height: 0;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  min-height: 73px;
   overflow: visible;
-  padding: 8px 12px 7px 14px;
+  padding: 6px 12px 5px 14px;
   border: 2px solid #664126;
   border-radius: 10px 13px 10px 13px;
   color: #493522;
@@ -402,7 +402,11 @@
   border-left: 2px solid #664126;
 }
 
-#screen-create .card-info-copy { min-width: 0; align-self: stretch; }
+#screen-create .card-info-copy {
+  min-width: 0;
+  width: calc(100% - 24px);
+  align-self: stretch;
+}
 #screen-create .card-info-open-area {
   display: flex;
   flex-direction: column;
@@ -412,7 +416,7 @@
   -webkit-tap-highlight-color: transparent;
 }
 #screen-create .card-info-title {
-  margin: 0 20px 3px 0;
+  margin: 0 0 3px;
   color: #3e2919;
   font: 700 .9rem/1.25 'Noto Serif KR', serif;
 }
@@ -427,12 +431,6 @@
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
 }
-/* Keep the original panel height while reserving text space for the flags. */
-#screen-create .card-info-popover::after {
-  content: '';
-  height: 78px;
-  pointer-events: none;
-}
 #screen-create .card-info-actions {
   position: absolute;
   z-index: 2;
@@ -440,20 +438,20 @@
   right: 10px;
   display: flex;
   gap: 0;
-  transform: translateY(-50%);
+  transform: translateY(-100%);
 }
 #screen-create .card-info-popover.is-below-card .card-info-actions {
   top: auto;
   bottom: 0;
-  transform: translateY(70%);
+  transform: translateY(100%);
 }
 #screen-create .card-info-detail,
 #screen-create .card-info-select,
 #screen-create .card-info-lock {
   position: relative;
   display: block;
-  flex: 0 0 36px;
-  width: 36px;
+  flex: 0 0 64.8px;
+  width: 64.8px;
   height: auto;
   padding: 0;
   border: 0;
@@ -469,14 +467,11 @@
   height: auto;
   object-fit: contain;
 }
-#screen-create .card-info-lock:disabled {
-  opacity: .48;
-  cursor: not-allowed;
-  filter: grayscale(.45);
-}
+#screen-create .card-info-lock:disabled,
 #screen-create .card-info-select:disabled {
-  opacity: .72;
+  opacity: 1;
   cursor: not-allowed;
+  filter: grayscale(1) saturate(0) brightness(.82) contrast(.9);
 }
 #screen-create .data-card.card-info-active {
   /* 카드의 box는 그대로 두고 촘촘한 명도 단계와 넓은 광륜을 겹친다. 각 1px 안팎의
