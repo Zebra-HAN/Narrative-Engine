@@ -2264,14 +2264,19 @@ function setupCardRevealAnimations(page) {
     card.addEventListener('animationend', () => card.classList.remove('card-deal', 'card-interactive'), { once: true });
     card.addEventListener('animationcancel', () => card.classList.remove('card-deal', 'card-interactive'), { once: true });
   });
-  // 소형 화면은 기존 경로 그대로. 큰 목록만 화면 밖 합성 준비를 제한한다.
-  if (cards.length > 32 && page.animate && Element.prototype.getAnimations
+  // Small sectioned screens can also animate cards below the viewport. Keep
+  // the proven large-screen path/buffer unchanged; scope only 5–32-card section
+  // screens to one viewport. Scroll lookahead still prepares entering cards.
+  const smallSectionScreen = cards.length > 4 && cards.length <= 32
+    && Boolean(page.querySelector('.card-section-header'));
+  if ((cards.length > 32 || smallSectionScreen) && page.animate && Element.prototype.getAnimations
       && window.ResizeObserver) {
-    scopeCardRevealAnimations(page, cards, lastDelay + CARD_REVEAL_DURATION_MS);
+    scopeCardRevealAnimations(page, cards, lastDelay + CARD_REVEAL_DURATION_MS,
+      smallSectionScreen ? 1 : 1.5);
   }
 }
 
-function scopeCardRevealAnimations(page, cards, duration) {
+function scopeCardRevealAnimations(page, cards, duration, viewportScreens = 1.5) {
   const area = document.getElementById('center-area');
   const waiting = new Set(cards);
   cards.forEach(card => card.classList.add('card-reveal-suspended'));
@@ -2329,7 +2334,7 @@ function scopeCardRevealAnimations(page, cards, duration) {
     // 빠른 이동 방향에는 더 준비하되, 좌표 재측정 없이 최대 두 화면까지 확장한다.
     const ahead = Math.min(height * 2, Math.abs(delta) * 2);
     const top = scrollTop - height * 0.5 - (delta < 0 ? ahead : 0);
-    const bottom = scrollTop + height * 1.5 + (delta > 0 ? ahead : 0);
+    const bottom = scrollTop + height * viewportScreens + (delta > 0 ? ahead : 0);
     // 끝 좌표는 누적 최댓값이다. 스크롤 시 가시/완충 구간만 방문한다.
     let low = 0;
     let high = records.length;
