@@ -1,3 +1,6 @@
+// Undefined on normal visits; diagnostic code is loaded only by explicit opt-in.
+const APP_PERF = window.APP_PERF;
+
 /* ════════════════════════════════════════════════
    데이터 조립
    각 데이터 파일에서 NAV_DATA / CARD_DATA 조립
@@ -38,6 +41,7 @@ const IMAGE_LOADER = (() => {
     if (!url) return Promise.resolve(false);
     if (jobs.has(url)) return jobs.get(url);
 
+    const perfImage = APP_PERF?.begin('image.prepare');
     const job = new Promise(resolve => {
       const image = new Image();
       image.decoding = 'async';
@@ -45,8 +49,9 @@ const IMAGE_LOADER = (() => {
       const finish = async loaded => {
         if (settled) return;
         settled = true;
-        if (!loaded) return resolve(false);
+        if (!loaded) { APP_PERF?.end(perfImage, { url: APP_PERF.safeURL(url), loaded: false }); return resolve(false); }
         try { if (image.decode) await image.decode(); } catch (_) { /* decoded by load fallback */ }
+        APP_PERF?.end(perfImage, { url: APP_PERF.safeURL(url), loaded: true });
         ready.add(url);
         resolve(true);
       };
@@ -436,6 +441,7 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
   area.dataset.backgroundStage = stage;
 
   const activationKey = `${navId}:${stage}:${screenKey}`;
+  APP_PERF?.mark('background.request', { activationKey });
   // 진행 중이던 목적지를 먼저 확정한다. 이후 새 요청이 준비되는 동안 이
   // 불투명 레이어가 outgoing 소유자로 남아 최하단 CSS 배경을 노출하지 않는다.
   if (activeBackgroundScreen !== activationKey) cancelRunningBackgroundTransition();
@@ -462,7 +468,10 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
         || (runningBackgroundTransition?.imageUrl === imageUrl
           && runningBackgroundTransition.activationKey === activationKey
           && runningBackgroundTransition.nextLayer.dataset.backgroundOwner === activationKey
-          && layerHasBackground(runningBackgroundTransition.nextLayer)))) return runningBackgroundTransition?.ready || true;
+          && layerHasBackground(runningBackgroundTransition.nextLayer)))) {
+    APP_PERF?.mark('background.reuse', { activationKey });
+    return runningBackgroundTransition?.ready || true;
+  }
 
   activeBackgroundScreen = activationKey;
   const requestId = ++backgroundRequestId;
@@ -497,6 +506,7 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
       }
     }
   }
+  APP_PERF?.mark('background.image-ready', { activationKey, loaded, url: APP_PERF.safeURL(imageUrl) });
   if (!loaded || !isAllowedCreativeBackground(imageUrl)) return;
 
   // A successful URL belongs to this route for the rest of this creative
@@ -514,6 +524,7 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
     setBackgroundLayerActive(layers, restoredLayer);
     void restoredLayer.offsetWidth;
     restoredLayer.style.removeProperty('transition');
+    APP_PERF?.mark('background.commit-no-fade', { activationKey });
     visibleBackgroundLayer = layers.indexOf(restoredLayer);
     activeBackgroundScreen = activationKey;
     area.classList.remove('is-background-pending');
@@ -532,6 +543,7 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
     setBackgroundLayerActive(layers, nextLayer);
     void nextLayer.offsetWidth;
     nextLayer.style.removeProperty('transition');
+    APP_PERF?.mark('background.commit-no-fade', { activationKey });
     visibleBackgroundLayer = nextLayerIndex;
     visibleBackgroundUrl = imageUrl;
     area.classList.remove('is-background-pending');
@@ -572,6 +584,7 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
         || transition.activationKey !== activeBackgroundScreen
         || nextLayer.dataset.backgroundOwner !== activeBackgroundScreen
         || !isAllowedCreativeBackground(imageUrl)) return;
+    APP_PERF?.mark('background.fade-start', { activationKey, url: APP_PERF.safeURL(imageUrl) });
     nextLayer.style.opacity = '1';
     // transitionend가 생략되는 브라우저/백그라운드 탭에서도 버퍼를 해제한다.
     transition.timer = setTimeout(finish, 360);
@@ -584,6 +597,7 @@ function finishBackgroundTransition(transition) {
       || transition.activationKey !== activeBackgroundScreen
       || transition.nextLayer.dataset.backgroundOwner !== activeBackgroundScreen
       || !isAllowedCreativeBackground(transition.imageUrl)) return;
+  APP_PERF?.mark('background.fade-finish', { activationKey: transition.activationKey });
   clearTimeout(transition.timer);
   transition.nextLayer.removeEventListener('transitionend', transition.onTransitionEnd);
   const area = transition.nextLayer.closest('.center-area');
@@ -997,13 +1011,16 @@ function initCenterBackSwipe() {
     if (!page) return;
     const key = `${currentNav}:${page.id}`;
     pageKeys.set(page, key);
-    if (scrollMemory.has(key)) page.scrollTop = scrollMemory.get(key);
+    if (scrollMemory.has(key)) {
+      if (APP_PERF) APP_PERF.measure('scroll.restore', () => { page.scrollTop = scrollMemory.get(key); }, { page: page.id });
+      else page.scrollTop = scrollMemory.get(key);
+    }
   };
   rememberPage(activePage());
   area.addEventListener('scroll', event => {
     const page = event.target;
     const key = pageKeys.get(page);
-    if (key) scrollMemory.set(key, page.scrollTop);
+    if (key) scrollMemory.set(key, APP_PERF ? APP_PERF.measure('scroll.read', () => page.scrollTop, { page: page.id }) : page.scrollTop);
   }, { capture: true, passive: true });
   new MutationObserver(() => {
     const page = activePage();
@@ -1018,11 +1035,13 @@ function initCenterBackSwipe() {
     returnAnimation?.cancel();
     returnPage = page;
     // 기존 취소 복귀의 180ms/ease를 재사용한다. 화면 교체는 즉시 완료한다.
+    APP_PERF?.mark('swipe.return-start', { page: page.id, offset, durationMs: 180 });
     const animation = page.animate([
       { transform: `translateX(${offset}px)` }, { transform: 'translateX(0px)' }
     ], { duration: 180, easing: 'ease' });
     returnAnimation = animation;
     animation.onfinish = () => {
+      APP_PERF?.mark('swipe.return-finished', { page: page.id });
       if (returnAnimation === animation) { returnAnimation = null; returnPage = null; }
     };
   }
@@ -1084,6 +1103,7 @@ function initCenterBackSwipe() {
       if (dx > 0 && dx > Math.abs(dy) * HORIZONTAL_BIAS) {
         isDragging = true;
         area.classList.add('is-back-swiping');
+        APP_PERF?.mark('swipe.drag-start', { page: dragPage?.id });
       }
     }
 
@@ -1117,6 +1137,7 @@ function initCenterBackSwipe() {
     const shouldGoBack = isDragging && Math.abs(dy) < furthestX * 1.5 &&
       (furthestX >= distanceThreshold || isFastFlick);
 
+    APP_PERF?.mark('swipe.decision', { back: shouldGoBack, distance: furthestX, elapsedMs: elapsed });
     const sourcePage = dragPage;
     const offset = dragOffset;
     if (!shouldGoBack) resetDragStyles();
@@ -1132,7 +1153,7 @@ function initCenterBackSwipe() {
       area.classList.remove('is-back-swiping');
       UI_SOUND.play('page');
       const key = pageKeys.get(sourcePage);
-      if (key) scrollMemory.set(key, sourcePage.scrollTop);
+      if (key) scrollMemory.set(key, APP_PERF ? APP_PERF.measure('scroll.read', () => sourcePage.scrollTop, { page: sourcePage.id }) : sourcePage.scrollTop);
       navigateAddressBack();
       // 사라질 이전 페이지를 먼저 원점으로 튕기지 않는다. 새 페이지는 같은
       // 드래그 위치에서 기존 복귀 곡선을 따라 원점에 안착한다.
@@ -1683,6 +1704,7 @@ function initScrollResponsiveChrome() {
   }
 
   function renderChrome() {
+    const perfRender = APP_PERF?.begin('panel.renderChrome');
     // RAF의 프레임 시각은 같은 프레임에서 저장한 시작 시각보다 앞설 수 있다.
     // 시작과 갱신 모두 같은 현재 시각을 사용하고 진행률의 양끝을 제한한다.
     const elapsed = Math.max(0, performance.now() - animationStartedAt);
@@ -1708,7 +1730,9 @@ function initScrollResponsiveChrome() {
       renderedTopProgress = targetTopProgress;
       renderedBottomProgress = targetBottomProgress;
       animationFrame = 0;
+      APP_PERF?.mark('panel.animation-finish', { top: targetTopProgress, bottom: targetBottomProgress });
     }
+    APP_PERF?.end(perfRender);
   }
 
   function animateChrome(topProgress, bottomProgress) {
@@ -1725,6 +1749,7 @@ function initScrollResponsiveChrome() {
     animationStartTopProgress = renderedTopProgress;
     animationStartBottomProgress = renderedBottomProgress;
     animationStartedAt = performance.now();
+    APP_PERF?.mark('panel.animation-start', { top: nextTopProgress, bottom: nextBottomProgress, nominalDurationMs: ANIMATION_DURATION });
     if (animationFrame) cancelAnimationFrame(animationFrame);
     animationFrame = requestAnimationFrame(renderChrome);
   }
@@ -1760,7 +1785,7 @@ function initScrollResponsiveChrome() {
   function onScroll(event) {
     const page = event.target;
     if (!(page instanceof Element) || !page.classList.contains('center-page')) return;
-    const currentTop = Math.max(0, page.scrollTop);
+    const currentTop = Math.max(0, APP_PERF ? APP_PERF.measure('scroll.read', () => page.scrollTop, { page: page.id }) : page.scrollTop);
     const previousTop = scrollPositions.get(page) ?? currentTop;
     scrollPositions.set(page, currentTop);
     // wheel/touch와 그 결과로 발생한 scroll 이벤트를 중복 계산하지 않는다.
@@ -1834,7 +1859,7 @@ function initScrollResponsiveChrome() {
   const pageObserver = new MutationObserver(() => {
     const activePage = area.querySelector('.center-page.active[data-chrome-view]')
       || area.querySelector('.center-page.active');
-    if (activePage) scrollPositions.set(activePage, activePage.scrollTop);
+    if (activePage) scrollPositions.set(activePage, APP_PERF ? APP_PERF.measure('scroll.read', () => activePage.scrollTop, { page: activePage.id }) : activePage.scrollTop);
     const view = activePage?.dataset.chromeView || 'top';
     ignoreLayoutScrollUntil = performance.now() + ANIMATION_DURATION + 80;
     if (view === 'group' || (view === 'subgroup' && previousView === 'cards')) setProgress(1);
@@ -2222,11 +2247,12 @@ function scopeCardRevealAnimations(page, cards, duration) {
   }
 
   function measure() {
+    const perfGeometry = APP_PERF?.begin('cardReveal.measureGeometry');
     // 초기/실제 크기 변경 때만 읽기 일괄. transform과 무관한 레이아웃 좌표를 보관한다.
     height = page.clientHeight;
     width = page.offsetWidth;
     outerHeight = page.offsetHeight;
-    lastScrollTop = page.scrollTop;
+    lastScrollTop = APP_PERF ? APP_PERF.measure('scroll.read', () => page.scrollTop, { page: page.id }) : page.scrollTop;
     const offsets = new Map([[page, 0]]);
     function topOf(node) {
       if (!node || node === page) return 0;
@@ -2241,12 +2267,13 @@ function scopeCardRevealAnimations(page, cards, duration) {
     });
     page.querySelectorAll('.card-grid').forEach(grid => gridSizes.set(grid, {
       width: grid.offsetWidth, height: grid.offsetHeight }));
+    APP_PERF?.end(perfGeometry);
   }
 
   function updateScope() {
     if (finished || !clock) return;
     if (!page.isConnected || clock.currentTime >= duration) { stop(); return; }
-    const scrollTop = page.scrollTop;
+    const scrollTop = APP_PERF ? APP_PERF.measure('scroll.read', () => page.scrollTop, { page: page.id }) : page.scrollTop;
     const delta = scrollTop - lastScrollTop;
     lastScrollTop = scrollTop;
     // 빠른 이동 방향에는 더 준비하되, 좌표 재측정 없이 최대 두 화면까지 확장한다.
@@ -4413,3 +4440,10 @@ function attachSwipeToClose(panelEl, closeFn) {
     panelEl.removeEventListener('touchend',   onTouchEnd);
   };
 }
+
+// All declarations are initialized before diagnostic function wrapping.
+APP_PERF?.install(() => ({
+  nav: currentNav, sub: currentSubId,
+  page: document.querySelector('.center-page.active[data-chrome-view]')?.id || 'page-default',
+  trail: addressTrail.map(item => ({ type: item.type, label: item.label }))
+}));
