@@ -327,6 +327,7 @@
   grid-template-columns: minmax(0, 1fr) 100px;
   gap: 8px;
   min-height: 0;
+  overflow: visible;
   padding: 8px 12px 7px 14px;
   border: 2px solid #664126;
   border-radius: 10px 13px 10px 13px;
@@ -426,34 +427,46 @@
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
 }
-#screen-create .card-info-actions {
-  position: relative;
-  width: 100px;
+/* Keep the original panel height while reserving text space for the flags. */
+#screen-create .card-info-popover::after {
+  content: '';
   height: 78px;
-  align-self: center;
+  pointer-events: none;
+}
+#screen-create .card-info-actions {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  right: 10px;
+  display: flex;
+  gap: 0;
+  transform: translateY(-50%);
+}
+#screen-create .card-info-popover.is-below-card .card-info-actions {
+  top: auto;
+  bottom: 0;
+  transform: translateY(70%);
 }
 #screen-create .card-info-detail,
 #screen-create .card-info-select,
 #screen-create .card-info-lock {
-  position: absolute;
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  padding: 2px;
+  position: relative;
+  display: block;
+  flex: 0 0 36px;
+  width: 36px;
+  height: auto;
+  padding: 0;
   border: 0;
-  border-radius: 50%;
+  border-radius: 0;
   background: transparent;
+  box-shadow: none;
   -webkit-tap-highlight-color: transparent;
   transition: transform 70ms ease-out;
 }
-#screen-create .card-info-lock { top: 0; left: 28px; }
-#screen-create .card-info-detail { bottom: 0; left: 0; }
-#screen-create .card-info-select { right: 0; bottom: 0; }
 #screen-create .card-info-actions img {
   display: block;
-  width: 40px;
-  height: 40px;
+  width: 100%;
+  height: auto;
   object-fit: contain;
 }
 #screen-create .card-info-lock:disabled {
@@ -464,19 +477,6 @@
 #screen-create .card-info-select:disabled {
   opacity: .72;
   cursor: not-allowed;
-}
-#screen-create .card-info-close {
-  position: absolute;
-  z-index: 2;
-  top: -13px;
-  right: -12px;
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  padding: 5px;
-  border: 0;
-  background: transparent;
 }
 #screen-create .data-card.card-info-active {
   /* 카드의 box는 그대로 두고 촘촘한 명도 단계와 넓은 광륜을 겹친다. 각 1px 안팎의
