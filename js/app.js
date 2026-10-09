@@ -1437,7 +1437,57 @@ function fitCardTitle(container) {
 
 function fitAllCardTitles() {
   if (!document.getElementById('screen-create').classList.contains('active')) return;
-  document.querySelectorAll('#center-area .center-page.active .card-name').forEach(fitCardTitle);
+  const containers = Array.from(document.querySelectorAll('#center-area .center-page.active .card-name'));
+  // Only two-column multiline screens showed consistent end-to-end gains.
+  // Preserve small screens and every unproven layout's existing path.
+  if (containers.length <= 4 || containers.some(container =>
+    !container.closest('.card-grid-layout-d'))) {
+    containers.forEach(fitCardTitle);
+    return;
+  }
+
+  // The candidate sizes and fit checks are unchanged. Batch each write/read
+  // phase so one card's style write does not force a whole-page layout for the
+  // next card. Every title is completed synchronously before this RAF returns.
+  const jobs = [];
+  containers.forEach(container => {
+    const text = container.querySelector('.card-name-text');
+    if (!text || container.clientWidth <= 0 || container.clientHeight <= 0) return;
+    const key = titleFitKey(container, text);
+    if (cardTitleFitCache.get(container) === key) return;
+    cardTitleFitCache.set(container, key);
+    jobs.push({ container, text });
+  });
+  jobs.forEach(({ text }) => {
+    text.style.removeProperty('font-size');
+    text.style.removeProperty('line-height');
+  });
+  let pending = jobs.filter(job => {
+    const { height } = getCardTitleAvailableSize(job.container);
+    const style = getComputedStyle(job.container);
+    const size = parseFloat(style.fontSize);
+    const lineHeight = parseFloat(style.lineHeight);
+    if (!size || !lineHeight) return false;
+    job.height = height - Math.max(3, height * 0.1);
+    job.lineHeight = lineHeight / size;
+    job.candidates = getCardTitleCandidates(size);
+    job.index = 0;
+    return true;
+  });
+  while (pending.length) {
+    pending.forEach(job => {
+      const compact = job.index === job.candidates.length;
+      const size = job.candidates[Math.min(job.index, job.candidates.length - 1)];
+      applyCardTitleSize(job.text, size, job.lineHeight
+        * (compact ? CARD_TITLE_COMPACT_LINE_HEIGHT_SCALE : 1));
+    });
+    pending = pending.filter(job => {
+      const fits = cardTitleFits(job.text, job.height);
+      if (fits || job.index === job.candidates.length) return false;
+      job.index++;
+      return true;
+    });
+  }
 }
 
 function requestCardTitleAutoFit() {

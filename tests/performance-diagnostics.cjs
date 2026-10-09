@@ -4,6 +4,7 @@ const base = process.env.PERF_TEST_URL || 'http://127.0.0.1:8001';
 const fixtures = [
   { id: 'race', nav: 'character', g: 2, cards: 139 },
   { id: 'race', nav: 'character', g: 1, sg: 0, cards: 4 },
+  { id: 'race', nav: 'character', g: 1, sg: 1, cards: 20 },
   { id: 'experience', nav: 'compass', g: 1, cards: 116 },
   { id: 'attribute', nav: 'character', g: 2, cards: 2 }
 ];
@@ -38,6 +39,7 @@ const fixtures = [
       await page.evaluate(f => { if (f.sg === undefined) showGroupCards(f.id, f.g); else showSubgroupCards(f.id, f.g, f.sg); }, fixture);
       await page.waitForTimeout(650);
       assert.equal(await page.locator('.center-page.active[data-chrome-view] .data-card').count(), fixture.cards);
+      if (fixture.cards === 20) assert.equal(await page.locator('.center-page.active .card-section-header').count(), 3);
       // Existing information/select/lock/detail behavior must survive instrumentation.
       if (fixture.cards === 139) {
         await page.locator('.center-page.active[data-chrome-view] .data-card').first().click();
