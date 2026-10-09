@@ -300,6 +300,13 @@
   </div>
 </div>
 
+<!-- Opt-in only: no diagnostic script, observers or RAF loop on normal visits. -->
+<script>
+(() => {
+  const enabled = new URLSearchParams(location.search).get('perf') === '1';
+  if (enabled) document.write('<script src="js/perf-diagnostics.js"><\/script>');
+})();
+</script>
 <script src="data/character.js"></script>
 <script src="data/narrative.js"></script>
 <script src="data/world.js"></script>
