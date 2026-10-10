@@ -582,7 +582,9 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
   };
   runningBackgroundTransition = transition;
   nextLayer.addEventListener('transitionend', transition.onTransitionEnd);
-  requestAnimationFrame(() => {
+  // Let the prepared zero-opacity layer paint before starting its fade.
+  // Initial card layout/scroll restoration must not consume the fade window.
+  requestAnimationFrame(() => requestAnimationFrame(() => {
     if (runningBackgroundTransition !== transition || requestId !== backgroundRequestId
         || transition.activationKey !== activeBackgroundScreen
         || nextLayer.dataset.backgroundOwner !== activeBackgroundScreen
@@ -591,7 +593,7 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey })
     nextLayer.style.opacity = '1';
     // transitionend가 생략되는 브라우저/백그라운드 탭에서도 버퍼를 해제한다.
     transition.timer = setTimeout(finish, 360);
-  });
+  }));
   return ready;
 }
 
@@ -1801,10 +1803,15 @@ function initScrollResponsiveChrome() {
     targetBottomProgress = nextBottomProgress;
     animationStartTopProgress = renderedTopProgress;
     animationStartBottomProgress = renderedBottomProgress;
-    animationStartedAt = performance.now();
-    APP_PERF?.mark('panel.animation-start', { top: nextTopProgress, bottom: nextBottomProgress, nominalDurationMs: ANIMATION_DURATION });
     if (animationFrame) cancelAnimationFrame(animationFrame);
-    animationFrame = requestAnimationFrame(renderChrome);
+    // Start the clock after the initial route layout has had a paint opportunity.
+    animationFrame = requestAnimationFrame(() => {
+      animationFrame = requestAnimationFrame(() => {
+        animationStartedAt = performance.now();
+        APP_PERF?.mark('panel.animation-start', { top: nextTopProgress, bottom: nextBottomProgress, nominalDurationMs: ANIMATION_DURATION });
+        renderChrome();
+      });
+    });
   }
 
   function setProgress(progress) {
