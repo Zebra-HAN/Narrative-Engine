@@ -1789,6 +1789,8 @@ function initScrollResponsiveChrome() {
       renderedTopProgress = targetTopProgress;
       renderedBottomProgress = targetBottomProgress;
       animationFrame = 0;
+      infoPanel.classList.toggle('chrome-render-suspended', targetTopProgress === 1);
+      bottomChrome.classList.toggle('chrome-render-suspended', targetBottomProgress === 1);
       APP_PERF?.mark('panel.animation-finish', { top: targetTopProgress, bottom: targetBottomProgress });
     }
     APP_PERF?.end(perfRender);
@@ -1803,6 +1805,9 @@ function initScrollResponsiveChrome() {
     if (nextTopProgress === renderedTopProgress
         && nextBottomProgress === renderedBottomProgress
         && !animationFrame) return;
+    // Restore painting at the existing offscreen transform before the two RAFs.
+    if (nextTopProgress < 1) infoPanel.classList.remove('chrome-render-suspended');
+    if (nextBottomProgress < 1) bottomChrome.classList.remove('chrome-render-suspended');
     targetTopProgress = nextTopProgress;
     targetBottomProgress = nextBottomProgress;
     animationStartTopProgress = renderedTopProgress;
