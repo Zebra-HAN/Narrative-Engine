@@ -1724,6 +1724,10 @@ function initScrollResponsiveChrome() {
   const bottomChrome = document.getElementById('create-chrome-bottom');
   if (!screen || !area || !infoPanel || !bottomChrome) return;
 
+  const panelToggle = document.getElementById('card-panel-toggle');
+  let cardPanelMode = false;
+  let cardPanelsLocked = true;
+
   const INTENT_DISTANCE = 18;
   const INTENT_VELOCITY = 0.32;
   const GESTURE_GAP = 140;
@@ -1815,11 +1819,27 @@ function initScrollResponsiveChrome() {
   }
 
   function setProgress(progress) {
+    if (cardPanelMode) {
+      if (progress === 0 && cardPanelsLocked) return;
+      if (progress > 0) {
+        cardPanelsLocked = true;
+        if (panelToggle) { panelToggle.hidden = false; panelToggle.setAttribute('aria-expanded', 'false'); }
+      }
+    }
     // 하단 크롬이 숨기 시작하면 열린 유틸리티 메뉴도 함께 닫는다.
     // 메뉴를 단순히 아래로 끌고 가지 않아 다음 표시 때 닫힌 상태가 유지된다.
     if (progress > 0 && extraMenuOpen) closeExtraMenu({ instant: true });
     animateChrome(progress, progress);
   }
+
+  panelToggle?.addEventListener('click', () => {
+    if (!cardPanelMode) return;
+    cardPanelsLocked = false;
+    panelToggle.hidden = true;
+    panelToggle.setAttribute('aria-expanded', 'true');
+    resetGesture();
+    setProgress(0);
+  });
 
   function trackGesture(delta, timestamp = performance.now()) {
     if (Math.abs(delta) < 0.5) return;
@@ -1922,7 +1942,20 @@ function initScrollResponsiveChrome() {
     if (activePage) scrollPositions.set(activePage, APP_PERF ? APP_PERF.measure('scroll.read', () => activePage.scrollTop, { page: activePage.id }) : activePage.scrollTop);
     const view = activePage?.dataset.chromeView || 'top';
     ignoreLayoutScrollUntil = performance.now() + ANIMATION_DURATION + 80;
-    if (view === 'group' || (view === 'subgroup' && previousView === 'cards')) setProgress(1);
+    cardPanelMode = view === 'cards';
+    screen.classList.toggle('card-panels-mode', cardPanelMode);
+    if (panelToggle) { panelToggle.hidden = !cardPanelMode; panelToggle.setAttribute('aria-expanded', 'false'); }
+    if (cardPanelMode) {
+      // Set the initial hidden state before paint and before card reveal scope.
+      cardPanelsLocked = true;
+      if (animationFrame) cancelAnimationFrame(animationFrame);
+      animationFrame = 0;
+      targetTopProgress = renderedTopProgress = animationStartTopProgress = 1;
+      targetBottomProgress = renderedBottomProgress = animationStartBottomProgress = 1;
+      animationStartedAt = performance.now();
+      if (extraMenuOpen) closeExtraMenu({ instant: true });
+      renderChrome();
+    } else if (view === 'group' || (view === 'subgroup' && previousView === 'cards')) setProgress(1);
     else if (view !== 'subgroup') setProgress(0);
     previousView = view;
     resetGesture();

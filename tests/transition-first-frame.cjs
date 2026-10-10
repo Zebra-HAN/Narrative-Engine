@@ -63,7 +63,8 @@ const { chromium } = require('playwright');
           assert.equal(await page.locator('.creative-background-layer.is-incoming').count(), 0);
           assert.equal(await page.locator('.center-page.active .data-card').count(), 139);
           await page.waitForFunction(() => [...document.querySelectorAll('.center-page.active .data-card')].every(n => getComputedStyle(n).opacity === '1'));
-          assert(panelFrames >= 3, 'panel must retain intermediate movement after slow first paint');
+          assert.equal(panelFrames, 0, 'card entry panels stay hidden without movement');
+          assert(sample.frames.every(f => /-100%/.test(f.panel)), 'no visible-panel entry frame');
         }
         console.log(`${mode} ${restored ? 'restored card 100' : 'top'}: ${intermediate} intermediate fade frames, ${panelFrames} panel frames`);
       }
