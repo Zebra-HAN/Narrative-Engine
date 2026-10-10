@@ -22,7 +22,13 @@ const { chromium } = require('playwright');
       });
       assert.equal(immediate.cards.length,139);
       assert.equal(immediate.flag,off?'off':undefined);
-      if(off) for(const card of immediate.cards) assert.deepEqual(card,{opacity:'1',animation:'none',transform:'none',pointer:'auto'});
+      if(off) for(const card of immediate.cards) {
+        const {pointer, ...visual} = card;
+        assert.deepEqual(visual,{opacity:'1',animation:'none',transform:'none'});
+        // Finalized non-sequential cards use the normal pressable rule ('all');
+        // the remaining reveal cards use the diagnostic override ('auto').
+        assert(['auto','all'].includes(pointer), 'all cards remain interactive');
+      }
       else {
         await page.waitForTimeout(50);
         assert(await page.evaluate(()=>[...document.querySelectorAll('.center-page.active .data-card')].some(card=>getComputedStyle(card).animationName==='cardFlip')));
