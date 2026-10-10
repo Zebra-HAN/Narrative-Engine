@@ -3285,3 +3285,9 @@ body {
 .card-panel-toggle[hidden] { display: none; }
 #screen-create.card-panels-mode .info-panel,
 #screen-create.card-panels-mode .create-chrome-bottom { animation: none; }
+
+/* Keep layout dimensions/scroll padding; omit paint and persistent layer hints. */
+#screen-create .chrome-render-suspended {
+  visibility: hidden;
+  will-change: auto;
+}
