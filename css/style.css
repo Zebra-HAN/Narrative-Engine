@@ -3265,19 +3265,27 @@ body {
   pointer-events: auto !important;
 }
 
-/* Card-only panel access; keep the existing scroll area/padding unchanged. */
+/* Card-only panel access; shared dimensions also reserve its scroll-free strip. */
+#screen-create {
+  --card-panel-button-top: calc(env(safe-area-inset-top, 0px) + 8px);
+  --card-panel-button-height: 36px;
+}
+#screen-create .center-page[data-chrome-view="cards"] {
+  top: calc(var(--card-panel-button-top) + var(--card-panel-button-height) + 8px);
+  padding-top: 0;
+}
 .card-panel-toggle {
   position: absolute;
   left: 50%;
-  bottom: max(8px, env(safe-area-inset-bottom));
+  top: var(--card-panel-button-top);
   transform: translateX(-50%);
   z-index: 30;
   width: 44px;
-  height: 36px;
+  height: var(--card-panel-button-height);
   border: 1px solid #c9b87b;
   border-radius: 8px;
   background: #fff9e8;
-  color: #493e24;
+  color: #173f2a;
   font-size: 16px;
   cursor: pointer;
   touch-action: manipulation;
