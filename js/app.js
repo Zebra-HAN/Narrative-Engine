@@ -344,7 +344,7 @@ const CREATIVE_BACKGROUNDS = {
   world: {
     top: ['top_world-1.jpg', 'top_world-2.jpg', 'top_world-3.jpg','top_world-4.jpg'],
     group: ['group_world-1.jpg', 'group_world-2.jpg'],
-    card: ['bg_map.jpg', 'card_world-2.jpg','card_world-1.jpg', 'card_world-2.jpg', 'card_world-3.jpg', 'card_world-4.jpg',  'card_world-6.jpg'],
+    card: ['bg_map.jpg', 'card_world-1.jpg', 'card_world-2.jpg', 'card_world-3.jpg', 'card_world-4.jpg',  'card_world-6.jpg'],
   },
   compass: {
     top: ['top_comp.jpg'],
