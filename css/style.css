@@ -3264,3 +3264,24 @@ body {
   opacity: 1 !important;
   pointer-events: auto !important;
 }
+
+/* Card-only panel access; keep the existing scroll area/padding unchanged. */
+.card-panel-toggle {
+  position: absolute;
+  left: 50%;
+  bottom: max(8px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 30;
+  width: 44px;
+  height: 36px;
+  border: 1px solid #c9b87b;
+  border-radius: 8px;
+  background: #fff9e8;
+  color: #493e24;
+  font-size: 16px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.card-panel-toggle[hidden] { display: none; }
+#screen-create.card-panels-mode .info-panel,
+#screen-create.card-panels-mode .create-chrome-bottom { animation: none; }

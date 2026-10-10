@@ -38,6 +38,11 @@ const fixtures = [
       await controls.locator('#start').click();
       await page.evaluate(f => { if (f.sg === undefined) showGroupCards(f.id, f.g); else showSubgroupCards(f.id, f.g, f.sg); }, fixture);
       await page.waitForTimeout(650);
+      // Card entry now hides chrome immediately; its animation is user-triggered.
+      if (await page.locator('#card-panel-toggle').isVisible()) {
+        await page.locator('#card-panel-toggle').click();
+        await page.waitForTimeout(350);
+      }
       assert.equal(await page.locator('.center-page.active[data-chrome-view] .data-card').count(), fixture.cards);
       if (fixture.cards === 20) assert.equal(await page.locator('.center-page.active .card-section-header').count(), 3);
       // Existing information/select/lock/detail behavior must survive instrumentation.
