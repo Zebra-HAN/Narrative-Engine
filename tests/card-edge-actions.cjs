@@ -19,6 +19,9 @@ const { chromium } = require('playwright');
  assert.equal(await page.locator('.center-page.active[data-chrome-view]').evaluate(n=>n.scrollTop),scrollBefore);
  const right=page.locator('.card-edge-right'),left=page.locator('.card-edge-left');
  assert(await right.isVisible()); assert.equal(await left.isVisible(),false);
+ const geometry=await right.evaluate(n=>{const r=n.getBoundingClientRect();return {bottom:r.bottom,right:r.right,buttons:[...n.children].map(b=>{const r=b.getBoundingClientRect();return {width:r.width,height:r.height}})}});
+ assert.equal(geometry.bottom,687); assert.equal(geometry.right,387);
+ for(const b of geometry.buttons){assert.equal(b.width,110);assert.equal(b.height,110)}
  assert.equal(await page.locator('.card-info-popover button').count(),0);
  await page.evaluate(()=>window.originalEdge=document.querySelector('.card-edge-right'));
  await page.locator('.card-info-detail').click();
@@ -31,6 +34,7 @@ const { chromium } = require('playwright');
  await page.locator('.card-info-lock').click(); assert(await page.locator('.card-info-select').isDisabled());
  assert(await page.evaluate(()=>isCardLocked(focusedCard.subId,focusedCard.idx)));
  await page.locator('.card-info-lock').click(); await page.locator('.card-info-select').click();
+ assert(await left.evaluate(n=>n.getAnimations().some(a=>a.transitionProperty==='transform')),'left controls slide out before suspension');
  await page.waitForTimeout(320); assert.equal(await left.isVisible(),false);
  assert.equal(await page.locator('.card-info-select').getAttribute('aria-label'),'선택');
  await card.nth(9).click();
