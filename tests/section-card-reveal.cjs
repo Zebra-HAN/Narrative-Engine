@@ -24,7 +24,7 @@ const { chromium } = require('playwright');
         durations: [...source.querySelectorAll('.data-card')].map(n => getComputedStyle(n).getPropertyValue('--card-reveal-duration')) };
     });
     assert.equal(initial.cards, 20); assert.equal(initial.headers, 3);
-    assert(initial.suspended > 0 && initial.suspended < 20);
+    assert.equal(initial.suspended, 0, 'offscreen cards are finalized at entry');
     assert(initial.durations.every(v => v === '450ms'));
     await page.evaluate(() => {
       const source = revealSource;
@@ -36,7 +36,7 @@ const { chromium } = require('playwright');
       return [...source.querySelectorAll('.card-reveal-suspended')].filter(n => {
         const r = n.getBoundingClientRect(); return r.top < view.bottom && r.bottom > view.top;
       }).length;
-    }), 0, 'fast scroll must prepare visible cards immediately');
+    }), 0, 'fast scroll must keep skipped cards ready');
     assert.deepEqual(await page.evaluate(() => [...revealSource.querySelectorAll('.card-name-text')].map(n => n.style.cssText)), await page.evaluate(() => revealBefore));
     await page.setViewportSize({ width: 390, height: 844 });
     await page.waitForTimeout(80);
@@ -56,8 +56,8 @@ const { chromium } = require('playwright');
     assert.equal(await page.locator('.center-page.active .data-card').evaluateAll(nodes => nodes.every(n => getComputedStyle(n).opacity === '1')), true);
     await page.evaluate(() => { navigateAddressBack(); showSubgroupCards('race', 1, 0); });
     await page.waitForTimeout(60);
-    assert.equal(await page.locator('.center-page.active .card-reveal-suspended').count(), 0, '4-card control keeps old path');
+    assert.equal(await page.locator('.center-page.active .card-reveal-suspended').count(), 0, '4-card control has no suspended cards');
     assert.deepEqual(errors, []);
-    console.log('PASS sections, flip delays/duration, fast scroll, resize, title styles, detach cleanup, re-entry, final visibility and 4-card control');
+    console.log('PASS sections, unchanged delays/duration, skipped cards ready on scroll/resize, title styles, detach/re-entry and 4-card control');
   } finally { await browser.close(); }
 })().catch(e => { console.error(e); process.exitCode = 1; });
