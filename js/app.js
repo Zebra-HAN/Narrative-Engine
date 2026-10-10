@@ -332,23 +332,23 @@ function initUiSounds() {
 ════════════════════════════════════════════════ */
 const CREATIVE_BACKGROUNDS = {
   character: {
-    top: ['top_character-1.jpg', 'top_character-2.jpg', 'top_character-3.jpg'],
-    group: ['group_character-1.jpg', 'group_character-2.jpg'],
+    top: ['top_character-1.jpg', 'top_character-2.jpg', 'top_character-3.jpg','top_character-4'],
+    group: ['group_character-1.jpg', 'group_character-2.jpg','group_character-3.jpg'],
     card: ['card_character-1.jpg', 'card_character-2.jpg', 'card_character-3.jpg', 'bg_monster.jpg'],
   },
   narrative2: {
-    top: ['top_story.jpg', 'top_story-1.jpg', 'top_story-2.jpg'],
+    top: ['top_story.jpg', 'top_story-1.jpg', 'top_story-2.jpg','top_story-3.jpg'],
     group: ['group_story.jpg', 'group_story-1.jpg', 'group_story-2.jpg', 'group_story-3.jpg', 'group_story-4.jpg'],
     card: ['card_story-1.jpg', 'card_story-2.jpg', 'card_story-3.jpg', 'card_story-4.jpg', 'card_story-5.jpg'],
   },
   world: {
-    top: ['top_world-1.jpg', 'top_world-2.jpg', 'top_world-3.jpg'],
+    top: ['top_world-1.jpg', 'top_world-2.jpg', 'top_world-3.jpg','top_world-4.jpg'],
     group: ['group_world-1.jpg', 'group_world-2.jpg'],
-    card: ['bg_map.jpg', 'card_world-1.jpg', 'card_world-2.jpg', 'card_world-3.jpg', 'card_world-4.jpg', 'card_world-5.jpg', 'card_world-6.jpg'],
+    card: ['bg_map.jpg', 'card_world-2.jpg','card_world-1.jpg', 'card_world-2.jpg', 'card_world-3.jpg', 'card_world-4.jpg',  'card_world-6.jpg'],
   },
   compass: {
     top: ['top_comp.jpg'],
-    group: ['group_comp-1.jpg', 'group_comp-2.jpg', 'group_comp-3.jpg'],
+    group: ['group_comp-0.jpg','group_comp-1.jpg', 'group_comp-2.jpg', 'group_comp-3.jpg', 'bg_explorer.jpg'],
     card: ['card_comp-1.jpg', 'card_comp-2.jpg', 'card_comp-3.jpg', 'card_comp-4.jpg'],
   },
 };
