@@ -354,7 +354,7 @@ function initUiSounds() {
 ════════════════════════════════════════════════ */
 const CREATIVE_BACKGROUNDS = {
   character: {
-    top: ['top_character-1.jpg', 'top_character-2.jpg', 'top_character-3.jpg','top_character-4'],
+    top: ['top_character-1.jpg', 'top_character-2.jpg', 'top_character-3.jpg','top_character-4.jpg'],
     group: ['group_character-1.jpg', 'group_character-2.jpg','group_character-3.jpg'],
     card: ['card_character-1.jpg', 'card_character-2.jpg', 'card_character-3.jpg', 'bg_monster.jpg'],
   },
