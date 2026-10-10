@@ -1942,12 +1942,17 @@ function initScrollResponsiveChrome() {
     if (activePage) scrollPositions.set(activePage, APP_PERF ? APP_PERF.measure('scroll.read', () => activePage.scrollTop, { page: activePage.id }) : activePage.scrollTop);
     const view = activePage?.dataset.chromeView || 'top';
     ignoreLayoutScrollUntil = performance.now() + ANIMATION_DURATION + 80;
-    const returningFromCards = previousView === 'cards' && (view === 'group' || view === 'subgroup');
+    const hierarchyView = view === 'group' || view === 'subgroup' || view === 'cards';
+    // Groups hide on entry; subgroups retain the intended state except on card return.
+    const hideOnEntry = view === 'cards' || view === 'group'
+      || (view === 'subgroup' && (previousView === 'cards'
+        || (targetTopProgress === 1 && targetBottomProgress === 1)));
     cardPanelMode = view === 'cards';
-    // Keep the intro override on return: removing it restarts CSS panel entry.
-    screen.classList.toggle('card-panels-mode', cardPanelMode || returningFromCards);
+    // Suppress route-level CSS intros throughout the hierarchy. Explicit panel
+    // calls and scroll gestures still use the existing chrome animation.
+    screen.classList.toggle('card-panels-mode', hierarchyView);
     if (panelToggle) { panelToggle.hidden = !cardPanelMode; panelToggle.setAttribute('aria-expanded', 'false'); }
-    if (cardPanelMode || returningFromCards) {
+    if (hideOnEntry) {
       // Set entry/return state before paint, including when the button had opened chrome.
       cardPanelsLocked = true;
       if (animationFrame) cancelAnimationFrame(animationFrame);
@@ -1957,8 +1962,7 @@ function initScrollResponsiveChrome() {
       animationStartedAt = performance.now();
       if (extraMenuOpen) closeExtraMenu({ instant: true });
       renderChrome();
-    } else if (view === 'group' || (view === 'subgroup' && previousView === 'cards')) setProgress(1);
-    else if (view !== 'subgroup') setProgress(0);
+    } else if (view !== 'subgroup') setProgress(0);
     previousView = view;
     resetGesture();
   });
