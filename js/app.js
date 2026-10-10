@@ -2833,6 +2833,88 @@ function cardClick(subId, idx) {
 }
 
 
+let cardEdgeActions = null;
+
+function updateCardEdgeActions({ immediate = false } = {}) {
+  const cardEl = getFocusedCardElement();
+  const active = Boolean(focusedCard && cardEl?.closest('[data-chrome-view="cards"]'));
+  if (!cardEdgeActions && !active) return;
+  if (!cardEdgeActions) {
+    const screen = document.getElementById('screen-create');
+    const makeGroup = side => {
+      const group = document.createElement('div');
+      group.className = `card-edge-actions card-edge-${side} is-suspended`;
+      group.setAttribute('aria-hidden', 'true');
+      screen.appendChild(group);
+      return group;
+    };
+    const left = makeGroup('left'), right = makeGroup('right');
+    const makeButton = (parent, className, action) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = `card-edge-button pressable ${className}`;
+      button.addEventListener('click', event => { event.stopPropagation(); action(); });
+      parent.appendChild(button);
+      return button;
+    };
+    cardEdgeActions = { left, right,
+      detail: makeButton(right, 'card-info-detail', () => openDetailSheet('card')),
+      select: makeButton(right, 'card-info-select', selectCurrentCard),
+      lock: makeButton(left, 'card-info-lock', toggleCurrentCardLock) };
+    cardEdgeActions.detail.setAttribute('aria-label', '상세정보');
+    cardEdgeActions.detail.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/></svg>';
+    new MutationObserver(() => {
+      if (!focusedCard || !getFocusedCardElement()) updateCardEdgeActions({ immediate: true });
+    }).observe(document.getElementById('center-area'), { childList: true });
+  }
+  const selected = active && Boolean(selectedCards[focusedCard.subId]?.has(focusedCard.idx));
+  const locked = active && isCardLocked(focusedCard.subId, focusedCard.idx);
+  const { left, right, select, lock } = cardEdgeActions;
+  select.disabled = Boolean(locked);
+  select.setAttribute('aria-pressed', String(Boolean(selected)));
+  select.setAttribute('aria-label', selected ? '선택 취소' : '선택');
+  select.title = locked ? '잠금을 해제한 뒤 선택을 취소할 수 있습니다.' : '';
+  select.innerHTML = selected
+    ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>'
+    : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 12 5 5L20 6"/></svg>';
+  lock.disabled = !selected;
+  lock.setAttribute('aria-pressed', String(Boolean(locked)));
+  lock.setAttribute('aria-label', locked ? '잠금 해제' : '잠금');
+  lock.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="${locked ? 'M8 10V7a4 4 0 0 1 8 0v3' : 'M8 10V7a4 4 0 0 1 8 0'}"/><path d="M12 14v3"/></svg>`;
+  setCardEdgeVisibility(right, active, immediate);
+  setCardEdgeVisibility(left, Boolean(selected), immediate);
+}
+
+function setCardEdgeVisibility(group, visible, immediate) {
+  clearTimeout(group._exitTimer);
+  group._finishExit?.();
+  group._finishExit = null;
+  group.setAttribute('aria-hidden', String(!visible));
+  group.inert = !visible;
+  if (visible) {
+    if (group.classList.contains('is-visible')) return;
+    group.classList.remove('is-suspended');
+    // Establish the offscreen state only on entry, never when changing cards.
+    void group.offsetWidth;
+    group.classList.add('is-visible');
+    return;
+  }
+  group.classList.remove('is-visible');
+  if (immediate || group.classList.contains('is-suspended')) {
+    group.classList.add('is-suspended');
+    return;
+  }
+  const finish = () => {
+    group.removeEventListener('transitionend', onEnd);
+    if (!group.classList.contains('is-visible')) group.classList.add('is-suspended');
+    group._finishExit = null;
+  };
+  const onEnd = event => { if (event.target === group && event.propertyName === 'transform') finish(); };
+  group._finishExit = () => group.removeEventListener('transitionend', onEnd);
+  group.addEventListener('transitionend', onEnd);
+  group._exitTimer = setTimeout(finish, 300);
+}
+
 function closeCardInfo() {
   const panel = document.querySelector('.card-info-popover:not(.is-closing)');
   const cardEl = getFocusedCardElement();
@@ -2841,6 +2923,7 @@ function closeCardInfo() {
     panel?.remove();
     document.querySelectorAll('.data-card.card-info-active').forEach(card => card.classList.remove('card-info-active'));
     focusedCard = null;
+    updateCardEdgeActions();
     return;
   }
 
@@ -2868,6 +2951,7 @@ function closeCardInfo() {
 
   cardEl.classList.remove('card-info-active');
   focusedCard = null;
+  updateCardEdgeActions();
 
   let removed = false;
   const removePanel = () => {
@@ -2911,6 +2995,7 @@ function positionCardInfo(panel, cardEl) {
 function renderCardInfo() {
   document.querySelectorAll('.card-info-popover:not(.is-closing)').forEach(panel => panel.remove());
   document.querySelectorAll('.data-card.card-info-active').forEach(card => card.classList.remove('card-info-active'));
+  updateCardEdgeActions();
   if (!focusedCard) return;
 
   const cardEl = getFocusedCardElement();
@@ -2921,8 +3006,6 @@ function renderCardInfo() {
   }
 
   cardEl.classList.add('card-info-active');
-  const selected = Boolean(selectedCards[focusedCard.subId]?.has(focusedCard.idx));
-  const locked = isCardLocked(focusedCard.subId, focusedCard.idx);
   const panel = document.createElement('section');
   panel.className = 'card-info-popover';
   panel.setAttribute('role', 'dialog');
@@ -2933,11 +3016,7 @@ function renderCardInfo() {
       <h3 class="card-info-title">${escapeHtml(focusedCard.name)}</h3>
       <p class="card-info-desc">${escapeHtml(focusedCard.desc || '설명 없음')}</p>
     </div>
-    <div class="card-info-actions">
-      <button type="button" class="card-info-lock pressable${locked ? ' is-locked' : ''}" aria-label="${locked ? '잠금 해제' : '잠금'}" aria-pressed="${locked}"${selected ? '' : ' disabled title="카드를 먼저 선택해주세요."'}><img src="images/core/buttons/detail-${locked ? 'lock-off' : 'lock-on'}.webp" alt="" aria-hidden="true" draggable="false"></button>
-      <button type="button" class="card-info-detail pressable" aria-label="상세정보"><img src="images/core/buttons/detail-detail.webp" alt="" aria-hidden="true" draggable="false"></button>
-      <button type="button" class="card-info-select pressable${selected ? ' is-selected' : ''}" aria-label="${selected ? '선택 취소' : '선택'}" aria-pressed="${selected}"${locked ? ' disabled title="잠금을 해제한 뒤 선택을 취소할 수 있습니다."' : ''}><img src="images/core/buttons/detail-${selected ? 'close' : 'select'}.webp" alt="" aria-hidden="true" draggable="false"></button>
-    </div>`;
+`;
   page.appendChild(panel);
   const openFocusedCardDetail = () => openDetailSheet('card');
   const isPanelAction = target => Boolean(target.closest('button'));
@@ -2956,15 +3035,6 @@ function renderCardInfo() {
     event.preventDefault();
     openFocusedCardDetail();
   });
-  const bindAction = (selector, action) => {
-    panel.querySelector(selector).addEventListener('click', event => {
-      event.stopPropagation();
-      action();
-    });
-  };
-  bindAction('.card-info-detail', openFocusedCardDetail);
-  bindAction('.card-info-select', selectCurrentCard);
-  bindAction('.card-info-lock', toggleCurrentCardLock);
   positionCardInfo(panel, cardEl);
 }
 

@@ -42,7 +42,7 @@ const { execFileSync } = require('node:child_process');
           assert(state.contentTop >= state.buttonBottom + 8); assert.equal(state.center, 393 / 2);
           assert.equal(state.buttonTop, 8); assert.equal(state.buttonWidth, old.buttonWidth); assert.equal(state.buttonHeight, old.buttonHeight);
           assert.equal(state.background, old.background); assert.equal(state.border, old.border); assert.equal(state.radius, old.radius);
-          assert.equal(state.color, 'rgb(23, 63, 42)'); assert.equal(await page.locator('#card-panel-toggle').textContent(), '▼');
+          assert.equal(state.color, 'rgb(47, 143, 78)'); assert.equal(await page.locator('#card-panel-toggle').textContent(), '▼');
           await page.evaluate(() => { const n = document.querySelector('.center-page.active[data-chrome-view]'); n.scrollTop = n.scrollHeight; });
           assert.equal(await page.locator('.center-page.active[data-chrome-view]').evaluate(n => n.getBoundingClientRect().top), 52);
           // Simulate a 59px safe-area value through the shared derived variable.

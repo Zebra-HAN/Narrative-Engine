@@ -949,10 +949,10 @@ body::after {
       z-index: 5;
       width: 34px;
       height: 34px;
-      border: 1px solid rgba(139, 195, 74, 0.45);
+      border: 1px solid #c9b87b;
       border-radius: 999px;
-      background-color: rgba(151, 183, 156, 1.0);
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='15 18 9 12 15 6'%3E%3C/polyline%3E%3C/svg%3E");
+      background-color: #ffffff;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a47c20' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 8H14a6 6 0 0 1 0 12H11M10 8l4-4M10 8l4 4'%3E%3C/path%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: center;
       background-size: 24px 24px;
@@ -3285,7 +3285,7 @@ body {
   border: 1px solid #c9b87b;
   border-radius: 8px;
   background: #fff9e8;
-  color: #173f2a;
+  color: #2f8f4e;
   font-size: 16px;
   cursor: pointer;
   touch-action: manipulation;
@@ -3299,3 +3299,44 @@ body {
   visibility: hidden;
   will-change: auto;
 }
+
+/* Independent card controls; overlays never participate in card layout. */
+#screen-create .card-edge-actions {
+  position: absolute;
+  top: clamp(calc(env(safe-area-inset-top, 0px) + 100px), 45%, calc(100% - env(safe-area-inset-bottom, 0px) - 210px));
+  z-index: 35;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transform: translateX(var(--edge-slide-out)) translateY(-50%);
+  transition: transform 220ms cubic-bezier(.22, .61, .36, 1);
+  will-change: transform;
+  pointer-events: none;
+}
+#screen-create .card-edge-right {
+  right: max(6px, env(safe-area-inset-right, 0px));
+  --edge-slide-out: calc(100% + 20px + env(safe-area-inset-right, 0px));
+}
+#screen-create .card-edge-left {
+  left: max(6px, env(safe-area-inset-left, 0px));
+  --edge-slide-out: calc(-100% - 20px - env(safe-area-inset-left, 0px));
+}
+#screen-create .card-edge-actions.is-visible { transform: translateX(0) translateY(-50%); pointer-events: auto; }
+#screen-create .card-edge-actions.is-suspended { visibility: hidden; will-change: auto; }
+#screen-create .card-edge-actions .card-edge-button {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  padding: 10px;
+  border: 1px solid #a98651;
+  border-radius: 9px;
+  background: linear-gradient(#fffdf3, #f2e6c8);
+  box-shadow: inset 0 0 0 1px #fff9e8, 0 2px 5px #30251640;
+  color: #2f7d48;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+#screen-create .card-edge-actions .card-info-detail,
+#screen-create .card-edge-actions .card-info-lock { color: #98701d; }
+#screen-create .card-edge-button svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+#screen-create .card-edge-actions .card-edge-button:disabled { opacity: .55; filter: none; cursor: not-allowed; }
