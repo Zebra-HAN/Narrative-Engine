@@ -2260,23 +2260,18 @@ function setupCardRevealAnimations(page) {
     rowOffset += Math.ceil(gridCards.length / columns);
   });
 
-  // Keep the original sequential waves through the twelfth card plus two steps.
-  // Cards outside that fixed sequential set are already in their final state.
+  // 12번째 카드의 파동 뒤 두 단계를 더 보여 준 다음, 남은 카드도 같은 flip으로 함께 시작한다.
   const twelfthCardWave = waveSteps.get(cards[CARD_REVEAL_BURST_CARD_INDEX]);
   const lastSequentialWave = twelfthCardWave === undefined
     ? Infinity
     : twelfthCardWave + CARD_REVEAL_EXTRA_WAVE_STEPS;
-  const sequentialCards = [];
+  const burstWave = lastSequentialWave + 1;
 
   let lastDelay = 0;
   cards.forEach(card => {
     const naturalWave = waveSteps.get(card) || 0;
-    if (naturalWave > lastSequentialWave) {
-      card.classList.remove('card-deal', 'card-interactive', 'card-reveal-suspended');
-      return;
-    }
-    sequentialCards.push(card);
-    const delay = naturalWave * CARD_REVEAL_WAVE_GAP_MS;
+    const wave = naturalWave > lastSequentialWave ? burstWave : naturalWave;
+    const delay = wave * CARD_REVEAL_WAVE_GAP_MS;
     card.style.animationDelay = `${delay}ms`;
     lastDelay = Math.max(lastDelay, delay);
 
@@ -2293,7 +2288,7 @@ function setupCardRevealAnimations(page) {
     && Boolean(page.querySelector('.card-section-header'));
   if ((cards.length > 32 || smallSectionScreen) && page.animate && Element.prototype.getAnimations
       && window.ResizeObserver) {
-    scopeCardRevealAnimations(page, sequentialCards, lastDelay + CARD_REVEAL_DURATION_MS,
+    scopeCardRevealAnimations(page, cards, lastDelay + CARD_REVEAL_DURATION_MS,
       smallSectionScreen ? 1 : 1.5);
   }
 }
