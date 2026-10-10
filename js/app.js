@@ -46,6 +46,7 @@ function currentImageURL(value) {
 const IMAGE_LOADER = (() => {
   const jobs = new Map();
   const ready = new Set();
+  const decoded = new Map();
   const idle = window.requestIdleCallback
     ? callback => window.requestIdleCallback(callback, { timeout: 1200 })
     : callback => setTimeout(callback, 80);
@@ -55,8 +56,8 @@ const IMAGE_LOADER = (() => {
     try { return currentImageURL(src); } catch (_) { return null; }
   }
 
-  function load(src) {
-    const url = normalize(src);
+  function load(src, exact = false) {
+    const url = exact ? new URL(src, document.baseURI).href : normalize(src);
     if (!url) return Promise.resolve(false);
     if (jobs.has(url)) return jobs.get(url);
 
@@ -69,7 +70,12 @@ const IMAGE_LOADER = (() => {
         if (settled) return;
         settled = true;
         if (!loaded) { APP_PERF?.end(perfImage, { url: APP_PERF.safeURL(url), loaded: false }); return resolve(false); }
-        try { if (image.decode) await image.decode(); } catch (_) { /* decoded by load fallback */ }
+        try { if (image.decode) await image.decode(); } catch (_) { return resolve(false); }
+        decoded.set(url, image);
+        if (decoded.size > 256) {
+          const oldest = decoded.keys().next().value;
+          decoded.delete(oldest); ready.delete(oldest); jobs.delete(oldest);
+        }
         APP_PERF?.end(perfImage, { url: APP_PERF.safeURL(url), loaded: true });
         ready.add(url);
         resolve(true);
@@ -128,7 +134,7 @@ const IMAGE_LOADER = (() => {
 
   function invalidate(original) {
     for (const url of jobs.keys()) {
-      if (originalImageURL(url) === original) { jobs.delete(url); ready.delete(url); }
+      if (originalImageURL(url) === original && url !== currentImageURL(original)) { jobs.delete(url); ready.delete(url); decoded.delete(url); }
     }
   }
 
@@ -1331,14 +1337,11 @@ window.addEventListener('load', () => {
 });
 */
 
-// 앱 시작: 첫 프레임은 흰색으로 유지하고, 기다림 없이 홈 화면이 부드럽게 떠오르게 한다.
+// 홈에 필요한 이미지를 디코딩한 뒤 첫 화면을 표시한다.
 window.addEventListener('load', async () => {
   IMAGE_LOADER.watch();
   // 홈의 두 장만 첫 전환 전에 기다리고, 공통 UI는 홈을 보는 동안 준비한다.
-  await Promise.race([
-    IMAGE_LOADER.preload(CORE_IMAGE_SOURCES.slice(0, 2), { background: false, limit: 2 }),
-    new Promise(resolve => setTimeout(resolve, 1200))
-  ]);
+  await IMAGE_LOADER.preload(CORE_IMAGE_SOURCES.slice(0, 2), { background: false, limit: 2 });
   switchScreen('screen-home', null, { type: 'launch', duration: FADE_MS_LAUNCH });
   // 첫 화면 전환을 먼저 시작한 뒤 유휴 시간에 모든 창작 화면 배경을 준비한다.
   // 배경 선택/화면별 기억 로직에는 관여하지 않는다.
@@ -1351,8 +1354,7 @@ if ('serviceWorker' in navigator) {
   const backgroundURLs = value => [...value.matchAll(/url\(["']?([^"')]+)["']?\)/g)]
     .map(match => match[1]).filter(src => !src.startsWith('data:'));
   let refreshTimer;
-  let paintTimer;
-  const changed = new Set();
+  const pendingRevisions = new Map();
 
   function refreshDisplayedImages() {
     clearTimeout(refreshTimer);
@@ -1371,31 +1373,42 @@ if ('serviceWorker' in navigator) {
     }, 100);
   }
 
-  navigator.serviceWorker.addEventListener('message', event => {
+  navigator.serviceWorker.addEventListener('message', async event => {
     const data = event.data;
     if (data?.type !== 'IMAGE_UPDATED' || !/^[a-f0-9]{64}$/.test(data.revision || '')) return;
     let url;
     try { url = originalImageURL(data.url); } catch (_) { return; }
     if (new URL(url).origin !== location.origin || imageRevisions.get(url) === data.revision) return;
+    pendingRevisions.set(url, data.revision);
+    const next = new URL(url);
+    next.searchParams.set('__image_revision', data.revision);
+    const nextURL = next.href;
+    // Do not invalidate prepared old pixels or publish the new URL before decode.
+    if (!await IMAGE_LOADER.load(nextURL, true) || pendingRevisions.get(url) !== data.revision) return;
+    const replacements = [];
+    for (const element of document.images) {
+      if (!element.src || originalImageURL(element.currentSrc || element.src) !== url) continue;
+      const image = new Image();
+      for (const attribute of element.attributes) if (attribute.name !== 'src') image.setAttribute(attribute.name, attribute.value);
+      image.src = nextURL;
+      image.classList.add('image-ready');
+      try { await image.decode(); } catch (_) { continue; }
+      replacements.push({ element, image });
+    }
+    if (pendingRevisions.get(url) !== data.revision) return;
     imageRevisions.set(url, data.revision);
-    IMAGE_LOADER.invalidate(url);
-    changed.add(url);
-    clearTimeout(paintTimer);
-    paintTimer = setTimeout(() => {
-      for (const element of document.querySelectorAll('*')) {
-        if (element.tagName === 'IMG' && element.src
-            && changed.has(originalImageURL(element.currentSrc || element.src))) {
-          element.src = currentImageURL(element.src);
-        }
-        const background = getComputedStyle(element).backgroundImage;
-        if (backgroundURLs(background).some(src => changed.has(originalImageURL(src)))) {
-          element.style.backgroundImage = background.replace(/url\(["']?([^"')]+)["']?\)/g,
-            (match, src) => src.startsWith('data:') ? match : `url(${JSON.stringify(currentImageURL(src))})`);
-        }
+    for (const { element, image } of replacements) {
+      if (element.isConnected && originalImageURL(element.currentSrc || element.src) === url) element.replaceWith(image);
+    }
+    for (const element of document.querySelectorAll('*')) {
+      const background = getComputedStyle(element).backgroundImage;
+      if (backgroundURLs(background).some(src => originalImageURL(src) === url)) {
+        element.style.backgroundImage = background.replace(/url\(["']?([^"')]+)["']?\)/g,
+          (match, src) => src.startsWith('data:') ? match : `url(${JSON.stringify(currentImageURL(src))})`);
       }
-      // The selected files, route memory and transition ownership stay intact.
-      changed.clear();
-    }, 40);
+    }
+    IMAGE_LOADER.invalidate(url);
+    pendingRevisions.delete(url);
   });
 
   let registration;
@@ -2118,6 +2131,8 @@ function switchScreen(targetId, callback, options = {}) {
    내비게이션
 ════════════════════════════════════════════════ */
 function goHome() {
+  ++createEntryRequest;
+  ++centerPageRequest;
   closeCardInfo();
   closeDetailSheet();
   closeStatusOverlay();
@@ -2136,13 +2151,20 @@ function goHome() {
 function goToNarrative() {
   switchScreen('screen-narrative', null, { type: 'instant' });
 }
-function goToCreate() {
+let createEntryRequest = 0;
+async function goToCreate() {
+  const entry = ++createEntryRequest;
 
   // 이전 방문에서 열린 메뉴가 닫히는 애니메이션이 첫 프레임에 보이지 않도록 즉시 초기화
   closeExtraMenu({ instant: true });
 
+  await switchNav('character', true, { silentAddress: true });
+  if (entry !== createEntryRequest) return;
+  if (document.querySelector('#center-area').classList.contains('is-background-pending') && currentBackgroundDescriptor) {
+    await applyCreativeBackground(currentBackgroundDescriptor);
+  }
+  if (entry !== createEntryRequest || visibleBackgroundLayer < 0) return;
   switchScreen('screen-create', () => {
-    switchNav('character', true, { silentAddress: true });
     setAddressTrail([]);
     restartCreateIntro();
   }, { type: 'instant' });
@@ -2244,18 +2266,37 @@ function selectSub(subId, navId) {
 /* ════════════════════════════════════════════════
    중앙 표시 영역
 ════════════════════════════════════════════════ */
+let centerPageRequest = 0;
+async function mountPreparedCenterPage(area, page, request) {
+  const images = [...page.querySelectorAll('img')];
+  const prepared = await Promise.all(images.map(async image => {
+    image.src = currentImageURL(image.src);
+    try {
+      await image.decode();
+      if (!image.naturalWidth) return false;
+      image.classList.add('image-ready');
+      return true;
+    } catch (_) { return false; }
+  }));
+  if (request !== centerPageRequest || prepared.some(ready => !ready)) return false;
+  area.querySelectorAll('.center-page:not(#page-default)').forEach(previous => previous.remove());
+  area.appendChild(page);
+  return true;
+}
+
 function showDefaultCenter() {
+  ++centerPageRequest;
   closeCardInfo();
   const area = document.getElementById('center-area');
 
-  void applyCreativeBackground({ navId: currentNav, stage: 'top', screenKey: 'top' });
+  const backgroundReady = applyCreativeBackground({ navId: currentNav, stage: 'top', screenKey: 'top' });
 
   // 기존 동적 페이지 제거
   area.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
 
   const def = document.getElementById('page-default');
   def.classList.add('active');
-  return true;
+  return backgroundReady;
 }
 
 
@@ -2505,7 +2546,7 @@ function showGroupPage(subId, animate = true) {
   const data = CARD_DATA[subId];
   if (!data || !data.groups) return;
   void applyCreativeBackground({ navId: currentNav, stage: 'group', screenKey: `group:${subId}` });
-  document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
+  const renderRequest = ++centerPageRequest;
 
   const page = document.createElement('div');
   page.className = 'center-page active';
@@ -2557,7 +2598,7 @@ sg.cards.forEach((card, cIdx) => {
   html += '</div>';
 
   page.innerHTML = html;
-  area.appendChild(page);
+  void mountPreparedCenterPage(area, page, renderRequest);
 
  setupGroupButtonActions(page);
 }
@@ -2578,7 +2619,7 @@ function showSubgroupPage(subId, groupIdx) {
   grp.subgroups.forEach(sg => preloadCards(sg.cards));
   void applyCreativeBackground({ navId: currentNav, stage: 'group', screenKey: `subgroup:${subId}:${groupIdx}` });
 
-  document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
+  const renderRequest = ++centerPageRequest;
 
   const page = document.createElement('div');
   page.className = 'center-page active';
@@ -2619,7 +2660,7 @@ function showSubgroupPage(subId, groupIdx) {
   html += '</div>';
 
   page.innerHTML = html;
-  area.appendChild(page);
+  void mountPreparedCenterPage(area, page, renderRequest);
 
   setupGroupButtonActions(page);
    setGroupAddress(subId, groupIdx);
@@ -2642,7 +2683,7 @@ function showSubgroupCards(subId, groupIdx, sgIdx) {
   if (!sg) return;
   preloadCards(sg.cards);
 
-  document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
+  const renderRequest = ++centerPageRequest;
 
   const page = document.createElement('div');
   page.className = 'center-page active';
@@ -2683,7 +2724,7 @@ function showSubgroupCards(subId, groupIdx, sgIdx) {
   page.innerHTML = html;
   markFirstCardRow(page);
   setupCardRevealAnimations(page);
-  area.appendChild(page);
+  void mountPreparedCenterPage(area, page, renderRequest);
    setSubgroupAddress(subId, groupIdx, sgIdx);
 }
 
@@ -2776,7 +2817,7 @@ function showGroupCards(subId, groupIdx) {
   preloadCards(grp.cards);
   void applyCreativeBackground({ navId: currentNav, stage: 'card', screenKey: `group-cards:${subId}:${groupIdx}` });
 
-  document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
+  const renderRequest = ++centerPageRequest;
 
   const page = document.createElement('div');
   page.className = 'center-page active';
@@ -2817,7 +2858,7 @@ function showGroupCards(subId, groupIdx) {
   page.innerHTML = html;
   markFirstCardRow(page);
   setupCardRevealAnimations(page);
-  area.appendChild(page);
+  void mountPreparedCenterPage(area, page, renderRequest);
    setGroupAddress(subId, groupIdx, true);
 }
 
@@ -2918,7 +2959,7 @@ function showCardPage(subId, animate = true) {
   document.getElementById('page-default').classList.remove('active');
 
   // 기존 페이지 제거
-  area.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
+  const renderRequest = ++centerPageRequest;
 
   const page = document.createElement('div');
   page.className = 'center-page active';
@@ -2964,7 +3005,7 @@ function showCardPage(subId, animate = true) {
   markFirstCardRow(page);
   // card-deal 애니메이션 끝난 뒤 클래스 제거 → pressable 눌림효과 항상 작동
   setupCardRevealAnimations(page);
-  area.appendChild(page);
+  void mountPreparedCenterPage(area, page, renderRequest);
 }
 
 

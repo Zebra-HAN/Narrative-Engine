@@ -1,4 +1,4 @@
-const SHELL_CACHE = 'narrative-shell-v8';
+const SHELL_CACHE = 'narrative-shell-v9';
 const IMAGE_CACHE = 'narrative-images-v4';
 const LEGACY_IMAGE_CACHE = 'narrative-images-v3';
 const REVISION_HEADER = 'X-Narrative-Image-Revision';
@@ -51,9 +51,10 @@ function imageResponse(response, hash, forBrowser = false) {
   headers.delete('Content-Encoding');
   headers.delete('Content-Length');
   if (hash) headers.set(REVISION_HEADER, hash);
-  // CacheStorage owns reuse. WebKit's memory cache must not hide a new request
-  // from this worker after a reload or PWA foreground transition.
-  if (forBrowser) headers.set('Cache-Control', 'no-store');
+  // Keep decoded resources reusable. Freshness is checked independently via
+  // REFRESH_IMAGES; changed bytes receive a distinct content-hash URL.
+  if (forBrowser) headers.set('Cache-Control', forBrowser === 'versioned'
+    ? 'public, max-age=31536000, immutable' : 'no-cache');
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
 
@@ -111,19 +112,31 @@ async function validateImage(url) {
   finally { if (pending.get(url) === job) pending.delete(url); }
 }
 
-async function serveImage(value, clientId) {
+async function checkImage(url, clientId) {
+  const response = await validateImage(url);
+  if (response.ok && response.headers.has(REVISION_HEADER) && !response.headers.has('X-Narrative-Offline')) {
+    let checked = checkedByClient.get(clientId);
+    if (!checked) checkedByClient.set(clientId, checked = new Set());
+    checked.add(url);
+  }
+  return response;
+}
+
+async function serveImage(value, clientId, keepAlive) {
   await activationReady;
   const url = imageURL(value);
-  let checked = checkedByClient.get(clientId);
-  if (!checked) checkedByClient.set(clientId, checked = new Set());
-  const cache = await caches.open(IMAGE_CACHE);
-  let response = checked.has(url) && await cache.match(url);
-  if (!response) {
-    response = await validateImage(url);
-    // Offline fallback is useful, but must not suppress the next online check.
-    if (response.ok && response.headers.has(REVISION_HEADER) && !response.headers.has('X-Narrative-Offline')) checked.add(url);
+  const requestedRevision = new URL(value).searchParams.get('__image_revision');
+  const cached = await (await caches.open(IMAGE_CACHE)).match(url);
+  if (cached) {
+    if (!checkedByClient.get(clientId)?.has(url)) {
+      keepAlive(checkImage(url, clientId).catch(() => {}));
+    }
+    return imageResponse(cached, cached.headers.get(REVISION_HEADER),
+      requestedRevision === cached.headers.get(REVISION_HEADER) && requestedRevision ? 'versioned' : true);
   }
-  return imageResponse(response, response.headers.get(REVISION_HEADER), true);
+  const response = await checkImage(url, clientId);
+  return imageResponse(response, response.headers.get(REVISION_HEADER),
+    requestedRevision === response.headers.get(REVISION_HEADER) && requestedRevision ? 'versioned' : true);
 }
 
 self.addEventListener('message', event => {
@@ -138,7 +151,11 @@ self.addEventListener('message', event => {
     }).map(imageURL))];
     // Only displayed images, at most four conditional requests in parallel.
     for (let index = 0; index < urls.length; index += 4) {
-      await Promise.allSettled(urls.slice(index, index + 4).map(url => serveImage(url, event.source.id)));
+      await Promise.allSettled(urls.slice(index, index + 4).map(async url => {
+        const response = await checkImage(url, event.source.id);
+        const hash = response.headers.get(REVISION_HEADER);
+        if (hash && !response.headers.has('X-Narrative-Offline')) event.source.postMessage({ type: 'IMAGE_UPDATED', url, revision: hash });
+      }));
     }
     const live = new Set((await self.clients.matchAll({ type: 'window', includeUncontrolled: true })).map(client => client.id));
     for (const id of checkedByClient.keys()) if (!live.has(id)) checkedByClient.delete(id);
@@ -151,7 +168,7 @@ self.addEventListener('fetch', event => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
   if (request.destination === 'image') {
-    event.respondWith(serveImage(url.href, event.clientId));
+    event.respondWith(serveImage(url.href, event.clientId, promise => event.waitUntil(promise)));
     return;
   }
   // App code remains network-first, with the existing offline shell fallback.
