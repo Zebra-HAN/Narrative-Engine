@@ -2240,41 +2240,13 @@ function setupCardRevealAnimations(page) {
   // both paths; the experiment overrides only card reveal styling.
 
   const cards = Array.from(page.querySelectorAll('.card-deal'));
-  const waveSteps = new Map();
-  let rowOffset = 0;
-  // CSS Grid는 고정 열 수와 DOM 순서로 배치한다. 섹션별 행 수를 누적하면
-  // 기존 row+column 파동을 레이아웃 측정/좌표 정렬 없이 그대로 얻을 수 있다.
-  page.querySelectorAll('.card-grid').forEach(grid => {
-    const gridCards = Array.from(grid.querySelectorAll('.card-deal'));
-    const columns = getRenderedCardGridColumns(grid);
-    gridCards.forEach((card, index) => {
-      waveSteps.set(card, rowOffset + Math.floor(index / columns) + index % columns);
-    });
-    rowOffset += Math.ceil(gridCards.length / columns);
-  });
-
-  // 12번째 카드의 파동 뒤 두 단계를 더 보여 준 다음, 남은 카드도 같은 flip으로 함께 시작한다.
-  const twelfthCardWave = waveSteps.get(cards[CARD_REVEAL_BURST_CARD_INDEX]);
-  const lastSequentialWave = twelfthCardWave === undefined
-    ? Infinity
-    : twelfthCardWave + CARD_REVEAL_EXTRA_WAVE_STEPS;
-  const burstWave = lastSequentialWave + 1;
-
-  let lastDelay = 0;
-  cards.forEach(card => {
-    const naturalWave = waveSteps.get(card) || 0;
-    const wave = naturalWave > lastSequentialWave ? burstWave : naturalWave;
-    const delay = wave * CARD_REVEAL_WAVE_GAP_MS;
-    card.style.animationDelay = `${delay}ms`;
-    lastDelay = Math.max(lastDelay, delay);
-  });
-  scopeCardRevealAnimations(page, cards, lastDelay + CARD_REVEAL_DURATION_MS);
+  scopeCardRevealAnimations(page, cards);
 }
 
-function scopeCardRevealAnimations(page, cards, duration) {
+function scopeCardRevealAnimations(page, cards) {
   const area = document.getElementById('center-area');
   // Mount after scroll restoration, before the first paint. Cards outside this
-  // initial viewport become ordinary cards permanently, including on scroll.
+  // initial viewport share a zero-delay flip; visible cards keep their wave.
   cards.forEach(card => card.classList.add('card-reveal-suspended'));
   const mountObserver = new MutationObserver(changes => {
     if (!page.isConnected) {
@@ -2301,21 +2273,46 @@ function scopeCardRevealAnimations(page, cards, duration) {
       return cardTop < bottom && cardTop + card.offsetHeight > top;
     }));
     APP_PERF?.end(perfGeometry);
+    const waveSteps = new Map();
+    let rowOffset = 0;
+    // CSS Grid는 고정 열 수와 DOM 순서로 배치한다. 섹션별 행 수를 누적하면
+    // 기존 row+column 파동을 레이아웃 측정/좌표 정렬 없이 그대로 얻을 수 있다.
+    page.querySelectorAll('.card-grid').forEach(grid => {
+      const gridCards = Array.from(grid.querySelectorAll('.card-deal')).filter(card => visible.has(card));
+      const columns = getRenderedCardGridColumns(grid);
+      gridCards.forEach((card, index) => {
+        waveSteps.set(card, rowOffset + Math.floor(index / columns) + index % columns);
+      });
+      rowOffset += Math.ceil(gridCards.length / columns);
+    });
+
+    // 12번째 카드의 파동 뒤 두 단계를 더 보여 준 다음, 남은 카드도 같은 flip으로 함께 시작한다.
+    const twelfthCardWave = waveSteps.get(Array.from(visible)[CARD_REVEAL_BURST_CARD_INDEX]);
+    const lastSequentialWave = twelfthCardWave === undefined
+      ? Infinity
+      : twelfthCardWave + CARD_REVEAL_EXTRA_WAVE_STEPS;
+    const burstWave = lastSequentialWave + 1;
+
+    let lastDelay = 0;
     cards.forEach(card => {
-      if (!visible.has(card)) card.classList.remove('card-deal', 'card-interactive');
-      else {
-        // Only animated cards need reveal lifecycle listeners.
-        card.addEventListener('animationstart', () => card.classList.add('card-interactive'), { once: true });
-        card.addEventListener('animationend', () => card.classList.remove('card-deal', 'card-interactive'), { once: true });
-        card.addEventListener('animationcancel', () => card.classList.remove('card-deal', 'card-interactive'), { once: true });
-      }
+      const naturalWave = waveSteps.get(card) || 0;
+      const wave = naturalWave > lastSequentialWave ? burstWave : naturalWave;
+      const delay = visible.has(card) ? wave * CARD_REVEAL_WAVE_GAP_MS : 0;
+      card.style.animationDelay = `${delay}ms`;
+      lastDelay = Math.max(lastDelay, delay);
+    });
+    const duration = lastDelay + CARD_REVEAL_DURATION_MS;
+    cards.forEach(card => {
+      card.addEventListener('animationstart', () => card.classList.add('card-interactive'), { once: true });
+      card.addEventListener('animationend', () => card.classList.remove('card-deal', 'card-interactive'), { once: true });
+      card.addEventListener('animationcancel', () => card.classList.remove('card-deal', 'card-interactive'), { once: true });
       card.classList.remove('card-reveal-suspended');
     });
-    // Keep the existing shared document timeline for visible cardFlip effects.
-    // No scroll/resize observer can enroll cards that skipped their reveal.
+    // Keep the existing shared document timeline for all cardFlip effects.
+    // The initial restored viewport alone determines the sequential delays.
     if (page.animate && Element.prototype.getAnimations) {
       const clock = page.animate([], { duration });
-      const animations = Array.from(visible).flatMap(card => card.getAnimations()
+      const animations = cards.flatMap(card => card.getAnimations()
         .filter(animation => animation.animationName === 'cardFlip'));
       const align = () => {
         if (clock.startTime !== null) animations.forEach(animation => { animation.startTime = clock.startTime; });

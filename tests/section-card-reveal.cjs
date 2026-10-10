@@ -24,7 +24,7 @@ const { chromium } = require('playwright');
         durations: [...source.querySelectorAll('.data-card')].map(n => getComputedStyle(n).getPropertyValue('--card-reveal-duration')) };
     });
     assert.equal(initial.cards, 20); assert.equal(initial.headers, 3);
-    assert.equal(initial.suspended, 0, 'offscreen cards are finalized at entry');
+    assert.equal(initial.suspended, 0, 'all flips are released at entry');
     assert(initial.durations.every(v => v === '450ms'));
     await page.evaluate(() => {
       const source = revealSource;
@@ -36,7 +36,7 @@ const { chromium } = require('playwright');
       return [...source.querySelectorAll('.card-reveal-suspended')].filter(n => {
         const r = n.getBoundingClientRect(); return r.top < view.bottom && r.bottom > view.top;
       }).length;
-    }), 0, 'fast scroll must keep skipped cards ready');
+    }), 0, 'fast scroll must not suspend ongoing flips');
     assert.deepEqual(await page.evaluate(() => [...revealSource.querySelectorAll('.card-name-text')].map(n => n.style.cssText)), await page.evaluate(() => revealBefore));
     await page.setViewportSize({ width: 390, height: 844 });
     await page.waitForTimeout(80);
@@ -49,7 +49,14 @@ const { chromium } = require('playwright');
     assert.equal(await page.evaluate(() => revealSource.isConnected), false);
     assert.equal(await page.evaluate(() => revealSource.querySelectorAll('.card-reveal-suspended').length), 0, 'detach cleans waiting cards');
     await enter(); await page.waitForTimeout(80);
-    assert.deepEqual(await page.locator('.center-page.active .data-card').evaluateAll(nodes => nodes.map(n => n.style.animationDelay)), initial.delays);
+    assert.equal(await page.evaluate(() => {
+      const source = document.querySelector('.center-page.active[data-chrome-view]');
+      const view = source.getBoundingClientRect();
+      const visible = [...source.querySelectorAll('.data-card')].filter(n => {
+        const r = n.getBoundingClientRect(); return r.top < view.bottom && r.bottom > view.top;
+      });
+      return visible[0]?.style.animationDelay;
+    }), '0ms', 're-entry starts its wave at the restored viewport, not old list delays');
     await page.waitForTimeout(1400);
     assert.equal(await page.locator('.center-page.active .card-reveal-suspended').count(), 0);
     assert.equal(await page.locator('.center-page.active .card-deal').count(), 0);
@@ -58,6 +65,6 @@ const { chromium } = require('playwright');
     await page.waitForTimeout(60);
     assert.equal(await page.locator('.center-page.active .card-reveal-suspended').count(), 0, '4-card control has no suspended cards');
     assert.deepEqual(errors, []);
-    console.log('PASS sections, unchanged delays/duration, skipped cards ready on scroll/resize, title styles, detach/re-entry and 4-card control');
+    console.log('PASS sections, unchanged delays/duration, zero-delay offscreen cards and scroll/resize, title styles, detach/re-entry and 4-card control');
   } finally { await browser.close(); }
 })().catch(e => { console.error(e); process.exitCode = 1; });
