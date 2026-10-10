@@ -1942,11 +1942,13 @@ function initScrollResponsiveChrome() {
     if (activePage) scrollPositions.set(activePage, APP_PERF ? APP_PERF.measure('scroll.read', () => activePage.scrollTop, { page: activePage.id }) : activePage.scrollTop);
     const view = activePage?.dataset.chromeView || 'top';
     ignoreLayoutScrollUntil = performance.now() + ANIMATION_DURATION + 80;
+    const returningFromCards = previousView === 'cards' && (view === 'group' || view === 'subgroup');
     cardPanelMode = view === 'cards';
-    screen.classList.toggle('card-panels-mode', cardPanelMode);
+    // Keep the intro override on return: removing it restarts CSS panel entry.
+    screen.classList.toggle('card-panels-mode', cardPanelMode || returningFromCards);
     if (panelToggle) { panelToggle.hidden = !cardPanelMode; panelToggle.setAttribute('aria-expanded', 'false'); }
-    if (cardPanelMode) {
-      // Set the initial hidden state before paint and before card reveal scope.
+    if (cardPanelMode || returningFromCards) {
+      // Set entry/return state before paint, including when the button had opened chrome.
       cardPanelsLocked = true;
       if (animationFrame) cancelAnimationFrame(animationFrame);
       animationFrame = 0;
