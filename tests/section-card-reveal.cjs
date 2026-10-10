@@ -25,7 +25,7 @@ const { chromium } = require('playwright');
     });
     assert.equal(initial.cards, 20); assert.equal(initial.headers, 3);
     assert(initial.suspended > 0 && initial.suspended < 20);
-    assert(initial.durations.every(v => v === '450ms'));
+    assert(initial.durations.every((v, i) => v === (i < 17 ? '450ms' : '550ms')));
     await page.evaluate(() => {
       const source = revealSource;
       source.scrollTop = source.scrollHeight;

@@ -2200,6 +2200,8 @@ function renderGroupTitle(group) {
 }
 
 const CARD_REVEAL_DURATION_MS = 450;
+const CARD_REVEAL_LOWER_DURATION_MS = 550;
+const CARD_REVEAL_UPPER_CARD_COUNT = 17;
 const CARD_REVEAL_WAVE_GAP_MS = 80;
 const CARD_REVEAL_BURST_CARD_INDEX = 11;
 const CARD_REVEAL_EXTRA_WAVE_STEPS = 2;
@@ -2260,20 +2262,25 @@ function setupCardRevealAnimations(page) {
     rowOffset += Math.ceil(gridCards.length / columns);
   });
 
-  // 12번째 카드의 파동 뒤 두 단계를 더 보여 준 다음, 남은 카드도 같은 flip으로 함께 시작한다.
+  // 상단 17장은 기존 파동/후반 묶음 지연을 유지한다.
+  // 18번째부터는 두 번째 카드의 지연과 별도 지속시간을 사용한다.
   const twelfthCardWave = waveSteps.get(cards[CARD_REVEAL_BURST_CARD_INDEX]);
   const lastSequentialWave = twelfthCardWave === undefined
     ? Infinity
     : twelfthCardWave + CARD_REVEAL_EXTRA_WAVE_STEPS;
   const burstWave = lastSequentialWave + 1;
 
-  let lastDelay = 0;
-  cards.forEach(card => {
+  const lowerDelay = (waveSteps.get(cards[1]) || 0) * CARD_REVEAL_WAVE_GAP_MS;
+  let lastEnd = 0;
+  cards.forEach((card, index) => {
     const naturalWave = waveSteps.get(card) || 0;
     const wave = naturalWave > lastSequentialWave ? burstWave : naturalWave;
-    const delay = wave * CARD_REVEAL_WAVE_GAP_MS;
+    const lower = index >= CARD_REVEAL_UPPER_CARD_COUNT;
+    const delay = lower ? lowerDelay : wave * CARD_REVEAL_WAVE_GAP_MS;
+    const duration = lower ? CARD_REVEAL_LOWER_DURATION_MS : CARD_REVEAL_DURATION_MS;
+    if (lower) card.style.setProperty('--card-reveal-duration', `${duration}ms`);
     card.style.animationDelay = `${delay}ms`;
-    lastDelay = Math.max(lastDelay, delay);
+    lastEnd = Math.max(lastEnd, delay + duration);
 
     // 각 카드는 이후 순차 공개를 기다리는 다른 카드와 관계없이 자신의 공개가
     // 시작되는 순간 사용할 수 있게 된다.
@@ -2288,7 +2295,7 @@ function setupCardRevealAnimations(page) {
     && Boolean(page.querySelector('.card-section-header'));
   if ((cards.length > 32 || smallSectionScreen) && page.animate && Element.prototype.getAnimations
       && window.ResizeObserver) {
-    scopeCardRevealAnimations(page, cards, lastDelay + CARD_REVEAL_DURATION_MS,
+    scopeCardRevealAnimations(page, cards, lastEnd,
       smallSectionScreen ? 1 : 1.5);
   }
 }
@@ -2367,7 +2374,8 @@ function scopeCardRevealAnimations(page, cards, duration, viewportScreens = 1.5)
     }
     const elapsed = clock.currentTime ?? 0;
     const playing = new Set(entering.filter(card => elapsed
-      < parseFloat(card.style.animationDelay) + CARD_REVEAL_DURATION_MS));
+      < parseFloat(card.style.animationDelay)
+        + (parseFloat(card.style.getPropertyValue('--card-reveal-duration')) || CARD_REVEAL_DURATION_MS)));
     entering.forEach(card => {
       card.classList.remove('card-reveal-suspended');
       if (!playing.has(card)) card.classList.remove('card-deal', 'card-interactive');
