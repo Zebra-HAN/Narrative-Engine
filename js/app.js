@@ -27,6 +27,22 @@ const CARD_DATA = {
    동일 URL의 요청/디코드를 한 Promise로 합쳐 재방문 때 재사용하고, 짧은 유휴 시간에
    다음 화면만 준비한다. 전체 이미지 디렉터리를 한꺼번에 읽지는 않는다.
 ════════════════════════════════════════════════ */
+// Versions are learned from content changes, never from a clock or manual URL edits.
+const imageRevisions = new Map();
+function originalImageURL(value) {
+  const url = new URL(value, document.baseURI);
+  url.searchParams.delete('__image_revision');
+  return url.href;
+}
+function currentImageURL(value) {
+  const original = originalImageURL(value);
+  const hash = imageRevisions.get(original);
+  if (!hash) return original;
+  const url = new URL(original);
+  url.searchParams.set('__image_revision', hash);
+  return url.href;
+}
+
 const IMAGE_LOADER = (() => {
   const jobs = new Map();
   const ready = new Set();
@@ -36,7 +52,7 @@ const IMAGE_LOADER = (() => {
 
   function normalize(src) {
     if (!src) return null;
-    try { return new URL(src, document.baseURI).href; } catch (_) { return null; }
+    try { return currentImageURL(src); } catch (_) { return null; }
   }
 
   function load(src) {
@@ -110,7 +126,13 @@ const IMAGE_LOADER = (() => {
     watch(node);
   }))).observe(document.documentElement, { childList: true, subtree: true });
 
-  return { load, preload, reveal, watch };
+  function invalidate(original) {
+    for (const url of jobs.keys()) {
+      if (originalImageURL(url) === original) { jobs.delete(url); ready.delete(url); }
+    }
+  }
+
+  return { load, preload, reveal, watch, invalidate };
 })();
 
 const NAV_IMAGE_VERSION = '20261005-1';
@@ -380,7 +402,7 @@ let currentBackgroundDescriptor = null;
 const backgroundLayerDescriptors = new WeakMap();
 
 function backgroundCssValue(imageUrl) {
-  return `url(${JSON.stringify(imageUrl)})`;
+  return `url(${JSON.stringify(currentImageURL(imageUrl))})`;
 }
 
 function layerHasBackground(layer) {
@@ -1326,10 +1348,71 @@ window.addEventListener('load', async () => {
 });
 
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js')
-    .catch(error => console.warn('Service worker registration failed:', error)));
-}
+  const backgroundURLs = value => [...value.matchAll(/url\(["']?([^"')]+)["']?\)/g)]
+    .map(match => match[1]).filter(src => !src.startsWith('data:'));
+  let refreshTimer;
+  let paintTimer;
+  const changed = new Set();
 
+  function refreshDisplayedImages() {
+    clearTimeout(refreshTimer);
+    refreshTimer = setTimeout(() => {
+      const worker = navigator.serviceWorker.controller;
+      if (!worker || document.visibilityState !== 'visible') return;
+      const urls = new Set();
+      for (const element of document.querySelectorAll('*')) {
+        const rect = element.getBoundingClientRect();
+        if (!rect.width || !rect.height || rect.bottom < 0 || rect.top > innerHeight
+            || rect.right < 0 || rect.left > innerWidth) continue;
+        if (element.tagName === 'IMG' && element.src) urls.add(originalImageURL(element.currentSrc || element.src));
+        for (const src of backgroundURLs(getComputedStyle(element).backgroundImage)) urls.add(originalImageURL(src));
+      }
+      worker.postMessage({ type: 'REFRESH_IMAGES', urls: [...urls] });
+    }, 100);
+  }
+
+  navigator.serviceWorker.addEventListener('message', event => {
+    const data = event.data;
+    if (data?.type !== 'IMAGE_UPDATED' || !/^[a-f0-9]{64}$/.test(data.revision || '')) return;
+    let url;
+    try { url = originalImageURL(data.url); } catch (_) { return; }
+    if (new URL(url).origin !== location.origin || imageRevisions.get(url) === data.revision) return;
+    imageRevisions.set(url, data.revision);
+    IMAGE_LOADER.invalidate(url);
+    changed.add(url);
+    clearTimeout(paintTimer);
+    paintTimer = setTimeout(() => {
+      for (const element of document.querySelectorAll('*')) {
+        if (element.tagName === 'IMG' && element.src
+            && changed.has(originalImageURL(element.currentSrc || element.src))) {
+          element.src = currentImageURL(element.src);
+        }
+        const background = getComputedStyle(element).backgroundImage;
+        if (backgroundURLs(background).some(src => changed.has(originalImageURL(src)))) {
+          element.style.backgroundImage = background.replace(/url\(["']?([^"')]+)["']?\)/g,
+            (match, src) => src.startsWith('data:') ? match : `url(${JSON.stringify(currentImageURL(src))})`);
+        }
+      }
+      // The selected files, route memory and transition ownership stay intact.
+      changed.clear();
+    }, 40);
+  });
+
+  let registration;
+  function resumeImages() {
+    registration?.update().catch(() => {});
+    refreshDisplayedImages();
+  }
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' })
+    .then(value => { registration = value; refreshDisplayedImages(); })
+    .catch(error => console.warn('Service worker registration failed:', error)));
+  navigator.serviceWorker.addEventListener('controllerchange', refreshDisplayedImages);
+  window.addEventListener('pageshow', resumeImages);
+  window.addEventListener('online', resumeImages);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') resumeImages();
+  });
+}
 
 
 initCenterBackSwipe();
