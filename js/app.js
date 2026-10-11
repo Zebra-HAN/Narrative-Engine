@@ -2442,8 +2442,7 @@ function showSubgroupPage(subId, groupIdx) {
   page.id = 'page-' + subId + '_sg_' + grp.id;
 
    const subgroupLayoutClass = getGroupLayoutClass(grp.subgroups.length);
-  let html = `<div class="section-label">${formatLabel(grp.label, grp.icon)}</div>`;
-  html += `<div class="group-select-wrap ${subgroupLayoutClass}${getGroupRevealClass(grp.subgroups.length)}">`;
+  let html = `<div class="group-select-wrap ${subgroupLayoutClass}${getGroupRevealClass(grp.subgroups.length)}">`;
 
   grp.subgroups.forEach((sg, sgIdx) => {
   // 서브그룹 배지: globalIdx = (groupIdx + 1) * 1000000 + sgIdx * 1000 + cIdx
