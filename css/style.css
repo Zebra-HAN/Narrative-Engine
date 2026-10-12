@@ -3411,6 +3411,7 @@ body {
 }
 .card-minimap-tags { display: flex; flex-wrap: wrap; gap: 5px; padding: 8px 0; }
 .card-minimap-tag {
+  font-size: 70%;
   max-width: 100%;
   box-sizing: border-box;
   padding: 4px 7px;
@@ -3422,3 +3423,12 @@ body {
 }
 .card-minimap button:focus-visible, .card-minimap summary:focus-visible,
 .card-minimap-toggle:focus-visible { outline: 2px solid #2f8f4e; outline-offset: -2px; }
+
+/* Suppress native tap shading only in the outline; retain keyboard focus rings. */
+.card-minimap-toggle, .card-minimap, .card-minimap * {
+  -webkit-tap-highlight-color: transparent;
+}
+.card-minimap-toggle { transition: transform 100ms ease-out; }
+@media (prefers-reduced-motion: reduce) {
+  .card-minimap-toggle { transition: none; }
+}

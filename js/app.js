@@ -4534,7 +4534,9 @@ function buildCardMinimapGroups(cards) {
   let current = unclassified;
   for (const card of cards) {
     if (isSectionItem(card)) {
-      current = { label: String(card.label ?? ''), cards: [] };
+      const formatted = document.createElement('template');
+      formatted.innerHTML = formatSectionHeaderLabel(card.label);
+      current = { label: formatted.content.querySelector('.card-section-title')?.textContent || '', cards: [] };
       groups.push(current);
     } else current.cards.push(card);
   }
@@ -4550,6 +4552,7 @@ function initCardMinimap() {
   const content = document.getElementById('card-minimap-content');
   const close = document.getElementById('card-minimap-close');
   if (!area || !toggle || !panel || !content || !close) return;
+  toggle.classList.add('pressable');
   const activePage = () => area.querySelector('.center-page.active[data-chrome-view="cards"]');
   function hide(restoreFocus = false) {
     panel.hidden = true;
@@ -4588,6 +4591,17 @@ function initCardMinimap() {
     content.scrollTop = 0;
     close.focus({ preventScroll: true });
   });
+  // Capture the complete outside interaction before card/long-press/chrome handlers.
+  // Close on click (after release), so the same gesture cannot hit the restored UI.
+  function consumeOutside(event) {
+    if (panel.hidden || panel.contains(event.target)) return;
+    event.stopImmediatePropagation();
+    if (event.type !== 'touchstart' && event.type !== 'touchend' && event.cancelable) event.preventDefault();
+    if (event.type === 'click') hide(true);
+  }
+  for (const type of ['pointerdown', 'mousedown', 'touchstart', 'touchmove', 'touchend', 'click', 'contextmenu']) {
+    document.addEventListener(type, consumeOutside, { capture: true, passive: false });
+  }
   close.addEventListener('click', () => hide(true));
   panel.addEventListener('keydown', event => {
     if (event.key === 'Escape') { event.preventDefault(); hide(true); }
