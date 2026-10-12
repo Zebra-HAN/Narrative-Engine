@@ -52,9 +52,11 @@ const fixtures = [
         await page.locator('.card-info-lock').click();
         assert.equal(await page.locator('.card-info-select').isDisabled(), true);
         assert.equal(await page.locator('.card-info-lock').getAttribute('aria-pressed'), 'true');
-        await page.locator('.card-info-detail').click();
+        await page.locator('.card-info-popover:not(.is-closing) .card-info-copy').click();
         assert.equal(await page.locator('#detail-overlay').evaluate(e => e.classList.contains('active')), true);
         await page.evaluate(() => closeDetailSheet());
+        // Actions now follow the card, which a long information body may have scrolled out of view.
+        await page.locator('.center-page.active[data-chrome-view] .data-card').first().scrollIntoViewIfNeeded();
         await page.locator('.card-info-lock').click();
         await page.locator('.card-info-select').click();
         await page.locator('.center-page.active[data-chrome-view] .data-card').first().click();

@@ -32,7 +32,7 @@ const { chromium } = require('playwright');
       await page.locator('.card-info-select').click();
       await page.locator('.card-info-lock').click();
       assert.equal(await page.locator('.card-info-select').isDisabled(),true);
-      await page.locator('.card-info-detail').click();
+      await page.locator('.card-info-popover:not(.is-closing) .card-info-copy').click();
       assert(await page.locator('.detail-overlay').evaluate(e=>e.classList.contains('active')));
       await page.evaluate(()=>{closeDetailSheet();closeCardInfo();});
       const cdp=await context.newCDPSession(page);

@@ -2844,6 +2844,67 @@ function cardClick(subId, idx) {
 
 
 let cardEdgeActions = null;
+let cardEdgePositionFrame = 0;
+
+function requestCardEdgePosition() {
+  if (!focusedCard || cardEdgePositionFrame) return;
+  cardEdgePositionFrame = requestAnimationFrame(() => {
+    cardEdgePositionFrame = 0;
+    positionCardEdgeActions();
+  });
+}
+
+/* Screen overlay: follow the real card without adding grid space or scroll height. */
+function positionCardEdgeActions({ ensureVisible = false } = {}) {
+  const card = getFocusedCardElement();
+  const page = card?.closest('.center-page[data-chrome-view="cards"]');
+  const group = cardEdgeActions?.group;
+  if (!page || !group) return;
+  const screen = document.getElementById('screen-create');
+  const screenRect = screen.getBoundingClientRect();
+  const pageRect = page.getBoundingClientRect();
+  let cardRect = card.getBoundingClientRect();
+  const gap = Math.min(6, cardRect.width / 12);
+  const size = Math.min(110, (cardRect.width - gap) / 2);
+  const width = size * 2 + gap;
+  group.style.setProperty('--card-action-size', `${size}px`);
+  group.style.gap = `${gap}px`;
+  group.style.width = `${width}px`;
+  const safeBottom = parseFloat(getComputedStyle(group).getPropertyValue('--action-safe-bottom')) || 0;
+  const chromeRect = document.getElementById('create-chrome-bottom').getBoundingClientRect();
+  const bottom = Math.min(pageRect.bottom, screenRect.bottom - safeBottom - 8, chromeRect.top);
+  // Reserve the unpressed footprint: the existing touch scale may still be
+  // returning to normal when the click arrives.
+  const cardStyle = getComputedStyle(card);
+  const fullWidth = parseFloat(cardStyle.width) || cardRect.width;
+  const fullHeight = parseFloat(cardStyle.height) || cardRect.height;
+  const fullSize = Math.min(110, (fullWidth - gap) / 2);
+  const reservedBottom = (cardRect.top + cardRect.bottom + fullHeight) / 2 + 6 + fullSize;
+  if (ensureVisible && reservedBottom > bottom) {
+    page.scrollTop += reservedBottom - bottom;
+    cardRect = card.getBoundingClientRect();
+  }
+  // Existing bottom padding normally supplies the needed space. Clamp only if
+  // an exceptionally short viewport has no further scroll room.
+  const placedTop = Math.max(pageRect.top, Math.min(cardRect.bottom + 6, bottom - size));
+  const placedLeft = Math.max(pageRect.left, Math.min(cardRect.left + (cardRect.width - width) / 2, pageRect.right - width));
+  group.style.left = `${placedLeft - screenRect.left}px`;
+  group.style.top = `${placedTop - screenRect.top}px`;
+  const visible = cardRect.bottom > pageRect.top && cardRect.top < bottom;
+  group.classList.toggle('is-offscreen', !visible);
+  group.inert = !visible || !focusedCard;
+  // Follow only the focused card's existing press/reveal animation, then stop.
+  if (card.getAnimations().some(animation => animation.playState === 'running'
+      && (animation.transitionProperty === 'transform' || animation.animationName === 'cardFlip'))) {
+    requestCardEdgePosition();
+  }
+}
+
+function setCardActionImage(button, source, fallback) {
+  button.classList.remove('image-failed');
+  button.innerHTML = `<img class="card-action-icon" src="${source}" alt="" aria-hidden="true" draggable="false">${fallback}`;
+  button.querySelector('img').addEventListener('error', () => button.classList.add('image-failed'), { once: true });
+}
 
 function updateCardEdgeActions({ immediate = false } = {}) {
   const cardEl = getFocusedCardElement();
@@ -2851,48 +2912,57 @@ function updateCardEdgeActions({ immediate = false } = {}) {
   if (!cardEdgeActions && !active) return;
   if (!cardEdgeActions) {
     const screen = document.getElementById('screen-create');
-    const makeGroup = side => {
-      const group = document.createElement('div');
-      group.className = `card-edge-actions card-edge-${side} is-suspended`;
-      group.setAttribute('aria-hidden', 'true');
-      screen.appendChild(group);
-      return group;
-    };
-    const left = makeGroup('left'), right = makeGroup('right');
-    const makeButton = (parent, className, action) => {
+    const group = document.createElement('div');
+    group.className = 'card-edge-actions is-suspended';
+    group.setAttribute('role', 'group');
+    group.setAttribute('aria-label', '카드 잠금 및 선택');
+    group.setAttribute('aria-hidden', 'true');
+    screen.appendChild(group);
+    const makeButton = (className, action) => {
       const button = document.createElement('button');
       button.type = 'button';
       button.className = `card-edge-button pressable ${className}`;
       button.addEventListener('click', event => { event.stopPropagation(); action(); });
-      parent.appendChild(button);
+      group.appendChild(button);
       return button;
     };
-    cardEdgeActions = { left, right,
-      detail: makeButton(right, 'card-info-detail', () => openDetailSheet('card')),
-      select: makeButton(right, 'card-info-select', selectCurrentCard),
-      lock: makeButton(left, 'card-info-lock', toggleCurrentCardLock) };
-    cardEdgeActions.detail.setAttribute('aria-label', '상세정보');
-    cardEdgeActions.detail.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/></svg>';
+    cardEdgeActions = { group,
+      lock: makeButton('card-info-lock', toggleCurrentCardLock),
+      select: makeButton('card-info-select', selectCurrentCard) };
+    const area = document.getElementById('center-area');
+    area.addEventListener('scroll', requestCardEdgePosition, { capture: true, passive: true });
+    area.addEventListener('load', requestCardEdgePosition, true);
+    area.addEventListener('animationend', requestCardEdgePosition, true);
+    area.addEventListener('transitionend', requestCardEdgePosition, true);
+    window.addEventListener('resize', requestCardEdgePosition, { passive: true });
+    document.fonts?.addEventListener('loadingdone', requestCardEdgePosition);
+    const observer = new ResizeObserver(requestCardEdgePosition);
+    cardEdgeActions.observer = observer;
     new MutationObserver(() => {
       if (!focusedCard || !getFocusedCardElement()) updateCardEdgeActions({ immediate: true });
-    }).observe(document.getElementById('center-area'), { childList: true });
+    }).observe(area, { childList: true });
   }
   const selected = active && Boolean(selectedCards[focusedCard.subId]?.has(focusedCard.idx));
   const locked = active && isCardLocked(focusedCard.subId, focusedCard.idx);
-  const { left, right, select, lock } = cardEdgeActions;
+  const { group, select, lock, observer } = cardEdgeActions;
+  if (cardEdgeActions.card !== cardEl) {
+    observer.disconnect();
+    if (cardEl) observer.observe(cardEl);
+    cardEdgeActions.card = cardEl;
+  }
   select.disabled = Boolean(locked);
   select.setAttribute('aria-pressed', String(Boolean(selected)));
   select.setAttribute('aria-label', selected ? '선택 취소' : '선택');
   select.title = locked ? '잠금을 해제한 뒤 선택을 취소할 수 있습니다.' : '';
-  select.innerHTML = selected
+  setCardActionImage(select, `images/core/buttons/${selected ? 'cancel' : 'check'}.webp`, selected
     ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>'
-    : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 12 5 5L20 6"/></svg>';
+    : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 12 5 5L20 6"/></svg>');
   lock.disabled = !selected;
   lock.setAttribute('aria-pressed', String(Boolean(locked)));
   lock.setAttribute('aria-label', locked ? '잠금 해제' : '잠금');
-  lock.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="${locked ? 'M8 10V7a4 4 0 0 1 8 0v3' : 'M8 10V7a4 4 0 0 1 8 0'}"/><path d="M12 14v3"/></svg>`;
-  setCardEdgeVisibility(right, active, immediate);
-  setCardEdgeVisibility(left, Boolean(selected), immediate);
+  setCardActionImage(lock, `images/core/buttons/lock-${locked ? 'on' : 'off'}.webp`, `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="${locked ? 'M8 10V7a4 4 0 0 1 8 0v3' : 'M8 10V7a4 4 0 0 1 8 0'}"/><path d="M12 14v3"/></svg>`);
+  if (active) positionCardEdgeActions({ ensureVisible: true });
+  setCardEdgeVisibility(group, active, immediate);
 }
 
 function setCardEdgeVisibility(group, visible, immediate) {
@@ -2900,7 +2970,7 @@ function setCardEdgeVisibility(group, visible, immediate) {
   group._finishExit?.();
   group._finishExit = null;
   group.setAttribute('aria-hidden', String(!visible));
-  group.inert = !visible;
+  group.inert = !visible || group.classList.contains('is-offscreen');
   if (visible) {
     if (group.classList.contains('is-visible')) return;
     group.classList.remove('is-suspended');
@@ -2993,7 +3063,7 @@ function positionCardInfo(panel, cardEl) {
     + (cardRect.width - panelWidth) / 2;
   const left = Math.max(12, Math.min(centeredLeft, page.scrollWidth - panelWidth - 12));
   const top = isFirstRow
-    ? cardRect.bottom - pageRect.top + page.scrollTop + 10
+    ? cardRect.bottom - pageRect.top + page.scrollTop + (cardEdgeActions?.group.offsetHeight || 0) + 16
     : cardRect.top - pageRect.top + page.scrollTop - panel.offsetHeight - 10;
   panel.classList.toggle('is-below-card', isFirstRow);
   panel.style.left = `${left}px`;
@@ -3046,6 +3116,7 @@ function renderCardInfo() {
     openFocusedCardDetail();
   });
   positionCardInfo(panel, cardEl);
+  requestCardEdgePosition();
 }
 
 function toggleCardInfo(card) {

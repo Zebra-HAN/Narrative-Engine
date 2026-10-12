@@ -72,7 +72,7 @@ const { chromium } = require('playwright');
       await page.locator('.center-page.active .data-card').nth(99).click();
       await page.locator('.card-info-select').click(); await page.locator('.card-info-lock').click();
       assert(await page.locator('.card-info-select').isDisabled());
-      await page.locator('.card-info-detail').click();
+      await page.locator('.card-info-popover:not(.is-closing) .card-info-copy').click();
       assert(await page.locator('.detail-overlay').evaluate(n => n.classList.contains('active')));
       await page.evaluate(() => { closeDetailSheet(); closeCardInfo(); navigateAddressBack(); });
       assert.deepEqual(errors, []);
