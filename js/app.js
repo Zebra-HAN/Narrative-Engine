@@ -1769,7 +1769,8 @@ function initScrollResponsiveChrome() {
   let cardPanelMode = false;
   function measureDock() {
     if (!cardPanelMode) return;
-    screen.style.setProperty('--card-dock-height', `${dock.offsetHeight}px`);
+    const dockBottom = parseFloat(getComputedStyle(dock).bottom) || 0;
+    screen.style.setProperty('--card-dock-height', `${dock.offsetHeight + dockBottom}px`);
     const page = area.querySelector('.center-page.active[data-chrome-view="cards"]');
     const card = page?.querySelector('.data-card');
     // Reserve only the actual two-button row beneath the final card.
