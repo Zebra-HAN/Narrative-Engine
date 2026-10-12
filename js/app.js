@@ -1854,7 +1854,6 @@ function initScrollResponsiveChrome() {
     bottomChrome.style.transform = `translate3d(0, ${renderedBottomProgress * 100}%, 0)`;
     infoPanel.classList.toggle('top-chrome-hidden', renderedTopProgress > 0.98);
     bottomChrome.classList.toggle('bottom-chrome-hidden', renderedBottomProgress > 0.98);
-    requestCardEdgePosition();
     if (timeProgress < 1) {
       animationFrame = requestAnimationFrame(renderChrome);
     } else {
@@ -2929,41 +2928,56 @@ function requestCardEdgePosition() {
   });
 }
 
-/* Screen overlay: follow the real card without adding grid space or scroll height. */
-function positionCardEdgeActions({ ensureVisible = false } = {}) {
-  const card = getFocusedCardElement();
-  const page = card?.closest('.center-page[data-chrome-view="cards"]');
-  const group = cardEdgeActions?.group;
-  if (!page || !group) return;
-  if (group.parentElement !== page) page.appendChild(group);
-  const size = Math.min(110, (card.offsetWidth - Math.min(6, card.offsetWidth / 12)) / 2);
-  const gap = Math.min(6, card.offsetWidth / 12);
-  group.style.setProperty('--card-action-size', `${size}px`);
-  group.style.gap = `${gap}px`;
-  group.style.width = `${size * 2 + gap}px`;
-  const pageRect = page.getBoundingClientRect();
+/* Read card geometry once; actions remain in the page's scrolling coordinates. */
+function measureCardGeometry(card) {
+  const page = card.closest('.center-page');
   let left = 0, top = 0;
   for (let node = card; node && node !== page; node = node.offsetParent) {
     left += node.offsetLeft;
     top += node.offsetTop;
   }
-  group.style.left = `${left}px`;
-  group.style.top = `${top + card.offsetHeight + 6}px`;
+  const dock = document.getElementById('card-controls-dock');
+  const pageRect = page.getBoundingClientRect();
+  return { card, page, left, top, width: card.offsetWidth, height: card.offsetHeight,
+    cardRect: card.getBoundingClientRect(), pageRect,
+    scrollTop: page.scrollTop, scrollLeft: page.scrollLeft,
+    pageWidth: page.clientWidth, scrollWidth: page.scrollWidth,
+    bottom: Math.min(pageRect.bottom, dock.hidden ? pageRect.bottom : dock.getBoundingClientRect().top - 4) };
+}
+
+function positionCardEdgeActions({ ensureVisible = false, geometry = null } = {}) {
+  const card = getFocusedCardElement();
+  const group = cardEdgeActions?.group;
+  if (!card || !group) return;
+  const g = geometry || measureCardGeometry(card);
+  const gap = Math.min(6, g.width / 12);
+  const size = Math.min(110, (g.width - gap) / 2);
+  const key = [card, g.left, g.top, g.width, g.height];
+  const previous = cardEdgeActions.geometry;
+  if (!previous || key.some((value, index) => value !== previous[index])) {
+    if (group.parentElement !== g.page) g.page.appendChild(group);
+    group.style.setProperty('--card-action-size', `${size}px`);
+    group.style.gap = `${gap}px`;
+    group.style.width = `${size * 2 + gap}px`;
+    group.style.left = `${g.left}px`;
+    group.style.top = `${g.top + g.height + 6}px`;
+    cardEdgeActions.geometry = key;
+  }
   if (ensureVisible) {
-    const dock = document.getElementById('card-controls-dock');
-    const bottom = Math.min(pageRect.bottom, dock.hidden ? pageRect.bottom : dock.getBoundingClientRect().top - 4);
-    const overflow = group.getBoundingClientRect().bottom - bottom;
-    if (overflow > 0) page.scrollTop += overflow;
+    const overflow = g.pageRect.top - g.scrollTop + g.top + g.height + 6 + size - g.bottom;
+    if (overflow > 0) g.page.scrollTop = g.scrollTop + overflow;
   }
 }
 
 function setCardActionImage(button, source, fallback) {
+  if (button.dataset.actionImage === source) return;
+  button.dataset.actionImage = source;
   button.classList.remove('image-failed');
   button.innerHTML = `<img class="card-action-icon" src="${source}" alt="" aria-hidden="true" draggable="false">${fallback}`;
   button.querySelector('img').addEventListener('error', () => button.classList.add('image-failed'), { once: true });
 }
 
-function updateCardEdgeActions({ immediate = false } = {}) {
+function updateCardEdgeActions({ immediate = false, deferPosition = false } = {}) {
   const cardEl = getFocusedCardElement();
   const active = Boolean(focusedCard && cardEl?.closest('[data-chrome-view="cards"]'));
   if (!cardEdgeActions && !active) return;
@@ -2987,12 +3001,18 @@ function updateCardEdgeActions({ immediate = false } = {}) {
       lock: makeButton('card-info-lock', toggleCurrentCardLock),
       select: makeButton('card-info-select', selectCurrentCard) };
     const area = document.getElementById('center-area');
-    area.addEventListener('load', requestCardEdgePosition, true);
-    area.addEventListener('animationend', requestCardEdgePosition, true);
-    area.addEventListener('transitionend', requestCardEdgePosition, true);
+    // Card/action image loads and transform transitions do not change layout.
+    area.addEventListener('load', event => {
+      if (event.target.closest?.('.page-title-card')) requestCardEdgePosition();
+    }, true);
     window.addEventListener('resize', requestCardEdgePosition, { passive: true });
     document.fonts?.addEventListener('loadingdone', requestCardEdgePosition);
-    const observer = new ResizeObserver(requestCardEdgePosition);
+    const observer = new ResizeObserver(entries => {
+      const previous = cardEdgeActions.geometry;
+      const box = entries[0]?.borderBoxSize?.[0];
+      if (!previous || !box || Math.abs(box.inlineSize - previous[3]) > 1
+          || Math.abs(box.blockSize - previous[4]) > 1) requestCardEdgePosition();
+    });
     cardEdgeActions.observer = observer;
     new MutationObserver(() => {
       if (!focusedCard || !getFocusedCardElement()) updateCardEdgeActions({ immediate: true });
@@ -3019,7 +3039,7 @@ function updateCardEdgeActions({ immediate = false } = {}) {
   lock.setAttribute('aria-pressed', String(Boolean(locked)));
   lock.setAttribute('aria-label', locked ? '잠금 해제' : '잠금');
   setCardActionImage(lock, `images/core/buttons/lock-${locked ? 'on' : 'off'}.webp`, `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="${locked ? 'M8 10V7a4 4 0 0 1 8 0v3' : 'M8 10V7a4 4 0 0 1 8 0'}"/><path d="M12 14v3"/></svg>`);
-  if (active) positionCardEdgeActions({ ensureVisible: true });
+  if (active && !deferPosition) positionCardEdgeActions({ ensureVisible: true });
   setCardEdgeVisibility(group, active, immediate);
 }
 
@@ -3113,37 +3133,38 @@ function getFocusedCardElement() {
   return document.querySelector(`.center-page.active .data-card[data-global-idx="${focusedCard.idx}"]`);
 }
 
-function positionCardInfo(panel, cardEl) {
+function positionCardInfo(panel, cardEl, geometry = null) {
   const page = cardEl.closest('.center-page');
   if (!page) return;
 
-  const pageRect = page.getBoundingClientRect();
-  const cardRect = cardEl.getBoundingClientRect();
-  const panelWidth = Math.min(440, page.clientWidth - 24);
-  panel.style.width = `${panelWidth}px`;
+  const g = geometry || measureCardGeometry(cardEl);
+  const { pageRect, cardRect } = g;
+  const panelWidth = Math.min(440, g.pageWidth - 24);
 
-  const centeredLeft = cardRect.left - pageRect.left + page.scrollLeft
+  const centeredLeft = cardRect.left - pageRect.left + g.scrollLeft
     + (cardRect.width - panelWidth) / 2;
-  const left = Math.max(12, Math.min(centeredLeft, page.scrollWidth - panelWidth - 12));
-  const cardTop = cardRect.top - pageRect.top + page.scrollTop;
+  const left = Math.max(12, Math.min(centeredLeft, g.scrollWidth - panelWidth - 12));
+  const cardTop = cardRect.top - pageRect.top + g.scrollTop;
   const available = Math.max(40, cardTop - 14);
-  if (panel.offsetHeight > available) {
+  let panelHeight = panel.offsetHeight;
+  if (panelHeight > available) {
     panel.style.minHeight = '0';
     const copy = panel.querySelector('.card-info-copy');
     copy.style.maxHeight = `${Math.max(10, available - 33)}px`;
     copy.style.overflowY = 'auto';
+    panelHeight = panel.offsetHeight;
   }
-  const top = cardTop - panel.offsetHeight - 10;
+  const top = cardTop - panelHeight - 10;
   panel.style.left = `${left}px`;
   panel.style.top = `${Math.max(4, top)}px`;
-  panel.style.setProperty('--card-anchor-x', `${Math.max(18, Math.min(panelWidth - 18, cardRect.left - pageRect.left + page.scrollLeft + cardRect.width / 2 - left))}px`);
+  panel.style.setProperty('--card-anchor-x', `${Math.max(18, Math.min(panelWidth - 18, cardRect.left - pageRect.left + g.scrollLeft + cardRect.width / 2 - left))}px`);
   panel.classList.add('is-positioned');
 }
 
 function renderCardInfo() {
   document.querySelectorAll('.card-info-popover:not(.is-closing)').forEach(panel => panel.remove());
   document.querySelectorAll('.data-card.card-info-active').forEach(card => card.classList.remove('card-info-active'));
-  updateCardEdgeActions();
+  updateCardEdgeActions({ deferPosition: true });
   if (!focusedCard) return;
 
   const cardEl = getFocusedCardElement();
@@ -3156,6 +3177,8 @@ function renderCardInfo() {
   cardEl.classList.add('card-info-active');
   const panel = document.createElement('section');
   panel.className = 'card-info-popover';
+  // Resolve width with CSS before the shared geometry read.
+  panel.style.width = 'min(440px, calc(100% - 24px))';
   panel.setAttribute('role', 'dialog');
   panel.setAttribute('aria-label', `${focusedCard.name} 카드 정보`);
   panel.setAttribute('tabindex', '0');
@@ -3183,8 +3206,9 @@ function renderCardInfo() {
     event.preventDefault();
     openFocusedCardDetail();
   });
-  positionCardInfo(panel, cardEl);
-  requestCardEdgePosition();
+  const geometry = measureCardGeometry(cardEl);
+  positionCardInfo(panel, cardEl, geometry);
+  positionCardEdgeActions({ ensureVisible: true, geometry });
 }
 
 function toggleCardInfo(card) {
