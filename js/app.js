@@ -4931,6 +4931,9 @@ function createPageTitleCard(group, subId) {
   const frame = document.createElement('button');
   frame.type = 'button';
   frame.className = 'page-title-card pressable';
+  IMAGE_LOADER.load('images/core/sub-nav/title_card.webp').then(ready => {
+    frame.dataset.bannerReady = String(ready);
+  });
   frame.dataset.imageLayout = 'square';
   frame.setAttribute('aria-label', `${group.label || ''} 상세 정보 보기`);
   const media = document.createElement('span');
