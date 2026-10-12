@@ -120,6 +120,21 @@
   <button type="button" id="card-panel-toggle" class="card-panel-toggle" hidden
     aria-label="상단·하단 패널 표시" aria-controls="info-panel create-chrome-bottom" aria-expanded="false">▼</button>
 
+  <button type="button" id="card-minimap-toggle" class="card-minimap-toggle" hidden
+    aria-label="전체 목록 열기" aria-controls="card-minimap" aria-expanded="false">
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+      <path d="M12 5v15M12 5C9 3 5 3 2 4v15c3-1 7-1 10 1 3-2 7-2 10-1V4c-3-1-7-1-10 1Z"/>
+      <path d="M5 8h4M5 11h4M15 8h4M15 11h4"/>
+    </svg>
+  </button>
+  <aside id="card-minimap" class="card-minimap" aria-labelledby="card-minimap-title" hidden>
+    <div class="card-minimap-header">
+      <strong id="card-minimap-title">전체 목록</strong>
+      <button type="button" id="card-minimap-close" aria-label="전체 목록 닫기">×</button>
+    </div>
+    <div id="card-minimap-content" class="card-minimap-content"></div>
+  </aside>
+
   <div class="create-chrome-slot create-chrome-slot-bottom">
   <div class="create-chrome-bottom" id="create-chrome-bottom">
 

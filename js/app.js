@@ -1336,6 +1336,7 @@ if ('serviceWorker' in navigator) {
 
 initCenterBackSwipe();
 initScrollResponsiveChrome();
+initCardMinimap();
 initInfoPanelAction();
 initInfoTextAutoFit();
 initUiSounds();
@@ -2508,6 +2509,7 @@ function showSubgroupCards(subId, groupIdx, sgIdx) {
 
  let html = getCardGridOpenTag(grp);
 
+  page.minimapCards = sg.cards;
   sg.cards.forEach((card, rawIdx) => {
     if (card.type === 'section') {
       html += `</div><div class="card-section-header">${formatSectionHeaderLabel(card.label)}</div>${getCardGridOpenTag(grp)}`;
@@ -2644,6 +2646,7 @@ function showGroupCards(subId, groupIdx) {
   const offset = groupIdx * 1000;
 
   let html = getCardGridOpenTag(grp);
+  page.minimapCards = grp.cards;
   grp.cards.forEach((card, rawIdx) => {
     if (card.type === 'section') {
       html += `</div><div class="card-section-header">${formatSectionHeaderLabel(card.label)}</div>${getCardGridOpenTag(grp)}`;
@@ -2789,6 +2792,7 @@ function showCardPage(subId, animate = true) {
 
   if (!selectedCards[subId]) selectedCards[subId] = new Set();
 
+  page.minimapCards = cards;
   cards.forEach((card, rawIdx) => {
     if (card.type === 'section') {
       html += `</div><div class="card-section-header">${formatSectionHeaderLabel(card.label)}</div>${getCardGridOpenTag()}`;
@@ -4520,3 +4524,75 @@ APP_PERF?.install(() => ({
   page: document.querySelector('.center-page.active[data-chrome-view]')?.id || 'page-default',
   trail: addressTrail.map(item => ({ type: item.type, label: item.label }))
 }));
+
+
+/* Independent outline: reuse the exact ordered array rendered by each card page.
+   Section markers apply to subsequent cards, rather than a card.section field. */
+function buildCardMinimapGroups(cards) {
+  const groups = [];
+  const unclassified = { label: '미분류', cards: [] };
+  let current = unclassified;
+  for (const card of cards) {
+    if (isSectionItem(card)) {
+      current = { label: String(card.label ?? ''), cards: [] };
+      groups.push(current);
+    } else current.cards.push(card);
+  }
+  if (!groups.length) return { sectioned: false, groups: [unclassified] };
+  if (unclassified.cards.length) groups.push(unclassified);
+  return { sectioned: true, groups };
+}
+
+function initCardMinimap() {
+  const area = document.getElementById('center-area');
+  const toggle = document.getElementById('card-minimap-toggle');
+  const panel = document.getElementById('card-minimap');
+  const content = document.getElementById('card-minimap-content');
+  const close = document.getElementById('card-minimap-close');
+  if (!area || !toggle || !panel || !content || !close) return;
+  const activePage = () => area.querySelector('.center-page.active[data-chrome-view="cards"]');
+  function hide(restoreFocus = false) {
+    panel.hidden = true;
+    toggle.hidden = !activePage();
+    toggle.setAttribute('aria-expanded', 'false');
+    content.replaceChildren();
+    if (restoreFocus && !toggle.hidden) toggle.focus({ preventScroll: true });
+  }
+  function tags(cards) {
+    const list = document.createElement('div');
+    list.className = 'card-minimap-tags';
+    cards.forEach(card => {
+      const tag = document.createElement('span');
+      tag.className = 'card-minimap-tag';
+      tag.textContent = String(card.name ?? '');
+      list.appendChild(tag);
+    });
+    return list;
+  }
+  toggle.addEventListener('click', () => {
+    const page = activePage();
+    if (!page) return;
+    const outline = buildCardMinimapGroups(page.minimapCards || []);
+    content.replaceChildren();
+    outline.groups.forEach(group => {
+      if (!outline.sectioned) { content.appendChild(tags(group.cards)); return; }
+      const section = document.createElement('details');
+      const heading = document.createElement('summary');
+      heading.textContent = `${group.label} — ${group.cards.length}`;
+      section.append(heading, tags(group.cards));
+      content.appendChild(section);
+    });
+    toggle.hidden = true;
+    toggle.setAttribute('aria-expanded', 'true');
+    panel.hidden = false;
+    content.scrollTop = 0;
+    close.focus({ preventScroll: true });
+  });
+  close.addEventListener('click', () => hide(true));
+  panel.addEventListener('keydown', event => {
+    if (event.key === 'Escape') { event.preventDefault(); hide(true); }
+  });
+  // Only page changes close the outline. Selection/locks never rebuild it or cards.
+  new MutationObserver(() => hide()).observe(area, { childList: true });
+  hide();
+}

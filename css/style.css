@@ -3340,3 +3340,85 @@ body {
 #screen-create .card-edge-actions .card-info-lock { color: #98701d; }
 #screen-create .card-edge-button svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 #screen-create .card-edge-actions .card-edge-button:disabled { opacity: .55; filter: none; cursor: not-allowed; }
+
+
+/* Outline overlays share the existing card access strip without changing its layout. */
+.card-minimap-toggle, .card-minimap {
+  position: absolute;
+  top: var(--card-panel-button-top);
+  right: max(8px, env(safe-area-inset-right, 0px));
+  z-index: 36;
+  box-sizing: border-box;
+}
+.card-minimap-toggle[hidden], .card-minimap[hidden] { display: none; }
+.card-minimap-toggle {
+  width: 48px;
+  height: var(--card-panel-button-height);
+  display: grid;
+  place-items: center;
+  border: 2px solid #80603a;
+  border-radius: 8px;
+  background: linear-gradient(#fff9e8, #e7d7af);
+  color: #456a3e;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.card-minimap {
+  width: min(300px, calc(100% - 16px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)));
+  bottom: max(calc(var(--bottom-chrome-height, 150px) + 8px), calc(env(safe-area-inset-bottom, 0px) + 80px));
+  display: flex;
+  flex-direction: column;
+  border: 5px solid #725032;
+  border-radius: 10px;
+  background: #f6ecd1;
+  color: #48351f;
+  box-shadow: inset 0 0 0 1px #bca06b, 0 4px 14px #0005;
+  overflow: hidden;
+}
+.card-minimap-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 12px;
+  border-bottom: 1px solid #bca06b;
+  flex-shrink: 0;
+}
+#card-minimap-close {
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 26px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.card-minimap-content {
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 8px;
+  font-size: 14px;
+}
+.card-minimap summary {
+  padding: 12px 2px;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+  border-bottom: 1px solid #bca06b66;
+  touch-action: manipulation;
+}
+.card-minimap-tags { display: flex; flex-wrap: wrap; gap: 5px; padding: 8px 0; }
+.card-minimap-tag {
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 4px 7px;
+  border: 1px solid #bca06b;
+  border-radius: 5px;
+  background: #fffaeb;
+  overflow-wrap: anywhere;
+  line-height: 1.4;
+}
+.card-minimap button:focus-visible, .card-minimap summary:focus-visible,
+.card-minimap-toggle:focus-visible { outline: 2px solid #2f8f4e; outline-offset: -2px; }
