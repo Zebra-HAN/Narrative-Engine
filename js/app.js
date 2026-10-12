@@ -4907,10 +4907,8 @@ function createPageTitleCard(group, subId) {
   const count = document.createElement('span');
   count.className = 'page-title-count';
   count.textContent = String((group.cards || []).filter(card => !isSectionItem(card)).length);
-  footer.append(hint, count);
-  const path = createPageTitlePath(subId);
-  if (path) frame.appendChild(path);
-  frame.append(media, copy, footer);
+  footer.appendChild(count);
+  frame.append(hint, media, copy, footer);
   frame.addEventListener('click', () => {
     const parent = getInfoPanelContext(true);
     closeCardInfo();
@@ -4919,34 +4917,4 @@ function createPageTitleCard(group, subId) {
       detail: group.detail?.trim() ? group.detail : parent.detail });
   });
   return frame;
-}
-
-
-/* Resolve ownership from the existing NAV category IDs, independent of currentNav. */
-function createPageTitlePath(subId) {
-  const owner = Object.entries(NAV_DATA).find(([, nav]) => nav.subs.some(sub => sub.id === subId));
-  if (!owner) return null;
-  const [navId, nav] = owner;
-  const sub = nav.subs.find(item => item.id === subId);
-  const path = document.createElement('span');
-  path.className = 'page-title-path';
-  const item = (label, image, icon) => {
-    const entry = document.createElement('span');
-    entry.className = 'page-title-path-item';
-    const visual = document.createElement('span');
-    visual.className = 'page-title-path-icon';
-    visual.setAttribute('aria-hidden', 'true');
-    setInfoVisual(visual, image, icon);
-    const name = document.createElement('span');
-    name.textContent = label;
-    entry.append(visual, name);
-    return entry;
-  };
-  const separator = document.createElement('span');
-  separator.className = 'page-title-path-separator';
-  separator.setAttribute('aria-hidden', 'true');
-  separator.textContent = '|';
-  path.append(item(nav.label, MAIN_CATEGORY_IMAGE[navId], MAIN_CATEGORY_INFO[navId]?.icon),
-    separator, item(sub.label, sub.img, sub.icon));
-  return path;
 }

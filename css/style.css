@@ -3453,13 +3453,13 @@ body {
 .page-title-card {
   display: grid;
   justify-items: center;
-  grid-template-columns: minmax(0, 34%) minmax(0, 1fr);
-  grid-template-areas: "path path" "media copy" "footer footer";
+  grid-template-columns: minmax(0, 38%) minmax(0, 1fr);
+  grid-template-areas: "hint hint" "media copy" "footer footer";
   gap: 2px 8px;
-  width: min(100%, 620px);
+  width: min(90%, 558px);
   box-sizing: border-box;
-  margin: 0 auto 18px;
-  padding: 5px 12px;
+  margin: 10px auto 18px;
+  padding: 4px 6px;
   border: 3px solid #725032;
   border-radius: 12px;
   background: linear-gradient(135deg, #fff9e8, #eee1bb);
@@ -3477,8 +3477,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: min(80px, 100%);
-  height: 80px;
+  width: min(96px, 100%);
+  height: 96px;
   min-width: 0;
   grid-area: media;
   align-self: center;
@@ -3496,51 +3496,30 @@ body {
 .page-title-copy { grid-area: copy; align-self: center; display: grid; gap: 2px; min-width: 0; width: 100%; text-align: center; }
 .page-title-heading { color: #315339; font-weight: 800; font-size: 18.7px; overflow-wrap: anywhere; }
 .page-title-description { font-size: 11px; line-height: 1.4; overflow-wrap: anywhere; white-space: pre-line; }
-.page-title-footer { grid-area: footer; width: 100%; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px; font-size: 12px; }
-.page-title-hint { color: #6c634f; }
+.page-title-footer { grid-area: footer; width: 100%; display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 4px; font-size: 12px; }
+.page-title-hint { grid-area: hint; justify-self: end; font-size: 7.2px; line-height: 1.3; color: #948975; }
 .page-title-count { border: 1px solid #bca06b; border-radius: 20px; padding: 1px 6px; color: #315339; }
-.page-title-card[data-image-layout="landscape"] .page-title-media { width: min(100px, 100%); height: 75px; }
+.page-title-card[data-image-layout="landscape"] .page-title-media { width: min(120px, 100%); height: 90px; }
 .page-title-card[data-image-layout="wide"] {
   grid-template-columns: minmax(0, 1fr);
-  grid-template-areas: "path" "media" "copy" "footer";
+  grid-template-areas: "hint" "media" "copy" "footer";
 }
 .page-title-card[data-image-layout="wide"] .page-title-media {
-  /* Add back the frame's 30px inset so the image spans 85% of the outer card. */
-  width: min(100%, calc(85% + 25.5px));
+  width: 100%;
   height: auto;
 }
 .page-title-card[data-image-layout="wide"] .page-title-image { width: 100%; max-height: none; }
-.page-title-card[data-image-layout="portrait"] .page-title-media { width: 54px; max-width: 100%; height: 90px; }
+.page-title-card[data-image-layout="portrait"] .page-title-media { width: 70.8px; max-width: 100%; height: 118px; }
 .page-title-card[data-image-layout="portrait"] .page-title-image { width: 100%; height: 100%; object-fit: cover; object-position: center; }
 .page-title-card:focus-visible { outline: 2px solid #2f8f4e; outline-offset: -5px; }
 @media (max-width: 360px) {
-  .page-title-card { padding: 5px 10px; gap: 2px 8px; }
+  .page-title-card { padding: 4px 6px; gap: 2px 6px; }
   .page-title-heading { font-size: 17px; }
-  .page-title-card[data-image-layout="wide"] .page-title-media { width: min(100%, calc(85% + 22.1px)); }
 }
 @media (prefers-reduced-motion: reduce) {
   .page-title-card { transition: none; }
 }
 
-.page-title-path {
-  grid-area: path;
-  justify-self: end;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-  gap: 4px;
-  max-width: 100%;
-  color: #7b7566;
-  font-size: 10px;
-  line-height: 1.3;
-  text-align: right;
-}
-.page-title-path-item { display: inline-flex; align-items: center; gap: 3px; min-width: 0; overflow-wrap: anywhere; }
-.page-title-path-icon { display: inline-flex; align-items: center; justify-content: center; width: 13px; height: 13px; flex: 0 0 13px; }
-.page-title-path-icon .info-icon-img { width: 100%; height: 100%; object-fit: contain; }
-.page-title-path-icon .info-icon-text { font-size: 12px; line-height: 1; }
-.page-title-path-separator { opacity: .45; font-weight: 400; }
 .page-title-heading { text-align: center; }
 
 
