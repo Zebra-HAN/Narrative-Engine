@@ -837,6 +837,24 @@ function getCardGridOpenTag(group) {
   return `<div class="card-grid ${getCardGridLayoutClass(group)}">`;
 }
 
+// Existing setting only: keep data/IDs intact and split on complete 3-column rows.
+// The section stack has no perspective; each chunk owns its 3D/compositing scope.
+function splitExistingSettingGrids(page) {
+  page.querySelectorAll('.card-grid').forEach(grid => {
+    const cards = Array.from(grid.children);
+    if (!cards.length) return;
+    const section = document.createElement('div');
+    section.className = grid.className.replace('card-grid', 'setting-card-section');
+    for (let start = 0; start < cards.length; start += 12) {
+      const chunk = grid.cloneNode(false);
+      chunk.classList.add('setting-card-chunk');
+      chunk.append(...cards.slice(start, start + 12));
+      section.appendChild(chunk);
+    }
+    grid.replaceWith(section);
+  });
+}
+
 // 실제 CSS 열 수: legacy d도 현재는 3열이다. 카드의 화면 좌표를 읽지 않는다.
 function getRenderedCardGridColumns(grid) {
   if (grid.classList.contains('card-grid-layout-b')) return 4;
@@ -2399,7 +2417,12 @@ function scopeCardRevealAnimations(page, cards) {
 
     const waves = new Map();
     let rowOffset = 0;
-    page.querySelectorAll('.card-grid').forEach(grid => {
+    // Treat chunks as one logical grid so a partially visible row at a chunk
+    // boundary keeps exactly the original reveal wave and section row offset.
+    const revealGrids = page.id === 'page-setting_setting_existing'
+      ? page.querySelectorAll('.setting-card-section, .card-grid:not(.setting-card-chunk)')
+      : page.querySelectorAll('.card-grid');
+    revealGrids.forEach(grid => {
       const gridCards = Array.from(grid.querySelectorAll('.card-deal')).filter(card => visible.has(card));
       const columns = getRenderedCardGridColumns(grid);
       gridCards.forEach((card, index) => {
@@ -2754,6 +2777,7 @@ function showGroupCards(subId, groupIdx) {
   });
   html += '</div>';
   page.innerHTML = html;
+  if (subId === 'setting' && grp.id === 'setting_existing') splitExistingSettingGrids(page);
   page.prepend(titleCard);
   markFirstCardRow(page);
   setupCardRevealAnimations(page);

@@ -1084,6 +1084,30 @@ body::after {
       margin-inline: 12px;
     }
 
+    /* Existing setting experiment only. Keep the section's original margins
+       and use the original row gap between complete four-row chunks. */
+    #page-setting_setting_existing .setting-card-section {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 11px;
+      margin: 0 12px 16px;
+    }
+    #page-setting_setting_existing .setting-card-section + .card-section-header {
+      margin-top: 35px;
+    }
+    #page-setting_setting_existing .card-grid.setting-card-chunk {
+      margin: 0;
+      min-width: 0;
+      perspective: 900px;
+      contain: layout style;
+      isolation: isolate;
+      transform: translateZ(0);
+      will-change: transform;
+      /* Paint containment would clip the check/lock marks and wide glow.
+         Independent composited backing layers retain this visual overflow. */
+      overflow: visible;
+    }
+
     .data-card {
       aspect-ratio: 0.72;
       /* 절제된 나무 테두리로, 촘촘한 모바일 그리드에 맞게 좁으면서도 하나의 갈색 선 대신
