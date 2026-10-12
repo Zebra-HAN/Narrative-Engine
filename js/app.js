@@ -110,7 +110,7 @@ const IMAGE_LOADER = (() => {
     watch(node);
   }))).observe(document.documentElement, { childList: true, subtree: true });
 
-  return { load, preload, reveal, watch };
+  return { load, preload, reveal, watch, isReady: src => ready.has(normalize(src)) };
 })();
 
 const NAV_IMAGE_VERSION = '20261005-1';
@@ -375,7 +375,6 @@ const creativeBackgroundMemory = new Map();
 let visibleBackgroundLayer = -1;
 let visibleBackgroundUrl = null;
 let backgroundRequestId = 0;
-let runningBackgroundTransition = null;
 let currentBackgroundDescriptor = null;
 const backgroundLayerDescriptors = new WeakMap();
 
@@ -385,13 +384,6 @@ function backgroundCssValue(imageUrl) {
 
 function layerHasBackground(layer) {
   return Boolean(layer?.style.backgroundImage && layer.style.backgroundImage !== 'none');
-}
-
-function layerShowsBackground(layer, imageUrl) {
-  return layerHasBackground(layer)
-    && layer.dataset.backgroundOwner === activeBackgroundScreen
-    && layer.classList.contains('is-active')
-    && layer.style.backgroundImage === backgroundCssValue(imageUrl);
 }
 
 function setBackgroundLayerActive(layers, activeLayer) {
@@ -410,25 +402,6 @@ function isAllowedCreativeBackground(imageUrl, descriptor = currentBackgroundDes
     .some(file => new URL(`images/core/home/${file}`, document.baseURI).href === new URL(imageUrl, document.baseURI).href));
 }
 
-function clearCreativeBackgroundLayers() {
-  const transition = runningBackgroundTransition;
-  if (transition) {
-    clearTimeout(transition.timer);
-    transition.nextLayer.removeEventListener('transitionend', transition.onTransitionEnd);
-    runningBackgroundTransition = null;
-    transition.resolveReady?.(false);
-  }
-  const layers = Array.from(document.querySelectorAll('#center-area .creative-background-layer'));
-  setBackgroundLayerActive(layers, null);
-  layers.forEach(layer => {
-    layer.style.backgroundImage = 'none';
-    delete layer.dataset.backgroundOwner;
-    backgroundLayerDescriptors.delete(layer);
-  });
-  visibleBackgroundLayer = -1;
-  visibleBackgroundUrl = null;
-}
-
 function getCreativeBackground(navId, stage) {
   const candidates = CREATIVE_BACKGROUNDS[navId]?.[stage];
   if (!candidates?.length) return null;
@@ -436,215 +409,61 @@ function getCreativeBackground(navId, stage) {
   return `images/core/home/${filename}`;
 }
 
-async function applyCreativeBackground({ navId = currentNav, stage, screenKey }) {
+async function applyCreativeBackground({ navId = currentNav, stage, screenKey }, commitPage = () => {}) {
   const area = document.getElementById('center-area');
-  if (!area || !stage || !screenKey) return;
-
-  // 배경 단계 정보는 향후 단계별 화면 처리가 필요할 때 사용할 수 있도록 유지한다.
-  area.dataset.backgroundStage = stage;
-
+  if (!area || !stage || !screenKey) return false;
+  const descriptor = { navId, stage, screenKey };
   const activationKey = `${navId}:${stage}:${screenKey}`;
-  APP_PERF?.mark('background.request', { activationKey });
-  // 진행 중이던 목적지를 먼저 확정한다. 이후 새 요청이 준비되는 동안 이
-  // 불투명 레이어가 outgoing 소유자로 남아 최하단 CSS 배경을 노출하지 않는다.
-  if (activeBackgroundScreen !== activationKey) cancelRunningBackgroundTransition();
-  currentBackgroundDescriptor = { navId, stage, screenKey };
-
-  // 화면별 선택 기억과 이미지 로더의 요청 캐시는 별개다. 여기에는 실제 로딩에
-  // 성공한 선택만 저장하며, 실패하거나 취소된 후보는 다음 방문을 막지 않는다.
-  let path = creativeBackgroundMemory.get(activationKey);
-  if (!path || !isAllowedCreativeBackground(path)) {
-    path = getCreativeBackground(navId, stage);
-  }
-  if (!path) return;
-  let imageUrl = new URL(path, document.baseURI).href;
-
-  // Do not use activeBackgroundScreen alone as a completion signal. It is set
-  // before load/decode finishes, so A -> B -> A can invalidate A's first
-  // request and then mistake that cancelled request for a visible background.
-  // Only a committed layer (or the exact fade already in progress) may skip
-  // the work. This is especially important for rapid back-swipe navigation.
-  const layers = Array.from(area.querySelectorAll('.creative-background-layer'));
-  let committedLayer = visibleBackgroundLayer >= 0 ? layers[visibleBackgroundLayer] : null;
-  if (activeBackgroundScreen === activationKey
-      && (layerShowsBackground(committedLayer, imageUrl)
-        || (runningBackgroundTransition?.imageUrl === imageUrl
-          && runningBackgroundTransition.activationKey === activationKey
-          && runningBackgroundTransition.nextLayer.dataset.backgroundOwner === activationKey
-          && layerHasBackground(runningBackgroundTransition.nextLayer)))) {
-    APP_PERF?.mark('background.reuse', { activationKey });
-    return runningBackgroundTransition?.ready || true;
-  }
-
-  activeBackgroundScreen = activationKey;
   const requestId = ++backgroundRequestId;
+  let path = creativeBackgroundMemory.get(activationKey);
+  if (!path || !isAllowedCreativeBackground(path, descriptor)) path = getCreativeBackground(navId, stage);
+  const candidates = (CREATIVE_BACKGROUNDS[navId]?.[stage] || [])
+    .map(file => new URL(`images/core/home/${file}`, document.baseURI).href);
+  let imageUrl = path ? new URL(path, document.baseURI).href : null;
+  const urls = [...new Set([imageUrl, ...candidates.filter(url => IMAGE_LOADER.isReady(url)), ...candidates].filter(Boolean))];
+  let loaded = false;
   area.classList.add('is-background-pending');
-
-  // 이전 비동기 결과는 요청 ID로 무효화하되, 준비된 outgoing 레이어는 유지한다.
-  committedLayer = visibleBackgroundLayer >= 0 ? layers[visibleBackgroundLayer] : null;
-  /*
-   * 이 값은 css/style.css 안에서 실제 background-image로 사용됩니다. 상대 경로를
-   * 그대로 넘기면 브라우저가 CSS 파일 위치(css/)를 기준으로 해석하여
-   * css/images/...를 찾게 되고, 이미지 대신 배경색만 보일 수 있습니다.
-   * 현재 문서 주소를 기준으로 절대 URL을 만든 뒤 넘겨 어느 배포 경로에서도
-   * 올바른 이미지 파일을 가리키게 합니다.
-   */
-  // 새 이미지가 준비될 때까지 검증된 outgoing 이미지가 계속 불투명하게 남는다.
-  let loaded = await IMAGE_LOADER.load(imageUrl);
-  if (requestId !== backgroundRequestId || activeBackgroundScreen !== activationKey) return;
-
-  // Do not strand the page on its plain fallback because one randomly chosen
-  // file had a transient cache/network failure. Try the remaining images for
-  // this stage and remember the first usable replacement for this route.
-  if (!loaded) {
-    const alternatives = (CREATIVE_BACKGROUNDS[navId]?.[stage] || [])
-      .map(file => new URL(`images/core/home/${file}`, document.baseURI).href)
-      .filter(url => url !== imageUrl);
-    for (const alternativeUrl of alternatives) {
-      loaded = await IMAGE_LOADER.load(alternativeUrl);
-      if (requestId !== backgroundRequestId || activeBackgroundScreen !== activationKey) return;
-      if (loaded) {
-        imageUrl = alternativeUrl;
-        break;
-      }
+  // Share the existing decode/cache jobs. A bounded total wait also covers a
+  // stalled network or decode; failure retains the opaque outgoing bitmap.
+  const deadline = performance.now() + 2500;
+  for (const url of urls) {
+    if (requestId !== backgroundRequestId) return false;
+    if (IMAGE_LOADER.isReady(url)) loaded = true;
+    else {
+      const remaining = deadline - performance.now();
+      if (remaining <= 0) break;
+      let timer;
+      loaded = await Promise.race([
+        IMAGE_LOADER.load(url),
+        new Promise(resolve => { timer = setTimeout(() => resolve(false), remaining); })
+      ]);
+      clearTimeout(timer);
     }
+    if (requestId !== backgroundRequestId) return false;
+    if (loaded) { imageUrl = url; break; }
   }
-  APP_PERF?.mark('background.image-ready', { activationKey, loaded, url: APP_PERF.safeURL(imageUrl) });
-  if (!loaded || !isAllowedCreativeBackground(imageUrl)) return;
-
-  // A successful URL belongs to this route for the rest of this creative
-  // session, independently of whether a later navigation cancels its fade.
-  creativeBackgroundMemory.set(activationKey, imageUrl);
-
-  // 이미 화면에 있는 배경이라면 레이어를 다시 교차시켜 깜빡임을 만들지 않는다.
-  if (visibleBackgroundUrl === imageUrl) {
-    const restoredLayer = committedLayer || layers[0];
-    if (!restoredLayer) return;
-    backgroundLayerDescriptors.set(restoredLayer, currentBackgroundDescriptor);
-    restoredLayer.dataset.backgroundOwner = activationKey;
-    restoredLayer.style.backgroundImage = backgroundCssValue(imageUrl);
-    restoredLayer.style.transition = 'none';
-    setBackgroundLayerActive(layers, restoredLayer);
-    void restoredLayer.offsetWidth;
-    restoredLayer.style.removeProperty('transition');
-    APP_PERF?.mark('background.commit-no-fade', { activationKey });
-    visibleBackgroundLayer = layers.indexOf(restoredLayer);
-    activeBackgroundScreen = activationKey;
-    area.classList.remove('is-background-pending');
-    return true;
-  }
-  if (layers.length < 2) return;
-
-  const nextLayerIndex = visibleBackgroundLayer === 0 ? 1 : 0;
-  const nextLayer = layers[nextLayerIndex];
-  const previousLayer = visibleBackgroundLayer >= 0 ? layers[visibleBackgroundLayer] : null;
-  if (!previousLayer || !layerHasBackground(previousLayer)) {
-    backgroundLayerDescriptors.set(nextLayer, currentBackgroundDescriptor);
-    nextLayer.dataset.backgroundOwner = activationKey;
-    nextLayer.style.backgroundImage = backgroundCssValue(imageUrl);
-    nextLayer.style.transition = 'none';
-    setBackgroundLayerActive(layers, nextLayer);
-    void nextLayer.offsetWidth;
-    nextLayer.style.removeProperty('transition');
-    APP_PERF?.mark('background.commit-no-fade', { activationKey });
-    visibleBackgroundLayer = nextLayerIndex;
+  if (requestId !== backgroundRequestId) return false;
+  const layers = Array.from(area.querySelectorAll('.creative-background-layer'));
+  if (loaded && isAllowedCreativeBackground(imageUrl, descriptor) && layers.length) {
+    const index = visibleBackgroundUrl === imageUrl && visibleBackgroundLayer >= 0
+      ? visibleBackgroundLayer : (visibleBackgroundLayer === 0 && layers.length > 1 ? 1 : 0);
+    const layer = layers[index];
+    layer.style.backgroundImage = backgroundCssValue(imageUrl);
+    layer.dataset.backgroundOwner = activationKey;
+    backgroundLayerDescriptors.set(layer, descriptor);
+    setBackgroundLayerActive(layers, layer);
+    visibleBackgroundLayer = index;
     visibleBackgroundUrl = imageUrl;
-    area.classList.remove('is-background-pending');
-    return true;
+    creativeBackgroundMemory.set(activationKey, imageUrl);
   }
-  backgroundLayerDescriptors.set(nextLayer, currentBackgroundDescriptor);
-  nextLayer.dataset.backgroundOwner = activationKey;
-  nextLayer.classList.remove('is-active', 'is-inactive');
-  nextLayer.style.backgroundImage = backgroundCssValue(imageUrl);
-  nextLayer.style.opacity = '0';
-  nextLayer.classList.add('is-incoming');
-
-  // 스타일을 먼저 확정한 다음 B만 A 위에서 나타나게 한다. A는 B가 완전히
-  // 불투명해진 뒤에만 정리하므로 전환 중 흰색/투명 프레임이 생기지 않는다.
-  void nextLayer.offsetWidth;
-  let resolveReady;
-  const ready = new Promise(resolve => { resolveReady = resolve; });
-  const transition = {
-    ready,
-    resolveReady,
-    activationKey,
-    requestId,
-    nextLayer,
-    nextLayerIndex,
-    previousLayer,
-    imageUrl,
-    timer: null,
-    onTransitionEnd: null,
-  };
-  const finish = () => finishBackgroundTransition(transition);
-  transition.onTransitionEnd = event => {
-    if (event.propertyName === 'opacity') finish();
-  };
-  runningBackgroundTransition = transition;
-  nextLayer.addEventListener('transitionend', transition.onTransitionEnd);
-  // Let the prepared zero-opacity layer paint before starting its fade.
-  // Initial card layout/scroll restoration must not consume the fade window.
-  requestAnimationFrame(() => requestAnimationFrame(() => {
-    if (runningBackgroundTransition !== transition || requestId !== backgroundRequestId
-        || transition.activationKey !== activeBackgroundScreen
-        || nextLayer.dataset.backgroundOwner !== activeBackgroundScreen
-        || !isAllowedCreativeBackground(imageUrl)) return;
-    APP_PERF?.mark('background.fade-start', { activationKey, url: APP_PERF.safeURL(imageUrl) });
-    nextLayer.style.opacity = '1';
-    // transitionend가 생략되는 브라우저/백그라운드 탭에서도 버퍼를 해제한다.
-    transition.timer = setTimeout(finish, 360);
-  }));
-  return ready;
-}
-
-function finishBackgroundTransition(transition) {
-  if (runningBackgroundTransition !== transition || transition.requestId !== backgroundRequestId
-      || transition.activationKey !== activeBackgroundScreen
-      || transition.nextLayer.dataset.backgroundOwner !== activeBackgroundScreen
-      || !isAllowedCreativeBackground(transition.imageUrl)) return;
-  APP_PERF?.mark('background.fade-finish', { activationKey: transition.activationKey });
-  clearTimeout(transition.timer);
-  transition.nextLayer.removeEventListener('transitionend', transition.onTransitionEnd);
-  const area = transition.nextLayer.closest('.center-area');
-  const layers = Array.from(area?.querySelectorAll('.creative-background-layer') || []);
-  // Mark every non-owner inactive while the new owner is still above it. The
-  // inactive class suppresses opacity transitions, so an old retained bitmap
-  // cannot fade over (or flash after) the newly committed background.
-  transition.nextLayer.style.transition = 'none';
-  transition.nextLayer.style.opacity = '1';
-  void transition.nextLayer.offsetWidth;
-  setBackgroundLayerActive(layers, transition.nextLayer);
-  transition.nextLayer.style.removeProperty('transition');
-  visibleBackgroundLayer = transition.nextLayerIndex;
-  visibleBackgroundUrl = transition.imageUrl;
-  runningBackgroundTransition = null;
-  area?.classList.remove('is-background-pending');
-  transition.resolveReady(true);
-}
-
-function cancelRunningBackgroundTransition() {
-  const transition = runningBackgroundTransition;
-  if (!transition) return;
-  if (transition.activationKey !== activeBackgroundScreen
-      || transition.nextLayer.dataset.backgroundOwner !== activeBackgroundScreen
-      || !isAllowedCreativeBackground(transition.imageUrl)) {
-    clearCreativeBackgroundLayers();
-    return;
-  }
-  clearTimeout(transition.timer);
-  transition.nextLayer.removeEventListener('transitionend', transition.onTransitionEnd);
-  // 다음 배경은 이미 로딩/디코딩을 마쳤다. 중간 이동이 발생해도 그 배경으로
-  // 전환을 마무리해야 이전 NAV/단계의 배경이 다시 튀어나오지 않는다.
-  const area = transition.nextLayer.closest('.center-area');
-  const layers = Array.from(area?.querySelectorAll('.creative-background-layer') || []);
-  transition.nextLayer.style.transition = 'none';
-  setBackgroundLayerActive(layers, transition.nextLayer);
-  void transition.nextLayer.offsetWidth;
-  transition.nextLayer.style.removeProperty('transition');
-  visibleBackgroundLayer = transition.nextLayerIndex;
-  visibleBackgroundUrl = transition.imageUrl;
-  runningBackgroundTransition = null;
-  transition.resolveReady(false);
+  activeBackgroundScreen = activationKey;
+  currentBackgroundDescriptor = descriptor;
+  area.dataset.backgroundStage = stage;
+  area.classList.remove('is-background-pending');
+  // Both writes occur in one task, before the browser can paint either one.
+  // Cached images take this path synchronously, without RAF or transition waits.
+  commitPage();
+  return true;
 }
 
 // 스와이프/PWA 복원에서는 현재 화면 소유의 유효한 레이어만 유지한다.
@@ -654,7 +473,6 @@ function retainCreativeBackgroundForSwipeBack() {
   if (!area) return;
 
   backgroundRequestId++;
-  cancelRunningBackgroundTransition();
 
   const layers = Array.from(area.querySelectorAll('.creative-background-layer'));
   const retainedLayer = layers[visibleBackgroundLayer];
@@ -666,7 +484,6 @@ function retainCreativeBackgroundForSwipeBack() {
 
 function resetCreativeBackgroundActivation() {
   backgroundRequestId++;
-  cancelRunningBackgroundTransition();
   activeBackgroundScreen = null;
   backgroundSessionSubId = null;
   currentBackgroundDescriptor = null;
@@ -2226,13 +2043,19 @@ function setBottomNavState(navId) {
 /* ════════════════════════════════════════════════
    주 내비게이션 전환
 ════════════════════════════════════════════════ */
-function switchNav(navId, skipAnimation, options = {}) {
+function switchNav(navId, skipAnimation, options = {}, backgroundPrepared = false) {
   if (navId === currentNav && !skipAnimation && addressTrail.length > 0 && !options.force) return;
 
   const prev = currentNav;
-  if (prev !== navId) resetCreativeBackgroundActivation();
+  if (!backgroundPrepared) {
+    // Route memory belongs to the creative session, including NAV backtracking.
+    // applyCreativeBackground invalidates the previous pending request itself.
+    return applyCreativeBackground({ navId, stage: 'top', screenKey: 'top' },
+      () => switchNav(navId, skipAnimation, options, true));
+  }
   currentNav = navId;
   currentSubId = null;
+  if (prev !== navId) backgroundSessionSubId = null;
 
     // 버튼 상태 (인스타그램식 선택 배경 이동 — CSS transition)
   setBottomNavState(navId);
@@ -2247,7 +2070,7 @@ function switchNav(navId, skipAnimation, options = {}) {
 
   // 중앙 기본 상태로
   closeCardInfo();
-  const backgroundReady = showDefaultCenter();
+  const backgroundReady = showDefaultCenter(true);
   updateInfoPanel();
    if (!options.silentAddress) setNavAddress(navId);
   return backgroundReady;
@@ -2281,7 +2104,12 @@ function renderSubnav(navId, animate) {
 /* ════════════════════════════════════════════════
    하위 메뉴 선택
 ════════════════════════════════════════════════ */
-function selectSub(subId, navId) {
+function selectSub(subId, navId, backgroundPrepared = false) {
+  if (!backgroundPrepared) {
+    const grouped = Boolean(CARD_DATA[subId]?.groups);
+    return applyCreativeBackground({ navId: navId || currentNav, stage: grouped ? 'group' : 'card',
+      screenKey: `${grouped ? 'group' : 'cards'}:${subId}` }, () => selectSub(subId, navId, true));
+  }
   closeCardInfo();
   beginBackgroundCategorySession(subId);
   // 이전 active 제거
@@ -2292,7 +2120,7 @@ function selectSub(subId, navId) {
 
   const same = currentSubId === subId;
   currentSubId = subId;
-  showCardPage(subId, !same);
+  showCardPage(subId, !same, true);
   const data = CARD_DATA[subId];
   if (data?.groups) preloadGroupDestinations(subId);
   else preloadCards(data);
@@ -2303,11 +2131,11 @@ function selectSub(subId, navId) {
 /* ════════════════════════════════════════════════
    중앙 표시 영역
 ════════════════════════════════════════════════ */
-function showDefaultCenter() {
+function showDefaultCenter(backgroundPrepared = false) {
+  if (!backgroundPrepared) return applyCreativeBackground({ navId: currentNav, stage: 'top', screenKey: 'top' }, () => showDefaultCenter(true));
   closeCardInfo();
   const area = document.getElementById('center-area');
 
-  void applyCreativeBackground({ navId: currentNav, stage: 'top', screenKey: 'top' });
 
   // 기존 동적 페이지 제거
   area.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
@@ -2450,13 +2278,13 @@ function scopeCardRevealAnimations(page, cards) {
    ─ groups 배열에 항목 추가만 하면 버튼 자동 생성
    ─ 그룹 안에 subgroups 배열이 있으면 → 2단계(서브그룹) 구조로 동작
 ════════════════════════════════════════════════ */
-function showGroupPage(subId, animate = true) {
+function showGroupPage(subId, animate = true, backgroundPrepared = false) {
+  if (!backgroundPrepared) return applyCreativeBackground({ navId: currentNav, stage: 'group', screenKey: `group:${subId}` }, () => showGroupPage(subId, animate, true));
   closeCardInfo();
   const area = document.getElementById('center-area');
 
   const data = CARD_DATA[subId];
   if (!data || !data.groups) return;
-  void applyCreativeBackground({ navId: currentNav, stage: 'group', screenKey: `group:${subId}` });
   document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
 
   const page = document.createElement('div');
@@ -2518,7 +2346,8 @@ sg.cards.forEach((card, cIdx) => {
    서브그룹 선택 화면 렌더 (2단계)
    ─ 그룹 안에 subgroups 배열이 있을 때 그룹 버튼 클릭 시 열림
 ════════════════════════════════════════════════ */
-function showSubgroupPage(subId, groupIdx) {
+function showSubgroupPage(subId, groupIdx, backgroundPrepared = false) {
+  if (!backgroundPrepared) return applyCreativeBackground({ navId: currentNav, stage: 'group', screenKey: `subgroup:${subId}:${groupIdx}` }, () => showSubgroupPage(subId, groupIdx, true));
   closeCardInfo();
   const area = document.getElementById('center-area');
   const data = CARD_DATA[subId];
@@ -2528,7 +2357,6 @@ function showSubgroupPage(subId, groupIdx) {
   if (!grp || !grp.subgroups) return;
   IMAGE_LOADER.preload(imageSources(grp.subgroups));
   grp.subgroups.forEach(sg => preloadCards(sg.cards));
-  void applyCreativeBackground({ navId: currentNav, stage: 'group', screenKey: `subgroup:${subId}:${groupIdx}` });
 
   document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
 
@@ -2579,7 +2407,8 @@ function showSubgroupPage(subId, groupIdx) {
 /* ════════════════════════════════════════════════
    서브그룹 카드 목록 렌더 (2단계 → 카드)
 ════════════════════════════════════════════════ */
-function showSubgroupCards(subId, groupIdx, sgIdx) {
+function showSubgroupCards(subId, groupIdx, sgIdx, backgroundPrepared = false) {
+  if (!backgroundPrepared) return applyCreativeBackground({ navId: currentNav, stage: 'card', screenKey: `subgroup-cards:${subId}:${groupIdx}:${sgIdx}` }, () => showSubgroupCards(subId, groupIdx, sgIdx, true));
   closeCardInfo();
   const area = document.getElementById('center-area');
   const data = CARD_DATA[subId];
@@ -2587,7 +2416,6 @@ function showSubgroupCards(subId, groupIdx, sgIdx) {
 
   const grp = data.groups[groupIdx];
   if (!grp || !grp.subgroups) return;
-  void applyCreativeBackground({ navId: currentNav, stage: 'card', screenKey: `subgroup-cards:${subId}:${groupIdx}:${sgIdx}` });
 
   const sg = grp.subgroups[sgIdx];
   if (!sg) return;
@@ -2722,7 +2550,8 @@ function updateSubgroupBadges(subId, groupIdx) {
 /* ════════════════════════════════════════════════
    그룹 버튼 클릭 → 해당 그룹의 카드 목록 열기 (1단계 그룹용)
 ════════════════════════════════════════════════ */
-function showGroupCards(subId, groupIdx) {
+function showGroupCards(subId, groupIdx, backgroundPrepared = false) {
+  if (!backgroundPrepared) return applyCreativeBackground({ navId: currentNav, stage: 'card', screenKey: `group-cards:${subId}:${groupIdx}` }, () => showGroupCards(subId, groupIdx, true));
   closeCardInfo();
   const area = document.getElementById('center-area');
   const data = CARD_DATA[subId];
@@ -2732,7 +2561,6 @@ function showGroupCards(subId, groupIdx) {
   if (!grp) return;
   preloadCards(grp.cards);
   const titleCard = createPageTitleCard(grp, subId);
-  void applyCreativeBackground({ navId: currentNav, stage: 'card', screenKey: `group-cards:${subId}:${groupIdx}` });
 
   document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
 
@@ -2864,18 +2692,19 @@ function updateGroupBadges(subId) {
 }
 
 
-function showCardPage(subId, animate = true) {
-  closeCardInfo();
+function showCardPage(subId, animate = true, backgroundPrepared = false) {
 
   // type:'group' 인 경우 그룹 선택 화면을 열고 종료
   const navInfo2 = Object.values(NAV_DATA).find(n => n.subs.find(s => s.id === subId));
   const subCheck = navInfo2 ? navInfo2.subs.find(s => s.id === subId) : null;
   if (subCheck && subCheck.type === 'group') {
-    return showGroupPage(subId, animate);
+    return showGroupPage(subId, animate, backgroundPrepared);
   }
 
   const area = document.getElementById('center-area');
-  void applyCreativeBackground({ navId: currentNav, stage: 'card', screenKey: `cards:${subId}` });
+  if (!backgroundPrepared) return applyCreativeBackground({ navId: currentNav, stage: 'card', screenKey: `cards:${subId}` },
+    () => showCardPage(subId, animate, true));
+  closeCardInfo();
 
   // default 숨기기
   document.getElementById('page-default').classList.remove('active');
@@ -2976,8 +2805,8 @@ function positionCardEdgeActions({ ensureVisible = false, geometry = null } = {}
   const group = cardEdgeActions?.group;
   if (!card || !group) return;
   const g = geometry || measureCardGeometry(card);
-  const gap = Math.min(6, g.width / 12);
-  const size = Math.min(110, (g.width - gap) / 2);
+  const gap = Math.min(4, g.width / 18);
+  const size = Math.min(110, (g.width - Math.min(6, g.width / 12)) / 2);
   const key = [card, g.left, g.top, g.width, g.height];
   const previous = cardEdgeActions.geometry;
   if (!previous || key.some((value, index) => value !== previous[index])) {
@@ -2985,7 +2814,7 @@ function positionCardEdgeActions({ ensureVisible = false, geometry = null } = {}
     group.style.setProperty('--card-action-size', `${size}px`);
     group.style.gap = `${gap}px`;
     group.style.width = `${size * 2 + gap}px`;
-    group.style.left = `${g.left}px`;
+    group.style.left = `${g.left + (Math.min(6, g.width / 12) - gap) / 2}px`;
     group.style.top = `${g.top + g.height + 6}px`;
     cardEdgeActions.geometry = key;
   }
@@ -3104,8 +2933,8 @@ function retireCardActions(group) {
   group.setAttribute('aria-hidden', 'true');
   group.style.pointerEvents = 'none';
   const animations = [...group.children].map(button => button.animate([
-    { transform: button.style.transform, opacity: button.style.opacity },
-    { transform: 'translateY(calc(-100% - 12px))', opacity: 0 }
+    { transform: button.style.transform },
+    { transform: 'translateY(calc(-100% - 12px))' }
   ], { duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 190, easing: 'ease-in', fill: 'forwards' }));
   Promise.allSettled(animations.map(animation => animation.finished)).then(() => {
     group.remove();
@@ -3128,13 +2957,26 @@ function setCardEdgeVisibility(group, visible, immediate) {
     return;
   }
   if (group.classList.contains('is-visible')) return;
+  // Reopening the same card reverses its current presentation instead of
+  // drawing a second row over the one still retreating behind the card.
+  const retiring = cardEdgeActions.retiring;
+  let entryStart = null;
+  if (retiring?.parentElement === group.parentElement
+      && retiring.style.left === group.style.left && retiring.style.top === group.style.top) {
+    entryStart = [...retiring.children].map(button => {
+      const style = getComputedStyle(button);
+      return { transform: style.transform, opacity: style.opacity };
+    });
+    retiring.remove();
+    cardEdgeActions.retiring = null;
+  }
   group.classList.remove('is-suspended');
   group.classList.add('is-visible');
   cardEdgeActions.animations?.forEach(animation => animation.cancel());
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  cardEdgeActions.animations = [...group.children].map(button => {
+  cardEdgeActions.animations = [...group.children].map((button, index) => {
     return button.animate([
-      { transform: 'translateY(calc(-100% - 12px))', opacity: 0 },
+      entryStart?.[index] || { transform: 'translateY(calc(-100% - 12px))', opacity: 0 },
       { transform: 'translateY(5px)', opacity: 1, offset: .5 },
       { transform: 'translateY(-4px)', offset: .72 },
       { transform: 'translateY(2px)', offset: .88 },

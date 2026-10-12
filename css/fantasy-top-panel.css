@@ -328,9 +328,9 @@
   gap: 0;
   min-height: 87.6px;
   overflow: visible;
-  padding: 24px 12px 5px 14px;
+  padding: 14.5px 13px;
   border: 2px solid #664126;
-  border-radius: 10px 13px 10px 13px;
+  border-radius: 20px 26px 20px 26px;
   color: #493522;
   background:
     linear-gradient(rgba(255, 249, 224, .93), rgba(230, 207, 159, .94)),
@@ -407,6 +407,7 @@
 #screen-create .card-info-copy {
   min-width: 0;
   width: calc(100% - 24px);
+  justify-self: center;
   align-self: stretch;
 }
 #screen-create .card-info-open-area {
