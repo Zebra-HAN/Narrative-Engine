@@ -58,9 +58,10 @@
   border-color: var(--hotel-bronze);
   box-shadow: var(--hotel-small-edge);
 }
-.app-dialog-btn.app-dialog-btn-confirm, .app-dialog-btn.app-dialog-btn-single { background: var(--hotel-cream); color: #192d49; border-color: var(--hotel-gold); }
-.app-dialog-btn.app-dialog-btn-cancel { background: linear-gradient(155deg, #dbe2e9, #b8c5d3); color: #192d49; }
-.app-dialog-btn.app-dialog-btn-danger { background: linear-gradient(155deg, #8e5351, #693e43); color: #fff0e7; border-color: #c69582 !important; }
+.app-dialog-btn.app-dialog-btn-confirm, .app-dialog-btn.app-dialog-btn-single { background: var(--hotel-cream); color: #192d49; border-color: #b99a62 !important; }
+.app-dialog-btn.app-dialog-btn-confirm { color: #352214; }
+.app-dialog-btn.app-dialog-btn-cancel { background: var(--hotel-surface); color: #f4ebd8; border-color: #7893b3 !important; }
+.app-dialog-btn.app-dialog-btn-danger { background: linear-gradient(155deg, #f5d9d5, #e9bdb9); color: #943b3b; border-color: #c98d88 !important; }
 #screen-create .card-controls-dock .extra-btn-danger { background: linear-gradient(155deg, #683f3c, #472e32); color: #f2c7b9; border-color: #bd8370; }
 #screen-create .card-controls-dock :is(.extra-btn-random, .extra-btn-random-all) { color: #d5e5cf; border-color: #8fa58a; }
 :is(.detail-close, .status-close, #card-minimap-close) { color: var(--hotel-glint); }
@@ -84,7 +85,7 @@
   background: var(--hotel-surface);
   box-shadow: var(--hotel-edge), 0 4px 12px #09132655;
 }
-#screen-create .card-controls-row { grid-template-columns: 54px minmax(0, 1fr) 54px; gap: 3px; }
+#screen-create .card-controls-row { grid-template-columns: minmax(0, 1fr) 54px 54px; gap: 3px; }
 #screen-create .card-controls-dock :is(.card-minimap-toggle, .ctrl-btn-menu, .card-panel-toggle) {
   background: var(--hotel-cream);
   color: #192d49;
@@ -109,7 +110,7 @@
    through wherever the actual panel has already moved out of the way. */
 #screen-create.card-controls-mode .create-chrome-slot-bottom { bottom: 0; z-index: 50; }
 #screen-create.card-controls-mode .create-chrome-bottom { pointer-events: auto; }
-#screen-create .card-controls-dock .ctrl-address { height: 42px; padding: 1px; gap: 3px; }
+#screen-create .card-controls-dock .ctrl-address { height: 42px; padding: 1px 1px 1px 6px; gap: 3px; }
 #screen-create .card-controls-dock .address-tag {
   height: 30px;
   min-width: 46px;
@@ -122,16 +123,22 @@
   letter-spacing: 0;
 }
 #screen-create .card-controls-dock .address-tag[data-path-type="sub"] { font-size: 0.70rem; font-weight: 400; }
-#screen-create .card-controls-dock .address-tag[data-path-type="nav"] { padding-left: 0; }
+#screen-create .card-controls-dock .address-tag[data-path-type="sub"] { padding-left: 3px; }
+#screen-create .card-controls-dock .address-tag[data-path-type="nav"] { padding-left: 0; gap: 0; }
+#screen-create .card-controls-dock .address-tag:not([data-path-type="nav"]):not([data-path-type="sub"]) { justify-content: center; text-align: center; }
+#screen-create .address-tag[data-path-type="nav"] .address-path-icon { margin-left: -1px; }
+/* Character art has 63px/74px of transparent horizontal inset in its 474px
+   source. Correct that space without changing the other NAV artwork. */
+#screen-create .address-tag[data-nav-id="character"] .address-path-icon { margin-left: -3px; margin-right: -3px; }
 #screen-create .address-tag[data-path-type="nav"] .address-path-icon { flex-basis: 34px; width: 34px; height: 34px; }
 #screen-create .address-tag[data-path-type="sub"] .address-path-icon { flex-basis: 30px; width: 30px; height: 30px; }
 
 /* Preserve the three popup designs while adjusting their exterior bounds. */
 .detail-overlay, .status-overlay, .card-minimap-overlay {
   padding:
-    calc(max(18px, env(safe-area-inset-top, 0px)) + 7dvh)
+    calc(max(18px, env(safe-area-inset-top, 0px)) + 5dvh)
     max(2%, env(safe-area-inset-right, 0px))
-    calc(max(18px, env(safe-area-inset-bottom, 0px)) + 9dvh)
+    calc(max(18px, env(safe-area-inset-bottom, 0px)) + 6dvh)
     max(2%, env(safe-area-inset-left, 0px));
 }
 .detail-overlay .popup-swipe-frame, .status-overlay .popup-swipe-frame,
@@ -158,7 +165,8 @@
   box-shadow: none;
   border-radius: 0;
 }
-.page-title-card .page-title-hint { justify-self: start; opacity: 0.5; }
+.page-title-card .page-title-hint { justify-self: start; opacity: 0.35; transform: translateX(6px); }
+.page-title-card .page-title-count { transform: translateY(-5px); }
 .page-title-card .page-title-copy { max-height: 100%; overflow-y: auto; }
 .page-title-card[data-image-layout] .page-title-media { width: 100%; height: 100%; min-height: 0; }
 .page-title-card[data-image-layout] .page-title-image {
@@ -189,4 +197,40 @@
   grid-template-rows: 12px minmax(0, 1fr) auto 16px;
   grid-template-areas: "hint" "media" "copy" "footer";
 }
-.page-title-card[data-image-layout="wide"] .page-title-image { width: 100%; }
+.page-title-card[data-image-layout="wide"] .page-title-image { width: 94%; max-height: 94%; }
+
+#screen-create .card-minimap-toggle:disabled {
+  filter: grayscale(1) brightness(.5) contrast(.5) brightness(2);
+  opacity: .45;
+  cursor: default;
+  transform: none;
+}
+.card-minimap-tag {
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform 100ms ease-out, box-shadow 100ms ease-out;
+}
+.card-minimap-tag:active, .card-minimap-tag.is-pressing {
+  transform: translateY(2px) scale(.90);
+  box-shadow: inset 0 2px 4px #80603966;
+  transition-duration: 60ms;
+}
+#screen-create .control-bar > .ctrl-address { display: none; }
+.panel-search-placeholder {
+  flex: 1;
+  min-width: 0;
+  height: 30px;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 10px;
+  border: 1px solid #d2bf94;
+  border-radius: 8px;
+  background: #f2ebdd;
+  color: #756b58;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: default;
+}
+.panel-search-placeholder svg { flex-shrink: 0; }

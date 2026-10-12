@@ -979,6 +979,7 @@ function renderAddressTrail() {
     tag.dataset.pathType = item.type;
     const cardMode = document.getElementById('screen-create').classList.contains('card-controls-mode');
     const navId = item.navId || currentNav;
+    if (item.type === 'nav') tag.dataset.navId = navId;
     const meta = item.type === 'nav' ? NAV_DATA[navId] : item.type === 'sub' ? getSubInfo(item.subId) : null;
     if (cardMode && meta) {
       const icon = document.createElement('span');
@@ -1778,11 +1779,12 @@ function initScrollResponsiveChrome() {
   cardMenu.setAttribute('aria-controls', 'extra-menu-panel');
   cardMenu.setAttribute('aria-expanded', 'false');
   dock.prepend(panelToggle);
-  row.prepend(document.getElementById('card-minimap-toggle'));
+  row.appendChild(document.getElementById('card-minimap-toggle'));
   row.appendChild(cardMenu);
   let cardPanelMode = false;
+  let dockMode = false;
   function measureDock() {
-    if (!cardPanelMode) return;
+    if (!dockMode) return;
     const dockBottom = parseFloat(getComputedStyle(dock).bottom) || 0;
     screen.style.setProperty('--card-dock-height', `${dock.offsetHeight + dockBottom}px`);
     const page = area.querySelector('.center-page.active[data-chrome-view="cards"]');
@@ -1793,9 +1795,9 @@ function initScrollResponsiveChrome() {
     requestCardEdgePosition();
   }
   function syncCardDock() {
-    screen.classList.toggle('card-controls-mode', cardPanelMode);
-    dock.hidden = !cardPanelMode;
-    if (cardPanelMode) {
+    screen.classList.toggle('card-controls-mode', dockMode);
+    dock.hidden = !dockMode;
+    if (dockMode) {
       if (address.parentElement !== document.getElementById('card-address-slot')) {
         cardMenuSize = { width: originalMenu.offsetWidth, height: originalMenu.offsetHeight };
       }
@@ -1924,7 +1926,7 @@ function initScrollResponsiveChrome() {
   }
 
   panelToggle?.addEventListener('click', () => {
-    if (!cardPanelMode) return;
+    if (!dockMode) return;
     const opening = targetBottomProgress > 0.5;
     cardPanelsLocked = !opening;
     panelToggle.setAttribute('aria-expanded', String(opening));
@@ -2040,11 +2042,12 @@ function initScrollResponsiveChrome() {
       || (view === 'subgroup' && (previousView === 'cards'
         || (targetTopProgress === 1 && targetBottomProgress === 1)));
     cardPanelMode = view === 'cards';
+    dockMode = hierarchyView;
     syncCardDock();
     // Suppress route-level CSS intros throughout the hierarchy. Explicit panel
     // calls and scroll gestures still use the existing chrome animation.
     screen.classList.toggle('card-panels-mode', hierarchyView);
-    if (panelToggle) { panelToggle.hidden = !cardPanelMode; panelToggle.setAttribute('aria-expanded', 'false'); }
+    if (panelToggle) { panelToggle.hidden = !dockMode; panelToggle.setAttribute('aria-expanded', 'false'); }
     if (hideOnEntry) {
       // Set entry/return state before paint, including when the button had opened chrome.
       cardPanelsLocked = true;
@@ -4856,39 +4859,124 @@ function initCardMinimap() {
   collapse.addEventListener('click', () => content.querySelectorAll('details').forEach(section => { section.open = false; }));
   toggle.classList.add('pressable');
   const activePage = () => area.querySelector('.center-page.active[data-chrome-view="cards"]');
+  function syncToggle() {
+    const view = area.querySelector('.center-page.active[data-chrome-view]')?.dataset.chromeView;
+    toggle.hidden = !['group', 'subgroup', 'cards'].includes(view);
+    toggle.disabled = view !== 'cards';
+  }
+  let scrollJob = null;
+  function cancelSectionScroll() {
+    if (!scrollJob) return;
+    cancelAnimationFrame(scrollJob.frame);
+    scrollJob.popupObserver?.disconnect();
+    scrollJob.page.style.scrollBehavior = scrollJob.behavior;
+    scrollJob = null;
+    for (const type of ['pointerdown', 'touchstart', 'wheel', 'keydown']) {
+      document.removeEventListener(type, cancelSectionScroll, true);
+    }
+  }
+  function scrollToSection(page, card) {
+    cancelSectionScroll();
+    if (activePage() !== page || !card?.isConnected) return;
+    const grid = card.closest('.card-grid-section') || card.closest('.card-grid');
+    if (!grid) return;
+    let heading = grid.previousElementSibling;
+    while (heading && !heading.classList.contains('card-section-header')) heading = heading.previousElementSibling;
+    const target = heading || grid;
+    const view = page.getBoundingClientRect();
+    const info = document.getElementById('info-panel');
+    const infoBottom = getComputedStyle(info).visibility === 'hidden' ? 0 : info.getBoundingClientRect().bottom;
+    const visibleTop = Math.max(0, view.top + page.clientTop, infoBottom);
+    const from = page.scrollTop;
+    const to = Math.max(0, Math.min(page.scrollHeight - page.clientHeight,
+      from + target.getBoundingClientRect().top - visibleTop - 8));
+    if (Math.abs(to - from) < 1 || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      page.scrollTop = to;
+      return;
+    }
+    const job = { page, behavior: page.style.scrollBehavior, frame: 0, lastTop: from };
+    scrollJob = job;
+    job.popupObserver = new MutationObserver(records => {
+      if (scrollJob !== job) return;
+      if (records.some(record => Array.from(record.addedNodes).some(node =>
+        node instanceof Element && node.classList.contains('card-info-popover')))) cancelSectionScroll();
+    });
+    job.popupObserver.observe(page, { childList: true });
+    page.style.scrollBehavior = 'auto';
+    const started = performance.now();
+    const duration = Math.min(520, 180 + Math.sqrt(Math.abs(to - from)) * 4);
+    for (const type of ['pointerdown', 'touchstart', 'wheel', 'keydown']) {
+      document.addEventListener(type, cancelSectionScroll, { capture: true, passive: true });
+    }
+    const step = () => {
+      if (scrollJob !== job) return;
+      if (activePage() !== page || !page.isConnected || Math.abs(page.scrollTop - job.lastTop) > 1.5) {
+        cancelSectionScroll();
+        return;
+      }
+      const t = Math.min(1, (performance.now() - started) / duration);
+      page.scrollTop = from + (to - from) * (1 - Math.pow(1 - t, 3));
+      job.lastTop = page.scrollTop;
+      if (t < 1) job.frame = requestAnimationFrame(step);
+      else cancelSectionScroll();
+    };
+    job.frame = requestAnimationFrame(step);
+  }
+  const popupObserver = new MutationObserver(() => {
+    if (!document.getElementById('screen-create').classList.contains('active')
+      || document.querySelector('.detail-overlay.active, .status-overlay.active, .app-dialog-overlay.active, #extra-menu-panel.open')
+      || !overlay.hidden) cancelSectionScroll();
+  });
+  for (const node of [document.getElementById('screen-create'), overlay,
+    document.getElementById('detail-overlay'), document.getElementById('status-overlay'),
+    document.getElementById('app-dialog-overlay'), document.getElementById('extra-menu-panel')]) {
+    popupObserver.observe(node, { attributes: true, attributeFilter: ['class', 'hidden'] });
+  }
+  window.addEventListener('resize', cancelSectionScroll, { passive: true });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) cancelSectionScroll(); });
   function hide(restoreFocus = false) {
     swipeFrame._swipeCleanup?.();
     overlay.hidden = true;
     panel.hidden = true;
-    toggle.hidden = !activePage();
+    syncToggle();
     toggle.setAttribute('aria-expanded', 'false');
     content.replaceChildren();
     if (restoreFocus && !toggle.hidden) toggle.focus({ preventScroll: true });
   }
-  function tags(cards) {
+  function tags(cards, page, renderedCards, nextIndex) {
     const list = document.createElement('div');
     list.className = 'card-minimap-tags';
     cards.forEach(card => {
-      const tag = document.createElement('span');
-      tag.className = 'card-minimap-tag';
+      const tag = document.createElement('button');
+      tag.type = 'button';
+      tag.className = 'card-minimap-tag pressable';
       tag.textContent = String(card.name ?? '');
+      const target = renderedCards[nextIndex.value++];
+      tag.addEventListener('click', () => {
+        hide(true);
+        scrollToSection(page, target);
+      });
       list.appendChild(tag);
     });
     return list;
   }
   toggle.addEventListener('click', () => {
+    cancelSectionScroll();
     const page = activePage();
     if (!page) return;
+    if (extraMenuOpen) closeExtraMenu({ instant: true });
     const cards = page.minimapCards || [];
     const outline = buildCardMinimapGroups(cards);
+    const renderedCards = page.querySelectorAll('.data-card');
+    const nextIndex = { value: 0 };
     title.textContent = `${page.minimapGroup?.label || ''} — ${cards.filter(card => !isSectionItem(card)).length}`;
     content.replaceChildren();
     outline.groups.forEach(group => {
-      if (!outline.sectioned) { content.appendChild(tags(group.cards)); return; }
+      if (!outline.sectioned) { content.appendChild(tags(group.cards, page, renderedCards, nextIndex)); return; }
       const section = document.createElement('details');
       const heading = document.createElement('summary');
       heading.textContent = `${group.label} — ${group.cards.length}`;
-      section.append(heading, tags(group.cards));
+      section.append(heading, tags(group.cards, page, renderedCards, nextIndex));
       content.appendChild(section);
     });
     toggle.setAttribute('aria-expanded', 'true');
@@ -4920,7 +5008,7 @@ function initCardMinimap() {
     }
   });
   // Only page changes close the outline. Selection/locks never rebuild it or cards.
-  new MutationObserver(() => hide()).observe(area, { childList: true });
+  new MutationObserver(() => { cancelSectionScroll(); hide(); }).observe(area, { childList: true });
   hide();
 }
 
