@@ -4038,10 +4038,10 @@ function showAppNotice(msg) {
   ]);
 }
 
-function showAppConfirm(msg, confirmSound) {
+function showAppConfirm(msg, confirmSound, destructiveLabel = null) {
   return showAppDialog(msg, [
     { label: '아니오', className: 'app-dialog-btn-cancel', value: false },
-    { label: '예', className: 'app-dialog-btn-confirm', value: true, sound: confirmSound }
+    { label: destructiveLabel || '예', className: destructiveLabel ? 'app-dialog-btn-danger' : 'app-dialog-btn-confirm', value: true, sound: confirmSound }
   ]);
 }
 
@@ -4057,7 +4057,7 @@ function refreshStatusIfOpen() {
 ════════════════════════════════════════════════ */
 async function partialReset() {
   const label = NAV_DATA[currentNav].label;
-  const ok = await showAppConfirm(`${label} 탭의 선택을 모두 초기화하시겠습니까?`);
+  const ok = await showAppConfirm(`${label} 탭의 선택을 모두 초기화하시겠습니까?`, undefined, '초기화');
   if (!ok) return;
   UI_SOUND.play('delete2');
   const subs = NAV_DATA[currentNav].subs;
@@ -4083,7 +4083,7 @@ async function partialReset() {
 }
 
 async function fullReset() {
-  const ok = await showAppConfirm('모든 선택을 초기화하시겠습니까?\n잠금된 카드의 선택 및 잠금 상태도 모두 초기화됩니다.');
+  const ok = await showAppConfirm('모든 선택을 초기화하시겠습니까?\n잠금된 카드의 선택 및 잠금 상태도 모두 초기화됩니다.', undefined, '모두 초기화');
   if (!ok) return;
   UI_SOUND.play('delete');
   selectedCards = {};

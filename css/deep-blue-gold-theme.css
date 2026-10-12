@@ -1,79 +1,77 @@
-/* Shared quiet teal surfaces and layered metal edges; no layout/animation resets. */
+/* Shared quiet deep-blue surfaces and layered metal edges; no layout/animation resets. */
 :root {
-  --hotel-deep: #102f33;
-  --hotel-teal: #174348;
-  --hotel-light: #23565b;
-  --hotel-bronze-dark: #624431;
-  --hotel-bronze: #a77949;
-  --hotel-gold: #c6a064;
-  --hotel-glint: #e7c995;
+  --hotel-deep: #101d32;
+  --hotel-blue: #192d49;
+  --hotel-light: #294568;
+  --hotel-bronze-dark: #806039;
+  --hotel-bronze: #c5a266;
+  --hotel-gold: #c5a266;
+  --hotel-glint: #ead3a0;
   --hotel-title: #f4ebd8;
   --hotel-text: #ddd7c7;
-  --hotel-muted: #b9c9c3;
-  --hotel-surface: radial-gradient(ellipse at 18% 0%, #2a606566, transparent 65%), linear-gradient(155deg, #23565b, #174348 48%, #102f33);
-  --hotel-edge: inset 0 0 0 1px #c6a06499, inset 0 2px 0 #e7c99566, inset 2px 0 0 #a7794955, inset 0 -3px 5px #061b1d88, 0 3px 9px #08191c55;
-  --hotel-small-edge: inset 0 1px 0 #e7c99577, inset 0 -1px 2px #061b1d66, 0 2px 4px #08191c44;
+  --hotel-muted: #bcc7d5;
+  --hotel-surface: radial-gradient(ellipse at 18% 0%, #46648a55, transparent 65%), linear-gradient(155deg, #294568, #192d49 48%, #101d32);
+  --hotel-edge: inset 0 0 0 1px #ead3a099, inset 0 2px 0 #ead3a0aa, inset 2px 0 0 #ead3a077, inset -2px -2px 0 #806039aa, inset 0 -4px 6px #09132666, 0 3px 9px #0a152855;
+  --hotel-small-edge: inset 0 1px 0 #ead3a077, inset 0 -1px 2px #09132666, 0 2px 4px #0a152844;
   --hotel-cream: linear-gradient(160deg, #f5ecd9, #e4d3b4);
 }
 :is(.detail-sheet, .status-panel, .card-minimap, .app-dialog, .page-title-card, .card-section-header),
-#screen-create :is(.card-info-popover, .create-chrome-bottom, .extra-menu-panel) {
+#screen-create .card-controls-dock .extra-menu-panel {
   background: var(--hotel-surface);
   color: var(--hotel-text);
-  border-color: var(--hotel-bronze-dark);
+  border-color: var(--hotel-gold);
   box-shadow: var(--hotel-edge);
 }
 :is(.detail-sheet, .status-panel) { border-width: 3px; border-style: solid; }
 .card-minimap { border-width: 4px; }
-.app-dialog { border-width: 2px; border-style: solid; box-shadow: var(--hotel-small-edge), 0 8px 24px #061b1d66; }
+.app-dialog { border-width: 2px; border-style: solid; box-shadow: var(--hotel-small-edge), 0 8px 24px #09132666; }
 .detail-sheet::before { background: linear-gradient(90deg, transparent, var(--hotel-glint), transparent); }
 :is(.page-title-heading, .card-section-title, .detail-name, .status-title, .status-section-title, .app-dialog-msg, #card-minimap-title) { color: var(--hotel-title); }
 :is(.page-title-description, .card-section-detail, .detail-body, .location-info-detail, .status-chip-name, .status-chip-desc, .status-chip-detail-line) { color: var(--hotel-text); }
 :is(.status-empty, .status-sub-label, .status-category-name, .status-card-path, .status-chip-details, .card-minimap-actions) { color: var(--hotel-muted); }
 .page-title-hint { color: #d4bf96; }
 .page-title-count {
-  background: linear-gradient(160deg, #23565b, #102f33);
+  background: linear-gradient(160deg, #294568, #101d32);
   color: var(--hotel-glint);
   border-color: var(--hotel-gold);
   box-shadow: var(--hotel-small-edge);
 }
-#screen-create .card-info-title { color: var(--hotel-title); }
-#screen-create .card-info-desc { color: var(--hotel-text); }
-#screen-create .card-info-popover::before { background: var(--hotel-deep); border-color: var(--hotel-bronze); }
 :is(.detail-desc, .detail-idea-block, .detail-sub-image-row, .status-chip, .status-chip-extra, .card-minimap-tag) {
-  background: linear-gradient(150deg, #2a5559, #143b40);
+  background: linear-gradient(150deg, #294568, #192d49);
   color: var(--hotel-text);
-  border-color: #a7794977;
-  box-shadow: inset 0 1px 0 #e7c99522;
+  border-color: #c5a26677;
+  box-shadow: inset 0 1px 0 #ead3a022;
 }
 :is(.detail-idea-block, .detail-sub-image-row):hover { border-color: var(--hotel-gold); }
 :is(.detail-idea-block, .detail-sub-image-row).checked {
-  background: linear-gradient(150deg, #396968, #225155);
+  background: linear-gradient(150deg, #415c7e, #2a4263);
   border-color: var(--hotel-glint);
   color: #fff2d0;
-  box-shadow: inset 0 0 0 1px #c6a06455, 0 2px 5px #061b1d55;
+  box-shadow: inset 0 0 0 1px #c5a26655, 0 2px 5px #09132655;
 }
-:is(.detail-divider, .detail-name::after) { background: linear-gradient(90deg, transparent, #c6a06488, transparent); }
-:is(.status-header, .status-section, .card-minimap-header, .card-minimap summary) { border-color: #c6a06466; }
+:is(.detail-divider, .detail-name::after) { background: linear-gradient(90deg, transparent, #c5a26688, transparent); }
+:is(.status-header, .status-section, .card-minimap-header, .card-minimap summary) { border-color: #c5a26666; }
 :is(.status-share-btn, .app-dialog-btn, .card-minimap-actions button),
-#screen-create :is(.extra-btn, .ctrl-btn-idea) {
-  background: linear-gradient(155deg, #2d6267, #163e43);
+#screen-create .card-controls-dock .extra-btn {
+  background: linear-gradient(155deg, #355278, #192d49);
   color: var(--hotel-title);
   border-color: var(--hotel-bronze);
   box-shadow: var(--hotel-small-edge);
 }
-.app-dialog-btn-confirm { background: linear-gradient(150deg, #3b6f68, #23534f); border-color: var(--hotel-gold); }
-.app-dialog-btn-cancel { background: linear-gradient(150deg, #43565a, #283e43); color: var(--hotel-muted); }
-#screen-create .extra-btn-danger { background: linear-gradient(155deg, #683f3c, #472e32); color: #f2c7b9; border-color: #bd8370; }
-#screen-create :is(.extra-btn-random, .extra-btn-random-all) { color: #d5e5cf; border-color: #8fa58a; }
+.app-dialog-btn.app-dialog-btn-confirm, .app-dialog-btn.app-dialog-btn-single { background: var(--hotel-cream); color: #192d49; border-color: var(--hotel-gold); }
+.app-dialog-btn.app-dialog-btn-cancel { background: linear-gradient(155deg, #dbe2e9, #b8c5d3); color: #192d49; }
+.app-dialog-btn.app-dialog-btn-danger { background: linear-gradient(155deg, #8e5351, #693e43); color: #fff0e7; border-color: #c69582 !important; }
+#screen-create .card-controls-dock .extra-btn-danger { background: linear-gradient(155deg, #683f3c, #472e32); color: #f2c7b9; border-color: #bd8370; }
+#screen-create .card-controls-dock :is(.extra-btn-random, .extra-btn-random-all) { color: #d5e5cf; border-color: #8fa58a; }
 :is(.detail-close, .status-close, #card-minimap-close) { color: var(--hotel-glint); }
 :is(.detail-sheet, .status-panel, .app-dialog, .card-minimap) :is(input, textarea, select) {
-  background: #102f33; color: var(--hotel-title); border: 1px solid var(--hotel-bronze); border-radius: 6px;
+  background: #101d32; color: var(--hotel-title); border: 1px solid var(--hotel-bronze); border-radius: 6px;
 }
 :is(.detail-sheet, .status-panel, .app-dialog, .card-minimap) :is(input, textarea)::placeholder { color: var(--hotel-muted); }
 :is(.detail-sheet, .status-panel, .app-dialog, .card-minimap) button:disabled { opacity: .5; }
 :is(.detail-sheet, .status-panel, .app-dialog, .card-minimap, .card-controls-dock) :focus-visible { outline: 2px solid var(--hotel-glint); outline-offset: -2px; }
-#screen-create .ctrl-address { background: var(--hotel-deep); color: var(--hotel-text); border: 1px solid #a7794977; border-radius: 7px; }
-#screen-create .address-tag { background: linear-gradient(150deg, #23565b, #174348); color: var(--hotel-title); border-color: #c6a06466; box-shadow: inset 0 1px #e7c99522; text-shadow: none; }
+#screen-create .card-controls-dock .ctrl-address { background: var(--hotel-deep); color: var(--hotel-text); border: 1px solid #c5a26677; border-radius: 7px; }
+#screen-create .card-controls-dock .address-tag { background: linear-gradient(150deg, #294568, #192d49); color: var(--hotel-title); border-color: #c5a26666; box-shadow: inset 0 1px #ead3a022; text-shadow: none; }
 /* The dock's real height is already measured for last-card scroll clearance. */
 #screen-create .card-controls-dock {
   left: max(6px, env(safe-area-inset-left, 0px));
@@ -81,26 +79,28 @@
   bottom: max(8px, env(safe-area-inset-bottom, 0px));
   padding: 5px 5px 6px;
   gap: 3px;
-  border: 2px solid var(--hotel-bronze-dark);
+  border: 2px solid var(--hotel-gold);
   border-radius: 15px;
   background: var(--hotel-surface);
-  box-shadow: var(--hotel-edge), 0 4px 12px #061b1d55;
+  box-shadow: var(--hotel-edge), 0 4px 12px #09132655;
 }
 #screen-create .card-controls-row { grid-template-columns: 54px minmax(0, 1fr) 72px; gap: 3px; }
 #screen-create .card-controls-dock :is(.card-minimap-toggle, .ctrl-btn-menu, .card-panel-toggle) {
   background: var(--hotel-cream);
-  color: #174b50;
-  border: 2px solid var(--hotel-bronze-dark);
-  box-shadow: inset 0 0 0 1px var(--hotel-gold), inset 0 2px 1px #fff7e6bb, inset 0 -3px 4px #a7794944, 0 3px 6px #061b1d66;
+  color: #192d49;
+  border: 2px solid var(--hotel-gold);
+  box-shadow: inset 0 0 0 1px var(--hotel-gold), inset 0 2px 1px #fff7e6bb, inset 0 -3px 4px #c5a26644, 0 3px 6px #09132666;
   border-radius: 9px;
 }
 #screen-create .card-controls-dock .card-minimap-toggle { width: 54px; height: 42px; }
 #screen-create #card-menu-toggle { width: 72px; min-width: 72px; max-width: 72px; height: 42px !important; padding: 0; }
 #screen-create #card-menu-toggle .ctrl-menu-img { display: none; }
-#screen-create #card-menu-toggle .ctrl-menu-icon { display: flex; position: static; color: #174b50; font-size: 23px; }
+#screen-create #card-menu-toggle .ctrl-menu-icon { display: flex; position: static; color: #192d49; font-size: 23px; }
 #screen-create .card-controls-dock .card-panel-toggle { width: 50px; height: 50px; border-radius: 50%; font-size: 19px; }
-#screen-create .card-controls-dock .card-panel-toggle:active { transform: scale(.96); box-shadow: inset 0 0 0 1px var(--hotel-gold), inset 0 3px 5px #62443155, 0 1px 2px #061b1d66; }
+#screen-create .card-controls-dock .card-panel-toggle:active { transform: scale(.96); box-shadow: inset 0 0 0 1px var(--hotel-gold), inset 0 3px 5px #80603955, 0 1px 2px #09132666; }
 #screen-create .card-controls-dock .ctrl-address { min-height: 42px; }
 #screen-create .card-controls-dock .extra-menu-panel { border-radius: 10px; }
 .app-dialog-btn { border: 1px solid var(--hotel-bronze) !important; }
-.status-header { background: linear-gradient(150deg, #23565b, #174348); }
+.status-header { background: linear-gradient(150deg, #294568, #192d49); }
+
+.card-minimap-tag { background: #f2ebdd; color: #20252d; border-color: #c8b58e; box-shadow: inset 0 1px #fff9ee; }
