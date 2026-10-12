@@ -284,7 +284,7 @@ function initUiSounds() {
       if (event.isTrusted) UI_SOUND.play('start');
     } else if (target.matches('.data-card')) {
       playRandom(cardSounds);
-    } else if (target.matches('#btn-extra-menu')) {
+    } else if (target.matches('#btn-extra-menu, #card-menu-toggle')) {
       UI_SOUND.play(extraMenuOpen ? 'category4' : 'category3');
     } else if (target.matches('.extra-btn-home')) {
       UI_SOUND.play('selectNo');
@@ -956,10 +956,30 @@ function renderAddressTrail() {
     const tag = document.createElement('button');
     tag.type = 'button';
     tag.className = 'address-tag';
-    tag.textContent = item.label;
+    const cardMode = document.getElementById('screen-create').classList.contains('card-controls-mode');
+    const navId = item.navId || currentNav;
+    const meta = item.type === 'nav' ? NAV_DATA[navId] : item.type === 'sub' ? getSubInfo(item.subId) : null;
+    if (cardMode && meta) {
+      const icon = document.createElement('span');
+      icon.className = 'address-path-icon';
+      icon.setAttribute('aria-hidden', 'true');
+      setInfoVisual(icon, item.type === 'nav' ? MAIN_CATEGORY_IMAGE[navId] : meta.img,
+        meta.icon || (item.type === 'nav' ? MAIN_CATEGORY_INFO[navId]?.icon : ''));
+      tag.appendChild(icon);
+    }
+    const label = document.createElement('span');
+    label.textContent = item.label;
+    tag.appendChild(label);
     tag.title = item.label;
     tag.setAttribute('aria-label', `${item.label} 위치로 이동`);
     tag.addEventListener('click', () => navigateAddressTag(index));
+    if (cardMode && index > 0) {
+      const separator = document.createElement('span');
+      separator.className = 'address-path-separator';
+      separator.textContent = '|';
+      separator.setAttribute('aria-hidden', 'true');
+      address.appendChild(separator);
+    }
     address.appendChild(tag);
   });
 
@@ -1726,7 +1746,57 @@ function initScrollResponsiveChrome() {
   if (!screen || !area || !infoPanel || !bottomChrome) return;
 
   const panelToggle = document.getElementById('card-panel-toggle');
+  const dock = document.getElementById('card-controls-dock');
+  const row = dock.querySelector('.card-controls-row');
+  const address = document.getElementById('ctrl-address');
+  const menuPanel = document.getElementById('extra-menu-panel');
+  const originalMenu = document.getElementById('btn-extra-menu');
+  const originalMenuHeight = originalMenu.style.height;
+  let cardMenuSize = null;
+  const addressHome = document.createComment('address original location');
+  const menuHome = document.createComment('menu original location');
+  address.before(addressHome);
+  menuPanel.before(menuHome);
+  const cardMenu = originalMenu.cloneNode(true);
+  cardMenu.id = 'card-menu-toggle';
+  cardMenu.querySelector('[id]')?.removeAttribute('id');
+  cardMenu.setAttribute('aria-label', '메뉴 열기·닫기');
+  cardMenu.setAttribute('aria-controls', 'extra-menu-panel');
+  cardMenu.setAttribute('aria-expanded', 'false');
+  dock.prepend(panelToggle);
+  row.prepend(document.getElementById('card-minimap-toggle'));
+  row.appendChild(cardMenu);
   let cardPanelMode = false;
+  function measureDock() {
+    if (!cardPanelMode) return;
+    screen.style.setProperty('--card-dock-height', `${dock.offsetHeight}px`);
+    const page = area.querySelector('.center-page.active[data-chrome-view="cards"]');
+    const card = page?.querySelector('.data-card');
+    // Reserve only the actual two-button row beneath the final card.
+    const clearance = card ? Math.min(110, (card.offsetWidth - 6) / 2) + 12 : 6;
+    page?.style.setProperty('--card-control-clearance', `${clearance}px`);
+    requestCardEdgePosition();
+  }
+  function syncCardDock() {
+    screen.classList.toggle('card-controls-mode', cardPanelMode);
+    dock.hidden = !cardPanelMode;
+    if (cardPanelMode) {
+      if (address.parentElement !== document.getElementById('card-address-slot')) {
+        cardMenuSize = { width: originalMenu.offsetWidth, height: originalMenu.offsetHeight };
+      }
+      dock.style.setProperty('--card-menu-width', `${cardMenuSize.width}px`);
+      originalMenu.style.height = cardMenu.style.height = `${cardMenuSize.height}px`;
+      document.getElementById('card-address-slot').appendChild(address);
+      dock.appendChild(menuPanel);
+      measureDock();
+    } else {
+      addressHome.after(address);
+      menuHome.after(menuPanel);
+      originalMenu.style.height = originalMenuHeight;
+    }
+    renderAddressTrail();
+  }
+  new ResizeObserver(measureDock).observe(dock);
   let cardPanelsLocked = true;
 
   const INTENT_DISTANCE = 18;
@@ -1784,6 +1854,7 @@ function initScrollResponsiveChrome() {
     bottomChrome.style.transform = `translate3d(0, ${renderedBottomProgress * 100}%, 0)`;
     infoPanel.classList.toggle('top-chrome-hidden', renderedTopProgress > 0.98);
     bottomChrome.classList.toggle('bottom-chrome-hidden', renderedBottomProgress > 0.98);
+    requestCardEdgePosition();
     if (timeProgress < 1) {
       animationFrame = requestAnimationFrame(renderChrome);
     } else {
@@ -1829,22 +1900,23 @@ function initScrollResponsiveChrome() {
       if (progress === 0 && cardPanelsLocked) return;
       if (progress > 0) {
         cardPanelsLocked = true;
-        if (panelToggle) { panelToggle.hidden = false; panelToggle.setAttribute('aria-expanded', 'false'); }
+        if (panelToggle) panelToggle.setAttribute('aria-expanded', 'false');
       }
     }
     // 하단 크롬이 숨기 시작하면 열린 유틸리티 메뉴도 함께 닫는다.
     // 메뉴를 단순히 아래로 끌고 가지 않아 다음 표시 때 닫힌 상태가 유지된다.
     if (progress > 0 && extraMenuOpen) closeExtraMenu({ instant: true });
-    animateChrome(progress, progress);
+    animateChrome(cardPanelMode ? 1 : progress, progress);
   }
 
   panelToggle?.addEventListener('click', () => {
     if (!cardPanelMode) return;
-    cardPanelsLocked = false;
-    panelToggle.hidden = true;
-    panelToggle.setAttribute('aria-expanded', 'true');
+    const opening = targetBottomProgress > 0.5;
+    cardPanelsLocked = !opening;
+    panelToggle.setAttribute('aria-expanded', String(opening));
     resetGesture();
-    setProgress(0);
+    if (opening) setProgress(0);
+    else setProgress(1);
   });
 
   function trackGesture(delta, timestamp = performance.now()) {
@@ -1954,6 +2026,7 @@ function initScrollResponsiveChrome() {
       || (view === 'subgroup' && (previousView === 'cards'
         || (targetTopProgress === 1 && targetBottomProgress === 1)));
     cardPanelMode = view === 'cards';
+    syncCardDock();
     // Suppress route-level CSS intros throughout the hierarchy. Explicit panel
     // calls and scroll gestures still use the existing chrome animation.
     screen.classList.toggle('card-panels-mode', hierarchyView);
@@ -2872,7 +2945,9 @@ function positionCardEdgeActions({ ensureVisible = false } = {}) {
   group.style.width = `${width}px`;
   const safeBottom = parseFloat(getComputedStyle(group).getPropertyValue('--action-safe-bottom')) || 0;
   const chromeRect = document.getElementById('create-chrome-bottom').getBoundingClientRect();
-  const bottom = Math.min(pageRect.bottom, screenRect.bottom - safeBottom - 8, chromeRect.top);
+  const dock = document.getElementById('card-controls-dock');
+  const dockTop = dock && !dock.hidden ? dock.getBoundingClientRect().top - 4 : screenRect.bottom;
+  const bottom = Math.min(pageRect.bottom, screenRect.bottom - safeBottom - 8, chromeRect.top, dockTop);
   // Reserve the unpressed footprint: the existing touch scale may still be
   // returning to normal when the click arrives.
   const cardStyle = getComputedStyle(card);
@@ -4126,14 +4201,16 @@ let extraMenuOpen = false;
 function closeExtraMenu(options = {}) {
   extraMenuOpen = false;
   const panel = document.getElementById('extra-menu-panel');
-  const btn   = document.getElementById('btn-extra-menu');
-  const icon  = document.getElementById('extra-menu-icon');
+  const buttons = document.querySelectorAll('#btn-extra-menu, #card-menu-toggle');
 
   if (options.instant && panel) panel.classList.add('menu-resetting');
 
   if (panel) panel.classList.remove('open');
-  if (btn)   btn.classList.remove('open');
-  if (icon)  icon.textContent = '☰';
+  buttons.forEach(button => {
+    button.classList.remove('open');
+    button.setAttribute('aria-expanded', 'false');
+    button.querySelector('.ctrl-menu-icon').textContent = '☰';
+  });
 
   if (options.instant && panel) {
     requestAnimationFrame(() => panel.classList.remove('menu-resetting'));
@@ -4143,14 +4220,14 @@ function closeExtraMenu(options = {}) {
 function toggleExtraMenu() {
   extraMenuOpen = !extraMenuOpen;
   const panel = document.getElementById('extra-menu-panel');
-  const btn   = document.getElementById('btn-extra-menu');
-  const icon  = document.getElementById('extra-menu-icon');
+  const buttons = document.querySelectorAll('#btn-extra-menu, #card-menu-toggle');
 
   if (panel) panel.classList.toggle('open', extraMenuOpen);
-  if (btn)   btn.classList.toggle('open', extraMenuOpen);
-
-  // 닫혀있을때 ☰, 열려있을때 삼각형 ▲
-  if (icon) icon.textContent = extraMenuOpen ? '▼' : '☰';
+  buttons.forEach(button => {
+    button.classList.toggle('open', extraMenuOpen);
+    button.setAttribute('aria-expanded', String(extraMenuOpen));
+    button.querySelector('.ctrl-menu-icon').textContent = extraMenuOpen ? '▼' : '☰';
+  });
 }
 
 /* ════════════════════════════════════════════════

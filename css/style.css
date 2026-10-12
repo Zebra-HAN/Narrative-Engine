@@ -3569,3 +3569,37 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .card-minimap-actions button, #card-minimap-close { transition: none; }
 }
+
+
+/* Card-only compact dock; other screens retain the original chrome and address. */
+.card-controls-dock[hidden] { display: none; }
+.card-controls-dock {
+  position: absolute;
+  left: max(2px, env(safe-area-inset-left, 0px));
+  right: max(2px, env(safe-area-inset-right, 0px));
+  bottom: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding-bottom: max(2px, env(safe-area-inset-bottom, 0px));
+}
+.card-controls-row { display: grid; grid-template-columns: 48px minmax(0, 1fr) var(--card-menu-width, 64px); gap: 2px; align-items: center; width: 100%; }
+.card-address-slot { display: flex; min-width: 0; align-self: stretch; }
+#screen-create .card-controls-dock .ctrl-address { padding: 0 2px; gap: 2px; width: 100%; }
+#screen-create .card-controls-dock .address-tag { display: inline-flex; align-items: center; gap: 2px; padding: 3px 4px; }
+.address-path-icon { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 20px; width: 20px; height: 20px; }
+.address-path-icon .info-icon-img { width: 100%; height: 100%; object-fit: contain; }
+.address-path-icon .info-icon-text { font-size: 20px; line-height: 1; }
+.card-controls-dock .card-panel-toggle { position: static; transform: none; }
+.card-controls-dock .card-minimap-toggle { position: static; }
+#card-menu-toggle { position: relative; }
+#screen-create.card-controls-mode .center-page[data-chrome-view="cards"] {
+  top: calc(env(safe-area-inset-top, 0px) + 4px);
+  padding-bottom: calc(var(--card-dock-height, 80px) + var(--card-control-clearance, 6px));
+}
+#screen-create.card-controls-mode .create-chrome-slot-bottom { bottom: var(--card-dock-height, 80px); }
+#screen-create.card-controls-mode .control-bar { justify-content: flex-end; }
+
+.address-path-separator { flex-shrink: 0; opacity: .5; line-height: 1; }
