@@ -1028,7 +1028,8 @@ body::after {
 
 /* 인접한 세로 margin은 겹치므로 실제 카드 끝 → 명패 간격은 27px → 35px
    (약 1.3배). 첫 섹션과 명패 아래 간격은 유지한다. */
-.card-grid:has(.data-card) + .card-section-header {
+.card-grid:has(.data-card) + .card-section-header,
+.card-grid-section:has(.data-card) + .card-section-header {
   margin-top: 35px;
 }
 
@@ -1084,28 +1085,49 @@ body::after {
       margin-inline: 12px;
     }
 
-    /* Existing setting experiment only. Keep the section's original margins
-       and use the original row gap between complete four-row chunks. */
-    #page-setting_setting_existing .setting-card-section {
+    /* Keep each layout's original section margins and row gap between chunks.
+       Only the inner grids own perspective and independent backing layers. */
+    .card-grid-section {
       display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 9px 6px;
+      margin: 0 8px 16px;
+    }
+    .card-grid-section.card-grid-layout-b {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px 7px;
+      margin-inline: 10px;
+    }
+    .card-grid-section:is(.card-grid-layout-c, .card-grid-layout-d) {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 11px 8px;
+      margin-inline: 12px;
+    }
+    .card-grid-section.card-grid-layout-d {
       grid-template-columns: minmax(0, 1fr);
-      gap: 11px;
-      margin: 0 12px 16px;
     }
-    #page-setting_setting_existing .setting-card-section + .card-section-header {
-      margin-top: 35px;
-    }
-    #page-setting_setting_existing .card-grid.setting-card-chunk {
+    .card-grid.card-grid-chunk {
+      /* Share the original section-wide intrinsic column sizing. Separate
+         1fr grids can otherwise change widths around long card names. */
+      grid-column: 1 / -1;
+      grid-template-columns: subgrid;
       margin: 0;
       min-width: 0;
       perspective: 900px;
-      contain: layout style;
+      /* Layout containment disables column subgrids. Share only column sizing
+         for intrinsic tracks; each chunk still owns its rows and compositor. */
+      contain: style;
       isolation: isolate;
       transform: translateZ(0);
       will-change: transform;
       /* Paint containment would clip the check/lock marks and wide glow.
          Independent composited backing layers retain this visual overflow. */
       overflow: visible;
+    }
+    .card-grid.card-grid-chunk.card-grid-layout-d {
+      /* This layout has fixed equal tracks: retain the proven full isolation. */
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      contain: layout style;
     }
 
     .data-card {

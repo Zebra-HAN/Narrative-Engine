@@ -837,18 +837,20 @@ function getCardGridOpenTag(group) {
   return `<div class="card-grid ${getCardGridLayoutClass(group)}">`;
 }
 
-// Existing setting only: keep data/IDs intact and split on complete 3-column rows.
+// Keep data/IDs intact and split every card section on complete rendered rows.
 // The section stack has no perspective; each chunk owns its 3D/compositing scope.
-function splitExistingSettingGrids(page) {
-  page.querySelectorAll('.card-grid').forEach(grid => {
+function splitCardSectionGrids(page) {
+  page.querySelectorAll('.card-grid:not(.card-grid-chunk)').forEach(grid => {
     const cards = Array.from(grid.children);
     if (!cards.length) return;
+    const columns = getRenderedCardGridColumns(grid);
+    const chunkSize = Math.max(columns, Math.floor(12 / columns) * columns);
     const section = document.createElement('div');
-    section.className = grid.className.replace('card-grid', 'setting-card-section');
-    for (let start = 0; start < cards.length; start += 12) {
+    section.className = grid.className.replace('card-grid', 'card-grid-section');
+    for (let start = 0; start < cards.length; start += chunkSize) {
       const chunk = grid.cloneNode(false);
-      chunk.classList.add('setting-card-chunk');
-      chunk.append(...cards.slice(start, start + 12));
+      chunk.classList.add('card-grid-chunk');
+      chunk.append(...cards.slice(start, start + chunkSize));
       section.appendChild(chunk);
     }
     grid.replaceWith(section);
@@ -2373,6 +2375,8 @@ function getCardRevealDelayStyle() {
 }
 
 function setupCardRevealAnimations(page) {
+  // All three card renderers pass through here, including non-animated visits.
+  splitCardSectionGrids(page);
   if (APP_PERF && page.id === 'page-race_race_fantasy') {
     if (PERF_FANTASY_NO_FLIP) page.dataset.perfFantasyFlip = 'off';
     APP_PERF.mark('experiment.fantasy-flip', { enabled: !PERF_FANTASY_NO_FLIP });
@@ -2419,9 +2423,7 @@ function scopeCardRevealAnimations(page, cards) {
     let rowOffset = 0;
     // Treat chunks as one logical grid so a partially visible row at a chunk
     // boundary keeps exactly the original reveal wave and section row offset.
-    const revealGrids = page.id === 'page-setting_setting_existing'
-      ? page.querySelectorAll('.setting-card-section, .card-grid:not(.setting-card-chunk)')
-      : page.querySelectorAll('.card-grid');
+    const revealGrids = page.querySelectorAll('.card-grid-section, .card-grid:not(.card-grid-chunk)');
     revealGrids.forEach(grid => {
       const gridCards = Array.from(grid.querySelectorAll('.card-deal')).filter(card => visible.has(card));
       const columns = getRenderedCardGridColumns(grid);
@@ -2777,7 +2779,6 @@ function showGroupCards(subId, groupIdx) {
   });
   html += '</div>';
   page.innerHTML = html;
-  if (subId === 'setting' && grp.id === 'setting_existing') splitExistingSettingGrids(page);
   page.prepend(titleCard);
   markFirstCardRow(page);
   setupCardRevealAnimations(page);
