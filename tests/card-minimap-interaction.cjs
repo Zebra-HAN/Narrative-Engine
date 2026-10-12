@@ -29,13 +29,13 @@ const { chromium } = require('playwright');
    assert(await panel.isVisible());
    const styles=await page.evaluate(()=>({heading:getComputedStyle(document.querySelector('#card-minimap summary')).fontSize,tag:getComputedStyle(document.querySelector('.card-minimap-tag')).fontSize,padding:getComputedStyle(document.querySelector('.card-minimap-tag')).padding,highlight:[document.getElementById('card-minimap-toggle'),document.getElementById('card-minimap-close'),document.querySelector('#card-minimap summary'),document.querySelector('.card-minimap-tag')].map(n=>getComputedStyle(n).webkitTapHighlightColor)}));
    assert.equal(styles.heading,'14px');assert.equal(styles.tag,'9.8px');assert.equal(styles.padding,'4px 7px');assert(styles.highlight.every(v=>v==='rgba(0, 0, 0, 0)'));
-   // Left edge is outside the panel, directly over the real scrollable cards.
-   if(touch)await page.touchscreen.tap(45,200);else await page.mouse.click(45,200);
+   // The narrow left gutter is outside the centered popup.
+   if(touch)await page.touchscreen.tap(5,200);else await page.mouse.click(5,200);
    assert.equal(await panel.isVisible(),false);
    const state=await page.evaluate(()=>({scroll:document.querySelector('.center-page.active[data-chrome-view="cards"]').scrollTop,selection:JSON.stringify([...selectedCards.race]),locks:JSON.stringify([...lockedCards.race||[]])}));
    assert.deepEqual(state,original);assert.equal(await page.locator('.card-info-popover').count(),0);
    // Holding outside cannot start a card long-press or open details.
-   await toggle.click();await page.mouse.move(45,200);await page.mouse.down();await page.waitForTimeout(750);await page.mouse.up();
+   await toggle.click();await page.mouse.move(5,200);await page.mouse.down();await page.waitForTimeout(750);await page.mouse.up();
    assert.equal(await panel.isVisible(),false);assert.equal(await page.locator('.card-info-popover').count(),0);
    await page.evaluate(()=>{CARD_DATA.outlineFixture=[{type:'section',label:'핵심 제목 — 부가 설명'},{name:'카드'},{type:'section',label:'둘째 제목 | 추가 설명'},{name:'카드'},{type:'section',label:'분리 없는 제목'},{name:'카드'}];showCardPage('outlineFixture',false)});
    await toggle.click();assert.deepEqual(await page.locator('#card-minimap summary').allTextContents(),['핵심 제목 — 1','둘째 제목 — 1','분리 없는 제목 — 1']);

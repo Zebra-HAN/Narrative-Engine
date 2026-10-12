@@ -127,13 +127,7 @@
       <path d="M5 8h4M5 11h4M15 8h4M15 11h4"/>
     </svg>
   </button>
-  <aside id="card-minimap" class="card-minimap" aria-labelledby="card-minimap-title" hidden>
-    <div class="card-minimap-header">
-      <strong id="card-minimap-title">전체 목록</strong>
-      <button type="button" id="card-minimap-close" aria-label="전체 목록 닫기">×</button>
-    </div>
-    <div id="card-minimap-content" class="card-minimap-content"></div>
-  </aside>
+
 
   <div class="create-chrome-slot create-chrome-slot-bottom">
   <div class="create-chrome-bottom" id="create-chrome-bottom">
@@ -272,6 +266,29 @@
   </div>
 
   
+  <div id="card-minimap-overlay" class="card-minimap-overlay" hidden>
+    <div class="popup-swipe-frame">
+      <aside id="card-minimap" class="card-minimap" role="dialog" aria-modal="true" aria-labelledby="card-minimap-title" hidden>
+        <button type="button" id="card-minimap-close" class="pressable" aria-label="전체 목록 닫기">
+          <span class="card-minimap-close-fallback" aria-hidden="true">×</span>
+          <img class="close-icon" src="images/core/buttons/cancel.webp" alt="" aria-hidden="true" draggable="false">
+        </button>
+        <div class="card-minimap-header">
+          <strong id="card-minimap-title"></strong>
+          <div class="card-minimap-actions">
+            <button type="button" id="card-minimap-expand" class="pressable" aria-label="전체 펼치기" title="전체 펼치기">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 5 6 6 6-6M6 12l6 6 6-6"/></svg>
+            </button>
+            <button type="button" id="card-minimap-collapse" class="pressable" aria-label="전체 접기" title="전체 접기">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 12 6-6 6 6M6 19l6-6 6 6"/></svg>
+            </button>
+          </div>
+        </div>
+        <div id="card-minimap-content" class="card-minimap-content"></div>
+      </aside>
+    </div>
+  </div>
+
   <!-- 상태 오버레이 -->
   <div class="status-overlay" id="status-overlay" onclick="closeStatusOverlay(event)">
     <div class="popup-swipe-frame">

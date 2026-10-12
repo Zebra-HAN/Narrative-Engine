@@ -3343,7 +3343,7 @@ body {
 
 
 /* Outline overlays share the existing card access strip without changing its layout. */
-.card-minimap-toggle, .card-minimap {
+.card-minimap-toggle {
   position: absolute;
   top: var(--card-panel-button-top);
   right: max(8px, env(safe-area-inset-right, 0px));
@@ -3364,8 +3364,9 @@ body {
   touch-action: manipulation;
 }
 .card-minimap {
-  width: min(300px, calc(100% - 16px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)));
-  bottom: max(calc(var(--bottom-chrome-height, 150px) + 8px), calc(env(safe-area-inset-bottom, 0px) + 80px));
+  position: relative;
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   border: 5px solid #725032;
@@ -3375,24 +3376,38 @@ body {
   box-shadow: inset 0 0 0 1px #bca06b, 0 4px 14px #0005;
   overflow: hidden;
 }
+
 .card-minimap-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-left: 12px;
+  gap: 8px;
+  padding: 8px 48px 8px 12px;
   border-bottom: 1px solid #bca06b;
   flex-shrink: 0;
 }
-#card-minimap-close {
-  min-width: 44px;
-  min-height: 44px;
+#card-minimap-title { min-width: 0; font-size: 16px; overflow-wrap: anywhere; }
+.card-minimap-actions { display: flex; flex-shrink: 0; color: #75664f; }
+.card-minimap-actions button, #card-minimap-close {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
   border: 0;
   background: transparent;
   color: inherit;
-  font-size: 26px;
   cursor: pointer;
   touch-action: manipulation;
+  transition: transform 100ms ease-out;
 }
+.card-minimap-actions svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+#card-minimap-close { position: absolute; top: 7px; right: 2px; padding: 6px; font-size: 26px; }
+#card-minimap-close .close-icon { grid-area: 1 / 1; }
+.card-minimap-close-fallback { display: none; grid-area: 1 / 1; }
+#card-minimap-close.image-failed .close-icon { display: none; }
+#card-minimap-close.image-failed .card-minimap-close-fallback { display: block; }
+
 .card-minimap-content {
   min-height: 0;
   overflow-y: auto;
@@ -3518,3 +3533,30 @@ body {
 .page-title-card[data-image-layout="portrait"] .page-title-media { grid-area: media; align-self: center; }
 .page-title-card[data-image-layout="portrait"] .page-title-description { grid-area: description; align-self: end; }
 .page-title-card[data-image-layout="portrait"] .page-title-footer { grid-area: footer; align-self: start; }
+
+
+/* Shared exterior geometry: preserve the detail popup's top/side margins. */
+.detail-overlay, .status-overlay, .card-minimap-overlay {
+  padding: max(18px, env(safe-area-inset-top, 0px))
+    max(5%, env(safe-area-inset-right, 0px))
+    max(18px, env(safe-area-inset-bottom, 0px))
+    max(5%, env(safe-area-inset-left, 0px));
+  height: 100%;
+  height: 100dvh;
+}
+.detail-overlay .popup-swipe-frame, .status-overlay .popup-swipe-frame,
+.card-minimap-overlay .popup-swipe-frame, .status-panel { max-width: 600px; }
+.card-minimap-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 650;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  background: transparent;
+}
+.card-minimap-overlay[hidden] { display: none; }
+.card-minimap-content { flex: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .card-minimap-actions button, #card-minimap-close { transition: none; }
+}

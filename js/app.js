@@ -2511,6 +2511,7 @@ function showSubgroupCards(subId, groupIdx, sgIdx) {
  let html = getCardGridOpenTag(grp);
 
   page.minimapCards = sg.cards;
+  page.minimapGroup = sg;
   sg.cards.forEach((card, rawIdx) => {
     if (card.type === 'section') {
       html += `</div><div class="card-section-header">${formatSectionHeaderLabel(card.label)}</div>${getCardGridOpenTag(grp)}`;
@@ -2650,6 +2651,7 @@ function showGroupCards(subId, groupIdx) {
 
   let html = getCardGridOpenTag(grp);
   page.minimapCards = grp.cards;
+  page.minimapGroup = grp;
   grp.cards.forEach((card, rawIdx) => {
     if (card.type === 'section') {
       html += `</div><div class="card-section-header">${formatSectionHeaderLabel(card.label)}</div>${getCardGridOpenTag(grp)}`;
@@ -2797,6 +2799,7 @@ function showCardPage(subId, animate = true) {
   if (!selectedCards[subId]) selectedCards[subId] = new Set();
 
   page.minimapCards = cards;
+  page.minimapGroup = subInfo || { label };
   cards.forEach((card, rawIdx) => {
     if (card.type === 'section') {
       html += `</div><div class="card-section-header">${formatSectionHeaderLabel(card.label)}</div>${getCardGridOpenTag()}`;
@@ -4417,7 +4420,7 @@ document.addEventListener('touchmove', (e) => {
 /* ════════════════════════════════════════════════
    스와이프로 닫기(왼쪽 스와이프로 패널 닫기)
 ════════════════════════════════════════════════ */
-function attachSwipeToClose(panelEl, closeFn) {
+function attachSwipeToClose(panelEl, closeFn, { lockDirection = false } = {}) {
   if (!panelEl) return;
 
   // 이전에 붙인 리스너 제거 (중복 방지)
@@ -4430,6 +4433,10 @@ function attachSwipeToClose(panelEl, closeFn) {
   let startX = null;
   let startY = null;
   let isDragging = false;
+  let axis = null;
+  let suppressClickUntil = 0;
+  let closeTimer = null;
+  let resetTimer = null;
 
    function setOverlayDragOpacity(progress) {
     if (!overlayEl) return;
@@ -4451,6 +4458,8 @@ function attachSwipeToClose(panelEl, closeFn) {
     startX = e.touches[0].clientX;
     startY = e.touches[0].clientY;
     isDragging = false;
+    axis = null;
+    suppressClickUntil = 0;
     panelEl.style.transition = 'none';
      if (overlayEl) overlayEl.style.transition = 'none';
   }
@@ -4460,6 +4469,12 @@ function attachSwipeToClose(panelEl, closeFn) {
     const dx = e.touches[0].clientX - startX;
     const dy = e.touches[0].clientY - startY;
 
+    if (lockDirection) {
+      if (!axis && Math.max(Math.abs(dx), Math.abs(dy)) > 12) {
+        axis = Math.abs(dx) > Math.abs(dy) * 1.5 ? 'horizontal' : 'vertical';
+      }
+      if (axis !== 'horizontal') return;
+    }
     // 수평 스와이프 판정 (세로 스크롤과 구분)
     if (!isDragging && Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 8) {
       isDragging = true;
@@ -4480,6 +4495,7 @@ function attachSwipeToClose(panelEl, closeFn) {
       return;
     }
      
+    if (lockDirection) suppressClickUntil = performance.now() + 500;
     const dx = e.changedTouches[0].clientX - startX;
     const shouldClose = Math.abs(dx) > CLOSE_THRESHOLD;
     const closeDirection = dx < 0 ? -1 : 1;
@@ -4494,7 +4510,7 @@ function attachSwipeToClose(panelEl, closeFn) {
         overlayEl.style.transition = `opacity ${CLOSE_DURATION}ms ease`;
         overlayEl.style.opacity = '0';
       }
-      setTimeout(() => {
+      closeTimer = setTimeout(() => {
         closeFn();
         // 닫힌 상태에서 inline 값을 지워 다음 열림 때 잔상이 되돌아오지 않게 함
         requestAnimationFrame(resetInlineStyles);
@@ -4508,17 +4524,30 @@ function attachSwipeToClose(panelEl, closeFn) {
         overlayEl.style.transition = 'opacity 0.2s ease';
         overlayEl.style.opacity = '';
       }
-      setTimeout(resetInlineStyles, 200);
+      resetTimer = setTimeout(resetInlineStyles, 200);
     }
     startX = null;
     isDragging = false;
   }
 
+  function onTouchCancel() { startX = null; isDragging = false; resetInlineStyles(); }
+  function onClick(event) {
+    if (lockDirection && performance.now() < suppressClickUntil) {
+      event.preventDefault(); event.stopImmediatePropagation();
+    }
+  }
+  panelEl.addEventListener('click', onClick, true);
+  panelEl.addEventListener('touchcancel', onTouchCancel, { passive: true });
   panelEl.addEventListener('touchstart', onTouchStart, { passive: true });
   panelEl.addEventListener('touchmove',  onTouchMove,  { passive: true });
   panelEl.addEventListener('touchend',   onTouchEnd,   { passive: true });
 
   panelEl._swipeCleanup = () => {
+    clearTimeout(closeTimer);
+    clearTimeout(resetTimer);
+    resetInlineStyles();
+    panelEl.removeEventListener('click', onClick, true);
+    panelEl.removeEventListener('touchcancel', onTouchCancel);
     panelEl.removeEventListener('touchstart', onTouchStart);
     panelEl.removeEventListener('touchmove',  onTouchMove);
     panelEl.removeEventListener('touchend',   onTouchEnd);
@@ -4537,19 +4566,25 @@ APP_PERF?.install(() => ({
    Section markers apply to subsequent cards, rather than a card.section field. */
 function buildCardMinimapGroups(cards) {
   const groups = [];
-  const unclassified = { label: '미분류', cards: [] };
-  let current = unclassified;
+  let current = null;
+  let sectioned = false;
   for (const card of cards) {
     if (isSectionItem(card)) {
       const formatted = document.createElement('template');
       formatted.innerHTML = formatSectionHeaderLabel(card.label);
-      current = { label: formatted.content.querySelector('.card-section-title')?.textContent || '', cards: [] };
-      groups.push(current);
-    } else current.cards.push(card);
+      const label = formatted.content.querySelector('.card-section-title')?.textContent || '';
+      current = label ? { label, cards: [] } : null;
+      if (current) { groups.push(current); sectioned = true; }
+    } else {
+      if (!current) {
+        const last = groups[groups.length - 1];
+        current = last?.unclassified ? last : { label: '미분류', cards: [], unclassified: true };
+        if (current !== last) groups.push(current);
+      }
+      current.cards.push(card);
+    }
   }
-  if (!groups.length) return { sectioned: false, groups: [unclassified] };
-  if (unclassified.cards.length) groups.push(unclassified);
-  return { sectioned: true, groups };
+  return { sectioned, groups };
 }
 
 function initCardMinimap() {
@@ -4558,10 +4593,24 @@ function initCardMinimap() {
   const panel = document.getElementById('card-minimap');
   const content = document.getElementById('card-minimap-content');
   const close = document.getElementById('card-minimap-close');
-  if (!area || !toggle || !panel || !content || !close) return;
+  const overlay = document.getElementById('card-minimap-overlay');
+  const swipeFrame = overlay?.querySelector('.popup-swipe-frame');
+  const title = document.getElementById('card-minimap-title');
+  const expand = document.getElementById('card-minimap-expand');
+  const collapse = document.getElementById('card-minimap-collapse');
+  if (!area || !toggle || !panel || !content || !close || !overlay || !swipeFrame || !title || !expand || !collapse) return;
+  const closeImage = close.querySelector('img');
+  const checkCloseImage = () => close.classList.toggle('image-failed', !closeImage.naturalWidth);
+  closeImage.addEventListener('load', checkCloseImage);
+  closeImage.addEventListener('error', checkCloseImage);
+  if (closeImage.complete) checkCloseImage();
+  expand.addEventListener('click', () => content.querySelectorAll('details').forEach(section => { section.open = true; }));
+  collapse.addEventListener('click', () => content.querySelectorAll('details').forEach(section => { section.open = false; }));
   toggle.classList.add('pressable');
   const activePage = () => area.querySelector('.center-page.active[data-chrome-view="cards"]');
   function hide(restoreFocus = false) {
+    swipeFrame._swipeCleanup?.();
+    overlay.hidden = true;
     panel.hidden = true;
     toggle.hidden = !activePage();
     toggle.setAttribute('aria-expanded', 'false');
@@ -4582,7 +4631,9 @@ function initCardMinimap() {
   toggle.addEventListener('click', () => {
     const page = activePage();
     if (!page) return;
-    const outline = buildCardMinimapGroups(page.minimapCards || []);
+    const cards = page.minimapCards || [];
+    const outline = buildCardMinimapGroups(cards);
+    title.textContent = `${page.minimapGroup?.label || ''} — ${cards.filter(card => !isSectionItem(card)).length}`;
     content.replaceChildren();
     outline.groups.forEach(group => {
       if (!outline.sectioned) { content.appendChild(tags(group.cards)); return; }
@@ -4594,7 +4645,9 @@ function initCardMinimap() {
     });
     toggle.hidden = true;
     toggle.setAttribute('aria-expanded', 'true');
+    overlay.hidden = false;
     panel.hidden = false;
+    attachSwipeToClose(swipeFrame, () => hide(true), { lockDirection: true });
     content.scrollTop = 0;
     close.focus({ preventScroll: true });
   });
@@ -4612,6 +4665,12 @@ function initCardMinimap() {
   close.addEventListener('click', () => hide(true));
   panel.addEventListener('keydown', event => {
     if (event.key === 'Escape') { event.preventDefault(); hide(true); }
+    if (event.key === 'Tab') {
+      const controls = Array.from(panel.querySelectorAll('button, summary')).filter(node => node.getClientRects().length);
+      const first = controls[0], last = controls[controls.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus({ preventScroll: true }); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus({ preventScroll: true }); }
+    }
   });
   // Only page changes close the outline. Selection/locks never rebuild it or cards.
   new MutationObserver(() => hide()).observe(area, { childList: true });

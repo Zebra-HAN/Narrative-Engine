@@ -28,11 +28,11 @@ const { chromium } = require('playwright');
    // Use the actual renderer with synthetic edge-case data; do not edit persisted data.
    await page.evaluate(()=>{CARD_DATA.minimapFixture=[{name:'동일 이름'},{type:'section',label:'테스트 섹션'},...Array.from({length:250},(_,i)=>({name:i===0?'긴이름'.repeat(120):'동일 이름'}))];showCardPage('minimapFixture',false)});
    await page.locator('#card-minimap-toggle').click();
-   assert.deepEqual(await page.locator('#card-minimap summary').allTextContents(),['테스트 섹션 — 250','미분류 — 1']);
-   await page.locator('#card-minimap summary').first().click();
+   assert.deepEqual(await page.locator('#card-minimap summary').allTextContents(),['미분류 — 1','테스트 섹션 — 250']);
+   await page.locator('#card-minimap-expand').click();
    const geometry=await page.evaluate(()=>{const p=document.getElementById('card-minimap');const c=document.getElementById('card-minimap-content');const r=p.getBoundingClientRect();const b=document.getElementById('create-chrome-bottom').getBoundingClientRect();return {top:r.top,bottom:r.bottom,right:r.right,height:r.height,bottomUI:b.height,overflow:c.scrollWidth>c.clientWidth,scrollable:c.scrollHeight>c.clientHeight};});
    assert(geometry.top>=0&&geometry.right<=viewport.width&&geometry.height>44);
-   assert(geometry.bottom<=viewport.height-geometry.bottomUI);
+   assert.equal(geometry.top,18);assert.equal(geometry.bottom,viewport.height-18);
    assert(!geometry.overflow);assert(geometry.scrollable);
    await page.locator('#card-minimap-content').evaluate(n=>n.scrollTop=1000);
    assert(await page.locator('#card-minimap-content').evaluate(n=>n.scrollTop>0));
