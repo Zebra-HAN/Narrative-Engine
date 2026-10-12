@@ -3320,7 +3320,7 @@ body {
   flex: 0 0 var(--card-action-size, 110px);
   width: var(--card-action-size, 110px);
   height: var(--card-action-size, 110px);
-  padding: calc(var(--card-action-size, 110px) * .2);
+  padding: 2px;
   border: 1px solid #a98651;
   border-radius: 9px;
   background: linear-gradient(#fffdf3, #f2e6c8);
@@ -3603,3 +3603,11 @@ body {
 #screen-create.card-controls-mode .control-bar { justify-content: flex-end; }
 
 .address-path-separator { flex-shrink: 0; opacity: .5; line-height: 1; }
+
+/* Card actions share the scrolling page coordinate system. */
+#screen-create .card-edge-actions { transform: none; transition: none; will-change: auto; }
+#screen-create .card-edge-actions.is-suspended { display: none; }
+#screen-create .card-edge-button:active,
+#screen-create .card-edge-button.is-pressing { filter: none; }
+
+#screen-create .card-edge-actions { clip-path: inset(0 -8px -8px -8px); }

@@ -2636,6 +2636,7 @@ function subgroupCardDblClick(subId, groupIdx, sgIdx, idx) {
   if (selectedCards[subId].has(globalIdx)) {
     if (isCardLocked(subId, globalIdx)) return;
     selectedCards[subId].delete(globalIdx);
+    clearCardDetailSelection(subId, globalIdx);
   } else {
     selectedCards[subId].add(globalIdx);
   }
@@ -2773,6 +2774,7 @@ function groupCardDblClick(subId, groupIdx, idx) {
   if (selectedCards[subId].has(globalIdx)) {
     if (isCardLocked(subId, globalIdx)) return;
     selectedCards[subId].delete(globalIdx);
+    clearCardDetailSelection(subId, globalIdx);
   } else {
     selectedCards[subId].add(globalIdx);
   }
@@ -2933,45 +2935,25 @@ function positionCardEdgeActions({ ensureVisible = false } = {}) {
   const page = card?.closest('.center-page[data-chrome-view="cards"]');
   const group = cardEdgeActions?.group;
   if (!page || !group) return;
-  const screen = document.getElementById('screen-create');
-  const screenRect = screen.getBoundingClientRect();
-  const pageRect = page.getBoundingClientRect();
-  let cardRect = card.getBoundingClientRect();
-  const gap = Math.min(6, cardRect.width / 12);
-  const size = Math.min(110, (cardRect.width - gap) / 2);
-  const width = size * 2 + gap;
+  if (group.parentElement !== page) page.appendChild(group);
+  const size = Math.min(110, (card.offsetWidth - Math.min(6, card.offsetWidth / 12)) / 2);
+  const gap = Math.min(6, card.offsetWidth / 12);
   group.style.setProperty('--card-action-size', `${size}px`);
   group.style.gap = `${gap}px`;
-  group.style.width = `${width}px`;
-  const safeBottom = parseFloat(getComputedStyle(group).getPropertyValue('--action-safe-bottom')) || 0;
-  const chromeRect = document.getElementById('create-chrome-bottom').getBoundingClientRect();
-  const dock = document.getElementById('card-controls-dock');
-  const dockTop = dock && !dock.hidden ? dock.getBoundingClientRect().top - 4 : screenRect.bottom;
-  const bottom = Math.min(pageRect.bottom, screenRect.bottom - safeBottom - 8, chromeRect.top, dockTop);
-  // Reserve the unpressed footprint: the existing touch scale may still be
-  // returning to normal when the click arrives.
-  const cardStyle = getComputedStyle(card);
-  const fullWidth = parseFloat(cardStyle.width) || cardRect.width;
-  const fullHeight = parseFloat(cardStyle.height) || cardRect.height;
-  const fullSize = Math.min(110, (fullWidth - gap) / 2);
-  const reservedBottom = (cardRect.top + cardRect.bottom + fullHeight) / 2 + 6 + fullSize;
-  if (ensureVisible && reservedBottom > bottom) {
-    page.scrollTop += reservedBottom - bottom;
-    cardRect = card.getBoundingClientRect();
+  group.style.width = `${size * 2 + gap}px`;
+  const pageRect = page.getBoundingClientRect();
+  let left = 0, top = 0;
+  for (let node = card; node && node !== page; node = node.offsetParent) {
+    left += node.offsetLeft;
+    top += node.offsetTop;
   }
-  // Existing bottom padding normally supplies the needed space. Clamp only if
-  // an exceptionally short viewport has no further scroll room.
-  const placedTop = Math.max(pageRect.top, Math.min(cardRect.bottom + 6, bottom - size));
-  const placedLeft = Math.max(pageRect.left, Math.min(cardRect.left + (cardRect.width - width) / 2, pageRect.right - width));
-  group.style.left = `${placedLeft - screenRect.left}px`;
-  group.style.top = `${placedTop - screenRect.top}px`;
-  const visible = cardRect.bottom > pageRect.top && cardRect.top < bottom;
-  group.classList.toggle('is-offscreen', !visible);
-  group.inert = !visible || !focusedCard;
-  // Follow only the focused card's existing press/reveal animation, then stop.
-  if (card.getAnimations().some(animation => animation.playState === 'running'
-      && (animation.transitionProperty === 'transform' || animation.animationName === 'cardFlip'))) {
-    requestCardEdgePosition();
+  group.style.left = `${left}px`;
+  group.style.top = `${top + card.offsetHeight + 6}px`;
+  if (ensureVisible) {
+    const dock = document.getElementById('card-controls-dock');
+    const bottom = Math.min(pageRect.bottom, dock.hidden ? pageRect.bottom : dock.getBoundingClientRect().top - 4);
+    const overflow = group.getBoundingClientRect().bottom - bottom;
+    if (overflow > 0) page.scrollTop += overflow;
   }
 }
 
@@ -3005,7 +2987,6 @@ function updateCardEdgeActions({ immediate = false } = {}) {
       lock: makeButton('card-info-lock', toggleCurrentCardLock),
       select: makeButton('card-info-select', selectCurrentCard) };
     const area = document.getElementById('center-area');
-    area.addEventListener('scroll', requestCardEdgePosition, { capture: true, passive: true });
     area.addEventListener('load', requestCardEdgePosition, true);
     area.addEventListener('animationend', requestCardEdgePosition, true);
     area.addEventListener('transitionend', requestCardEdgePosition, true);
@@ -3020,7 +3001,9 @@ function updateCardEdgeActions({ immediate = false } = {}) {
   const selected = active && Boolean(selectedCards[focusedCard.subId]?.has(focusedCard.idx));
   const locked = active && isCardLocked(focusedCard.subId, focusedCard.idx);
   const { group, select, lock, observer } = cardEdgeActions;
-  if (cardEdgeActions.card !== cardEl) {
+  if (active && cardEdgeActions.card !== cardEl) {
+    if (group.classList.contains('is-visible')) retireCardActions(group.cloneNode(true));
+    group.classList.remove('is-visible');
     observer.disconnect();
     if (cardEl) observer.observe(cardEl);
     cardEdgeActions.card = cardEl;
@@ -3029,7 +3012,7 @@ function updateCardEdgeActions({ immediate = false } = {}) {
   select.setAttribute('aria-pressed', String(Boolean(selected)));
   select.setAttribute('aria-label', selected ? '선택 취소' : '선택');
   select.title = locked ? '잠금을 해제한 뒤 선택을 취소할 수 있습니다.' : '';
-  setCardActionImage(select, `images/core/buttons/${selected ? 'cancel' : 'check'}.webp`, selected
+  setCardActionImage(select, `images/core/buttons/${selected ? 'close' : 'select'}.webp`, selected
     ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>'
     : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 12 5 5L20 6"/></svg>');
   lock.disabled = !selected;
@@ -3040,34 +3023,40 @@ function updateCardEdgeActions({ immediate = false } = {}) {
   setCardEdgeVisibility(group, active, immediate);
 }
 
+function retireCardActions(group) {
+  if (!group.parentElement) cardEdgeActions.group.parentElement.appendChild(group);
+  group.inert = true;
+  group.setAttribute('aria-hidden', 'true');
+  group.style.pointerEvents = 'none';
+  const animations = [...group.children].map(button => button.animate([
+    { transform: 'translateY(0)', opacity: 1 },
+    { transform: 'translateY(-100%)', opacity: 0 }
+  ], { duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 160, easing: 'ease-in', fill: 'forwards' }));
+  Promise.all(animations.map(animation => animation.finished)).then(() => group.remove());
+}
+
 function setCardEdgeVisibility(group, visible, immediate) {
-  clearTimeout(group._exitTimer);
-  group._finishExit?.();
-  group._finishExit = null;
   group.setAttribute('aria-hidden', String(!visible));
-  group.inert = !visible || group.classList.contains('is-offscreen');
-  if (visible) {
-    if (group.classList.contains('is-visible')) return;
-    group.classList.remove('is-suspended');
-    // Establish the offscreen state only on entry, never when changing cards.
-    void group.offsetWidth;
-    group.classList.add('is-visible');
-    return;
-  }
-  group.classList.remove('is-visible');
-  if (immediate || group.classList.contains('is-suspended')) {
+  group.inert = !visible;
+  if (!visible) {
+    if (!immediate && group.classList.contains('is-visible')) retireCardActions(group.cloneNode(true));
+    group.classList.remove('is-visible');
     group.classList.add('is-suspended');
     return;
   }
-  const finish = () => {
-    group.removeEventListener('transitionend', onEnd);
-    if (!group.classList.contains('is-visible')) group.classList.add('is-suspended');
-    group._finishExit = null;
-  };
-  const onEnd = event => { if (event.target === group && event.propertyName === 'transform') finish(); };
-  group._finishExit = () => group.removeEventListener('transitionend', onEnd);
-  group.addEventListener('transitionend', onEnd);
-  group._exitTimer = setTimeout(finish, 300);
+  if (group.classList.contains('is-visible')) return;
+  group.classList.remove('is-suspended');
+  group.classList.add('is-visible');
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  [...group.children].forEach((button, index) => {
+    button.animate([
+      { transform: 'translateY(-100%)', opacity: 0 },
+      { transform: 'translateY(5px)', opacity: 1, offset: .5 },
+      { transform: 'translateY(-4px)', offset: .72 },
+      { transform: 'translateY(2px)', offset: .88 },
+      { transform: 'translateY(0)', opacity: 1 }
+    ], { duration: 320, delay: index === 0 ? 35 : 0, easing: 'ease-out' });
+  });
 }
 
 function closeCardInfo() {
@@ -3130,17 +3119,21 @@ function positionCardInfo(panel, cardEl) {
 
   const pageRect = page.getBoundingClientRect();
   const cardRect = cardEl.getBoundingClientRect();
-  const isFirstRow = cardEl.classList.contains('first-row-card');
   const panelWidth = Math.min(440, page.clientWidth - 24);
   panel.style.width = `${panelWidth}px`;
 
   const centeredLeft = cardRect.left - pageRect.left + page.scrollLeft
     + (cardRect.width - panelWidth) / 2;
   const left = Math.max(12, Math.min(centeredLeft, page.scrollWidth - panelWidth - 12));
-  const top = isFirstRow
-    ? cardRect.bottom - pageRect.top + page.scrollTop + (cardEdgeActions?.group.offsetHeight || 0) + 16
-    : cardRect.top - pageRect.top + page.scrollTop - panel.offsetHeight - 10;
-  panel.classList.toggle('is-below-card', isFirstRow);
+  const cardTop = cardRect.top - pageRect.top + page.scrollTop;
+  const available = Math.max(40, cardTop - 14);
+  if (panel.offsetHeight > available) {
+    panel.style.minHeight = '0';
+    const copy = panel.querySelector('.card-info-copy');
+    copy.style.maxHeight = `${Math.max(10, available - 33)}px`;
+    copy.style.overflowY = 'auto';
+  }
+  const top = cardTop - panel.offsetHeight - 10;
   panel.style.left = `${left}px`;
   panel.style.top = `${Math.max(4, top)}px`;
   panel.style.setProperty('--card-anchor-x', `${Math.max(18, Math.min(panelWidth - 18, cardRect.left - pageRect.left + page.scrollLeft + cardRect.width / 2 - left))}px`);
@@ -3361,11 +3354,35 @@ function toggleCurrentCardLock() {
   refreshCardInfo();
 }
 
+function clearCardDetailSelection(subId, idx) {
+  const key = `${subId}__${idx}`;
+  delete selectedDetails[key];
+  delete selectedSubImages[key];
+  document.querySelectorAll('#detail-body [onclick]').forEach(block => {
+    if (block.getAttribute('onclick').includes(`('${subId}', ${idx},`) || block.getAttribute('onclick').includes(`('${subId}', ${idx})`)) {
+      block.classList.remove('checked');
+      block.setAttribute('aria-pressed', 'false');
+    }
+  });
+}
+
+function clearDeselectedDetails(subId) {
+  const prefix = `${subId}__`;
+  new Set([...Object.keys(selectedDetails), ...Object.keys(selectedSubImages)])
+    .forEach(key => {
+      if (key.startsWith(prefix)) {
+        const idx = Number(key.slice(prefix.length));
+        if (!selectedCards[subId]?.has(idx)) clearCardDetailSelection(subId, idx);
+      }
+    });
+}
+
 function toggleCardSelect(subId, idx) {
   if (!selectedCards[subId]) selectedCards[subId] = new Set();
   if (selectedCards[subId].has(idx)) {
     if (isCardLocked(subId, idx)) return;
     selectedCards[subId].delete(idx);
+    clearCardDetailSelection(subId, idx);
   } else {
     selectedCards[subId].add(idx);
   }
@@ -4026,17 +4043,8 @@ async function partialReset() {
     } else {
       delete selectedCards[sub.id];
     }
-    // 해당 서브의 세부정보와 서브 이미지 선택도 초기화
-    Object.keys(selectedDetails).forEach(key => {
-      if (key.startsWith(sub.id + '__') && !locks?.has(Number(key.slice((sub.id + '__').length)))) {
-        delete selectedDetails[key];
-      }
-    });
-     Object.keys(selectedSubImages).forEach(key => {
-      if (key.startsWith(sub.id + '__') && !locks?.has(Number(key.slice((sub.id + '__').length)))) {
-        delete selectedSubImages[key];
-      }
-    });
+    clearDeselectedDetails(sub.id);
+
   });
   if (currentSubId) showCardPage(currentSubId, false);
   renderSubnav(currentNav, false);
@@ -4055,6 +4063,10 @@ async function fullReset() {
   UI_SOUND.play('delete');
   selectedCards = {};
   lockedCards = {};
+  Object.keys(selectedDetails).concat(Object.keys(selectedSubImages)).forEach(key => {
+    const [subId, idx] = key.split('__');
+    clearCardDetailSelection(subId, Number(idx));
+  });
   selectedDetails = {};
    selectedSubImages = {};
   if (currentSubId) showCardPage(currentSubId, false);
@@ -4379,6 +4391,7 @@ async function randomSelectCurrent() {
 
   selectedCards[currentSubId] = new Set(lockedCards[currentSubId] || []);
   selectedCards[currentSubId].add(pick.globalIdx);
+  clearDeselectedDetails(currentSubId);
 
   // UI 갱신
   showCardPage(currentSubId, false);
@@ -4421,6 +4434,7 @@ subs.forEach(sub => {
   const pick = allCards[Math.floor(Math.random() * allCards.length)];
   selectedCards[sub.id] = new Set(lockedCards[sub.id] || []);
   selectedCards[sub.id].add(pick.globalIdx);
+  clearDeselectedDetails(sub.id);
 });
    
 
