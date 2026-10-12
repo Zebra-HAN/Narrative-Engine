@@ -11,6 +11,8 @@ const { chromium } = require('playwright');
  await page.waitForTimeout(1800);
  assert.equal(await page.locator('.card-edge-actions.is-visible').count(),0);
  const card=page.locator('.center-page.active .data-card');
+ // The scrolling title now precedes cards; position the tested card before measuring click stability.
+ await card.nth(0).scrollIntoViewIfNeeded();
  const scrollBefore=await page.locator('.center-page.active[data-chrome-view]').evaluate(n=>n.scrollTop);
  await card.nth(0).click();
  const entryMotion=await page.locator('.card-edge-right').evaluate(n=>n.getAnimations().some(a=>a.transitionProperty==='transform'));

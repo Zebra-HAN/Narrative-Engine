@@ -3432,3 +3432,63 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .card-minimap-toggle { transition: none; }
 }
+
+
+/* Scrolling title frame: replace these three layers independently with artwork. */
+.page-title-card {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  width: min(100%, 620px);
+  box-sizing: border-box;
+  margin: 0 auto 18px;
+  padding: 18px;
+  border: 3px solid #725032;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #fff9e8, #eee1bb);
+  box-shadow: inset 0 0 0 1px #bca06b, 0 3px 8px #0003;
+  color: #48351f;
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: pan-y;
+  transition: transform 100ms ease-out;
+}
+.page-title-card * { -webkit-tap-highlight-color: transparent; }
+.page-title-media {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(180px, 100%);
+  height: 180px;
+  min-width: 0;
+}
+.page-title-image {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 6px;
+}
+.page-title-icon { font-size: 72px; line-height: 1.2; }
+.page-title-copy { display: grid; gap: 10px; min-width: 0; width: 100%; }
+.page-title-heading { color: #315339; font-weight: 800; font-size: 22px; overflow-wrap: anywhere; }
+.page-title-description { font-size: 14px; line-height: 1.6; overflow-wrap: anywhere; white-space: pre-line; }
+.page-title-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 12px; }
+.page-title-hint { color: #6c634f; }
+.page-title-count { border: 1px solid #bca06b; border-radius: 20px; padding: 3px 8px; color: #315339; }
+.page-title-card[data-image-layout="landscape"] .page-title-media { width: min(240px, 100%); height: 180px; }
+.page-title-card[data-image-layout="wide"] .page-title-media { width: min(480px, 100%); height: 190px; }
+.page-title-card[data-image-layout="portrait"] { grid-template-columns: minmax(0, 32%) minmax(0, 1fr); text-align: left; }
+.page-title-card[data-image-layout="portrait"] .page-title-media { width: 100%; height: 220px; }
+.page-title-card:focus-visible { outline: 2px solid #2f8f4e; outline-offset: -5px; }
+@media (max-width: 360px) {
+  .page-title-card { padding: 12px; gap: 10px; }
+  .page-title-heading { font-size: 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-title-card { transition: none; }
+}

@@ -2497,6 +2497,7 @@ function showSubgroupCards(subId, groupIdx, sgIdx) {
   const sg = grp.subgroups[sgIdx];
   if (!sg) return;
   preloadCards(sg.cards);
+  const titleCard = createPageTitleCard(sg);
 
   document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
 
@@ -2538,6 +2539,7 @@ function showSubgroupCards(subId, groupIdx, sgIdx) {
   html += '</div>';
 
   page.innerHTML = html;
+  page.prepend(titleCard);
   markFirstCardRow(page);
   setupCardRevealAnimations(page);
   area.appendChild(page);
@@ -2631,6 +2633,7 @@ function showGroupCards(subId, groupIdx) {
   const grp = data.groups[groupIdx];
   if (!grp) return;
   preloadCards(grp.cards);
+  const titleCard = createPageTitleCard(grp);
   void applyCreativeBackground({ navId: currentNav, stage: 'card', screenKey: `group-cards:${subId}:${groupIdx}` });
 
   document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
@@ -2673,6 +2676,7 @@ function showGroupCards(subId, groupIdx) {
   });
   html += '</div>';
   page.innerHTML = html;
+  page.prepend(titleCard);
   markFirstCardRow(page);
   setupCardRevealAnimations(page);
   area.appendChild(page);
@@ -3056,16 +3060,19 @@ function refreshCardInfo() {
 
 // 가장 깊은 현재 위치를 표시하고, 설명이 비어 있을 때만 상위 설명을 사용한다.
 // 카드/focusedCard와 무관한 NAV → 카테고리 → 그룹 → 서브그룹 경로이다.
-function getInfoPanelContext() {
+function getInfoPanelContext(includeTitleGroup = false) {
   const nav = NAV_DATA[currentNav];
   const sub = currentSubId ? getSubInfo(currentSubId) : null;
   const items = [nav, sub].filter(Boolean);
   const location = addressTrail[addressTrail.length - 1];
   // 랜덤/초기화가 카테고리 목록을 다시 그려도 이전 그룹 경로를 설명하지 않는다.
-  const activePage = document.querySelector('#center-area .center-page.active');
+  const activePage = document.querySelector('#center-area .center-page.active[data-chrome-view]')
+    || document.querySelector('#center-area .center-page.active');
   const isCategoryPage = sub && activePage?.id === `page-${sub.id}`;
   let group = null;
-  if (sub && !isCategoryPage && location?.subId === currentSubId) {
+  // Group information now lives in its scrolling title; fixed chrome keeps the category context.
+  const hasTitleCard = Boolean(activePage?.querySelector('.page-title-card'));
+  if (sub && !isCategoryPage && (!hasTitleCard || includeTitleGroup) && location?.subId === currentSubId) {
     group = CARD_DATA[currentSubId]?.groups?.[location.groupIdx];
     if (group) items.push(group);
     if (location.type === 'subgroup') {
@@ -3140,8 +3147,8 @@ function initInfoPanelAction() {
 }
 
 // 표시와 닫기 동작만 공유하고 카드 선택 데이터는 읽거나 변경하지 않는다.
-function openLocationInfo() {
-  const { item, description, detail } = getInfoPanelContext();
+function openLocationInfo(context = getInfoPanelContext()) {
+  const { item, description, detail } = context;
   if (!item) return;
   const image = item === NAV_DATA[currentNav] ? MAIN_CATEGORY_IMAGE[currentNav] : item.img;
   const icon = item.icon || MAIN_CATEGORY_INFO[currentNav]?.icon;
@@ -4609,4 +4616,85 @@ function initCardMinimap() {
   // Only page changes close the outline. Selection/locks never rebuild it or cards.
   new MutationObserver(() => hide()).observe(area, { childList: true });
   hide();
+}
+
+
+/* A scrolling group introduction, separate from selectable cards and section data.
+   Frame, media and copy are independent hooks for later artwork replacements. */
+function createPageTitleCard(group) {
+  const frame = document.createElement('button');
+  frame.type = 'button';
+  frame.className = 'page-title-card pressable';
+  frame.dataset.imageLayout = 'square';
+  frame.setAttribute('aria-label', `${group.label || ''} 상세 정보 보기`);
+  const media = document.createElement('span');
+  media.className = 'page-title-media';
+  const fallback = () => {
+    const icon = document.createElement('span');
+    icon.className = 'page-title-icon';
+    icon.textContent = group.icon || '◆';
+    media.replaceChildren(icon);
+    frame.dataset.imageLayout = 'square';
+  };
+  fallback();
+  if (group.img) {
+    const image = new Image();
+    image.alt = '';
+    image.draggable = false;
+    image.decoding = 'async';
+    image.className = 'page-title-image';
+    const classify = source => {
+      if (!source.naturalWidth || !source.naturalHeight) return;
+      const ratio = source.naturalWidth / source.naturalHeight;
+      frame.dataset.imageLayout = ratio < 0.9 ? 'portrait'
+        : ratio > 1.6 ? 'wide' : ratio > 1.1 ? 'landscape' : 'square';
+    };
+    // Reuse already displayed group-image metadata before its page is removed.
+    const sourceURL = new URL(group.img, document.baseURI).href;
+    const prepared = Array.from(document.images).find(img => img.src === sourceURL && img.naturalWidth);
+    if (prepared) classify(prepared);
+    image.addEventListener('load', () => {
+      classify(image);
+      image.classList.add('image-ready');
+      media.replaceChildren(image);
+    }, { once: true });
+    image.addEventListener('error', fallback, { once: true });
+    image.src = group.img;
+    if (image.complete && image.naturalWidth) {
+      classify(image);
+      image.classList.add('image-ready');
+      media.replaceChildren(image);
+    }
+  }
+  const copy = document.createElement('span');
+  copy.className = 'page-title-copy';
+  const title = document.createElement('span');
+  title.className = 'page-title-heading';
+  title.textContent = group.label || '';
+  copy.appendChild(title);
+  if (group.description?.trim()) {
+    const description = document.createElement('span');
+    description.className = 'page-title-description';
+    description.textContent = group.description;
+    copy.appendChild(description);
+  }
+  const footer = document.createElement('span');
+  footer.className = 'page-title-footer';
+  const hint = document.createElement('span');
+  hint.className = 'page-title-hint';
+  hint.textContent = '터치하여 상세 정보 보기';
+  const count = document.createElement('span');
+  count.className = 'page-title-count';
+  count.textContent = `${(group.cards || []).filter(card => !isSectionItem(card)).length}개 카드`;
+  footer.append(hint, count);
+  copy.appendChild(footer);
+  frame.append(media, copy);
+  frame.addEventListener('click', () => {
+    const parent = getInfoPanelContext(true);
+    closeCardInfo();
+    openLocationInfo({ item: group,
+      description: group.description?.trim() ? group.description : parent.description,
+      detail: group.detail?.trim() ? group.detail : parent.detail });
+  });
+  return frame;
 }
