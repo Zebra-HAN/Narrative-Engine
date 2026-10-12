@@ -3438,11 +3438,11 @@ body {
 .page-title-card {
   display: grid;
   justify-items: center;
-  gap: 12px;
+  gap: 2px;
   width: min(100%, 620px);
   box-sizing: border-box;
   margin: 0 auto 18px;
-  padding: 18px;
+  padding: 5px 12px;
   border: 3px solid #725032;
   border-radius: 12px;
   background: linear-gradient(135deg, #fff9e8, #eee1bb);
@@ -3460,8 +3460,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: min(180px, 100%);
-  height: 180px;
+  width: min(66px, 100%);
+  height: 66px;
   min-width: 0;
 }
 .page-title-image {
@@ -3473,22 +3473,48 @@ body {
   object-fit: contain;
   border-radius: 6px;
 }
-.page-title-icon { font-size: 72px; line-height: 1.2; }
-.page-title-copy { display: grid; gap: 10px; min-width: 0; width: 100%; }
+.page-title-icon { font-size: 40px; line-height: 1.2; }
+.page-title-copy { display: grid; gap: 2px; min-width: 0; width: 100%; }
 .page-title-heading { color: #315339; font-weight: 800; font-size: 22px; overflow-wrap: anywhere; }
-.page-title-description { font-size: 14px; line-height: 1.6; overflow-wrap: anywhere; white-space: pre-line; }
-.page-title-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 12px; }
+.page-title-description { font-size: 14px; line-height: 1.4; overflow-wrap: anywhere; white-space: pre-line; }
+.page-title-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px; font-size: 12px; }
 .page-title-hint { color: #6c634f; }
-.page-title-count { border: 1px solid #bca06b; border-radius: 20px; padding: 3px 8px; color: #315339; }
-.page-title-card[data-image-layout="landscape"] .page-title-media { width: min(240px, 100%); height: 180px; }
-.page-title-card[data-image-layout="wide"] .page-title-media { width: min(480px, 100%); height: 190px; }
-.page-title-card[data-image-layout="portrait"] { grid-template-columns: minmax(0, 32%) minmax(0, 1fr); text-align: left; }
-.page-title-card[data-image-layout="portrait"] .page-title-media { width: 100%; height: 220px; }
+.page-title-count { border: 1px solid #bca06b; border-radius: 20px; padding: 1px 6px; color: #315339; }
+.page-title-card[data-image-layout="landscape"] .page-title-media { width: min(88px, 100%); height: 66px; }
+.page-title-card[data-image-layout="wide"] .page-title-media { width: min(240px, 100%); height: 70px; }
+.page-title-card[data-image-layout="portrait"] { grid-template-columns: minmax(0, 32%) minmax(0, 1fr); grid-template-areas: "path path" "heading heading" "media description" "media footer"; text-align: left; }
+.page-title-card[data-image-layout="portrait"] .page-title-media { width: 100%; height: 80px; }
 .page-title-card:focus-visible { outline: 2px solid #2f8f4e; outline-offset: -5px; }
 @media (max-width: 360px) {
-  .page-title-card { padding: 12px; gap: 10px; }
+  .page-title-card { padding: 5px 10px; gap: 2px; }
   .page-title-heading { font-size: 20px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .page-title-card { transition: none; }
 }
+
+.page-title-path {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-width: 100%;
+  color: #7b7566;
+  font-size: 10px;
+  line-height: 1.3;
+  text-align: right;
+}
+.page-title-path-item { display: inline-flex; align-items: center; gap: 3px; min-width: 0; overflow-wrap: anywhere; }
+.page-title-path-icon { display: inline-flex; align-items: center; justify-content: center; width: 13px; height: 13px; flex: 0 0 13px; }
+.page-title-path-icon .info-icon-img { width: 100%; height: 100%; object-fit: contain; }
+.page-title-path-icon .info-icon-text { font-size: 12px; line-height: 1; }
+.page-title-path-separator { opacity: .45; font-weight: 400; }
+.page-title-heading { text-align: center; }
+.page-title-card[data-image-layout="portrait"] .page-title-path { grid-area: path; }
+.page-title-card[data-image-layout="portrait"] .page-title-copy { display: contents; }
+.page-title-card[data-image-layout="portrait"] .page-title-heading { grid-area: heading; width: 100%; }
+.page-title-card[data-image-layout="portrait"] .page-title-media { grid-area: media; align-self: center; }
+.page-title-card[data-image-layout="portrait"] .page-title-description { grid-area: description; align-self: end; }
+.page-title-card[data-image-layout="portrait"] .page-title-footer { grid-area: footer; align-self: start; }

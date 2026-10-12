@@ -2497,7 +2497,7 @@ function showSubgroupCards(subId, groupIdx, sgIdx) {
   const sg = grp.subgroups[sgIdx];
   if (!sg) return;
   preloadCards(sg.cards);
-  const titleCard = createPageTitleCard(sg);
+  const titleCard = createPageTitleCard(sg, subId);
 
   document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
 
@@ -2633,7 +2633,7 @@ function showGroupCards(subId, groupIdx) {
   const grp = data.groups[groupIdx];
   if (!grp) return;
   preloadCards(grp.cards);
-  const titleCard = createPageTitleCard(grp);
+  const titleCard = createPageTitleCard(grp, subId);
   void applyCreativeBackground({ navId: currentNav, stage: 'card', screenKey: `group-cards:${subId}:${groupIdx}` });
 
   document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
@@ -4621,7 +4621,7 @@ function initCardMinimap() {
 
 /* A scrolling group introduction, separate from selectable cards and section data.
    Frame, media and copy are independent hooks for later artwork replacements. */
-function createPageTitleCard(group) {
+function createPageTitleCard(group, subId) {
   const frame = document.createElement('button');
   frame.type = 'button';
   frame.className = 'page-title-card pressable';
@@ -4688,6 +4688,8 @@ function createPageTitleCard(group) {
   count.textContent = `${(group.cards || []).filter(card => !isSectionItem(card)).length}개 카드`;
   footer.append(hint, count);
   copy.appendChild(footer);
+  const path = createPageTitlePath(subId);
+  if (path) frame.appendChild(path);
   frame.append(media, copy);
   frame.addEventListener('click', () => {
     const parent = getInfoPanelContext(true);
@@ -4697,4 +4699,34 @@ function createPageTitleCard(group) {
       detail: group.detail?.trim() ? group.detail : parent.detail });
   });
   return frame;
+}
+
+
+/* Resolve ownership from the existing NAV category IDs, independent of currentNav. */
+function createPageTitlePath(subId) {
+  const owner = Object.entries(NAV_DATA).find(([, nav]) => nav.subs.some(sub => sub.id === subId));
+  if (!owner) return null;
+  const [navId, nav] = owner;
+  const sub = nav.subs.find(item => item.id === subId);
+  const path = document.createElement('span');
+  path.className = 'page-title-path';
+  const item = (label, image, icon) => {
+    const entry = document.createElement('span');
+    entry.className = 'page-title-path-item';
+    const visual = document.createElement('span');
+    visual.className = 'page-title-path-icon';
+    visual.setAttribute('aria-hidden', 'true');
+    setInfoVisual(visual, image, icon);
+    const name = document.createElement('span');
+    name.textContent = label;
+    entry.append(visual, name);
+    return entry;
+  };
+  const separator = document.createElement('span');
+  separator.className = 'page-title-path-separator';
+  separator.setAttribute('aria-hidden', 'true');
+  separator.textContent = '|';
+  path.append(item(nav.label, MAIN_CATEGORY_IMAGE[navId], MAIN_CATEGORY_INFO[navId]?.icon),
+    separator, item(sub.label, sub.img, sub.icon));
+  return path;
 }
