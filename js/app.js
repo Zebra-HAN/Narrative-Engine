@@ -976,6 +976,7 @@ function renderAddressTrail() {
     const tag = document.createElement('button');
     tag.type = 'button';
     tag.className = 'address-tag';
+    tag.dataset.pathType = item.type;
     const cardMode = document.getElementById('screen-create').classList.contains('card-controls-mode');
     const navId = item.navId || currentNav;
     const meta = item.type === 'nav' ? NAV_DATA[navId] : item.type === 'sub' ? getSubInfo(item.subId) : null;
@@ -993,13 +994,6 @@ function renderAddressTrail() {
     tag.title = item.label;
     tag.setAttribute('aria-label', `${item.label} 위치로 이동`);
     tag.addEventListener('click', () => navigateAddressTag(index));
-    if (cardMode && index > 0) {
-      const separator = document.createElement('span');
-      separator.className = 'address-path-separator';
-      separator.textContent = '|';
-      separator.setAttribute('aria-hidden', 'true');
-      address.appendChild(separator);
-    }
     address.appendChild(tag);
   });
 
@@ -4897,7 +4891,6 @@ function initCardMinimap() {
       section.append(heading, tags(group.cards));
       content.appendChild(section);
     });
-    toggle.hidden = true;
     toggle.setAttribute('aria-expanded', 'true');
     overlay.hidden = false;
     panel.hidden = false;

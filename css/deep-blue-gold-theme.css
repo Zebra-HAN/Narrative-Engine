@@ -104,3 +104,33 @@
 .status-header { background: linear-gradient(150deg, #294568, #192d49); }
 
 .card-minimap-tag { background: #f2ebdd; color: #20252d; border-color: #c8b58e; box-shadow: inset 0 1px #fff9ee; }
+
+/* The moving image panel covers the stationary dock; its slot passes hits
+   through wherever the actual panel has already moved out of the way. */
+#screen-create.card-controls-mode .create-chrome-slot-bottom { bottom: 0; z-index: 50; }
+#screen-create.card-controls-mode .create-chrome-bottom { pointer-events: auto; }
+#screen-create .card-controls-dock .ctrl-address { height: 42px; padding: 1px; gap: 1px; }
+#screen-create .card-controls-dock .address-tag {
+  height: 38px;
+  box-sizing: border-box;
+  padding: 0 2px;
+  gap: 1px;
+  font-size: 0.64rem;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+#screen-create .card-controls-dock .address-tag[data-path-type="sub"] { font-size: 0.70rem; font-weight: 600; }
+#screen-create .card-controls-dock .address-tag[data-path-type="nav"] { padding-left: 0; }
+#screen-create .address-tag[data-path-type="nav"] .address-path-icon { flex-basis: 34px; width: 34px; height: 34px; }
+#screen-create .address-tag[data-path-type="sub"] .address-path-icon { flex-basis: 30px; width: 30px; height: 30px; }
+
+/* Preserve the three popup designs while adjusting their exterior bounds. */
+.detail-overlay, .status-overlay, .card-minimap-overlay {
+  padding:
+    calc(max(18px, env(safe-area-inset-top, 0px)) + 7dvh)
+    max(2%, env(safe-area-inset-right, 0px))
+    calc(max(18px, env(safe-area-inset-bottom, 0px)) + 9dvh)
+    max(2%, env(safe-area-inset-left, 0px));
+}
+.detail-overlay .popup-swipe-frame, .status-overlay .popup-swipe-frame,
+.card-minimap-overlay .popup-swipe-frame, .detail-sheet, .status-panel { max-width: calc(600px + 6vw); }
