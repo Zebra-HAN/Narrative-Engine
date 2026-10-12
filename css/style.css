@@ -3635,4 +3635,4 @@ body {
 #screen-create .card-edge-button:active,
 #screen-create .card-edge-button.is-pressing { filter: none; }
 
-#screen-create .card-edge-actions { clip-path: inset(0 -8px -8px -8px); }
+#screen-create .card-edge-actions { clip-path: inset(-8px -8px -8px -8px); }

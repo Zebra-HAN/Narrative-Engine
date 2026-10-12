@@ -3001,9 +3001,29 @@ function positionCardEdgeActions({ ensureVisible = false, geometry = null } = {}
 function setCardActionImage(button, source, fallback) {
   if (button.dataset.actionImage === source) return;
   button.dataset.actionImage = source;
-  button.classList.remove('image-failed');
-  button.innerHTML = `<img class="card-action-icon" src="${source}" alt="" aria-hidden="true" draggable="false">${fallback}`;
-  button.querySelector('img').addEventListener('error', () => button.classList.add('image-failed'), { once: true });
+  // Keep the current artwork until the new state is decoded; replacing it with
+  // a loading/transparent img produces a flash while the button is moving.
+  const image = new Image();
+  image.className = 'card-action-icon image-ready';
+  image.alt = '';
+  image.setAttribute('aria-hidden', 'true');
+  image.draggable = false;
+  const commit = loaded => {
+    if (button.dataset.actionImage !== source) return;
+    button.classList.toggle('image-failed', !loaded);
+    button.innerHTML = fallback;
+    if (loaded) button.prepend(image);
+  };
+  image.addEventListener('load', () => {
+    // Register readiness with the shared loader too, so retiring clones do not
+    // fade the same already-decoded artwork a second time.
+    IMAGE_LOADER.load(source).then(() => {
+      if (image.decode) image.decode().then(() => commit(true), () => commit(true));
+      else commit(true);
+    });
+  }, { once: true });
+  image.addEventListener('error', () => commit(false), { once: true });
+  image.src = source;
 }
 
 function updateCardEdgeActions({ immediate = false, deferPosition = false } = {}) {
@@ -3073,15 +3093,27 @@ function updateCardEdgeActions({ immediate = false, deferPosition = false } = {}
 }
 
 function retireCardActions(group) {
+  // A cloned row must leave from the current presentation, even mid-entry.
+  const source = cardEdgeActions.group;
+  [...group.children].forEach((button, index) => {
+    const style = getComputedStyle(source.children[index]);
+    button.style.transform = style.transform;
+    button.style.opacity = style.opacity;
+  });
+  cardEdgeActions.retiring?.remove();
+  cardEdgeActions.retiring = group;
   if (!group.parentElement) cardEdgeActions.group.parentElement.appendChild(group);
   group.inert = true;
   group.setAttribute('aria-hidden', 'true');
   group.style.pointerEvents = 'none';
   const animations = [...group.children].map(button => button.animate([
-    { transform: 'translateY(0)', opacity: 1 },
-    { transform: 'translateY(-100%)', opacity: 0 }
-  ], { duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 160, easing: 'ease-in', fill: 'forwards' }));
-  Promise.all(animations.map(animation => animation.finished)).then(() => group.remove());
+    { transform: button.style.transform, opacity: button.style.opacity },
+    { transform: 'translateY(calc(-100% - 12px))', opacity: 0 }
+  ], { duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 190, easing: 'ease-in', fill: 'forwards' }));
+  Promise.allSettled(animations.map(animation => animation.finished)).then(() => {
+    group.remove();
+    if (cardEdgeActions.retiring === group) cardEdgeActions.retiring = null;
+  });
 }
 
 function setCardEdgeVisibility(group, visible, immediate) {
@@ -3089,6 +3121,11 @@ function setCardEdgeVisibility(group, visible, immediate) {
   group.inert = !visible;
   if (!visible) {
     if (!immediate && group.classList.contains('is-visible')) retireCardActions(group.cloneNode(true));
+    if (immediate) {
+      cardEdgeActions.retiring?.remove();
+      cardEdgeActions.retiring = null;
+    }
+    cardEdgeActions.animations?.forEach(animation => animation.cancel());
     group.classList.remove('is-visible');
     group.classList.add('is-suspended');
     return;
@@ -3096,15 +3133,17 @@ function setCardEdgeVisibility(group, visible, immediate) {
   if (group.classList.contains('is-visible')) return;
   group.classList.remove('is-suspended');
   group.classList.add('is-visible');
+  cardEdgeActions.animations?.forEach(animation => animation.cancel());
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  [...group.children].forEach((button, index) => {
-    button.animate([
-      { transform: 'translateY(-100%)', opacity: 0 },
+  cardEdgeActions.animations = [...group.children].map(button => {
+    return button.animate([
+      { transform: 'translateY(calc(-100% - 12px))', opacity: 0 },
       { transform: 'translateY(5px)', opacity: 1, offset: .5 },
       { transform: 'translateY(-4px)', offset: .72 },
       { transform: 'translateY(2px)', offset: .88 },
       { transform: 'translateY(0)', opacity: 1 }
-    ], { duration: 320, delay: index === 0 ? 35 : 0, easing: 'ease-out' });
+    ], { duration: 350, delay: button.classList.contains('card-info-select') ? 0 : 70,
+      easing: 'ease-out', fill: 'backwards' });
   });
 }
 
