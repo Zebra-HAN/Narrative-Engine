@@ -2604,6 +2604,7 @@ function showSubgroupCards(subId, groupIdx, sgIdx) {
         ontouchstart="startLongPress(event,this,'subgroup','${subId}',${groupIdx},${sgIdx},${idx})"
         onmouseup="cancelLongPress()" ontouchend="cancelLongPress()"
         onmouseleave="cancelLongPress()" ontouchcancel="cancelLongPress()">
+        <span class="card-highlight-frame" aria-hidden="true"></span>
         <img class="card-lock-mark" src="images/core/buttons/lock.webp" alt="잠금됨" draggable="false">
         <div class="card-img-frame ${card.img ? 'has-image' : 'has-icon'}">${renderIcon(card.icon, card.img, 'card-img')}</div>
         <div class="card-name"><span class="card-name-text">${card.name}</span></div>
@@ -2744,6 +2745,7 @@ function showGroupCards(subId, groupIdx) {
     ontouchstart="startLongPress(event,this,'group','${subId}',${groupIdx},${idx})"
     onmouseup="cancelLongPress()" ontouchend="cancelLongPress()"
     onmouseleave="cancelLongPress()" ontouchcancel="cancelLongPress()">
+        <span class="card-highlight-frame" aria-hidden="true"></span>
         <img class="card-lock-mark" src="images/core/buttons/lock.webp" alt="잠금됨" draggable="false">
         <div class="card-img-frame ${card.img ? 'has-image' : 'has-icon'}">${renderIcon(card.icon, card.img, 'card-img')}</div>
         <div class="card-name"><span class="card-name-text">${card.name}</span></div>
@@ -2893,6 +2895,7 @@ function showCardPage(subId, animate = true) {
     ontouchstart="startLongPress(event,this,'card','${subId}',${idx})"
     onmouseup="cancelLongPress()"  ontouchend="cancelLongPress()"
     onmouseleave="cancelLongPress()" ontouchcancel="cancelLongPress()">
+        <span class="card-highlight-frame" aria-hidden="true"></span>
         <img class="card-lock-mark" src="images/core/buttons/lock.webp" alt="잠금됨" draggable="false">
         <div class="card-img-frame ${card.img ? 'has-image' : 'has-icon'}">${renderIcon(card.icon, card.img, 'card-img')}</div>
         <div class="card-name"><span class="card-name-text">${card.name}</span></div>
