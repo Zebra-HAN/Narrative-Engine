@@ -85,28 +85,3 @@ Requires Playwright and Chromium (`CHROMIUM_PATH` can override the binary;
 `PERF_TEST_URL` can override http://127.0.0.1:8001).
 This is a Chromium functional/record-bounding check, not a real iPhone performance
 measurement. Actual iPhone Safari/PWA behavior still needs device validation.
-
-## Independent card-rendering comparisons (all groups)
-
-All options require `perf=1`. With no `perf=1`, the original rendering is used
-regardless of `cardFlip` or `grid3d`. Use the same deployed app URL with:
-
-- Normal app, no recorder: no query string.
-- Original rendering with recorder: `?perf=1`
-- Card entry flips off: `?perf=1&cardFlip=off`
-- Grid 3D settings off: `?perf=1&grid3d=off`
-- Both off: `?perf=1&cardFlip=off&grid3d=off`
-
-The 3D option disables grid perspective and card backface hiding. Entry motion
-can look different; card dimensions, order and sections remain unchanged. Click
-highlight, action-button bounce, popover motion, selection, locking and navigation
-are retained. The entry-flip option does not turn off click/action animations.
-
-Reload for each mode. Start recording on the parent group screen, then enter,
-click the same cards, scroll the same route and swipe back. Stop and copy each
-report separately. Compare Safari against Safari with the same cache/recording
-conditions; do not mix Safari and standalone PWA runs. `experiment.card-rendering`
-events identify the enabled effects in recordings.
-
-The legacy `?perf=1&fantasyFlip=off` remains fantasy-only. `cardFlip=on` explicitly
-overrides that legacy switch; `cardFlip=off` disables entry flips for all groups.

@@ -1,11 +1,7 @@
 // Undefined on normal visits; diagnostic code is loaded only by explicit opt-in.
 const APP_PERF = window.APP_PERF;
-// Query-only comparisons; no diagnostic attributes on ordinary visits.
-const PERF_CARD_FLIP = APP_PERF ? new URLSearchParams(location.search).get('cardFlip') : null;
-const PERF_CARD_NO_FLIP = Boolean(APP_PERF) && PERF_CARD_FLIP === 'off';
-const PERF_GRID_NO_3D = Boolean(APP_PERF)
-  && new URLSearchParams(location.search).get('grid3d') === 'off';
-const PERF_FANTASY_NO_FLIP = Boolean(APP_PERF) && PERF_CARD_FLIP !== 'on'
+// Query-only experiment: ordinary visits always keep the existing reveal.
+const PERF_FANTASY_NO_FLIP = Boolean(APP_PERF)
   && new URLSearchParams(location.search).get('fantasyFlip') === 'off';
 
 /* ════════════════════════════════════════════════
@@ -2359,13 +2355,6 @@ function getCardRevealDelayStyle() {
 }
 
 function setupCardRevealAnimations(page) {
-  if (APP_PERF) {
-    if (PERF_CARD_NO_FLIP) page.dataset.perfCardFlip = 'off';
-    if (PERF_GRID_NO_3D) page.dataset.perfGrid3d = 'off';
-    APP_PERF.mark('experiment.card-rendering', { page: page.id,
-      flipEnabled: !(PERF_CARD_NO_FLIP || (PERF_FANTASY_NO_FLIP && page.id === 'page-race_race_fantasy')),
-      grid3dEnabled: !PERF_GRID_NO_3D });
-  }
   if (APP_PERF && page.id === 'page-race_race_fantasy') {
     if (PERF_FANTASY_NO_FLIP) page.dataset.perfFantasyFlip = 'off';
     APP_PERF.mark('experiment.fantasy-flip', { enabled: !PERF_FANTASY_NO_FLIP });
