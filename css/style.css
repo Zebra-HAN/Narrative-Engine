@@ -3590,3 +3590,12 @@ body {
 #screen-create .card-edge-button.is-pressing { filter: none; }
 
 #screen-create .card-edge-actions { clip-path: inset(0 -8px -8px -8px); }
+
+/* URL opt-in comparisons: keep layout, card actions and popovers intact. */
+.center-page[data-perf-card-flip="off"] .data-card.card-deal {
+  animation: none !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+.center-page[data-perf-grid3d="off"] .card-grid { perspective: none; }
+.center-page[data-perf-grid3d="off"] .data-card { backface-visibility: visible; }
