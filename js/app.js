@@ -4744,12 +4744,11 @@ function createPageTitleCard(group, subId) {
   hint.textContent = '터치하여 상세 정보 보기';
   const count = document.createElement('span');
   count.className = 'page-title-count';
-  count.textContent = `${(group.cards || []).filter(card => !isSectionItem(card)).length}개 카드`;
+  count.textContent = String((group.cards || []).filter(card => !isSectionItem(card)).length);
   footer.append(hint, count);
-  copy.appendChild(footer);
   const path = createPageTitlePath(subId);
   if (path) frame.appendChild(path);
-  frame.append(media, copy);
+  frame.append(media, copy, footer);
   frame.addEventListener('click', () => {
     const parent = getInfoPanelContext(true);
     closeCardInfo();

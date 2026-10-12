@@ -3453,7 +3453,9 @@ body {
 .page-title-card {
   display: grid;
   justify-items: center;
-  gap: 2px;
+  grid-template-columns: minmax(0, 34%) minmax(0, 1fr);
+  grid-template-areas: "path path" "media copy" "footer footer";
+  gap: 2px 8px;
   width: min(100%, 620px);
   box-sizing: border-box;
   margin: 0 auto 18px;
@@ -3475,9 +3477,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: min(66px, 100%);
-  height: 66px;
+  width: min(80px, 100%);
+  height: 80px;
   min-width: 0;
+  grid-area: media;
+  align-self: center;
 }
 .page-title-image {
   display: block;
@@ -3489,26 +3493,37 @@ body {
   border-radius: 6px;
 }
 .page-title-icon { font-size: 40px; line-height: 1.2; }
-.page-title-copy { display: grid; gap: 2px; min-width: 0; width: 100%; }
-.page-title-heading { color: #315339; font-weight: 800; font-size: 22px; overflow-wrap: anywhere; }
-.page-title-description { font-size: 14px; line-height: 1.4; overflow-wrap: anywhere; white-space: pre-line; }
-.page-title-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px; font-size: 12px; }
+.page-title-copy { grid-area: copy; align-self: center; display: grid; gap: 2px; min-width: 0; width: 100%; text-align: center; }
+.page-title-heading { color: #315339; font-weight: 800; font-size: 18.7px; overflow-wrap: anywhere; }
+.page-title-description { font-size: 11px; line-height: 1.4; overflow-wrap: anywhere; white-space: pre-line; }
+.page-title-footer { grid-area: footer; width: 100%; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px; font-size: 12px; }
 .page-title-hint { color: #6c634f; }
 .page-title-count { border: 1px solid #bca06b; border-radius: 20px; padding: 1px 6px; color: #315339; }
-.page-title-card[data-image-layout="landscape"] .page-title-media { width: min(88px, 100%); height: 66px; }
-.page-title-card[data-image-layout="wide"] .page-title-media { width: min(240px, 100%); height: 70px; }
-.page-title-card[data-image-layout="portrait"] { grid-template-columns: minmax(0, 32%) minmax(0, 1fr); grid-template-areas: "path path" "heading heading" "media description" "media footer"; text-align: left; }
-.page-title-card[data-image-layout="portrait"] .page-title-media { width: 100%; height: 80px; }
+.page-title-card[data-image-layout="landscape"] .page-title-media { width: min(100px, 100%); height: 75px; }
+.page-title-card[data-image-layout="wide"] {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "path" "media" "copy" "footer";
+}
+.page-title-card[data-image-layout="wide"] .page-title-media {
+  /* Add back the frame's 30px inset so the image spans 85% of the outer card. */
+  width: min(100%, calc(85% + 25.5px));
+  height: auto;
+}
+.page-title-card[data-image-layout="wide"] .page-title-image { width: 100%; max-height: none; }
+.page-title-card[data-image-layout="portrait"] .page-title-media { width: 54px; max-width: 100%; height: 90px; }
+.page-title-card[data-image-layout="portrait"] .page-title-image { width: 100%; height: 100%; object-fit: cover; object-position: center; }
 .page-title-card:focus-visible { outline: 2px solid #2f8f4e; outline-offset: -5px; }
 @media (max-width: 360px) {
-  .page-title-card { padding: 5px 10px; gap: 2px; }
-  .page-title-heading { font-size: 20px; }
+  .page-title-card { padding: 5px 10px; gap: 2px 8px; }
+  .page-title-heading { font-size: 17px; }
+  .page-title-card[data-image-layout="wide"] .page-title-media { width: min(100%, calc(85% + 22.1px)); }
 }
 @media (prefers-reduced-motion: reduce) {
   .page-title-card { transition: none; }
 }
 
 .page-title-path {
+  grid-area: path;
   justify-self: end;
   display: flex;
   align-items: center;
@@ -3527,12 +3542,6 @@ body {
 .page-title-path-icon .info-icon-text { font-size: 12px; line-height: 1; }
 .page-title-path-separator { opacity: .45; font-weight: 400; }
 .page-title-heading { text-align: center; }
-.page-title-card[data-image-layout="portrait"] .page-title-path { grid-area: path; }
-.page-title-card[data-image-layout="portrait"] .page-title-copy { display: contents; }
-.page-title-card[data-image-layout="portrait"] .page-title-heading { grid-area: heading; width: 100%; }
-.page-title-card[data-image-layout="portrait"] .page-title-media { grid-area: media; align-self: center; }
-.page-title-card[data-image-layout="portrait"] .page-title-description { grid-area: description; align-self: end; }
-.page-title-card[data-image-layout="portrait"] .page-title-footer { grid-area: footer; align-self: start; }
 
 
 /* Shared exterior geometry: preserve the detail popup's top/side margins. */

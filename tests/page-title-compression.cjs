@@ -25,14 +25,15 @@ const {chromium}=require('playwright');
     await page.locator('.page-title-media img').waitFor();await page.waitForTimeout(80);
     const metrics=await page.locator('.page-title-card').evaluate(n=>{
      const r=n.getBoundingClientRect(),heading=n.querySelector('.page-title-heading'),h=heading.getBoundingClientRect(),path=n.querySelector('.page-title-path'),p=path?.getBoundingClientRect(),img=n.querySelector('.page-title-image'),ir=img.getBoundingClientRect();
-     return {height:r.height,font:getComputedStyle(heading).fontSize,center:(h.left+h.right-r.left-r.right)/2,path:path?.textContent,pathFont:path?getComputedStyle(path).fontSize:null,pathRight:p?.right,frameRight:r.right,overlap:p&&[h,ir].some(x=>p.left<x.right&&p.right>x.left&&p.top<x.bottom&&p.bottom>x.top),ratio:ir.width/ir.height,natural:img.naturalWidth/img.naturalHeight,overflow:n.scrollWidth>n.clientWidth};
+     const copy=n.querySelector('.page-title-copy').getBoundingClientRect();
+     return {copyCenter:(h.left+h.right-copy.left-copy.right)/2,height:r.height,font:getComputedStyle(heading).fontSize,center:(h.left+h.right-r.left-r.right)/2,path:path?.textContent,pathFont:path?getComputedStyle(path).fontSize:null,pathRight:p?.right,frameRight:r.right,overlap:p&&[h,ir].some(x=>p.left<x.right&&p.right>x.left&&p.top<x.bottom&&p.bottom>x.top),ratio:ir.width/ir.height,natural:img.naturalWidth/img.naturalHeight,overflow:n.scrollWidth>n.clientWidth};
     });
     const key=`${width}-${index}`;
     if(mode==='before')heights.set(key,metrics);
     else{
-     const before=heights.get(key);assert(metrics.height/before.height<=0.62,`${key}: ${metrics.height}/${before.height}`);
-     assert.equal(metrics.font,before.font);assert(Math.abs(metrics.center)<1);assert.equal(metrics.path,'캐릭터|종족');assert(parseFloat(metrics.pathFont)<parseFloat(metrics.font));assert(metrics.pathRight<metrics.frameRight&&!metrics.overlap&&!metrics.overflow);assert(Math.abs(metrics.ratio-metrics.natural)<0.01);
-     console.log(`PASS ${width}px ratio ${index}: ${before.height.toFixed(1)} -> ${metrics.height.toFixed(1)}px (${Math.round(100*metrics.height/before.height)}%), title font/center, path and image preserved`);
+     const before=heights.get(key);assert(metrics.height/before.height<=(index===2 ? 0.66 : 0.62),`${key}: ${metrics.height}/${before.height}`);
+     assert(Math.abs(parseFloat(metrics.font)/parseFloat(before.font)-.85)<.01);assert(Math.abs(metrics.copyCenter)<1);assert.equal(metrics.path,'캐릭터|종족');assert(parseFloat(metrics.pathFont)<parseFloat(metrics.font));assert(metrics.pathRight<metrics.frameRight&&!metrics.overlap&&!metrics.overflow);if(index===3)assert(Math.abs(metrics.ratio-.6)<.01);else assert(Math.abs(metrics.ratio-metrics.natural)<0.01);
+     console.log(`PASS ${width}px ratio ${index}: ${before.height.toFixed(1)} -> ${metrics.height.toFixed(1)}px (${Math.round(100*metrics.height/before.height)}%), path preserved; requested font, layout and crop policy verified`);
     }
    }
    if(mode==='after'){
@@ -43,8 +44,15 @@ const {chromium}=require('playwright');
       const sub=nav.subs.find(s=>CARD_DATA[s.id]?.groups);
       const group={label:'그룹',description:'설명',cards:[]};
       const card=createPageTitleCard(group,sub.id);document.body.appendChild(card);
-      await new Promise(r=>setTimeout(r,80));
       const path=card.querySelector('.page-title-path');
+      await new Promise((resolve,reject)=>{
+       const deadline=performance.now()+5000;
+       function ready(){
+        if(path.querySelectorAll('img').length===2)resolve();
+        else if(performance.now()>deadline)reject(new Error('Path images did not finish loading'));
+        else requestAnimationFrame(ready);
+       }ready();
+      });
       results.push({labels:path.textContent,expected:nav.label+'|'+sub.label,navSrc:path.children[0].querySelector('img')?.getAttribute('src'),expectedNav:MAIN_CATEGORY_IMAGE[navId],catSrc:path.children[2].querySelector('img')?.getAttribute('src'),expectedCat:sub.img});
       card.remove();
      }

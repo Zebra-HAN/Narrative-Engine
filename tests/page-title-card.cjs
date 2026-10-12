@@ -27,12 +27,13 @@ const {chromium}=require('playwright');
     if(i!==4&&i!==5)await title.locator('.page-title-media img').waitFor();
     if(i===5)await page.waitForTimeout(150);
     assert.equal(await title.locator('.page-title-heading').textContent(),'그룹 '+i);
-    assert.equal(await title.locator('.page-title-count').textContent(),'120개 카드');
+    assert.equal(await title.locator('.page-title-count').textContent(),'120');
     assert.equal(await title.locator('.page-title-description').count(),i===4?0:1);
     if(i===4||i===5)assert.equal(await title.locator('.page-title-icon').textContent(),'🌿');
     const geometry=await title.evaluate(n=>{const r=n.getBoundingClientRect();const img=n.querySelector('.page-title-media img');const ir=img?.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,first:n===n.parentElement.firstElementChild,ratio:ir?ir.width/ir.height:null,natural:img?img.naturalWidth/img.naturalHeight:null,notUpscaled:!img||ir.width<=img.naturalWidth,contained:!ir||(ir.left>=r.left&&ir.right<=r.right&&ir.top>=r.top&&ir.bottom<=r.bottom),highlight:getComputedStyle(n).webkitTapHighlightColor};});
     assert(geometry.first&&geometry.left>=0&&geometry.right<=width&&geometry.top>=52&&geometry.contained&&geometry.notUpscaled);
-    if(geometry.ratio)assert(Math.abs(geometry.ratio-geometry.natural)<0.01);
+    if(geometry.ratio&&layout!=='portrait')assert(Math.abs(geometry.ratio-geometry.natural)<0.01);
+    if(layout==='portrait')assert(Math.abs(geometry.ratio-0.6)<0.01);
     assert.equal(geometry.highlight,'rgba(0, 0, 0, 0)');
     const state=()=>page.evaluate(()=>JSON.stringify({selected:[...selectedCards.race||[]],locked:[...lockedCards.race||[]],path:addressTrail}));
     const before=await state();await title.tap();
@@ -51,11 +52,11 @@ const {chromium}=require('playwright');
    }
    await page.evaluate(()=>{CARD_DATA.race.groups=window.realRaceGroups;showSubgroupCards('race',1,0)});
    assert.equal(await page.locator('.page-title-card').count(),1);
-   assert.equal(await page.locator('.page-title-count').textContent(),await page.evaluate(()=>CARD_DATA.race.groups[1].subgroups[0].cards.filter(c=>!isSectionItem(c)).length+'개 카드'));
+   assert.equal(await page.locator('.page-title-count').textContent(),await page.evaluate(()=>String(CARD_DATA.race.groups[1].subgroups[0].cards.filter(c=>!isSectionItem(c)).length)));
    await page.evaluate(()=>{showGroupPage('race',false);showCardPage('outlineFlatFixture',false)});
    assert.equal(await page.locator('.page-title-card').count(),0);
    assert.deepEqual(errors,[]);
-   console.log(`PASS title ${width}px: 4 ratios, original aspect/no upscaling, icon/error fallback, missing description, counts, existing detail, scroll/restore, group changes, minimap, subgroup and flat-page scope`);
+   console.log(`PASS title ${width}px: 4 ratios, aspect/crop policy, no unintended upscaling, icon/error fallback, missing description, counts, existing detail, scroll/restore, group changes, minimap, subgroup and flat-page scope`);
    await page.close();
   }
  }finally{await browser.close();}
