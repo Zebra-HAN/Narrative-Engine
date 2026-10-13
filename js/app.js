@@ -3553,8 +3553,6 @@ function toggleDetailCheck(subId, globalIdx, lineIdx) {
     // 카드도 자동 선택 상태로
     if (!selectedCards[subId]) selectedCards[subId] = new Set();
     selectedCards[subId].add(globalIdx);
-    // DOM 카드 selected 상태 반영
-    _syncCardSelectedDOM(subId, globalIdx);
     renderSubnav(currentNav, false);
     const el = document.querySelector(`[data-sub-id="${subId}"]`);
     if (el) el.classList.add('active');
@@ -3574,6 +3572,8 @@ function toggleDetailCheck(subId, globalIdx, lineIdx) {
   // 세부정보가 하나도 없으면 selectedDetails 키 삭제
   if (set.size === 0) delete selectedDetails[detailKey];
 
+  _syncCardSelectedDOM(subId, globalIdx);
+
   // 아이디어 통합 창 갱신
   refreshStatusIfOpen();
 }
@@ -3588,7 +3588,6 @@ function toggleSubImageCheck(subId, globalIdx) {
     selectedSubImages[detailKey] = true;
     if (!selectedCards[subId]) selectedCards[subId] = new Set();
     selectedCards[subId].add(globalIdx);
-    _syncCardSelectedDOM(subId, globalIdx);
     renderSubnav(currentNav, false);
     const el = document.querySelector(`[data-sub-id="${subId}"]`);
     if (el) el.classList.add('active');
@@ -3603,18 +3602,23 @@ function toggleSubImageCheck(subId, globalIdx) {
       block.setAttribute('aria-pressed', isChecked ? 'true' : 'false');
     });
 
+  _syncCardSelectedDOM(subId, globalIdx);
   refreshStatusIfOpen();
 }
 
 function _syncCardSelectedDOM(subId, globalIdx) {
-   const cardEl = document.querySelector(`.data-card[data-global-idx="${globalIdx}"]`);
+  const cardEl = currentSubId === subId
+    ? document.querySelector(`.center-page.active .data-card[data-global-idx="${globalIdx}"]`)
+    : null;
   if (cardEl) {
     cardEl.classList.remove('card-deal');
-    cardEl.classList.add('selected');
+    cardEl.classList.toggle('selected', Boolean(selectedCards[subId]?.has(globalIdx)));
   }
    
   if (focusedCard && focusedCard.subId === subId && focusedCard.idx === globalIdx) {
     updateInfoPanel();
+    // Sync existing controls without moving the row or replaying its animation.
+    updateCardEdgeActions({ deferPosition: true });
   }
 }
 
