@@ -316,19 +316,21 @@
 .detail-body .detail-idea-block:hover:not(.checked):not(:disabled) { background: linear-gradient(165deg, #ecf1f4, #dce5eb 50%, #cbd7df); box-shadow: inset 0 1px 0 #f5f8fa88, inset 0 -1px 1px #57708133, 0 2px 3px #10243926; }
 .detail-body .detail-idea-block.checked {
   border: 0;
-  background: linear-gradient(165deg, #e0d7c2, #d0bea0 52%, #baa584);
-  color: #1a2e43;
-  box-shadow: inset 3px 0 0 #a58d67, inset 0 1px 0 #f5ead477, inset 0 -1px 1px #51493833, 0 2px 3px #10243926;
-  font-weight: 650;
+  background: linear-gradient(165deg, #e8e0cf, #e3d8c3 52%, #d8ccb4);
+  color: #704c2c;
+  box-shadow: inset 0 1px 0 #f5ead477, inset 0 -1px 1px #51493833, 0 2px 3px #10243926;
+  font-weight: inherit;
 }
 .detail-body .detail-idea-block:disabled { cursor: default; opacity: 1; }
 .detail-sheet .detail-desc {
-  background: linear-gradient(165deg, #e7edf1, #d7dfe5 50%, #c4d0d9);
-  color: #1a2e43;
+  background: linear-gradient(165deg, #446478, #3a586b 46%, #314c60);
+  color: #f0e9dc;
   border-color: #708b9d66;
-  box-shadow: inset 0 1px 0 #f5f8fa88, inset 0 -1px 1px #57708133, 0 2px 3px #10243926;
+  box-shadow: inset 0 1px 0 #8ca6b855, inset 0 -2px 4px #10243933;
 }
 .detail-sheet .detail-divider, .detail-sheet .detail-name::after {
+  height: 1px;
+  border-radius: 0;
   background: linear-gradient(90deg, transparent, #52718477 45%, #d0b88aaa 50%, #52718477 55%, transparent);
 }
 .detail-columns-ab { column-gap: 7px; }
@@ -359,10 +361,11 @@
 }
 .status-panel .status-chip-name { color: #f0e9dc; }
 .status-panel .status-chip-desc {
-  background: linear-gradient(165deg, #e7edf1, #d7dfe5 50%, #c4d0d9);
-  color: #1a2e43;
-  border-radius: 4px;
-  box-shadow: inset 0 1px 0 #f5f8fa66, inset 0 -1px 1px #57708133;
+  background: transparent;
+  color: #e5e6df;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 .status-panel .status-chip-extra {
   padding: 0;
@@ -412,10 +415,10 @@
   transition: background .18s ease, color .18s ease, transform .12s ease;
 }
 .detail-desc.card-desc-selectable.checked {
-  background: linear-gradient(165deg, #e0d7c2, #d0bea0 52%, #baa584);
-  color: #1a2e43;
-  border-color: #a58d67;
-  box-shadow: inset 3px 0 0 #a58d67, inset 0 1px 0 #f5ead477, inset 0 -1px 1px #51493833, 0 2px 3px #10243926;
+  background: linear-gradient(165deg, #486a7e, #3f6175 52%, #34556a);
+  color: #f0e9dc;
+  border-color: #d0b88a;
+  box-shadow: inset 0 1px 0 #8ca6b877, inset 0 -2px 4px #10243944;
 }
 .detail-desc.card-desc-selectable[aria-disabled="true"] { cursor: default; pointer-events: none; opacity: 1; }
 
@@ -454,7 +457,60 @@
 .detail-sheet .detail-sub-image-row.checked {
   background: linear-gradient(165deg, #e0d7c2, #d0bea0 52%, #baa584);
   border-color: #a58d67;
-  box-shadow: inset 3px 0 0 #a58d67, inset 0 1px 0 #f5ead477, inset 0 -1px 1px #51493833, 0 2px 3px #10243926;
+  box-shadow: inset 0 1px 0 #f5ead477, inset 0 -1px 1px #51493833, 0 2px 3px #10243926;
 }
 
 :is(.detail-sheet, .status-panel) :focus-visible { outline-color: #d0b88a; }
+
+/* Share the existing full-width divider paint above and below the description. */
+.detail-sheet .detail-name::after { width: 100%; }
+
+/* A local CSS close control preserves the 44px hit area and the shared artwork. */
+.detail-sheet .detail-close {
+  top: 0;
+  right: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, transparent 62%, #a58d6788 66%, #d0b88a55 70%, transparent 71%) content-box,
+    linear-gradient(155deg, #527184, #19354b) content-box;
+  color: #f0e9dc;
+  z-index: 1;
+}
+.detail-sheet .detail-close .close-icon { display: none; }
+.detail-sheet .detail-close::before, .detail-sheet .detail-close::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 15px;
+  height: 2px;
+  border-radius: 1px;
+  background: currentColor;
+  pointer-events: none;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+.detail-sheet .detail-close::after { transform: translate(-50%, -50%) rotate(-45deg); }
+
+/* Category artwork is contained at its original ratio, with no diamond crop. */
+.status-panel .status-category-mark {
+  transform: none;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.status-panel .status-category-img { width: 100%; height: 100%; object-fit: contain; transform: none; }
+.status-panel .status-category-icon-text { transform: none; }
+.status-panel .status-section-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+.status-panel .status-nav-icon {
+  display: block;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  object-fit: contain;
+}

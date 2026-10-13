@@ -3814,7 +3814,11 @@ function renderStatusContent() {
     });
 
     const content = hasAny ? itemsHtml : '<div class="status-empty">  </div>';  /* 선택 없음 */
-    return `<div class="status-section"><div class="status-section-title">${nav.label}</div>${content}</div>`;
+    const navImage = MAIN_CATEGORY_IMAGE[navKey];
+    const navIcon = navImage
+      ? `<img class="status-nav-icon" src="${escapeHtml(navImage)}" alt="" aria-hidden="true" draggable="false">`
+      : `<span aria-hidden="true">${escapeHtml(MAIN_CATEGORY_INFO[navKey]?.icon || '')}</span>`;
+    return `<div class="status-section"><div class="status-section-title">${navIcon}<span>${escapeHtml(nav.label)}</span></div>${content}</div>`;
   }
 
   // 2컬럼: 왼쪽 = 캐릭터 + 세계관 / 오른쪽 = 스토리 + 나침반
