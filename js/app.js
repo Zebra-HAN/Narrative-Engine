@@ -3395,13 +3395,34 @@ function toggleCardSelect(subId, idx) {
 }
 
 
-function parseDetailItems(detail) {
-  if (!detail) return [];
-  return String(detail)
+// Section markers occupy their own line; blank lines still delimit ideas.
+// Legacy heading lines only affect presentation, never item text or indices.
+function parseDetailSections(detail) {
+  const chunks = String(detail || '')
     .replace(/\r\n?/g, '\n')
-    .split(/\n{2,}/)
-    .map(item => item.trim())
-    .filter(Boolean);
+    .replace(/^[ \t]*(\[\[section:.+\]\]|\[\[\/section\]\])[ \t]*$/gm, '\n\n$1\n\n')
+    .split(/\n{2,}/).map(item => item.trim()).filter(Boolean);
+  const explicit = chunks.some(item => /^\[\[section:(.+)\]\]$/.test(item));
+  const sections = [];
+  let current = null;
+  const start = title => {
+    current = { title, items: [] };
+    sections.push(current);
+  };
+  chunks.forEach(text => {
+    const marker = text.match(/^\[\[section:(.+)\]\]$/);
+    if (marker) { start(marker[1].trim()); return; }
+    if (explicit && text === '[[/section]]') { current = null; return; }
+    const heading = !explicit && text.match(/^【([^】]+)】[ \t]*\n([\s\S]+)$/);
+    if (heading) start(heading[1].trim());
+    if (!current) start('');
+    current.items.push({ text, display: heading ? heading[2].trim() : text });
+  });
+  return sections.filter(section => section.items.length);
+}
+
+function parseDetailItems(detail) {
+  return parseDetailSections(detail).flatMap(section => section.items.map(item => item.text));
 }
 
 function getDetailDisplayMode(card) {
@@ -3412,15 +3433,14 @@ function getDetailDisplayMode(card) {
 
 function getCardDetailColumns(card) {
   const mode = getDetailDisplayMode(card);
-  if (mode !== 'AB') {
-    return [{ key: 'c', label: 'C', items: parseDetailItems(card?.detail) }];
-  }
-
-  const leftDetail = card?.detailA ?? card?.detailLeft ?? card?.detail ?? '';
-  const rightDetail = card?.detailB ?? card?.detailRight ?? '';
+  const column = (key, label, detail) => {
+    const sections = parseDetailSections(detail);
+    return { key, label, sections, items: sections.flatMap(section => section.items.map(item => item.text)) };
+  };
+  if (mode !== 'AB') return [column('c', 'C', card?.detail)];
   return [
-    { key: 'a', label: 'A', items: parseDetailItems(leftDetail) },
-    { key: 'b', label: 'B', items: parseDetailItems(rightDetail) }
+    column('a', 'A', card?.detailA ?? card?.detailLeft ?? card?.detail ?? ''),
+    column('b', 'B', card?.detailB ?? card?.detailRight ?? '')
   ];
 }
 
@@ -3472,27 +3492,27 @@ function openDetailSheet(mode) {
       const checkedSet = selectedDetails[detailKey] || new Set();
 
       let bodyHtml = '';
-let globalItemIdx = 0;
+      let globalItemIdx = 0;
+      const renderColumn = column => column.sections.map(section => {
+        const itemsHtml = section.items.map(item => {
+          const itemIdx = globalItemIdx++;
+          return renderDetailIdeaBlock(focusedCard.subId, focusedCard.idx, itemIdx, item.display, checkedSet.has(itemIdx));
+        }).join('');
+        if (!section.title) return `<div class="detail-section-items">${itemsHtml}</div>`;
+        return `<section class="detail-section">
+          <h3 class="detail-section-title">${escapeHtml(section.title)}</h3>
+          <div class="detail-section-items">${itemsHtml}</div>
+        </section>`;
+      }).join('');
 
       if (hasDetailItems) {
         if (getDetailDisplayMode(card) === 'AB') {
-          const columnHtml = detailColumns.map(column => {
-            const itemsHtml = column.items.map(item => {
-              const itemIdx = globalItemIdx;
-              globalItemIdx += 1;
-              return renderDetailIdeaBlock(focusedCard.subId, focusedCard.idx, itemIdx, item, checkedSet.has(itemIdx));
-            }).join('');
-
-            return `<div class="detail-column detail-column-${column.key}" aria-label="${column.label} 열">${itemsHtml}</div>`;
-          }).join('');
+          const columnHtml = detailColumns.map(column =>
+            `<div class="detail-column detail-column-${column.key}" aria-label="${column.label} 열">${renderColumn(column)}</div>`
+          ).join('');
           bodyHtml += `<div class="detail-columns detail-columns-ab">${columnHtml}</div>`;
         } else {
-          const itemsHtml = detailColumns[0].items.map(item => {
-            const itemIdx = globalItemIdx;
-            globalItemIdx += 1;
-            return renderDetailIdeaBlock(focusedCard.subId, focusedCard.idx, itemIdx, item, checkedSet.has(itemIdx));
-          }).join('');
-          bodyHtml += `<div class="detail-column detail-column-c">${itemsHtml}</div>`;
+          bodyHtml += `<div class="detail-column detail-column-c">${renderColumn(detailColumns[0])}</div>`;
         }
       }
 

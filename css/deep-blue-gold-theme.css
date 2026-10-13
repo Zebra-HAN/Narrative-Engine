@@ -136,7 +136,10 @@
 /* Preserve the three popup designs while adjusting their exterior bounds. */
 .detail-overlay, .status-overlay, .card-minimap-overlay {
   padding:
-    calc(max(18px, env(safe-area-inset-top, 0px)) + 5dvh)
+    /* Old height = 89dvh - top inset - bottom inset; extend only its top by 5%. */
+    max(env(safe-area-inset-top, 0px), calc(
+      max(18px, env(safe-area-inset-top, 0px)) * 1.05 +
+      max(18px, env(safe-area-inset-bottom, 0px)) * .05 + .55dvh))
     max(2%, env(safe-area-inset-right, 0px))
     calc(max(18px, env(safe-area-inset-bottom, 0px)) + 6dvh)
     max(2%, env(safe-area-inset-left, 0px));
@@ -276,3 +279,54 @@
   pointer-events: none;
 }
 .page-title-card > :not(.page-title-plate) { position: relative; z-index: 1; }
+
+/* Detail hierarchy: quiet gold containers around independent borderless plates. */
+.detail-sheet { padding-left: 8px; padding-right: 8px; }
+.detail-content { padding-left: 4px; padding-right: 4px; }
+.detail-body { width: 100%; margin-left: 0; margin-right: 0; }
+.detail-section {
+  min-width: 0;
+  padding: 7px 5px 5px;
+  border: 1px solid #c5a26699;
+  border-radius: 12px;
+  background: #101d3240;
+}
+.detail-section-title {
+  margin: 0 3px 7px;
+  color: var(--hotel-glint);
+  font: inherit;
+  font-size: .74rem;
+  font-weight: 600;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.detail-column { gap: 10px; }
+.detail-section-items { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.detail-body .detail-idea-block {
+  border: 0;
+  border-radius: 8px;
+  background: linear-gradient(150deg, #304d70, #263e5b);
+  color: #f1eadc;
+  box-shadow: none;
+  transition: background .18s ease, color .18s ease, transform .12s ease;
+}
+.detail-body .detail-idea-block:hover:not(.checked):not(:disabled) { background: #3a5576; box-shadow: none; }
+.detail-body .detail-idea-block.checked {
+  border: 0;
+  background: linear-gradient(150deg, #ead3a0, #c5a266);
+  color: #14243b;
+  box-shadow: none;
+  font-weight: 650;
+}
+.detail-body .detail-idea-block:disabled { cursor: default; opacity: .75; }
+.detail-sheet .detail-desc { border-color: #c5a26666; }
+.detail-sheet .detail-divider, .detail-sheet .detail-name::after {
+  background: linear-gradient(90deg, transparent, #ead3a088, transparent);
+}
+.detail-columns-ab { column-gap: 7px; }
+@media (max-width: 599px) {
+  .detail-columns-ab { column-gap: 5px; }
+  .detail-columns-ab .detail-column { gap: 9px; }
+  .detail-section { padding: 6px 4px 4px; }
+  .detail-section-title { font-size: .66rem; }
+}
