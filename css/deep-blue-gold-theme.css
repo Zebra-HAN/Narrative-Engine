@@ -287,14 +287,16 @@
 .detail-section {
   min-width: 0;
   padding: 7px 5px 5px;
-  border: 1px solid #826b4980;
+  border: 1px solid #708b9d77;
+  border-top-color: #8ba3b477;
+  border-bottom-color: #1e3a4d99;
   border-radius: 12px;
-  background: linear-gradient(150deg, #b8cbd6, #acbfcb);
-  box-shadow: inset 0 1px 0 #f6f5eb77;
+  background: linear-gradient(165deg, #446478, #3a586b 46%, #314c60);
+  box-shadow: inset 0 1px 0 #8ca6b844, inset 0 -3px 5px #10243933;
 }
 .detail-section-title {
   margin: 0 3px 7px;
-  color: #172a40;
+  color: #f0e9dc;
   font: inherit;
   font-size: .74rem;
   font-weight: 600;
@@ -306,28 +308,28 @@
 .detail-body .detail-idea-block {
   border: 0;
   border-radius: 8px;
-  background: linear-gradient(150deg, #edf1ee, #e5ece9);
-  color: #172a40;
-  box-shadow: none;
+  background: linear-gradient(165deg, #e7edf1, #d7dfe5 50%, #c4d0d9);
+  color: #1a2e43;
+  box-shadow: inset 0 1px 0 #f5f8fa88, inset 0 -1px 1px #57708133, 0 2px 3px #10243926;
   transition: background .18s ease, color .18s ease, transform .12s ease;
 }
-.detail-body .detail-idea-block:hover:not(.checked):not(:disabled) { background: #f7f8f1; box-shadow: none; }
+.detail-body .detail-idea-block:hover:not(.checked):not(:disabled) { background: linear-gradient(165deg, #ecf1f4, #dce5eb 50%, #cbd7df); box-shadow: inset 0 1px 0 #f5f8fa88, inset 0 -1px 1px #57708133, 0 2px 3px #10243926; }
 .detail-body .detail-idea-block.checked {
   border: 0;
-  background: linear-gradient(150deg, #e5d3a3, #d5b775);
-  color: #172a40;
-  box-shadow: inset 3px 0 0 #826b49;
+  background: linear-gradient(165deg, #e0d7c2, #d0bea0 52%, #baa584);
+  color: #1a2e43;
+  box-shadow: inset 3px 0 0 #a58d67, inset 0 1px 0 #f5ead477, inset 0 -1px 1px #51493833, 0 2px 3px #10243926;
   font-weight: 650;
 }
 .detail-body .detail-idea-block:disabled { cursor: default; opacity: 1; }
 .detail-sheet .detail-desc {
-  background: linear-gradient(150deg, #edf1ee, #e5ece9);
-  color: #172a40;
-  border-color: #826b4980;
-  box-shadow: none;
+  background: linear-gradient(165deg, #e7edf1, #d7dfe5 50%, #c4d0d9);
+  color: #1a2e43;
+  border-color: #708b9d66;
+  box-shadow: inset 0 1px 0 #f5f8fa88, inset 0 -1px 1px #57708133, 0 2px 3px #10243926;
 }
 .detail-sheet .detail-divider, .detail-sheet .detail-name::after {
-  background: linear-gradient(90deg, transparent, #826b49aa 45%, #b99a60 50%, #826b49aa 55%, transparent);
+  background: linear-gradient(90deg, transparent, #52718477 45%, #d0b88aaa 50%, #52718477 55%, transparent);
 }
 .detail-columns-ab { column-gap: 7px; }
 @media (max-width: 599px) {
@@ -348,13 +350,20 @@
 .status-panel .status-col { max-width: calc((100% - 6px) / 2); }
 .status-panel .status-chip {
   padding: 6px 5px;
-  background: linear-gradient(150deg, #a4b9c6, #91a9b9);
-  color: #172a40;
+  background: radial-gradient(ellipse at 14% 0%, #2a4b6244, transparent 65%),
+    linear-gradient(165deg, #2c4b60, #29465b 45%, #213c51);
+  color: #f0e9dc;
   border-color: transparent;
-  box-shadow: inset 0 0 0 .75px #826b49cc;
+  box-shadow: inset 0 0 0 .75px #7f8f93aa, inset 0 1px 0 #8fa7b644,
+    inset 0 -2px 3px #10243966, 0 2px 4px #081c2b33;
 }
-.status-panel .status-chip-name { color: #172a40; }
-.status-panel .status-chip-desc { color: #172a40; }
+.status-panel .status-chip-name { color: #f0e9dc; }
+.status-panel .status-chip-desc {
+  background: linear-gradient(165deg, #e7edf1, #d7dfe5 50%, #c4d0d9);
+  color: #1a2e43;
+  border-radius: 4px;
+  box-shadow: inset 0 1px 0 #f5f8fa66, inset 0 -1px 1px #57708133;
+}
 .status-panel .status-chip-extra {
   padding: 0;
   border: 0;
@@ -367,8 +376,10 @@
   padding: 6px 4px 4px;
   border: 0;
   border-radius: 7px;
-  background: #b8cbd6;
-  color: #172a40;
+  background: linear-gradient(165deg, #446478, #3a586b 46%, #314c60);
+  color: #f0e9dc;
+  box-shadow: inset 0 0 0 .5px #8ca6b844, inset 0 1px 0 #8ca6b855,
+    inset 0 -3px 5px #10243933;
 }
 .status-idea-section-title {
   margin: 0 2px 5px;
@@ -376,7 +387,7 @@
   font-size: .64rem;
   font-weight: 600;
   line-height: 1.4;
-  color: #172a40;
+  color: #f0e9dc;
   overflow-wrap: anywhere;
 }
 .status-idea-plates { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
@@ -385,13 +396,14 @@
   padding: 6px 5px;
   border: 0;
   border-radius: 6px;
-  background: #edf1ee;
-  color: #172a40;
+  background: linear-gradient(165deg, #e7edf1, #d7dfe5 50%, #c4d0d9);
+  color: #1a2e43;
+  box-shadow: inset 0 1px 0 #f5f8fa88, inset 0 -1px 1px #57708133, 0 2px 3px #10243926;
   font-size: .64rem;
   line-height: 1.55;
   white-space: pre-wrap;
 }
-.status-panel :is(.status-chip-img, .status-chip-sub-img) { border-color: #826b4966; }
+.status-panel :is(.status-chip-img, .status-chip-sub-img) { border-color: #6f879566; }
 
 /* The existing card description becomes one independent optional idea. */
 .detail-desc.card-desc-selectable {
@@ -400,46 +412,49 @@
   transition: background .18s ease, color .18s ease, transform .12s ease;
 }
 .detail-desc.card-desc-selectable.checked {
-  background: linear-gradient(150deg, #e5d3a3, #d5b775);
-  color: #172a40;
-  border-color: #b99a60;
-  box-shadow: inset 3px 0 0 #826b49;
+  background: linear-gradient(165deg, #e0d7c2, #d0bea0 52%, #baa584);
+  color: #1a2e43;
+  border-color: #a58d67;
+  box-shadow: inset 3px 0 0 #a58d67, inset 0 1px 0 #f5ead477, inset 0 -1px 1px #51493833, 0 2px 3px #10243926;
 }
 .detail-desc.card-desc-selectable[aria-disabled="true"] { cursor: default; pointer-events: none; opacity: 1; }
 
 /* Two reading popups only: keep every box metric, paint a fine antique-metal rim. */
 .detail-sheet, .status-panel {
-  background: radial-gradient(ellipse at 12% 0%, #35516a55, transparent 58%),
-    linear-gradient(155deg, #243d59, #14263d 52%, #101e30);
-  color: #f0e5cb;
-  border-color: #14263d;
-  box-shadow: inset 0 0 0 1px #b99a60bb, inset 0 1px 0 #f0e5cb88,
-    0 12px 28px #07111e66;
+  background: radial-gradient(ellipse at 12% 0%, #2a4b6266, transparent 62%),
+    linear-gradient(160deg, #224257, #19354b 45%, #102439);
+  color: #f0e9dc;
+  border-color: #102439;
+  box-shadow: inset 0 0 0 1px #a58d67aa, inset 0 1px 0 #d0b88a77,
+    inset 0 -2px 4px #071b2c66, 0 12px 28px #07152166;
 }
-.detail-sheet::before { background: linear-gradient(180deg, #f0e5cb33, transparent 1px); }
+.detail-sheet::before { background: linear-gradient(180deg, #d0b88a33, transparent 1px); }
 .detail-sheet .detail-name, .status-panel :is(.status-title, .status-section-title) {
-  color: #f0e5cb;
+  color: #f0e9dc;
   text-shadow: none;
 }
 .status-panel .status-header {
-  background: linear-gradient(150deg, #243d59, #1b3049);
-  border-bottom-color: #826b4977;
+  background: linear-gradient(160deg, #2a4b62, #19354b);
+  border-bottom-color: #6d879766;
+  box-shadow: inset 0 1px 0 #87a0b333;
 }
 .status-panel .status-share-btn {
-  background: linear-gradient(150deg, #2d4763, #1a314c);
-  color: #f0e5cb;
-  border-color: #b99a60;
-  box-shadow: inset 0 1px 0 #f0e5cb22;
+  background: linear-gradient(160deg, #2a4b62, #19354b);
+  color: #f0e9dc;
+  border-color: #a58d67;
+  box-shadow: inset 0 1px 0 #d0b88a33, inset 0 -1px 1px #10243955;
 }
-.status-panel .status-section { border-bottom-color: #826b4977; }
-.status-panel :is(.status-card-meta, .status-category-name, .status-card-path) { color: #d3dee6; }
+.status-panel .status-section { border-bottom-color: #52718466; }
+.status-panel :is(.status-card-meta, .status-category-name, .status-card-path) { color: #d7e0e7; }
 .detail-sheet .detail-sub-image-row {
-  background: #edf1ee;
-  border-color: #826b4980;
-  box-shadow: none;
+  background: linear-gradient(165deg, #e7edf1, #d7dfe5 50%, #c4d0d9);
+  border-color: #708b9d66;
+  box-shadow: inset 0 1px 0 #f5f8fa88, inset 0 -1px 1px #57708133, 0 2px 3px #10243926;
 }
 .detail-sheet .detail-sub-image-row.checked {
-  background: #d5b775;
-  border-color: #b99a60;
-  box-shadow: inset 3px 0 0 #826b49;
+  background: linear-gradient(165deg, #e0d7c2, #d0bea0 52%, #baa584);
+  border-color: #a58d67;
+  box-shadow: inset 3px 0 0 #a58d67, inset 0 1px 0 #f5ead477, inset 0 -1px 1px #51493833, 0 2px 3px #10243926;
 }
+
+:is(.detail-sheet, .status-panel) :focus-visible { outline-color: #d0b88a; }
