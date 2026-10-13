@@ -285,7 +285,7 @@ function initUiSounds() {
     } else if (target.matches('.data-card')) {
       playRandom(cardSounds);
     } else if (target.matches('#btn-extra-menu, #card-menu-toggle')) {
-      UI_SOUND.play(extraMenuOpen ? 'category4' : 'category3');
+      UI_SOUND.play(target.getAttribute('aria-expanded') === 'true' ? 'category4' : 'category3');
     } else if (target.matches('.extra-btn-home')) {
       UI_SOUND.play('selectNo');
     } else if (target.matches('.extra-btn, .group-select-btn')) {
@@ -1581,19 +1581,21 @@ function initScrollResponsiveChrome() {
   const dock = document.getElementById('card-controls-dock');
   const row = dock.querySelector('.card-controls-row');
   const address = document.getElementById('ctrl-address');
-  const menuPanel = document.getElementById('extra-menu-panel');
   const originalMenu = document.getElementById('btn-extra-menu');
   const originalMenuHeight = originalMenu.style.height;
   let cardMenuSize = null;
   const addressHome = document.createComment('address original location');
-  const menuHome = document.createComment('menu original location');
   address.before(addressHome);
-  menuPanel.before(menuHome);
   const cardMenu = originalMenu.cloneNode(true);
   cardMenu.id = 'card-menu-toggle';
   cardMenu.querySelector('[id]')?.removeAttribute('id');
   cardMenu.setAttribute('aria-label', '메뉴 열기·닫기');
-  cardMenu.setAttribute('aria-controls', 'extra-menu-panel');
+  cardMenu.setAttribute('aria-controls', 'card-extra-menu-panel');
+  cardMenu.setAttribute('onclick', "toggleExtraMenu('dock')");
+  const cardMenuPanel = document.getElementById('extra-menu-panel').cloneNode(true);
+  cardMenuPanel.id = 'card-extra-menu-panel';
+  cardMenuPanel.querySelectorAll('[id]').forEach(node => node.id = `card-${node.id}`);
+  dock.appendChild(cardMenuPanel);
   cardMenu.setAttribute('aria-expanded', 'false');
   dock.prepend(panelToggle);
   row.appendChild(document.getElementById('card-minimap-toggle'));
@@ -1621,11 +1623,9 @@ function initScrollResponsiveChrome() {
       dock.style.setProperty('--card-menu-width', `${cardMenuSize.width}px`);
       originalMenu.style.height = cardMenu.style.height = `${cardMenuSize.height}px`;
       document.getElementById('card-address-slot').appendChild(address);
-      dock.appendChild(menuPanel);
       measureDock();
     } else {
       addressHome.after(address);
-      menuHome.after(menuPanel);
       originalMenu.style.height = originalMenuHeight;
     }
     renderAddressTrail();
@@ -1738,7 +1738,8 @@ function initScrollResponsiveChrome() {
     }
     // 하단 크롬이 숨기 시작하면 열린 유틸리티 메뉴도 함께 닫는다.
     // 메뉴를 단순히 아래로 끌고 가지 않아 다음 표시 때 닫힌 상태가 유지된다.
-    if (progress > 0 && extraMenuOpen) closeExtraMenu({ instant: true });
+    const closingMenu = progress > 0 ? 'main' : 'dock';
+    if (extraMenuState[closingMenu]) closeExtraMenu({ instant: true, scope: closingMenu });
     animateChrome(cardPanelMode ? 1 : progress, progress);
   }
 
@@ -1873,7 +1874,7 @@ function initScrollResponsiveChrome() {
       targetTopProgress = renderedTopProgress = animationStartTopProgress = 1;
       targetBottomProgress = renderedBottomProgress = animationStartBottomProgress = 1;
       animationStartedAt = performance.now();
-      if (extraMenuOpen) closeExtraMenu({ instant: true });
+      if (isExtraMenuOpen()) closeExtraMenu({ instant: true });
       renderChrome();
     } else if (view !== 'subgroup') setProgress(0);
     previousView = view;
@@ -2164,6 +2165,21 @@ function showDefaultCenter(backgroundPrepared = false) {
 
 
 
+const groupScrollObserver = new ResizeObserver(entries => {
+  entries.forEach(({ target }) => {
+    const page = target.closest('.center-page.group-scrollable');
+    if (!page?.isConnected) { groupScrollObserver.unobserve(target); return; }
+    page.style.setProperty('--group-content-bottom', `${target.offsetTop + target.offsetHeight}px`);
+  });
+});
+function setupGroupVerticalScroll(page, count) {
+  if (count !== 5 && count < 7) return;
+  page.classList.add('group-scrollable');
+  const wrap = page.querySelector('.group-select-wrap');
+  page.style.setProperty('--group-content-bottom', `${wrap.offsetTop + wrap.offsetHeight}px`);
+  groupScrollObserver.observe(wrap);
+}
+
 function getGroupLayoutClass(count) {
   if (count === 2) return 'group-layout-two';
   if (count === 4) return 'group-layout-four';
@@ -2356,6 +2372,7 @@ sg.cards.forEach((card, cIdx) => {
   area.appendChild(page);
 
  setupGroupButtonActions(page);
+ setupGroupVerticalScroll(page, data.groups.length);
 }
 
 /* ════════════════════════════════════════════════
@@ -2417,6 +2434,7 @@ function showSubgroupPage(subId, groupIdx, backgroundPrepared = false) {
   area.appendChild(page);
 
   setupGroupButtonActions(page);
+  setupGroupVerticalScroll(page, grp.subgroups.length);
    setGroupAddress(subId, groupIdx);
 }
 
@@ -4168,38 +4186,30 @@ function escHtml(s) {
 /* ════════════════════════════════════════════════
    추가 메뉴 전환
 ════════════════════════════════════════════════ */
-let extraMenuOpen = false;
-
-function closeExtraMenu(options = {}) {
-  extraMenuOpen = false;
-  const panel = document.getElementById('extra-menu-panel');
-  const buttons = document.querySelectorAll('#btn-extra-menu, #card-menu-toggle');
-
-  if (options.instant && panel) panel.classList.add('menu-resetting');
-
-  if (panel) panel.classList.remove('open');
-  buttons.forEach(button => {
-    button.classList.remove('open');
-    button.setAttribute('aria-expanded', 'false');
-    button.querySelector('.ctrl-menu-icon').textContent = '☰';
-  });
-
-  if (options.instant && panel) {
-    requestAnimationFrame(() => panel.classList.remove('menu-resetting'));
-  }
+const extraMenuState = { main: false, dock: false };
+function isExtraMenuOpen() {
+  return extraMenuState.main || extraMenuState.dock;
 }
-
-function toggleExtraMenu() {
-  extraMenuOpen = !extraMenuOpen;
-  const panel = document.getElementById('extra-menu-panel');
-  const buttons = document.querySelectorAll('#btn-extra-menu, #card-menu-toggle');
-
-  if (panel) panel.classList.toggle('open', extraMenuOpen);
-  buttons.forEach(button => {
-    button.classList.toggle('open', extraMenuOpen);
-    button.setAttribute('aria-expanded', String(extraMenuOpen));
-    button.querySelector('.ctrl-menu-icon').textContent = extraMenuOpen ? '▼' : '☰';
+function setExtraMenuOpen(scope, open, instant = false) {
+  extraMenuState[scope] = open;
+  const panel = document.getElementById(scope === 'dock' ? 'card-extra-menu-panel' : 'extra-menu-panel');
+  const button = document.getElementById(scope === 'dock' ? 'card-menu-toggle' : 'btn-extra-menu');
+  if (instant) panel?.classList.add('menu-resetting');
+  panel?.classList.toggle('open', open);
+  if (button) {
+    button.classList.toggle('open', open);
+    button.setAttribute('aria-expanded', String(open));
+    button.querySelector('.ctrl-menu-icon').textContent = open ? '▼' : '☰';
+  }
+  if (instant && panel) requestAnimationFrame(() => panel.classList.remove('menu-resetting'));
+}
+function closeExtraMenu(options = {}) {
+  (options.scope ? [options.scope] : ['main', 'dock']).forEach(scope => {
+    setExtraMenuOpen(scope, false, options.instant);
   });
+}
+function toggleExtraMenu(scope = 'main') {
+  setExtraMenuOpen(scope, !extraMenuState[scope]);
 }
 
 /* ════════════════════════════════════════════════
@@ -4795,12 +4805,13 @@ function initCardMinimap() {
   }
   const popupObserver = new MutationObserver(() => {
     if (!document.getElementById('screen-create').classList.contains('active')
-      || document.querySelector('.detail-overlay.active, .status-overlay.active, .app-dialog-overlay.active, #extra-menu-panel.open')
+      || document.querySelector('.detail-overlay.active, .status-overlay.active, .app-dialog-overlay.active, .extra-menu-panel.open')
       || !overlay.hidden) cancelSectionScroll();
   });
   for (const node of [document.getElementById('screen-create'), overlay,
     document.getElementById('detail-overlay'), document.getElementById('status-overlay'),
-    document.getElementById('app-dialog-overlay'), document.getElementById('extra-menu-panel')]) {
+    document.getElementById('app-dialog-overlay'), document.getElementById('extra-menu-panel'),
+    document.getElementById('card-extra-menu-panel')]) {
     popupObserver.observe(node, { attributes: true, attributeFilter: ['class', 'hidden'] });
   }
   window.addEventListener('resize', cancelSectionScroll, { passive: true });
@@ -4835,7 +4846,7 @@ function initCardMinimap() {
     cancelSectionScroll();
     const page = activePage();
     if (!page) return;
-    if (extraMenuOpen) closeExtraMenu({ instant: true });
+    if (isExtraMenuOpen()) closeExtraMenu({ instant: true });
     const cards = page.minimapCards || [];
     const outline = buildCardMinimapGroups(cards);
     const renderedCards = page.querySelectorAll('.data-card');

@@ -59,7 +59,7 @@
     <button class="home-link pressable" id="btn-narrative" onclick="goToNarrative()">스토리 구조</button>
     <button class="home-link pressable" id="btn-create" onclick="goToCreate()">창작 시작</button>
   </div>
-  <p class="home-version">v26.1013.1221</p>
+  <p class="home-version">v26.1013.1423</p>
 </div>
 
 
@@ -193,7 +193,7 @@
    <span>검색 · 준비 중</span>
  </button>
  <div class="ctrl-address" id="ctrl-address" aria-label="주소창"></div>
-  <button type="button" class="ctrl-btn ctrl-btn-menu pressable" id="btn-extra-menu" onclick="toggleExtraMenu()">
+  <button type="button" class="ctrl-btn ctrl-btn-menu pressable" id="btn-extra-menu" aria-controls="extra-menu-panel" aria-expanded="false" onclick="toggleExtraMenu('main')">
     <!-- 닫힌 메뉴 버튼(☰ 상태) ooo　점3개 open이전 상태   예: images/menu/menu-closed.png -->
     <img class="ctrl-menu-img ctrl-menu-img-closed" src="images/core/buttons/menu-button-on.webp" alt="" aria-hidden="true" />
     <!-- 열린 메뉴 버튼(▼ 상태)  off를 위한  메뉴버튼  -->
