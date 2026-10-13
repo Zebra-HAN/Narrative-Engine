@@ -3433,6 +3433,7 @@ function renderDetailIdeaBlock(subId, globalIdx, itemIdx, item, isChecked) {
     <button
       type="button"
       class="detail-idea-block pressable${isChecked ? ' checked' : ''}"
+      ${isCardLocked(subId, globalIdx) ? 'disabled' : ''}
       onclick="toggleDetailCheck('${subId}', ${globalIdx}, ${itemIdx})"
       aria-pressed="${isChecked ? 'true' : 'false'}"
     >${escapeHtml(item)}</button>`;
@@ -3501,6 +3502,7 @@ let globalItemIdx = 0;
           <button
             type="button"
             class="detail-sub-image-row pressable${subImageChecked ? ' checked' : ''}"
+            ${isCardLocked(focusedCard.subId, focusedCard.idx) ? 'disabled' : ''}
             onclick="toggleSubImageCheck('${focusedCard.subId}', ${focusedCard.idx})"
             aria-pressed="${subImageChecked ? 'true' : 'false'}"
           >
@@ -3540,6 +3542,7 @@ function showDetailOverlay() {
 }
 
 function toggleDetailCheck(subId, globalIdx, lineIdx) {
+  if (isCardLocked(subId, globalIdx)) return;
   const detailKey = `${subId}__${globalIdx}`;
 
   // selectedDetails 초기화
@@ -3580,6 +3583,7 @@ function toggleDetailCheck(subId, globalIdx, lineIdx) {
 
 
 function toggleSubImageCheck(subId, globalIdx) {
+  if (isCardLocked(subId, globalIdx)) return;
   const detailKey = `${subId}__${globalIdx}`;
 
   if (selectedSubImages[detailKey]) {
