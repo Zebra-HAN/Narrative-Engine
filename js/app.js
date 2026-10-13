@@ -2076,8 +2076,17 @@ function switchNav(navId, skipAnimation, options = {}, backgroundPrepared = fals
   return backgroundReady;
 }
 
+// Session-only positions, keyed by the owner of the currently rendered strip.
+const categoryScrollPositions = new Map();
 function renderSubnav(navId, animate) {
   const scroll = document.getElementById('subnav-scroll');
+  const previousNav = scroll.dataset.navId;
+  if (previousNav) {
+    categoryScrollPositions.set(previousNav, Math.max(0, Math.min(scroll.scrollLeft,
+      scroll.scrollWidth - scroll.clientWidth)));
+  }
+  const savedPosition = categoryScrollPositions.get(navId) || 0;
+  scroll.dataset.navId = navId;
   scroll.innerHTML = '';
 
   const subs = NAV_DATA[navId].subs;
@@ -2099,6 +2108,13 @@ function renderSubnav(navId, animate) {
     `;
     scroll.appendChild(item);
   });
+  // Reading the completed strip's range resolves layout. Restore before paint,
+  // with no smooth scroll and no frame in the previous owner's position.
+  const previousBehavior = scroll.style.scrollBehavior;
+  scroll.style.scrollBehavior = 'auto';
+  scroll.scrollTo({ left: Math.max(0, Math.min(savedPosition,
+    scroll.scrollWidth - scroll.clientWidth)), behavior: 'instant' });
+  scroll.style.scrollBehavior = previousBehavior;
 }
 
 /* ════════════════════════════════════════════════
