@@ -117,6 +117,7 @@ const NAV_IMAGE_VERSION = '20261005-1';
 
 const CORE_IMAGE_SOURCES = [
   'images/core/home/forestglow.jpg', 'images/core/home/royal-banner.webp',
+  'images/core/sub-nav/title_card.webp',
   'images/core/buttons/top_panel.webp', 'images/core/buttons/top_icon.webp',
   'images/core/buttons/bottom_panel.jpg', 'images/core/buttons/check.webp',
   'images/core/buttons/lock.webp', 'images/core/buttons/cancel.webp',
@@ -4938,8 +4939,13 @@ function createPageTitleCard(group, subId) {
   const frame = document.createElement('button');
   frame.type = 'button';
   frame.className = 'page-title-card pressable';
-  IMAGE_LOADER.load('images/core/sub-nav/title_card.webp').then(ready => {
+  const bannerSource = 'images/core/sub-nav/title_card.webp';
+  const bannerReady = IMAGE_LOADER.isReady(bannerSource);
+  frame.dataset.bannerReady = String(bannerReady);
+  frame.setAttribute('aria-hidden', String(!bannerReady));
+  IMAGE_LOADER.load(bannerSource).then(ready => {
     frame.dataset.bannerReady = String(ready);
+    frame.setAttribute('aria-hidden', String(!ready));
   });
   frame.dataset.imageLayout = 'square';
   frame.setAttribute('aria-label', `${group.label || ''} 상세 정보 보기`);

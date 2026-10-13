@@ -148,9 +148,13 @@
 #screen-create .card-controls-dock .address-tag.is-pressing { transform: scale(0.94); transition-duration: 80ms; }
 #screen-create .card-controls-dock :is(.card-minimap-toggle, #card-menu-toggle) { border-width: 1px; }
 
-/* One fixed-ratio banner for every group. Loading/failure retains the quiet
-   blue fallback without changing geometry or stretching the banner artwork. */
+/* One fixed-ratio banner for every group. Reserve its geometry while decoding;
+   loading/failure never paints the former CSS panel. */
 .page-title-card {
+  visibility: hidden;
+  background: none;
+  box-shadow: none;
+  border-radius: 0;
   width: 100%;
   aspect-ratio: 1654 / 1072;
   margin-top: 20px;
@@ -161,6 +165,7 @@
   grid-template-areas: "hint hint" "media copy" "footer footer";
 }
 .page-title-card[data-banner-ready="true"] {
+  visibility: inherit;
   background: url('../images/core/sub-nav/title_card.webp') center / contain no-repeat;
   box-shadow: none;
   border-radius: 0;
