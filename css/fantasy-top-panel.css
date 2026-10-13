@@ -508,10 +508,10 @@
 }
 
 /* New green selection uses the same layered structure and glow geometry. */
-#screen-create .data-card.selected:not(.locked):not(.card-info-active) {
+#screen-create .data-card.selected:not(.locked) {
   filter: brightness(1.14) saturate(1.13);
 }
-#screen-create .data-card.selected:not(.locked):not(.card-info-active)::before {
+#screen-create .data-card.selected:not(.locked)::before {
   content: '';
   position: absolute;
   z-index: 4;
@@ -529,18 +529,18 @@
     inset 0 0 26px rgba(0, 181, 53, .28);
 }
 
-/* Inactive selected titles match their green glow. */
-#screen-create .data-card.selected:not(.locked):not(.card-info-active) .card-name {
+/* Selection overrides click gold immediately, including the title. */
+#screen-create .data-card.selected:not(.locked) .card-name {
   color: #087a25;
   font-weight: 500;
   text-shadow: 0 1px 0 rgba(224, 255, 210, .9);
 }
 
-/* The original blue values now belong to locks; active cards keep gold. */
-#screen-create .data-card.locked:not(.card-info-active) {
+/* The original blue values belong to locks, overriding selection and click. */
+#screen-create .data-card.locked {
   filter: brightness(1.14) saturate(1.13);
 }
-#screen-create .data-card.locked:not(.card-info-active)::before {
+#screen-create .data-card.locked::before {
   border-color: rgba(244, 255, 255, 1);
   background:
     linear-gradient(135deg, rgba(190, 249, 255, .28), rgba(0, 137, 255, .09) 48%, rgba(90, 226, 255, .24)),
@@ -552,8 +552,8 @@
     inset 0 0 26px rgba(0, 103, 255, .28);
 }
 
-/* A clicked title remains the original warm orange, even when locked. */
-#screen-create .data-card.locked:not(.card-info-active) .card-name {
+/* A locked title uses its original blue even while the info panel is open. */
+#screen-create .data-card.locked .card-name {
   color: #004fb8;
   font-weight: 500;
   text-shadow: 0 1px 0 rgba(224, 253, 255, .9);
@@ -693,7 +693,7 @@
     0 0 42px 14px rgba(255, 145, 0, .25);
 }
 #screen-create .data-card.card-info-active .card-highlight-frame { opacity: 1; }
-#screen-create .data-card.selected:not(.locked):not(.card-info-active) .card-highlight-frame {
+#screen-create .data-card.selected:not(.locked) .card-highlight-frame {
   opacity: 1;
   border-color: #edffe9;
   box-shadow:
@@ -713,7 +713,7 @@
     0 0 47px 16px rgba(0, 154, 40, .28);
 }
 
-#screen-create .data-card.locked:not(.card-info-active) .card-highlight-frame {
+#screen-create .data-card.locked .card-highlight-frame {
   opacity: 1;
   border-color: #eaffff;
   box-shadow:
