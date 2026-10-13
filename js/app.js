@@ -545,6 +545,7 @@ let selectedCards = {};   // { subId: Set<idx> }
 let lockedCards = {};     // { subId: Set<idx> } - random/partial reset에서 유지할 카드
 let selectedDetails = {}; // { "subId__globalIdx": Set<detailItemIdx> }
 let selectedSubImages = {}; // { "subId__globalIdx": true }
+let selectedDescs = {}; // { "subId__globalIdx": true }, independent of card/detail selection
 let focusedCard  = null;  // { subId, idx, name, icon }
 let addressTrail = [];
 
@@ -3280,6 +3281,7 @@ function openLocationInfo(context = getInfoPanelContext()) {
   document.getElementById('detail-icon').innerHTML = renderIcon(icon, image, 'detail-card-img');
   document.getElementById('detail-name').textContent = item.label;
   document.getElementById('detail-desc').textContent = description;
+  configureDetailDescSelection();
   document.getElementById('detail-divider').style.display = detail ? '' : 'none';
   const body = document.getElementById('detail-body');
   body.replaceChildren();
@@ -3335,12 +3337,15 @@ function toggleCurrentCardLock() {
   const cardEl = getFocusedCardElement();
   if (cardEl) cardEl.classList.toggle('locked', isCardLocked(subId, idx));
   refreshCardInfo();
+  syncDetailDescSelection(subId, idx);
 }
 
 function clearCardDetailSelection(subId, idx) {
   const key = `${subId}__${idx}`;
   delete selectedDetails[key];
   delete selectedSubImages[key];
+  delete selectedDescs[key];
+  syncDetailDescSelection(subId, idx);
   document.querySelectorAll('#detail-body [onclick]').forEach(block => {
     if (block.getAttribute('onclick').includes(`('${subId}', ${idx},`) || block.getAttribute('onclick').includes(`('${subId}', ${idx})`)) {
       block.classList.remove('checked');
@@ -3351,7 +3356,7 @@ function clearCardDetailSelection(subId, idx) {
 
 function clearDeselectedDetails(subId) {
   const prefix = `${subId}__`;
-  new Set([...Object.keys(selectedDetails), ...Object.keys(selectedSubImages)])
+  new Set([...Object.keys(selectedDetails), ...Object.keys(selectedSubImages), ...Object.keys(selectedDescs)])
     .forEach(key => {
       if (key.startsWith(prefix)) {
         const idx = Number(key.slice(prefix.length));
@@ -3480,6 +3485,7 @@ function openDetailSheet(mode) {
     }
     nameEl.textContent = focusedCard.name;
     descEl.textContent = card?.desc || '';
+    configureDetailDescSelection(focusedCard.subId, focusedCard.idx);
 
     // 세부정보(detail) 파싱 및 선택 블록 렌더
     const detailKey = `${focusedCard.subId}__${focusedCard.idx}`;
@@ -3541,6 +3547,7 @@ divEl.style.display = 'none';
     }
 
   } else if (mode === 'category') {
+    configureDetailDescSelection();
     const navInfo = Object.values(NAV_DATA).find(n => n.subs.find(s => s.id === currentSubId));
     const sub = navInfo ? navInfo.subs.find(s => s.id === currentSubId) : null;
     iconEl.innerHTML   = sub ? renderIcon(sub.icon, sub.img, 'detail-card-img') : '✦';
@@ -3559,6 +3566,56 @@ function showDetailOverlay() {
     document.querySelector('.detail-overlay .popup-swipe-frame'),
     () => document.getElementById('detail-overlay').classList.remove('active')
   );
+}
+
+function syncDetailDescSelection(subId, idx) {
+  const element = document.getElementById('detail-desc');
+  const key = `${subId}__${idx}`;
+  if (element.dataset.descKey !== key) return;
+  const locked = isCardLocked(subId, idx);
+  element.classList.toggle('checked', Boolean(selectedDescs[key]));
+  element.setAttribute('aria-pressed', String(Boolean(selectedDescs[key])));
+  element.setAttribute('aria-disabled', String(locked));
+  element.tabIndex = locked ? -1 : 0;
+}
+
+function configureDetailDescSelection(subId = null, idx = null) {
+  const element = document.getElementById('detail-desc');
+  element.onclick = null;
+  element.onkeydown = null;
+  delete element.dataset.descKey;
+  element.classList.remove('card-desc-selectable', 'checked', 'pressable');
+  ['role', 'aria-pressed', 'aria-disabled', 'tabindex'].forEach(name => element.removeAttribute(name));
+  if (subId === null || !getCardByGlobalIdx(subId, idx)?.desc) return;
+  element.dataset.descKey = `${subId}__${idx}`;
+  element.classList.add('card-desc-selectable', 'pressable');
+  element.setAttribute('role', 'button');
+  element.onclick = () => toggleDescCheck(subId, idx);
+  element.onkeydown = event => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    if (!event.repeat) toggleDescCheck(subId, idx);
+  };
+  syncDetailDescSelection(subId, idx);
+}
+
+function toggleDescCheck(subId, idx) {
+  if (isCardLocked(subId, idx) || !getCardByGlobalIdx(subId, idx)?.desc) return;
+  const key = `${subId}__${idx}`;
+  if (selectedDescs[key]) {
+    delete selectedDescs[key];
+  } else {
+    selectedDescs[key] = true;
+    if (!selectedCards[subId]) selectedCards[subId] = new Set();
+    selectedCards[subId].add(idx);
+    renderSubnav(currentNav, false);
+    const activeSub = document.querySelector(`[data-sub-id="${currentSubId}"]`);
+    if (activeSub) activeSub.classList.add('active');
+    updateNavBadges();
+  }
+  syncDetailDescSelection(subId, idx);
+  _syncCardSelectedDOM(subId, idx);
+  refreshStatusIfOpen();
 }
 
 function toggleDetailCheck(subId, globalIdx, lineIdx) {
@@ -3733,7 +3790,7 @@ function renderStatusContent() {
             ? `<img class="status-chip-sub-img" src="${card.subImg}" alt="" draggable="false">`
             : '';
           const metaHtml = renderStatusCategoryMeta(sub.id, globalIdx);
-          const chipDescHtml = card.desc
+          const chipDescHtml = card.desc && selectedDescs[detailKey]
             ? `<span class="status-chip-desc">${card.desc}</span>`
             : '';
           const extraHtml = (detailHtml || subImageHtml)
@@ -4091,12 +4148,13 @@ async function fullReset() {
   UI_SOUND.play('delete');
   selectedCards = {};
   lockedCards = {};
-  Object.keys(selectedDetails).concat(Object.keys(selectedSubImages)).forEach(key => {
+  Object.keys(selectedDetails).concat(Object.keys(selectedSubImages), Object.keys(selectedDescs)).forEach(key => {
     const [subId, idx] = key.split('__');
     clearCardDetailSelection(subId, Number(idx));
   });
   selectedDetails = {};
    selectedSubImages = {};
+  selectedDescs = {};
   if (currentSubId) showCardPage(currentSubId, false);
   renderSubnav(currentNav, false);
   if (currentSubId) {
@@ -4411,6 +4469,8 @@ async function randomSelectCurrent() {
 
   selectedCards[currentSubId] = new Set(lockedCards[currentSubId] || []);
   selectedCards[currentSubId].add(pick.globalIdx);
+  if (pick.desc) selectedDescs[`${currentSubId}__${pick.globalIdx}`] = true;
+  syncDetailDescSelection(currentSubId, pick.globalIdx);
   clearDeselectedDetails(currentSubId);
 
   // UI 갱신
@@ -4454,6 +4514,8 @@ subs.forEach(sub => {
   const pick = allCards[Math.floor(Math.random() * allCards.length)];
   selectedCards[sub.id] = new Set(lockedCards[sub.id] || []);
   selectedCards[sub.id].add(pick.globalIdx);
+  if (pick.desc) selectedDescs[`${sub.id}__${pick.globalIdx}`] = true;
+  syncDetailDescSelection(sub.id, pick.globalIdx);
   clearDeselectedDetails(sub.id);
 });
    

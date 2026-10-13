@@ -385,3 +385,16 @@
   white-space: pre-wrap;
 }
 .status-panel :is(.status-chip-img, .status-chip-sub-img) { border-color: #6989a544; }
+
+/* The existing card description becomes one independent optional idea. */
+.detail-desc.card-desc-selectable {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .18s ease, color .18s ease, transform .12s ease;
+}
+.detail-desc.card-desc-selectable.checked {
+  background: linear-gradient(150deg, #ead3a0, #c5a266);
+  color: #14243b;
+  border-color: #ead3a0;
+}
+.detail-desc.card-desc-selectable[aria-disabled="true"] { cursor: default; pointer-events: none; opacity: .75; }
