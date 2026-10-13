@@ -4870,6 +4870,36 @@ function initCardMinimap() {
 
 /* A scrolling group introduction, separate from selectable cards and section data.
    Frame, media and copy are independent hooks for later artwork replacements. */
+// Round the visible artwork, including letterboxing and the portrait crop,
+// rather than only the img element's (sometimes larger) rectangular box.
+function updateTitleImageClip(image) {
+  const frame = image.closest('.page-title-card');
+  if (!frame?.isConnected || !image.naturalWidth) return;
+  if (!['portrait', 'wide'].includes(frame.dataset.imageLayout)) return;
+  const media = image.parentElement;
+  const style = getComputedStyle(image);
+  const width = parseFloat(style.width), height = parseFloat(style.height);
+  if (!width || !height) return;
+  const imageRect = image.getBoundingClientRect(), mediaRect = media.getBoundingClientRect();
+  const scaleX = imageRect.width / width, scaleY = imageRect.height / height;
+  if (!scaleX || !scaleY) return;
+  const fit = style.objectFit === 'cover' ? Math.max : Math.min;
+  const scale = fit(width / image.naturalWidth, height / image.naturalHeight);
+  const horizontal = (width - image.naturalWidth * scale) / 2;
+  const vertical = (height - image.naturalHeight * scale) / 2;
+  const left = Math.max(0, horizontal, (mediaRect.left - imageRect.left) / scaleX);
+  const right = Math.max(0, horizontal, (imageRect.right - mediaRect.right) / scaleX);
+  const top = Math.max(0, vertical, (mediaRect.top - imageRect.top) / scaleY);
+  const bottom = Math.max(0, vertical, (imageRect.bottom - mediaRect.bottom) / scaleY);
+  image.style.clipPath = `inset(${top}px ${right}px ${bottom}px ${left}px round 6px)`;
+}
+const titleImageClipObserver = new ResizeObserver(entries => {
+  entries.forEach(({ target }) => {
+    if (!target.isConnected) titleImageClipObserver.unobserve(target);
+    else updateTitleImageClip(target);
+  });
+});
+
 function createPageTitleCard(group, subId) {
   const frame = document.createElement('button');
   frame.type = 'button';
@@ -4909,6 +4939,10 @@ function createPageTitleCard(group, subId) {
       classify(image);
       image.classList.add('image-ready');
       media.replaceChildren(image);
+      if (['portrait', 'wide'].includes(frame.dataset.imageLayout)) {
+        titleImageClipObserver.observe(image);
+        updateTitleImageClip(image);
+      }
     }, { once: true });
     image.addEventListener('error', fallback, { once: true });
     image.src = group.img;
@@ -4916,6 +4950,10 @@ function createPageTitleCard(group, subId) {
       classify(image);
       image.classList.add('image-ready');
       media.replaceChildren(image);
+      if (['portrait', 'wide'].includes(frame.dataset.imageLayout)) {
+        titleImageClipObserver.observe(image);
+        updateTitleImageClip(image);
+      }
     }
   }
   const copy = document.createElement('span');
