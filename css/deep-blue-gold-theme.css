@@ -642,3 +642,32 @@
 .card-minimap-content::before, .card-minimap-content::after {
   content: ''; display: block; height: var(--outline-scroll-space, 0px);
 }
+
+/* Locked text keeps its selected surface, with a clear muted treatment. */
+.detail-body .detail-idea-block:disabled,
+.detail-desc.card-desc-selectable[aria-disabled="true"] {
+  filter: saturate(.35) brightness(.72);
+}
+
+/* TOP navigation artwork is shown whole; its neighboring information plate stays. */
+#screen-create:not(.card-controls-mode) .info-visual::after { display: none; }
+#screen-create:not(.card-controls-mode) .info-visual .info-icon-img,
+#screen-create:not(.card-controls-mode) .info-visual .info-icon-text {
+  border-radius: 0;
+  overflow: visible;
+  transform: none;
+  background: transparent;
+}
+#screen-create:not(.card-controls-mode) .info-visual .info-icon-img { object-fit: contain; }
+
+/* Larger native-ratio icons in the selected ideas window only. */
+.status-panel .status-nav-icon { width: 50px; height: 50px; flex-basis: 50px; }
+.status-panel .status-category-mark {
+  width: 36px;
+  height: 36px;
+  flex-basis: 36px;
+  align-self: center;
+  transform: translateY(2px);
+  margin-right: -2px;
+}
+.status-panel .status-category-icon-text { font-size: 1.24rem; }
