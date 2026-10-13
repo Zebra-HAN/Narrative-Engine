@@ -2793,7 +2793,16 @@ function measureCardGeometry(card) {
   }
   const dock = document.getElementById('card-controls-dock');
   const pageRect = page.getBoundingClientRect();
+  const grid = card.closest('.card-grid-section') || card.closest('.card-grid');
+  const gridStyle = getComputedStyle(grid);
+  const chunkStyle = getComputedStyle(card.closest('.card-grid'));
+  const columns = Math.max((gridStyle.gridTemplateColumns.match(/[\d.]+px/g) || []).length,
+    (chunkStyle.gridTemplateColumns.match(/[\d.]+px/g) || []).length);
+  // Match the three-column layout's 12px side margins and 8px column gap.
+  const threeColumnWidth = Math.round((grid.clientWidth + parseFloat(gridStyle.marginLeft)
+    + parseFloat(gridStyle.marginRight) - 24 - 2 * 8) / 3);
   return { card, page, left, top, width: card.offsetWidth, height: card.offsetHeight,
+    actionReferenceWidth: columns > 3 ? Math.max(card.offsetWidth, threeColumnWidth) : card.offsetWidth,
     cardRect: card.getBoundingClientRect(), pageRect,
     scrollTop: page.scrollTop, scrollLeft: page.scrollLeft,
     pageWidth: page.clientWidth, scrollWidth: page.scrollWidth,
@@ -2805,8 +2814,10 @@ function positionCardEdgeActions({ ensureVisible = false, geometry = null } = {}
   const group = cardEdgeActions?.group;
   if (!card || !group) return;
   const g = geometry || measureCardGeometry(card);
-  const gap = Math.min(4, g.width / 18);
-  const size = Math.min(110, (g.width - Math.min(6, g.width / 12)) / 2);
+  const width = g.actionReferenceWidth;
+  const size = Math.min(110, (width - Math.min(6, width / 12)) / 2);
+  // Keep at least one pixel between the scaled artwork as well as hit boxes.
+  const gap = Math.max(1, (size - 6) * 1.1 - size + 1);
   const key = [card, g.left, g.top, g.width, g.height];
   const previous = cardEdgeActions.geometry;
   if (!previous || key.some((value, index) => value !== previous[index])) {
@@ -2814,7 +2825,7 @@ function positionCardEdgeActions({ ensureVisible = false, geometry = null } = {}
     group.style.setProperty('--card-action-size', `${size}px`);
     group.style.gap = `${gap}px`;
     group.style.width = `${size * 2 + gap}px`;
-    group.style.left = `${g.left + (Math.min(6, g.width / 12) - gap) / 2}px`;
+    group.style.left = `${Math.max(0, Math.min(g.pageWidth - size * 2 - gap, g.left + (g.width - size * 2 - gap) / 2))}px`;
     group.style.top = `${g.top + g.height + 6}px`;
     cardEdgeActions.geometry = key;
   }
@@ -2872,7 +2883,7 @@ function updateCardEdgeActions({ immediate = false, deferPosition = false } = {}
       group.appendChild(button);
       return button;
     };
-    cardEdgeActions = { group,
+    cardEdgeActions = { group, retiring: new Map(),
       lock: makeButton('card-info-lock', toggleCurrentCardLock),
       select: makeButton('card-info-select', selectCurrentCard) };
     const area = document.getElementById('center-area');
@@ -2915,7 +2926,8 @@ function updateCardEdgeActions({ immediate = false, deferPosition = false } = {}
   lock.setAttribute('aria-label', locked ? '잠금 해제' : '잠금');
   setCardActionImage(lock, `images/core/buttons/lock-${locked ? 'on' : 'off'}.webp`, `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="${locked ? 'M8 10V7a4 4 0 0 1 8 0v3' : 'M8 10V7a4 4 0 0 1 8 0'}"/><path d="M12 14v3"/></svg>`);
   if (active && !deferPosition) positionCardEdgeActions({ ensureVisible: true });
-  setCardEdgeVisibility(group, active, immediate);
+  // A deferred card switch must position the new row before testing reentry.
+  if (!active || !deferPosition) setCardEdgeVisibility(group, active, immediate);
 }
 
 function retireCardActions(group) {
@@ -2926,8 +2938,8 @@ function retireCardActions(group) {
     button.style.transform = style.transform;
     button.style.opacity = style.opacity;
   });
-  cardEdgeActions.retiring?.remove();
-  cardEdgeActions.retiring = group;
+  const card = cardEdgeActions.card;
+  cardEdgeActions.retiring.set(card, group);
   if (!group.parentElement) cardEdgeActions.group.parentElement.appendChild(group);
   group.inert = true;
   group.setAttribute('aria-hidden', 'true');
@@ -2938,7 +2950,7 @@ function retireCardActions(group) {
   ], { duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 190, easing: 'ease-in', fill: 'forwards' }));
   Promise.allSettled(animations.map(animation => animation.finished)).then(() => {
     group.remove();
-    if (cardEdgeActions.retiring === group) cardEdgeActions.retiring = null;
+    if (cardEdgeActions.retiring.get(card) === group) cardEdgeActions.retiring.delete(card);
   });
 }
 
@@ -2948,8 +2960,8 @@ function setCardEdgeVisibility(group, visible, immediate) {
   if (!visible) {
     if (!immediate && group.classList.contains('is-visible')) retireCardActions(group.cloneNode(true));
     if (immediate) {
-      cardEdgeActions.retiring?.remove();
-      cardEdgeActions.retiring = null;
+      cardEdgeActions.retiring.forEach(row => row.remove());
+      cardEdgeActions.retiring.clear();
     }
     cardEdgeActions.animations?.forEach(animation => animation.cancel());
     group.classList.remove('is-visible');
@@ -2959,7 +2971,7 @@ function setCardEdgeVisibility(group, visible, immediate) {
   if (group.classList.contains('is-visible')) return;
   // Reopening the same card reverses its current presentation instead of
   // drawing a second row over the one still retreating behind the card.
-  const retiring = cardEdgeActions.retiring;
+  const retiring = cardEdgeActions.retiring.get(cardEdgeActions.card);
   let entryStart = null;
   if (retiring?.parentElement === group.parentElement
       && retiring.style.left === group.style.left && retiring.style.top === group.style.top) {
@@ -2968,7 +2980,7 @@ function setCardEdgeVisibility(group, visible, immediate) {
       return { transform: style.transform, opacity: style.opacity };
     });
     retiring.remove();
-    cardEdgeActions.retiring = null;
+    cardEdgeActions.retiring.delete(cardEdgeActions.card);
   }
   group.classList.remove('is-suspended');
   group.classList.add('is-visible');
@@ -3116,6 +3128,7 @@ function renderCardInfo() {
   const geometry = measureCardGeometry(cardEl);
   positionCardInfo(panel, cardEl, geometry);
   positionCardEdgeActions({ ensureVisible: true, geometry });
+  setCardEdgeVisibility(cardEdgeActions.group, true, false);
 }
 
 function toggleCardInfo(card) {
