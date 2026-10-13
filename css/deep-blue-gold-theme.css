@@ -514,3 +514,64 @@
   flex: 0 0 20px;
   object-fit: contain;
 }
+
+/* Frozen ideas remain readable and retain their independent selected appearance. */
+.detail-body .detail-idea-block:disabled {
+  pointer-events: none;
+  background: linear-gradient(165deg, #bdcad4, #b1c0cc 50%, #a3b4c2);
+  color: #2b4055;
+  box-shadow: inset 0 0 0 1px #58708455, inset 0 -2px 3px #1e344844;
+}
+.detail-body .detail-idea-block.checked:disabled {
+  background: linear-gradient(165deg, #d4cbb8, #c7bba3 50%, #bdb099);
+  color: #533c27;
+  box-shadow: inset 0 0 0 1px #8c795e66, inset 0 -2px 3px #51493833;
+}
+
+/* Only the utility row occupies this metal plate; main panel artwork is intact. */
+#screen-create .card-controls-dock {
+  border-color: transparent;
+  background: linear-gradient(155deg, #243d59, #102439) padding-box,
+    linear-gradient(135deg, #462817, #d98025 12%, #ffd46a 26%, #e8ad36 43%,
+      #84501f 60%, #d98025 75%, #ffce61 90%, #462817) border-box;
+  box-shadow: inset 0 0 0 .6px #ffd46a55, inset 0 2px 1px #fff0ad44,
+    inset 0 -2px 3px #6a380e66, 0 3px 7px #0c1c2e66;
+}
+#screen-create.card-controls-mode > .card-panel-toggle {
+  position: absolute;
+  top: auto;
+  bottom: calc(var(--card-dock-plate-height, 65px) - 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 41;
+  width: 50px;
+  height: 50px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #f0e9dc;
+  display: grid;
+  place-items: center;
+}
+#screen-create.card-controls-mode > .card-panel-toggle[hidden] { display: none; }
+#screen-create.card-controls-mode > .card-panel-toggle::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 25px;
+  height: 25px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px solid #d0b88a66;
+  background: linear-gradient(155deg, #2a4b6299, #19354b99);
+  box-shadow: inset 0 1px 0 #f0e9dc22, 0 1px 3px #10243955;
+  pointer-events: none;
+}
+#screen-create.card-controls-mode > .card-panel-toggle .card-panel-arrow {
+  position: relative;
+  pointer-events: none;
+  transition: transform 180ms ease;
+}
+#screen-create.card-controls-mode > .card-panel-toggle[aria-expanded="true"] .card-panel-arrow { transform: rotate(180deg); }

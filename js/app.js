@@ -1603,15 +1603,18 @@ function initScrollResponsiveChrome() {
   cardMenuPanel.querySelectorAll('[id]').forEach(node => node.id = `card-${node.id}`);
   dock.appendChild(cardMenuPanel);
   cardMenu.setAttribute('aria-expanded', 'false');
-  dock.prepend(panelToggle);
   row.appendChild(document.getElementById('card-minimap-toggle'));
   row.appendChild(cardMenu);
   let cardPanelMode = false;
+  let manualHierarchyPanels = false;
   let dockMode = false;
   function measureDock() {
     if (!dockMode) return;
     const dockBottom = parseFloat(getComputedStyle(dock).bottom) || 0;
-    screen.style.setProperty('--card-dock-height', `${dock.offsetHeight + dockBottom}px`);
+    const plateHeight = dock.offsetHeight + dockBottom;
+    screen.style.setProperty('--card-dock-plate-height', `${plateHeight}px`);
+    // Keep the previous scroll clearance while the 50px toggle leaves dock flow.
+    screen.style.setProperty('--card-dock-height', `${plateHeight + 50 + 3}px`);
     const page = area.querySelector('.center-page.active[data-chrome-view="cards"]');
     const card = page?.querySelector('.data-card');
     // Reserve only the actual two-button row beneath the final card.
@@ -1734,7 +1737,8 @@ function initScrollResponsiveChrome() {
     });
   }
 
-  function setProgress(progress) {
+  function setProgress(progress, { manual = false } = {}) {
+    if (manualHierarchyPanels && progress === 0 && !manual) return;
     if (cardPanelMode) {
       if (progress === 0 && cardPanelsLocked) return;
       if (progress > 0) {
@@ -1742,6 +1746,7 @@ function initScrollResponsiveChrome() {
         if (panelToggle) panelToggle.setAttribute('aria-expanded', 'false');
       }
     }
+    if (dockMode && progress > 0) panelToggle?.setAttribute('aria-expanded', 'false');
     // 하단 크롬이 숨기 시작하면 열린 유틸리티 메뉴도 함께 닫는다.
     // 메뉴를 단순히 아래로 끌고 가지 않아 다음 표시 때 닫힌 상태가 유지된다.
     const closingMenu = progress > 0 ? 'main' : 'dock';
@@ -1755,7 +1760,7 @@ function initScrollResponsiveChrome() {
     cardPanelsLocked = !opening;
     panelToggle.setAttribute('aria-expanded', String(opening));
     resetGesture();
-    if (opening) setProgress(0);
+    if (opening) setProgress(0, { manual: true });
     else setProgress(1);
   });
 
@@ -1866,6 +1871,7 @@ function initScrollResponsiveChrome() {
       || (view === 'subgroup' && (previousView === 'cards'
         || (targetTopProgress === 1 && targetBottomProgress === 1)));
     cardPanelMode = view === 'cards';
+    manualHierarchyPanels = view === 'group' || view === 'subgroup';
     dockMode = hierarchyView;
     syncCardDock();
     // Suppress route-level CSS intros throughout the hierarchy. Explicit panel
@@ -3338,6 +3344,14 @@ function toggleCurrentCardLock() {
   if (cardEl) cardEl.classList.toggle('locked', isCardLocked(subId, idx));
   refreshCardInfo();
   syncDetailDescSelection(subId, idx);
+  // Synchronize the existing disabled presentation without changing any choices.
+  document.querySelectorAll('#detail-body button[onclick]').forEach(button => {
+    const action = button.getAttribute('onclick');
+    if (action.includes(`toggleDetailCheck('${subId}', ${idx},`)
+        || action.includes(`toggleSubImageCheck('${subId}', ${idx})`)) {
+      button.disabled = isCardLocked(subId, idx);
+    }
+  });
 }
 
 function clearCardDetailSelection(subId, idx) {
