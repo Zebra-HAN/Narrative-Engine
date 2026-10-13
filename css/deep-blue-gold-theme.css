@@ -330,3 +330,58 @@
   .detail-section { padding: 6px 4px 4px; }
   .detail-section-title { font-size: .66rem; }
 }
+
+/* Idea integration only: retain vertical bounds and two columns, use screen width. */
+.status-overlay {
+  padding-left: max(3px, env(safe-area-inset-left, 0px));
+  padding-right: max(3px, env(safe-area-inset-right, 0px));
+}
+.status-overlay .popup-swipe-frame, .status-panel { max-width: none; }
+.status-panel .status-body { padding-left: 5px; padding-right: 5px; }
+.status-panel .status-two-col { gap: 6px; }
+.status-panel .status-col { max-width: calc((100% - 6px) / 2); }
+.status-panel .status-chip {
+  padding: 6px 5px;
+  background: linear-gradient(150deg, #c9deed, #b5cde1);
+  color: #172e49;
+  box-shadow: none;
+}
+.status-panel .status-chip-name { color: #162c46; }
+.status-panel .status-chip-desc { color: #304a65; }
+.status-panel .status-chip-extra {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.status-panel .status-chip-details { gap: 7px; }
+.status-idea-section {
+  min-width: 0;
+  padding: 6px 4px 4px;
+  border: 0;
+  border-radius: 7px;
+  background: #dcebf5;
+  color: #1f3b59;
+}
+.status-idea-section-title {
+  margin: 0 2px 5px;
+  font: inherit;
+  font-size: .64rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #183b5e;
+  overflow-wrap: anywhere;
+}
+.status-idea-plates { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.status-panel .status-chip-detail-line {
+  display: block;
+  padding: 6px 5px;
+  border: 0;
+  border-radius: 6px;
+  background: #f5faff;
+  color: #19344f;
+  font-size: .64rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+.status-panel :is(.status-chip-img, .status-chip-sub-img) { border-color: #6989a544; }

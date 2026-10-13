@@ -3671,6 +3671,33 @@ function closeStatusOverlay(e) {
     setBottomNavState(currentNav);
 }
 
+// Resolve selected indices through the same sections used by the detail sheet.
+// Group order follows the first selected idea; order within each group stays intact.
+function renderStatusDetailIdeas(card, checkedLines) {
+  if (!checkedLines?.size) return '';
+  const entries = getCardDetailColumns(card).flatMap(column =>
+    column.sections.flatMap((section, sectionIdx) => section.items.map(item => ({
+      key: `${column.key}:${sectionIdx}`, title: section.title, text: item.display
+    })))
+  );
+  const groups = new Map();
+  checkedLines.forEach(itemIdx => {
+    const entry = entries[itemIdx];
+    if (!entry) return;
+    if (!groups.has(entry.key)) groups.set(entry.key, { title: entry.title, items: [] });
+    groups.get(entry.key).items.push(entry.text);
+  });
+  if (!groups.size) return '';
+  return `<div class="status-chip-details">${Array.from(groups.values()).map(group =>
+    `<section class="status-idea-section">
+      ${group.title ? `<h4 class="status-idea-section-title">${escapeHtml(group.title)}</h4>` : ''}
+      <div class="status-idea-plates">${group.items.map(item =>
+        `<span class="status-chip-detail-line">${escapeHtml(item)}</span>`
+      ).join('')}</div>
+    </section>`
+  ).join('')}</div>`;
+}
+
 function renderStatusContent() {
   const body = document.getElementById('status-body');
 
@@ -3698,17 +3725,7 @@ function renderStatusContent() {
           // 선택된 세부정보 줄 수집
           const detailKey = `${sub.id}__${globalIdx}`;
           const checkedLines = selectedDetails[detailKey];
-          let detailHtml = '';
-          if (checkedLines && checkedLines.size > 0) {
-            const detailItems = getCardDetailItems(card);
-            const picked = [];
-            checkedLines.forEach(itemIdx => {
-              if (detailItems[itemIdx]) picked.push(detailItems[itemIdx]);
-            });
-            if (picked.length > 0) {
-              detailHtml = `<div class="status-chip-details">${picked.map(item => `<span class="status-chip-detail-line">${escapeHtml(item)}</span>`).join('')}</div>`;
-            }
-          }
+          const detailHtml = renderStatusDetailIdeas(card, checkedLines);
           const chipImgHtml = card.img
             ? `<img class="status-chip-img" src="${card.img}" alt="" draggable="false">`
             : '';
@@ -3836,6 +3853,8 @@ async function prepareCloneForSvg(root) {
     if (!original) return;
     copyComputedStyle(original, node);
   });
+  // Export a settled panel; copied animation styles would replay its entrance.
+  root.style.animation = 'none';
   root.style.width = `${sourceRoot.getBoundingClientRect().width}px`;
   root.style.height = 'auto';
   root.style.maxHeight = 'none';
@@ -3861,25 +3880,22 @@ function canvasToBlob(canvas) {
 async function renderStatusSlice(root, width, top, height, scale) {
   const serialized = new XMLSerializer().serializeToString(root);
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width * scale}" height="${height * scale}" viewBox="0 0 ${width} ${height}"><foreignObject width="${width}" height="${height}"><div xmlns="http://www.w3.org/1999/xhtml" style="width:${width}px;transform:translateY(-${top}px);transform-origin:top left">${serialized}</div></foreignObject></svg>`;
-  const blobUrl = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }));
-  try {
-    const image = new Image();
-    await new Promise((resolve, reject) => {
-      image.onload = resolve;
-      image.onerror = () => reject(new Error('캡처 이미지를 렌더링하지 못했습니다.'));
-      image.src = blobUrl;
-    });
-    const canvas = document.createElement('canvas');
-    canvas.width = Math.ceil(width * scale);
-    canvas.height = Math.ceil(height * scale);
-    const context = canvas.getContext('2d');
-    context.fillStyle = '#f9f9f9';
-    context.fillRect(0, 0, canvas.width, canvas.height);
-    context.drawImage(image, 0, 0, canvas.width, canvas.height);
-    return canvasToBlob(canvas);
-  } finally {
-    URL.revokeObjectURL(blobUrl);
-  }
+  // A data URL keeps foreignObject rasterization origin-clean for PNG export.
+  const svgUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  const image = new Image();
+  await new Promise((resolve, reject) => {
+    image.onload = resolve;
+    image.onerror = () => reject(new Error('캡처 이미지를 렌더링하지 못했습니다.'));
+    image.src = svgUrl;
+  });
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.ceil(width * scale);
+  canvas.height = Math.ceil(height * scale);
+  const context = canvas.getContext('2d');
+  context.fillStyle = '#f9f9f9';
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.drawImage(image, 0, 0, canvas.width, canvas.height);
+  return canvasToBlob(canvas);
 }
 
 async function deliverExportFiles(files) {
@@ -3919,8 +3935,9 @@ async function exportStatusAsPng() {
     await waitForExportImages(clone);
     await prepareCloneForSvg(clone);
     clone.querySelector('.status-header-actions')?.remove();
-    const width = Math.ceil(clone.scrollWidth);
-    const fullHeight = Math.ceil(clone.scrollHeight);
+    const bounds = clone.getBoundingClientRect();
+    const width = Math.ceil(Math.max(clone.scrollWidth, bounds.width));
+    const fullHeight = Math.ceil(Math.max(clone.scrollHeight, bounds.height));
     // 16 MP / 8192 px stays below conservative iOS Safari canvas limits.
     const scale = Math.min(2, 8192 / width, Math.sqrt(16000000 / (width * Math.min(fullHeight, 7000))));
     const sliceHeight = Math.max(1, Math.floor(Math.min(7000, 8192 / scale)));
