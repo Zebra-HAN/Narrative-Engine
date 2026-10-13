@@ -527,11 +527,13 @@ document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') restoreCreativeBackgroundAfterPageResume();
 });
 
-function beginBackgroundCategorySession(subId) {
-  // Keep every route's selection for the lifetime of the creative session.
-  // The activation key already contains nav/stage/path, so retaining entries
-  // cannot leak one category's image into another. Clearing here used to make
-  // a revisited group pick a new random card background instead of restoring it.
+function beginBackgroundCategorySession(subId, navId = currentNav) {
+  // Keep the TOP ancestor, but start a fresh category exploration. Image decode
+  // caches and independent category strip positions are intentionally untouched.
+  const topKey = `${navId}:top:top`;
+  for (const key of creativeBackgroundMemory.keys()) {
+    if (key !== topKey) creativeBackgroundMemory.delete(key);
+  }
   backgroundSessionSubId = subId;
 }
 
@@ -1050,12 +1052,12 @@ function navigateAddressTag(index) {
   if (!item) return;
 
   if (item.type === 'nav') {
-    switchNav(item.navId, false, { force: true });
+    switchNav(item.navId, false, { force: true, restoreBackground: true });
     return;
   }
 
   if (item.type === 'sub') {
-    selectSub(item.subId, item.navId);
+    selectSub(item.subId, item.navId, false, true);
     return;
   }
 
@@ -2057,12 +2059,14 @@ function setBottomNavState(navId) {
    주 내비게이션 전환
 ════════════════════════════════════════════════ */
 function switchNav(navId, skipAnimation, options = {}, backgroundPrepared = false) {
-  if (navId === currentNav && !skipAnimation && addressTrail.length > 0 && !options.force) return;
-
   const prev = currentNav;
   if (!backgroundPrepared) {
-    // Route memory belongs to the creative session, including NAV backtracking.
-    // applyCreativeBackground invalidates the previous pending request itself.
+    // Explicit NAV entry starts a new exploration; ancestor navigation restores
+    // the current one. Reset only chosen routes, never decoded image caches.
+    if (!options.restoreBackground) {
+      creativeBackgroundMemory.clear();
+      backgroundSessionSubId = null;
+    }
     return applyCreativeBackground({ navId, stage: 'top', screenKey: 'top' },
       () => switchNav(navId, skipAnimation, options, true));
   }
@@ -2133,14 +2137,14 @@ function renderSubnav(navId, animate) {
 /* ════════════════════════════════════════════════
    하위 메뉴 선택
 ════════════════════════════════════════════════ */
-function selectSub(subId, navId, backgroundPrepared = false) {
+function selectSub(subId, navId, backgroundPrepared = false, restoreBackground = false) {
   if (!backgroundPrepared) {
+    if (!restoreBackground) beginBackgroundCategorySession(subId, navId || currentNav);
     const grouped = Boolean(CARD_DATA[subId]?.groups);
     return applyCreativeBackground({ navId: navId || currentNav, stage: grouped ? 'group' : 'card',
-      screenKey: `${grouped ? 'group' : 'cards'}:${subId}` }, () => selectSub(subId, navId, true));
+      screenKey: `${grouped ? 'group' : 'cards'}:${subId}` }, () => selectSub(subId, navId, true, restoreBackground));
   }
   closeCardInfo();
-  beginBackgroundCategorySession(subId);
   // 이전 active 제거
   document.querySelectorAll('.subnav-item').forEach(el => el.classList.remove('active'));
   // 현재 active
