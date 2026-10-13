@@ -258,9 +258,9 @@
 /* Clip only the image viewport, never the banner or its external controls. */
 .page-title-card[data-image-layout] .page-title-media {
   overflow: hidden;
-  border-radius: 6px;
+  border-radius: 12px;
 }
-.page-title-card[data-image-layout] .page-title-image { border-radius: 6px; }
+.page-title-card[data-image-layout] .page-title-image { border-radius: 12px; }
 
 /* Same contain/center geometry as the former background, using the decoded node. */
 .page-title-card > .page-title-plate {

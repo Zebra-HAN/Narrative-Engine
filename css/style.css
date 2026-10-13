@@ -3532,7 +3532,7 @@ body {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
-  border-radius: 6px;
+  border-radius: 12px;
 }
 .page-title-icon { font-size: 40px; line-height: 1.2; }
 .page-title-copy { grid-area: copy; align-self: center; display: grid; gap: 2px; min-width: 0; width: 100%; text-align: center; }

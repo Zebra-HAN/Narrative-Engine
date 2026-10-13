@@ -4927,7 +4927,7 @@ function updateTitleImageClip(image) {
   const right = Math.max(0, horizontal, (imageRect.right - mediaRect.right) / scaleX);
   const top = Math.max(0, vertical, (mediaRect.top - imageRect.top) / scaleY);
   const bottom = Math.max(0, vertical, (imageRect.bottom - mediaRect.bottom) / scaleY);
-  image.style.clipPath = `inset(${top}px ${right}px ${bottom}px ${left}px round 6px)`;
+  image.style.clipPath = `inset(${top}px ${right}px ${bottom}px ${left}px round 12px)`;
 }
 const titleImageClipObserver = new ResizeObserver(entries => {
   entries.forEach(({ target }) => {
