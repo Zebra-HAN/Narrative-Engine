@@ -117,7 +117,6 @@ const NAV_IMAGE_VERSION = '20261005-1';
 
 const CORE_IMAGE_SOURCES = [
   'images/core/home/forestglow.jpg', 'images/core/home/royal-banner.webp',
-  'images/core/sub-nav/title_card.webp',
   'images/core/buttons/top_panel.webp', 'images/core/buttons/top_icon.webp',
   'images/core/buttons/bottom_panel.jpg', 'images/core/buttons/check.webp',
   'images/core/buttons/lock.webp', 'images/core/buttons/cancel.webp',
@@ -410,12 +409,13 @@ function getCreativeBackground(navId, stage) {
   return `images/core/home/${filename}`;
 }
 
-async function applyCreativeBackground({ navId = currentNav, stage, screenKey }, commitPage = () => {}) {
+async function applyCreativeBackground({ navId = currentNav, stage, screenKey }, commitPage = () => {}, titleGroup = null) {
   const area = document.getElementById('center-area');
   if (!area || !stage || !screenKey) return false;
   const descriptor = { navId, stage, screenKey };
   const activationKey = `${navId}:${stage}:${screenKey}`;
   const requestId = ++backgroundRequestId;
+  const titlePreparation = titleGroup ? prepareTitleAssets(titleGroup) : null;
   let path = creativeBackgroundMemory.get(activationKey);
   if (!path || !isAllowedCreativeBackground(path, descriptor)) path = getCreativeBackground(navId, stage);
   const candidates = (CREATIVE_BACKGROUNDS[navId]?.[stage] || [])
@@ -444,6 +444,9 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey },
     if (loaded) { imageUrl = url; break; }
   }
   if (requestId !== backgroundRequestId) return false;
+  const titleAssets = titleGroup
+    ? getPreparedTitleAssets(titleGroup) || await titlePreparation : null;
+  if (requestId !== backgroundRequestId) return false;
   const layers = Array.from(area.querySelectorAll('.creative-background-layer'));
   if (loaded && isAllowedCreativeBackground(imageUrl, descriptor) && layers.length) {
     const index = visibleBackgroundUrl === imageUrl && visibleBackgroundLayer >= 0
@@ -463,7 +466,7 @@ async function applyCreativeBackground({ navId = currentNav, stage, screenKey },
   area.classList.remove('is-background-pending');
   // Both writes occur in one task, before the browser can paint either one.
   // Cached images take this path synchronously, without RAF or transition waits.
-  commitPage();
+  commitPage(titleAssets);
   return true;
 }
 
@@ -1176,6 +1179,7 @@ window.addEventListener('load', async () => {
   // 첫 화면 전환을 먼저 시작한 뒤 유휴 시간에 모든 창작 화면 배경을 준비한다.
   // 배경 선택/화면별 기억 로직에는 관여하지 않는다.
   preloadCreativeBackgrounds();
+  void prepareTitlePlate();
   IMAGE_LOADER.preload(CORE_IMAGE_SOURCES.slice(2));
   preloadNavImages('character');
 });
@@ -2442,8 +2446,8 @@ function showSubgroupPage(subId, groupIdx, backgroundPrepared = false) {
 /* ════════════════════════════════════════════════
    서브그룹 카드 목록 렌더 (2단계 → 카드)
 ════════════════════════════════════════════════ */
-function showSubgroupCards(subId, groupIdx, sgIdx, backgroundPrepared = false) {
-  if (!backgroundPrepared) return applyCreativeBackground({ navId: currentNav, stage: 'card', screenKey: `subgroup-cards:${subId}:${groupIdx}:${sgIdx}` }, () => showSubgroupCards(subId, groupIdx, sgIdx, true));
+function showSubgroupCards(subId, groupIdx, sgIdx, backgroundPrepared = false, titleAssets = null) {
+  if (!backgroundPrepared) return applyCreativeBackground({ navId: currentNav, stage: 'card', screenKey: `subgroup-cards:${subId}:${groupIdx}:${sgIdx}` }, assets => showSubgroupCards(subId, groupIdx, sgIdx, true, assets), CARD_DATA[subId]?.groups?.[groupIdx]?.subgroups?.[sgIdx]);
   closeCardInfo();
   const area = document.getElementById('center-area');
   const data = CARD_DATA[subId];
@@ -2455,7 +2459,7 @@ function showSubgroupCards(subId, groupIdx, sgIdx, backgroundPrepared = false) {
   const sg = grp.subgroups[sgIdx];
   if (!sg) return;
   preloadCards(sg.cards);
-  const titleCard = createPageTitleCard(sg, subId);
+  const titleCard = createPageTitleCard(sg, subId, titleAssets);
 
   document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
 
@@ -2585,8 +2589,8 @@ function updateSubgroupBadges(subId, groupIdx) {
 /* ════════════════════════════════════════════════
    그룹 버튼 클릭 → 해당 그룹의 카드 목록 열기 (1단계 그룹용)
 ════════════════════════════════════════════════ */
-function showGroupCards(subId, groupIdx, backgroundPrepared = false) {
-  if (!backgroundPrepared) return applyCreativeBackground({ navId: currentNav, stage: 'card', screenKey: `group-cards:${subId}:${groupIdx}` }, () => showGroupCards(subId, groupIdx, true));
+function showGroupCards(subId, groupIdx, backgroundPrepared = false, titleAssets = null) {
+  if (!backgroundPrepared) return applyCreativeBackground({ navId: currentNav, stage: 'card', screenKey: `group-cards:${subId}:${groupIdx}` }, assets => showGroupCards(subId, groupIdx, true, assets), CARD_DATA[subId]?.groups?.[groupIdx]);
   closeCardInfo();
   const area = document.getElementById('center-area');
   const data = CARD_DATA[subId];
@@ -2595,7 +2599,7 @@ function showGroupCards(subId, groupIdx, backgroundPrepared = false) {
   const grp = data.groups[groupIdx];
   if (!grp) return;
   preloadCards(grp.cards);
-  const titleCard = createPageTitleCard(grp, subId);
+  const titleCard = createPageTitleCard(grp, subId, titleAssets);
 
   document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
 
@@ -4928,18 +4932,60 @@ const titleImageClipObserver = new ResizeObserver(entries => {
   });
 });
 
-function createPageTitleCard(group, subId) {
+// Keep the actual decoded plate element alive; CSS URL readiness is not paint readiness.
+let titlePlate = null;
+let titlePlateJob = null;
+let titleRepresentative = null;
+function decodeTitleImage(source, className) {
+  return new Promise(resolve => {
+    const image = new Image();
+    image.className = `${className} image-ready`;
+    image.alt = '';
+    image.draggable = false;
+    image.decoding = 'sync';
+    image.onload = async () => {
+      try { if (image.decode) await image.decode(); }
+      catch (_) { resolve(null); return; }
+      resolve(image.naturalWidth ? image : null);
+    };
+    image.onerror = () => resolve(null);
+    image.src = source;
+  });
+}
+function prepareTitlePlate() {
+  if (titlePlate) return Promise.resolve(titlePlate);
+  if (!titlePlateJob) {
+    titlePlateJob = decodeTitleImage('images/core/sub-nav/title_card.webp', 'page-title-plate')
+      .then(image => {
+        titlePlate = image;
+        if (!image) titlePlateJob = null;
+        return image;
+      });
+  }
+  return titlePlateJob;
+}
+function getPreparedTitleAssets(group) {
+  if (!titlePlate || titleRepresentative?.group !== group || !titleRepresentative.ready) return null;
+  return { plate: titlePlate, image: titleRepresentative.image };
+}
+function prepareTitleAssets(group) {
+  if (titleRepresentative?.group !== group
+      || (titleRepresentative.ready && !titleRepresentative.image && group.img)) {
+    const entry = { group, ready: false, image: null };
+    entry.job = (group.img ? decodeTitleImage(group.img, 'page-title-image') : Promise.resolve(null))
+      .then(image => { entry.image = image; entry.ready = true; return image; });
+    titleRepresentative = entry;
+  }
+  return Promise.all([prepareTitlePlate(), titleRepresentative.job])
+    .then(([plate, image]) => ({ plate, image }));
+}
+
+function createPageTitleCard(group, subId, preparedAssets = null) {
   const frame = document.createElement('button');
   frame.type = 'button';
   frame.className = 'page-title-card pressable';
-  const bannerSource = 'images/core/sub-nav/title_card.webp';
-  const bannerReady = IMAGE_LOADER.isReady(bannerSource);
-  frame.dataset.bannerReady = String(bannerReady);
-  frame.setAttribute('aria-hidden', String(!bannerReady));
-  IMAGE_LOADER.load(bannerSource).then(ready => {
-    frame.dataset.bannerReady = String(ready);
-    frame.setAttribute('aria-hidden', String(!ready));
-  });
+  frame.dataset.bannerReady = 'false';
+  frame.setAttribute('aria-hidden', 'true');
   frame.dataset.imageLayout = 'square';
   frame.setAttribute('aria-label', `${group.label || ''} 상세 정보 보기`);
   const media = document.createElement('span');
@@ -4952,43 +4998,27 @@ function createPageTitleCard(group, subId) {
     frame.dataset.imageLayout = 'square';
   };
   fallback();
-  if (group.img) {
-    const image = new Image();
-    image.alt = '';
-    image.draggable = false;
-    image.decoding = 'async';
-    image.className = 'page-title-image';
-    const classify = source => {
-      if (!source.naturalWidth || !source.naturalHeight) return;
-      const ratio = source.naturalWidth / source.naturalHeight;
+  const mountAssets = ({ plate, image }) => {
+    if (!plate) return; // Failure never exposes content without its plate.
+    const previousFrame = plate.closest('.page-title-card');
+    if (previousFrame && previousFrame !== frame) {
+      previousFrame.dataset.bannerReady = 'false';
+      previousFrame.setAttribute('aria-hidden', 'true');
+    }
+    frame.prepend(plate);
+    if (image) {
+      const ratio = image.naturalWidth / image.naturalHeight;
       frame.dataset.imageLayout = ratio < 0.9 ? 'portrait'
         : ratio > 1.6 ? 'wide' : ratio > 1.1 ? 'landscape' : 'square';
-    };
-    // Reuse already displayed group-image metadata before its page is removed.
-    const sourceURL = new URL(group.img, document.baseURI).href;
-    const prepared = Array.from(document.images).find(img => img.src === sourceURL && img.naturalWidth);
-    if (prepared) classify(prepared);
-    image.addEventListener('load', () => {
-      classify(image);
-      image.classList.add('image-ready');
-      media.replaceChildren(image);
-      if (['portrait', 'wide'].includes(frame.dataset.imageLayout)) {
-        titleImageClipObserver.observe(image);
-        updateTitleImageClip(image);
-      }
-    }, { once: true });
-    image.addEventListener('error', fallback, { once: true });
-    image.src = group.img;
-    if (image.complete && image.naturalWidth) {
-      classify(image);
-      image.classList.add('image-ready');
       media.replaceChildren(image);
       if (['portrait', 'wide'].includes(frame.dataset.imageLayout)) {
         titleImageClipObserver.observe(image);
         updateTitleImageClip(image);
       }
     }
-  }
+    frame.dataset.bannerReady = 'true';
+    frame.setAttribute('aria-hidden', 'false');
+  };
   const copy = document.createElement('span');
   copy.className = 'page-title-copy';
   const title = document.createElement('span');
@@ -5011,6 +5041,11 @@ function createPageTitleCard(group, subId) {
   count.textContent = String((group.cards || []).filter(card => !isSectionItem(card)).length);
   footer.appendChild(count);
   frame.append(hint, media, copy, footer);
+  const assets = preparedAssets || getPreparedTitleAssets(group);
+  if (assets) mountAssets(assets);
+  else prepareTitleAssets(group).then(assets => {
+    if (frame.isConnected) mountAssets(assets);
+  });
   frame.addEventListener('click', () => {
     const parent = getInfoPanelContext(true);
     closeCardInfo();

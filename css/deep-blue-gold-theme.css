@@ -151,6 +151,7 @@
 /* One fixed-ratio banner for every group. Reserve its geometry while decoding;
    loading/failure never paints the former CSS panel. */
 .page-title-card {
+  position: relative;
   visibility: hidden;
   background: none;
   box-shadow: none;
@@ -166,7 +167,7 @@
 }
 .page-title-card[data-banner-ready="true"] {
   visibility: inherit;
-  background: url('../images/core/sub-nav/title_card.webp') center / contain no-repeat;
+  background: none;
   box-shadow: none;
   border-radius: 0;
 }
@@ -260,3 +261,18 @@
   border-radius: 6px;
 }
 .page-title-card[data-image-layout] .page-title-image { border-radius: 6px; }
+
+/* Same contain/center geometry as the former background, using the decoded node. */
+.page-title-card > .page-title-plate {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  object-fit: contain;
+  object-position: center;
+  z-index: 0;
+  pointer-events: none;
+}
+.page-title-card > :not(.page-title-plate) { position: relative; z-index: 1; }
