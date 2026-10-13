@@ -4946,7 +4946,25 @@ function initCardMinimap() {
   }
   window.addEventListener('resize', cancelSectionScroll, { passive: true });
   document.addEventListener('visibilitychange', () => { if (document.hidden) cancelSectionScroll(); });
-  function hide(restoreFocus = false) {
+  let pageMotion = null;
+  let closing = false;
+  function hide(restoreFocus = false, immediate = false, onClosed = null) {
+    if (!overlay.hidden && !immediate) {
+      if (closing) return;
+      closing = true;
+      const currentTransform = getComputedStyle(swipeFrame).transform;
+      pageMotion?.cancel();
+      const motion = swipeFrame.animate([
+        { transform: currentTransform }, { transform: 'translateX(105%)' }
+      ], { duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 260,
+        easing: 'cubic-bezier(.4,0,.7,1)', fill: 'forwards' });
+      pageMotion = motion;
+      motion.onfinish = () => { hide(restoreFocus, true, onClosed); };
+      return;
+    }
+    pageMotion?.cancel();
+    pageMotion = null;
+    closing = false;
     swipeFrame._swipeCleanup?.();
     overlay.hidden = true;
     panel.hidden = true;
@@ -4954,6 +4972,7 @@ function initCardMinimap() {
     toggle.setAttribute('aria-expanded', 'false');
     content.replaceChildren();
     if (restoreFocus && !toggle.hidden) toggle.focus({ preventScroll: true });
+    onClosed?.();
   }
   function tags(cards, page, renderedCards, nextIndex) {
     const list = document.createElement('div');
@@ -4965,14 +4984,14 @@ function initCardMinimap() {
       tag.textContent = String(card.name ?? '');
       const target = renderedCards[nextIndex.value++];
       tag.addEventListener('click', () => {
-        hide(true);
-        scrollToSection(page, target);
+        hide(true, false, () => scrollToSection(page, target));
       });
       list.appendChild(tag);
     });
     return list;
   }
-  toggle.addEventListener('click', () => {
+  function show() {
+    if (!overlay.hidden) return;
     cancelSectionScroll();
     const page = activePage();
     if (!page) return;
@@ -4994,10 +5013,65 @@ function initCardMinimap() {
     toggle.setAttribute('aria-expanded', 'true');
     overlay.hidden = false;
     panel.hidden = false;
-    attachSwipeToClose(swipeFrame, () => hide(true), { lockDirection: true });
+    pageMotion = swipeFrame.animate([
+      { transform: 'translateX(105%)' }, { transform: 'translateX(0)' }
+    ], { duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 300,
+      easing: 'cubic-bezier(.2,.75,.25,1)' });
     content.scrollTop = 0;
     close.focus({ preventScroll: true });
-  });
+  }
+  toggle.addEventListener('click', show);
+  // Direction lock keeps vertical scrolling and existing right-swipe back intact.
+  let gesture = null;
+  let suppressClickUntil = 0;
+  document.addEventListener('touchstart', event => {
+    gesture = null;
+    if (event.touches.length !== 1 || closing) return;
+    const inPage = !overlay.hidden && panel.contains(event.target);
+    if (!inPage && (!activePage()?.contains(event.target)
+      || document.querySelector('.detail-overlay.active, .status-overlay.active, .app-dialog-overlay.active')
+      || event.target.closest('button, .card-info-popover, input, textarea, [data-horizontal-scroll]'))) return;
+    // Respect any nested horizontal scroller.
+    for (let node = event.target; node && node !== area; node = node.parentElement) {
+      if (node.scrollWidth > node.clientWidth + 1 && /auto|scroll/.test(getComputedStyle(node).overflowX)) return;
+    }
+    const touch = event.touches[0];
+    gesture = { x: touch.clientX, y: touch.clientY, page: activePage(), inPage, locked: false };
+  }, { capture: true, passive: true });
+  document.addEventListener('touchmove', event => {
+    if (!gesture || event.touches.length !== 1) { gesture = null; return; }
+    const touch = event.touches[0], dx = touch.clientX - gesture.x, dy = touch.clientY - gesture.y;
+    if (!gesture.locked) {
+      if (Math.hypot(dx, dy) < 10) return;
+      if (Math.abs(dy) >= Math.abs(dx) / 1.3 || (gesture.inPage ? dx <= 0 : dx >= 0)) {
+        gesture = null; return;
+      }
+      gesture.locked = true;
+      cancelLongPress();
+    }
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }, { capture: true, passive: false });
+  document.addEventListener('touchend', event => {
+    const current = gesture;
+    gesture = null;
+    if (!current?.locked) return;
+    // Let the existing back handler reset its untouched drag state on left swipes.
+    if (current.inPage) event.stopImmediatePropagation();
+    if (event.cancelable) event.preventDefault();
+    cancelLongPress();
+    suppressClickUntil = performance.now() + 450;
+    const touch = event.changedTouches[0];
+    if (!touch || Math.abs(touch.clientX - current.x) < 52) return;
+    if (current.inPage) hide(true);
+    else queueMicrotask(() => { if (current.page === activePage()) show(); });
+  }, { capture: true, passive: false });
+  document.addEventListener('touchcancel', () => { gesture = null; }, { capture: true, passive: true });
+  document.addEventListener('click', event => {
+    if (performance.now() < suppressClickUntil) {
+      event.preventDefault(); event.stopImmediatePropagation();
+    }
+  }, true);
   // Capture the complete outside interaction before card/long-press/chrome handlers.
   // Close on click (after release), so the same gesture cannot hit the restored UI.
   function consumeOutside(event) {
@@ -5020,7 +5094,7 @@ function initCardMinimap() {
     }
   });
   // Only page changes close the outline. Selection/locks never rebuild it or cards.
-  new MutationObserver(() => { cancelSectionScroll(); hide(); }).observe(area, { childList: true });
+  new MutationObserver(() => { cancelSectionScroll(); hide(false, true); }).observe(area, { childList: true });
   hide();
 }
 
