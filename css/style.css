@@ -1198,7 +1198,7 @@ body::after {
       from { opacity: 0; transform: rotateY(90deg); }
       to   { opacity: 1; transform: rotateY(0deg); }
     }
-    .data-card.selected {
+    .data-card.locked {
       /* 기존 1px border 폭은 모든 상태에서 고정한다. 선택 장식은 inset/outset
          shadow와 overlay만 사용하므로 grid item의 크기나 행 높이를 바꾸지 않는다. */
       border-color: #1779c8;
@@ -1211,7 +1211,7 @@ body::after {
         0 4px 9px rgba(20, 76, 122, .25);
       filter: brightness(1.055) saturate(1.035);
     }
-    .data-card.selected::before {
+    .data-card.locked::before {
       content: '';
       position: absolute;
       z-index: 4;

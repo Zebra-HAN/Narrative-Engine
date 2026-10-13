@@ -121,7 +121,7 @@ const CORE_IMAGE_SOURCES = [
   'images/core/buttons/bottom_panel.jpg', 'images/core/buttons/check.webp',
   'images/core/buttons/lock.webp', 'images/core/buttons/cancel.webp',
   'images/core/buttons/select.webp', 'images/core/buttons/detail.webp',
-  'images/core/buttons/close.webp', 'images/core/buttons/lock-on.webp',
+  'images/core/buttons/close.webp', 'images/core/buttons/lock-on2.webp',
   'images/core/buttons/lock-off.webp', 'images/core/buttons/menu-button-on.webp',
   'images/core/buttons/menu-button-off.webp',
   ...['character', 'story', 'idea', 'world', 'compass'].flatMap(name => [
@@ -2516,10 +2516,10 @@ function subgroupCardClick(subId, groupIdx, sgIdx, idx) {
 /* 서브그룹 카드 선택/해제 */
 function subgroupCardDblClick(subId, groupIdx, sgIdx, idx) {
   const globalIdx = getSubgroupCardGlobalIdx(groupIdx, sgIdx, idx);
+  if (isCardLocked(subId, globalIdx)) return;
   if (!selectedCards[subId]) selectedCards[subId] = new Set();
 
   if (selectedCards[subId].has(globalIdx)) {
-    if (isCardLocked(subId, globalIdx)) return;
     selectedCards[subId].delete(globalIdx);
     clearCardDetailSelection(subId, globalIdx);
   } else {
@@ -2656,9 +2656,9 @@ function groupCardClick(subId, groupIdx, idx) {
 /* 그룹 카드 선택/해제 */
 function groupCardDblClick(subId, groupIdx, idx) {
   const globalIdx = getGroupCardGlobalIdx(groupIdx, idx);
+  if (isCardLocked(subId, globalIdx)) return;
   if (!selectedCards[subId]) selectedCards[subId] = new Set();
   if (selectedCards[subId].has(globalIdx)) {
-    if (isCardLocked(subId, globalIdx)) return;
     selectedCards[subId].delete(globalIdx);
     clearCardDetailSelection(subId, globalIdx);
   } else {
@@ -2955,10 +2955,10 @@ function updateCardEdgeActions({ immediate = false, deferPosition = false } = {}
   setCardActionImage(select, `images/core/buttons/${selected ? 'close' : 'select'}.webp`, selected
     ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>'
     : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 12 5 5L20 6"/></svg>');
-  lock.disabled = !selected;
+  lock.disabled = !active;
   lock.setAttribute('aria-pressed', String(Boolean(locked)));
   lock.setAttribute('aria-label', locked ? '잠금 해제' : '잠금');
-  setCardActionImage(lock, `images/core/buttons/lock-${locked ? 'on' : 'off'}.webp`, `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="${locked ? 'M8 10V7a4 4 0 0 1 8 0v3' : 'M8 10V7a4 4 0 0 1 8 0'}"/><path d="M12 14v3"/></svg>`);
+  setCardActionImage(lock, `images/core/buttons/${locked ? 'lock-off' : 'lock-on2'}.webp`, `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="${locked ? 'M8 10V7a4 4 0 0 1 8 0' : 'M8 10V7a4 4 0 0 1 8 0v3'}"/><path d="M12 14v3"/></svg>`);
   if (active && !deferPosition) positionCardEdgeActions({ ensureVisible: true });
   // A deferred card switch must position the new row before testing reentry.
   if (!active || !deferPosition) setCardEdgeVisibility(group, active, immediate);
@@ -3315,8 +3315,13 @@ function isCardLocked(subId, idx) {
   return Boolean(lockedCards[subId]?.has(idx));
 }
 
+// Locks freeze selection as it already is, including an unselected card.
+function getLockedCardSelection(subId) {
+  return new Set([...(selectedCards[subId] || [])].filter(idx => isCardLocked(subId, idx)));
+}
+
 function toggleCurrentCardLock() {
-  if (!focusedCard || !selectedCards[focusedCard.subId]?.has(focusedCard.idx)) return;
+  if (!focusedCard) return;
 
   const { subId, idx } = focusedCard;
   if (!lockedCards[subId]) lockedCards[subId] = new Set();
@@ -3356,9 +3361,9 @@ function clearDeselectedDetails(subId) {
 }
 
 function toggleCardSelect(subId, idx) {
+  if (isCardLocked(subId, idx)) return;
   if (!selectedCards[subId]) selectedCards[subId] = new Set();
   if (selectedCards[subId].has(idx)) {
-    if (isCardLocked(subId, idx)) return;
     selectedCards[subId].delete(idx);
     clearCardDetailSelection(subId, idx);
   } else {
@@ -3535,6 +3540,7 @@ function showDetailOverlay() {
 }
 
 function toggleDetailCheck(subId, globalIdx, lineIdx) {
+  if (isCardLocked(subId, globalIdx) && !selectedCards[subId]?.has(globalIdx)) return;
   const detailKey = `${subId}__${globalIdx}`;
 
   // selectedDetails 초기화
@@ -3575,6 +3581,7 @@ function toggleDetailCheck(subId, globalIdx, lineIdx) {
 
 
 function toggleSubImageCheck(subId, globalIdx) {
+  if (isCardLocked(subId, globalIdx) && !selectedCards[subId]?.has(globalIdx)) return;
   const detailKey = `${subId}__${globalIdx}`;
 
   if (selectedSubImages[detailKey]) {
@@ -4017,7 +4024,7 @@ async function partialReset() {
   subs.forEach(sub => {
     const locks = lockedCards[sub.id];
     if (locks?.size) {
-      selectedCards[sub.id] = new Set(locks);
+      selectedCards[sub.id] = getLockedCardSelection(sub.id);
     } else {
       delete selectedCards[sub.id];
     }
@@ -4359,7 +4366,7 @@ async function randomSelectCurrent() {
   const pick =
     allCards[Math.floor(Math.random() * allCards.length)];
 
-  selectedCards[currentSubId] = new Set(lockedCards[currentSubId] || []);
+  selectedCards[currentSubId] = getLockedCardSelection(currentSubId);
   selectedCards[currentSubId].add(pick.globalIdx);
   clearDeselectedDetails(currentSubId);
 
@@ -4402,7 +4409,7 @@ subs.forEach(sub => {
     .filter(card => !isCardLocked(sub.id, card.globalIdx));
   if (allCards.length === 0) return;
   const pick = allCards[Math.floor(Math.random() * allCards.length)];
-  selectedCards[sub.id] = new Set(lockedCards[sub.id] || []);
+  selectedCards[sub.id] = getLockedCardSelection(sub.id);
   selectedCards[sub.id].add(pick.globalIdx);
   clearDeselectedDetails(sub.id);
 });
@@ -4517,7 +4524,7 @@ function startLongPress(evt, el, type, subId, a, b, c) {
     else if (type === 'group') globalIdx = getGroupCardGlobalIdx(a, b);
     else globalIdx = a;
     const wasSelected = Boolean(selectedCards[subId]?.has(globalIdx));
-    if (wasSelected && isCardLocked(subId, globalIdx)) return;
+    if (isCardLocked(subId, globalIdx)) return;
 
     if (type === 'subgroup') subgroupCardDblClick(subId, a, b, c);
     else if (type === 'group') groupCardDblClick(subId, a, b);

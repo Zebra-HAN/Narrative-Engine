@@ -507,13 +507,40 @@
   text-shadow: 0 1px 0 rgba(255, 244, 184, .76);
 }
 
-/* 선택 완료 상태가 정보 열람 상태와 겹쳐도 가장 강한 강조 단계로 유지한다. */
-#screen-create .data-card.selected,
-#screen-create .data-card.selected.card-info-active {
+/* New green selection uses the same layered structure and glow geometry. */
+#screen-create .data-card.selected:not(.locked):not(.card-info-active) {
   filter: brightness(1.14) saturate(1.13);
 }
-#screen-create .data-card.selected::before,
-#screen-create .data-card.selected.card-info-active::before {
+#screen-create .data-card.selected:not(.locked):not(.card-info-active)::before {
+  content: '';
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  border: 1px solid rgba(244, 255, 235, 1);
+  border-radius: calc(var(--radius-card) - 1px);
+  pointer-events: none;
+  background:
+    linear-gradient(135deg, rgba(190, 255, 172, .28), rgba(0, 204, 62, .09) 48%, rgba(90, 255, 110, .24)),
+    radial-gradient(ellipse at 50% 12%, rgba(211, 255, 194, .20), transparent 64%);
+  box-shadow:
+    inset 0 0 0 1px rgba(167, 255, 143, .92),
+    inset 0 0 0 2px rgba(24, 224, 67, .52),
+    inset 0 0 11px 2px rgba(42, 255, 85, .48),
+    inset 0 0 26px rgba(0, 181, 53, .28);
+}
+
+/* Inactive selected titles match their green glow. */
+#screen-create .data-card.selected:not(.locked):not(.card-info-active) .card-name {
+  color: #087a25;
+  font-weight: 500;
+  text-shadow: 0 1px 0 rgba(224, 255, 210, .9);
+}
+
+/* The original blue values now belong to locks; active cards keep gold. */
+#screen-create .data-card.locked:not(.card-info-active) {
+  filter: brightness(1.14) saturate(1.13);
+}
+#screen-create .data-card.locked:not(.card-info-active)::before {
   border-color: rgba(244, 255, 255, 1);
   background:
     linear-gradient(135deg, rgba(190, 249, 255, .28), rgba(0, 137, 255, .09) 48%, rgba(90, 226, 255, .24)),
@@ -525,9 +552,8 @@
     inset 0 0 26px rgba(0, 103, 255, .28);
 }
 
-/* selected가 card-info-active와 겹치면 이 규칙이 orange 제목까지 덮어 파란 상태만 남긴다. */
-#screen-create .data-card.selected .card-name,
-#screen-create .data-card.selected.card-info-active .card-name {
+/* A clicked title remains the original warm orange, even when locked. */
+#screen-create .data-card.locked:not(.card-info-active) .card-name {
   color: #004fb8;
   font-weight: 500;
   text-shadow: 0 1px 0 rgba(224, 253, 255, .9);
@@ -667,7 +693,27 @@
     0 0 42px 14px rgba(255, 145, 0, .25);
 }
 #screen-create .data-card.card-info-active .card-highlight-frame { opacity: 1; }
-#screen-create .data-card.selected .card-highlight-frame {
+#screen-create .data-card.selected:not(.locked):not(.card-info-active) .card-highlight-frame {
+  opacity: 1;
+  border-color: #edffe9;
+  box-shadow:
+    inset 0 0 0 1px rgba(247, 255, 240, 1),
+    inset 0 0 0 2px rgba(190, 255, 176, .98),
+    inset 0 0 0 3px rgba(50, 255, 90, .82),
+    inset 0 0 8px 3px rgba(0, 224, 65, .48),
+    inset 0 0 20px rgba(0, 181, 53, .30),
+    0 0 0 1px rgba(246, 255, 239, 1),
+    0 0 0 2px rgba(181, 255, 160, .99),
+    0 0 0 3px rgba(46, 255, 82, .98),
+    0 0 0 4px rgba(0, 215, 54, .92),
+    0 0 0 5px rgba(0, 151, 38, .76),
+    0 0 8px 5px rgba(53, 255, 91, .92),
+    0 0 17px 8px rgba(0, 220, 63, .72),
+    0 0 30px 12px rgba(0, 185, 49, .47),
+    0 0 47px 16px rgba(0, 154, 40, .28);
+}
+
+#screen-create .data-card.locked:not(.card-info-active) .card-highlight-frame {
   opacity: 1;
   border-color: #eaffff;
   box-shadow:
@@ -690,7 +736,7 @@
   #screen-create .card-highlight-frame { transition: none; }
 }
 
-#screen-create .data-card:is(.card-info-active, .selected) {
+#screen-create .data-card:is(.card-info-active, .selected, .locked) {
   border-color: #65472f;
   box-shadow: inset 0 0 0 1px rgba(239, 210, 161, .28),
     inset 0 1px 1px rgba(255, 244, 215, .18), 0 1px 2px rgba(55, 37, 23, .14);
