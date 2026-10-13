@@ -547,6 +547,7 @@ let selectedCards = {};   // { subId: Set<idx> }
 let lockedCards = {};     // { subId: Set<idx> } - random/partial reset에서 유지할 카드
 let selectedDetails = {}; // { "subId__globalIdx": Set<detailItemIdx> }
 let selectedSubImages = {}; // { "subId__globalIdx": true }
+let excludedMainImages = {}; // Default included; only explicit exclusions are stored.
 let selectedDescs = {}; // { "subId__globalIdx": true }, independent of card/detail selection
 let focusedCard  = null;  // { subId, idx, name, icon }
 let addressTrail = [];
@@ -3284,6 +3285,7 @@ function initInfoPanelAction() {
 
 // 표시와 닫기 동작만 공유하고 카드 선택 데이터는 읽거나 변경하지 않는다.
 function openLocationInfo(context = getInfoPanelContext()) {
+  configureDetailMainImage();
   const { item, description, detail } = context;
   if (!item) return;
   const image = item === NAV_DATA[currentNav] ? MAIN_CATEGORY_IMAGE[currentNav] : item.img;
@@ -3363,6 +3365,7 @@ function clearCardDetailSelection(subId, idx) {
   delete selectedDetails[key];
   delete selectedSubImages[key];
   delete selectedDescs[key];
+  delete excludedMainImages[key];
   syncDetailDescSelection(subId, idx);
   document.querySelectorAll('#detail-body [onclick]').forEach(block => {
     if (block.getAttribute('onclick').includes(`('${subId}', ${idx},`) || block.getAttribute('onclick').includes(`('${subId}', ${idx})`)) {
@@ -3374,7 +3377,7 @@ function clearCardDetailSelection(subId, idx) {
 
 function clearDeselectedDetails(subId) {
   const prefix = `${subId}__`;
-  new Set([...Object.keys(selectedDetails), ...Object.keys(selectedSubImages), ...Object.keys(selectedDescs)])
+  new Set([...Object.keys(selectedDetails), ...Object.keys(selectedSubImages), ...Object.keys(selectedDescs), ...Object.keys(excludedMainImages)])
     .forEach(key => {
       if (key.startsWith(prefix)) {
         const idx = Number(key.slice(prefix.length));
@@ -3483,6 +3486,7 @@ function renderDetailIdeaBlock(subId, globalIdx, itemIdx, item, isChecked) {
 }
 
 function openDetailSheet(mode) {
+  configureDetailMainImage();
   if (mode === 'card' && !focusedCard) return;
   if (mode === 'category' && !currentSubId) return;
 
@@ -3504,6 +3508,7 @@ function openDetailSheet(mode) {
     nameEl.textContent = focusedCard.name;
     descEl.textContent = card?.desc || '';
     configureDetailDescSelection(focusedCard.subId, focusedCard.idx);
+    configureDetailMainImage(focusedCard.subId, focusedCard.idx);
 
     // 세부정보(detail) 파싱 및 선택 블록 렌더
     const detailKey = `${focusedCard.subId}__${focusedCard.idx}`;
@@ -3579,6 +3584,11 @@ divEl.style.display = 'none';
 }
 
 function showDetailOverlay() {
+  const sheet = document.querySelector('.detail-sheet');
+  const behavior = sheet.style.scrollBehavior;
+  sheet.style.scrollBehavior = 'auto';
+  sheet.scrollTop = 0;
+  sheet.style.scrollBehavior = behavior;
   document.getElementById('detail-overlay').classList.add('active');
   attachSwipeToClose(
     document.querySelector('.detail-overlay .popup-swipe-frame'),
@@ -3586,7 +3596,53 @@ function showDetailOverlay() {
   );
 }
 
+function syncDetailMainImageSelection(subId, idx) {
+  const element = document.getElementById('detail-icon');
+  if (element.dataset.mainImageKey !== `${subId}__${idx}`) return;
+  const included = Boolean(selectedCards[subId]?.has(idx) && !excludedMainImages[`${subId}__${idx}`]);
+  const locked = isCardLocked(subId, idx);
+  element.classList.toggle('checked', included);
+  element.setAttribute('aria-pressed', String(included));
+  element.setAttribute('aria-disabled', String(locked));
+  element.tabIndex = locked ? -1 : 0;
+}
+
+function configureDetailMainImage(subId = null, idx = null) {
+  const element = document.getElementById('detail-icon');
+  element.onclick = null;
+  element.onkeydown = null;
+  delete element.dataset.mainImageKey;
+  element.classList.remove('main-image-selectable', 'checked');
+  ['role', 'aria-pressed', 'aria-disabled', 'tabindex', 'aria-label'].forEach(name => element.removeAttribute(name));
+  if (!subId || !getCardByGlobalIdx(subId, idx)?.img) return;
+  element.dataset.mainImageKey = `${subId}__${idx}`;
+  element.classList.add('main-image-selectable');
+  element.setAttribute('role', 'button');
+  element.setAttribute('aria-label', '아이디어 통합창에 메인 이미지 포함');
+  element.onclick = () => toggleMainImageCheck(subId, idx);
+  element.onkeydown = event => {
+    if (!['Enter', ' '].includes(event.key)) return;
+    event.preventDefault();
+    if (!event.repeat) toggleMainImageCheck(subId, idx);
+  };
+  syncDetailMainImageSelection(subId, idx);
+}
+
+function toggleMainImageCheck(subId, idx) {
+  if (isCardLocked(subId, idx) || !getCardByGlobalIdx(subId, idx)?.img) return;
+  const key = `${subId}__${idx}`;
+  if (!selectedCards[subId]?.has(idx)) {
+    toggleCardSelect(subId, idx);
+    delete excludedMainImages[key];
+  } else if (excludedMainImages[key]) delete excludedMainImages[key];
+  else excludedMainImages[key] = true;
+  syncDetailMainImageSelection(subId, idx);
+  _syncCardSelectedDOM(subId, idx);
+  refreshStatusIfOpen();
+}
+
 function syncDetailDescSelection(subId, idx) {
+  syncDetailMainImageSelection(subId, idx);
   const element = document.getElementById('detail-desc');
   const key = `${subId}__${idx}`;
   if (element.dataset.descKey !== key) return;
@@ -3706,6 +3762,7 @@ function toggleSubImageCheck(subId, globalIdx) {
 }
 
 function _syncCardSelectedDOM(subId, globalIdx) {
+  syncDetailMainImageSelection(subId, globalIdx);
   const cardEl = currentSubId === subId
     ? document.querySelector(`.center-page.active .data-card[data-global-idx="${globalIdx}"]`)
     : null;
@@ -3801,7 +3858,7 @@ function renderStatusContent() {
           const detailKey = `${sub.id}__${globalIdx}`;
           const checkedLines = selectedDetails[detailKey];
           const detailHtml = renderStatusDetailIdeas(card, checkedLines);
-          const chipImgHtml = card.img
+          const chipImgHtml = card.img && !excludedMainImages[detailKey]
             ? `<img class="status-chip-img" src="${card.img}" alt="" draggable="false">`
             : '';
                   const subImageHtml = card.subImg && selectedSubImages[detailKey]
@@ -3815,8 +3872,8 @@ function renderStatusContent() {
             ? `<div class="status-chip-extra">${detailHtml}${subImageHtml}</div>`
             : '';
           itemsHtml += `<div class="status-chip-wrap">
-               ${metaHtml}
             <div class="status-chip">
+              ${metaHtml}
               ${chipImgHtml}
               <div class="status-chip-text">
                 <span class="status-chip-name">${formatLabel(card.name, card.icon)}</span>
@@ -4170,13 +4227,14 @@ async function fullReset() {
   UI_SOUND.play('delete');
   selectedCards = {};
   lockedCards = {};
-  Object.keys(selectedDetails).concat(Object.keys(selectedSubImages), Object.keys(selectedDescs)).forEach(key => {
+  Object.keys(selectedDetails).concat(Object.keys(selectedSubImages), Object.keys(selectedDescs), Object.keys(excludedMainImages)).forEach(key => {
     const [subId, idx] = key.split('__');
     clearCardDetailSelection(subId, Number(idx));
   });
   selectedDetails = {};
    selectedSubImages = {};
   selectedDescs = {};
+  excludedMainImages = {};
   if (currentSubId) showCardPage(currentSubId, false);
   renderSubnav(currentNav, false);
   if (currentSubId) {
@@ -4492,6 +4550,7 @@ async function randomSelectCurrent() {
   selectedCards[currentSubId] = new Set(lockedCards[currentSubId] || []);
   selectedCards[currentSubId].add(pick.globalIdx);
   if (pick.desc) selectedDescs[`${currentSubId}__${pick.globalIdx}`] = true;
+  delete excludedMainImages[`${currentSubId}__${pick.globalIdx}`];
   syncDetailDescSelection(currentSubId, pick.globalIdx);
   clearDeselectedDetails(currentSubId);
 
@@ -4537,6 +4596,7 @@ subs.forEach(sub => {
   selectedCards[sub.id] = new Set(lockedCards[sub.id] || []);
   selectedCards[sub.id].add(pick.globalIdx);
   if (pick.desc) selectedDescs[`${sub.id}__${pick.globalIdx}`] = true;
+  delete excludedMainImages[`${sub.id}__${pick.globalIdx}`];
   syncDetailDescSelection(sub.id, pick.globalIdx);
   clearDeselectedDetails(sub.id);
 });
@@ -4919,7 +4979,7 @@ function initCardMinimap() {
     job.popupObserver.observe(page, { childList: true });
     page.style.scrollBehavior = 'auto';
     const started = performance.now();
-    const duration = Math.min(520, 180 + Math.sqrt(Math.abs(to - from)) * 4);
+    const duration = Math.min(1050, 180 + Math.sqrt(Math.abs(to - from)) * 14);
     for (const type of ['pointerdown', 'touchstart', 'wheel', 'keydown']) {
       document.addEventListener(type, cancelSectionScroll, { capture: true, passive: true });
     }
