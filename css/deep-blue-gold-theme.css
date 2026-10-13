@@ -636,3 +636,9 @@
 }
 .card-minimap :focus-visible { outline-color: #a87935; }
 .card-minimap-actions button { color: #493523; }
+
+/* Short outlines sit centrally with bounded native vertical travel on both sides. */
+.card-minimap-overlay { background: transparent; }
+.card-minimap-content::before, .card-minimap-content::after {
+  content: ''; display: block; height: var(--outline-scroll-space, 0px);
+}

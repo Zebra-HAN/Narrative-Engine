@@ -4948,24 +4948,46 @@ function initCardMinimap() {
   document.addEventListener('visibilitychange', () => { if (document.hidden) cancelSectionScroll(); });
   let pageMotion = null;
   let closing = false;
+  let fullyOpen = false;
+  const offscreen = () => swipeFrame.getBoundingClientRect().width;
+  const offset = () => new DOMMatrixReadOnly(getComputedStyle(swipeFrame).transform).m41;
+  function settle(to, finish) {
+    const from = offset();
+    pageMotion?.cancel();
+    swipeFrame.style.transform = `translateX(${to}px)`;
+    const motion = swipeFrame.animate([
+      { transform: `translateX(${from}px)` }, { transform: `translateX(${to}px)` }
+    ], { duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 220,
+      easing: 'cubic-bezier(.2,.75,.25,1)' });
+    pageMotion = motion;
+    motion.onfinish = () => {
+      if (pageMotion !== motion) return;
+      pageMotion = null;
+      finish?.();
+    };
+  }
+  function opened() {
+    if (!fullyOpen) UI_SOUND.play('page');
+    fullyOpen = true;
+    closing = false;
+    close.focus({ preventScroll: true });
+  }
   function hide(restoreFocus = false, immediate = false, onClosed = null) {
     if (!overlay.hidden && !immediate) {
       if (closing) return;
       closing = true;
-      const currentTransform = getComputedStyle(swipeFrame).transform;
-      pageMotion?.cancel();
-      const motion = swipeFrame.animate([
-        { transform: currentTransform }, { transform: 'translateX(105%)' }
-      ], { duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 260,
-        easing: 'cubic-bezier(.4,0,.7,1)', fill: 'forwards' });
-      pageMotion = motion;
-      motion.onfinish = () => { hide(restoreFocus, true, onClosed); };
+      settle(offscreen(), () => {
+        if (fullyOpen) UI_SOUND.play('page');
+        hide(restoreFocus, true, onClosed);
+      });
       return;
     }
     pageMotion?.cancel();
     pageMotion = null;
     closing = false;
-    swipeFrame._swipeCleanup?.();
+    fullyOpen = false;
+    gesture = null;
+    swipeFrame.style.removeProperty('transform');
     overlay.hidden = true;
     panel.hidden = true;
     syncToggle();
@@ -4974,6 +4996,21 @@ function initCardMinimap() {
     if (restoreFocus && !toggle.hidden) toggle.focus({ preventScroll: true });
     onClosed?.();
   }
+  let list = null;
+  let scrollAllowance = 0;
+  function measureList(initial = false) {
+    if (overlay.hidden || !list?.isConnected) return;
+    const height = content.clientHeight - 24;
+    const short = list.offsetHeight < height;
+    const travel = short ? Math.min(140, height * .22) : 0;
+    const padding = short ? (height - list.offsetHeight) / 2 + travel : 0;
+    const previous = scrollAllowance;
+    scrollAllowance = travel;
+    content.style.setProperty('--outline-scroll-space', `${Math.max(0, padding)}px`);
+    content.scrollTop = initial ? travel : Math.max(0, content.scrollTop + travel - previous);
+  }
+  const listObserver = new ResizeObserver(() => measureList());
+  listObserver.observe(content);
   function tags(cards, page, renderedCards, nextIndex) {
     const list = document.createElement('div');
     list.className = 'card-minimap-tags';
@@ -4990,7 +5027,7 @@ function initCardMinimap() {
     });
     return list;
   }
-  function show() {
+  function show(preview = false) {
     if (!overlay.hidden) return;
     cancelSectionScroll();
     const page = activePage();
@@ -5001,32 +5038,40 @@ function initCardMinimap() {
     const renderedCards = page.querySelectorAll('.data-card');
     const nextIndex = { value: 0 };
     title.textContent = `${page.minimapGroup?.label || ''} — ${cards.filter(card => !isSectionItem(card)).length}`;
-    content.replaceChildren();
+    listObserver.disconnect();
+    listObserver.observe(content);
+    list = document.createElement('div');
+    list.className = 'card-minimap-list';
+    content.replaceChildren(list);
     outline.groups.forEach(group => {
-      if (!outline.sectioned) { content.appendChild(tags(group.cards, page, renderedCards, nextIndex)); return; }
+      if (!outline.sectioned) { list.appendChild(tags(group.cards, page, renderedCards, nextIndex)); return; }
       const section = document.createElement('details');
       const heading = document.createElement('summary');
       heading.textContent = `${group.label} — ${group.cards.length}`;
       section.append(heading, tags(group.cards, page, renderedCards, nextIndex));
-      content.appendChild(section);
+      list.appendChild(section);
     });
     toggle.setAttribute('aria-expanded', 'true');
     overlay.hidden = false;
     panel.hidden = false;
-    pageMotion = swipeFrame.animate([
-      { transform: 'translateX(105%)' }, { transform: 'translateX(0)' }
-    ], { duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 300,
-      easing: 'cubic-bezier(.2,.75,.25,1)' });
-    content.scrollTop = 0;
-    close.focus({ preventScroll: true });
+    fullyOpen = false;
+    scrollAllowance = 0;
+    measureList(true);
+    listObserver.observe(list);
+    swipeFrame.style.transform = `translateX(${offscreen()}px)`;
+    if (!preview) settle(0, opened);
   }
-  toggle.addEventListener('click', show);
+  toggle.addEventListener('click', () => show());
   // Direction lock keeps vertical scrolling and existing right-swipe back intact.
   let gesture = null;
   let suppressClickUntil = 0;
   document.addEventListener('touchstart', event => {
+    if (gesture?.locked) {
+      if (gesture.inPage) settle(0, opened);
+      else hide(false);
+    }
     gesture = null;
-    if (event.touches.length !== 1 || closing) return;
+    if (event.touches.length !== 1) return;
     const inPage = !overlay.hidden && panel.contains(event.target);
     if (!inPage && (!activePage()?.contains(event.target)
       || document.querySelector('.detail-overlay.active, .status-overlay.active, .app-dialog-overlay.active')
@@ -5036,10 +5081,17 @@ function initCardMinimap() {
       if (node.scrollWidth > node.clientWidth + 1 && /auto|scroll/.test(getComputedStyle(node).overflowX)) return;
     }
     const touch = event.touches[0];
-    gesture = { x: touch.clientX, y: touch.clientY, page: activePage(), inPage, locked: false };
+    gesture = { x: touch.clientX, y: touch.clientY, page: activePage(), inPage, locked: false, lastX: touch.clientX, lastTime: performance.now(), velocity: 0 };
   }, { capture: true, passive: true });
   document.addEventListener('touchmove', event => {
-    if (!gesture || event.touches.length !== 1) { gesture = null; return; }
+    if (!gesture) return;
+    if (event.touches.length !== 1) {
+      if (gesture.locked) {
+        if (gesture.inPage) settle(0, opened);
+        else hide(false);
+      }
+      gesture = null; return;
+    }
     const touch = event.touches[0], dx = touch.clientX - gesture.x, dy = touch.clientY - gesture.y;
     if (!gesture.locked) {
       if (Math.hypot(dx, dy) < 10) return;
@@ -5048,7 +5100,18 @@ function initCardMinimap() {
       }
       gesture.locked = true;
       cancelLongPress();
+      if (!gesture.inPage) show(true);
+      gesture.origin = offset();
+      pageMotion?.cancel();
+      pageMotion = null;
+      closing = false;
     }
+    const now = performance.now();
+    gesture.velocity = (touch.clientX - gesture.lastX) / Math.max(1, now - gesture.lastTime);
+    gesture.lastX = touch.clientX;
+    gesture.lastTime = now;
+    gesture.position = Math.max(0, Math.min(offscreen(), gesture.origin + dx));
+    swipeFrame.style.transform = `translateX(${gesture.position}px)`;
     event.preventDefault();
     event.stopImmediatePropagation();
   }, { capture: true, passive: false });
@@ -5056,17 +5119,29 @@ function initCardMinimap() {
     const current = gesture;
     gesture = null;
     if (!current?.locked) return;
-    // Let the existing back handler reset its untouched drag state on left swipes.
+    // Allow the original back gesture to clean up without navigating.
+    event.minimapSwipe = true;
     if (current.inPage) event.stopImmediatePropagation();
     if (event.cancelable) event.preventDefault();
     cancelLongPress();
     suppressClickUntil = performance.now() + 450;
-    const touch = event.changedTouches[0];
-    if (!touch || Math.abs(touch.clientX - current.x) < 52) return;
-    if (current.inPage) hide(true);
-    else queueMicrotask(() => { if (current.page === activePage()) show(); });
+    const width = offscreen();
+    const position = current.position ?? current.origin;
+    const recent = performance.now() - current.lastTime < 100;
+    const velocity = recent ? current.velocity : 0;
+    const travel = current.inPage ? position : width - position;
+    const flick = travel >= 28 && Math.abs(velocity) > .45;
+    const open = flick ? velocity < 0 : position < width * (current.inPage ? .35 : .65);
+    if (open) settle(0, opened);
+    else hide(true);
   }, { capture: true, passive: false });
-  document.addEventListener('touchcancel', () => { gesture = null; }, { capture: true, passive: true });
+  document.addEventListener('touchcancel', () => {
+    const current = gesture;
+    gesture = null;
+    if (!current?.locked) return;
+    if (current.inPage) settle(0, opened);
+    else hide(false);
+  }, { capture: true, passive: true });
   document.addEventListener('click', event => {
     if (performance.now() < suppressClickUntil) {
       event.preventDefault(); event.stopImmediatePropagation();
@@ -5075,7 +5150,7 @@ function initCardMinimap() {
   // Capture the complete outside interaction before card/long-press/chrome handlers.
   // Close on click (after release), so the same gesture cannot hit the restored UI.
   function consumeOutside(event) {
-    if (panel.hidden || panel.contains(event.target)) return;
+    if (event.minimapSwipe || panel.hidden || panel.contains(event.target)) return;
     event.stopImmediatePropagation();
     if (event.type !== 'touchstart' && event.type !== 'touchend' && event.cancelable) event.preventDefault();
     if (event.type === 'click') hide(true);
