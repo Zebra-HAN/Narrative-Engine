@@ -319,8 +319,7 @@ function initUiSounds() {
   // 이를 캡처하여 UI 작업이 끝난 뒤가 아니라 입력이 확정되는 순간 재생을 시작한다.
   // 이것이 유일한 일반 활성화 경로이므로 touchend/pointerup에서 중복 실행되지 않는다.
   document.addEventListener('click', event => {
-    const card = event.target.closest('.data-card');
-    if (card && _lpDidFire) return;
+    if (_lpDidFire) return;
     playActivationSound(event);
   }, { capture: true });
 
@@ -4688,13 +4687,24 @@ function runGroupButtonAction(btn) {
 
 
 /* ════════════════════════════════════════════════
-   길게 누르기 → 카드 선택/취소
+   길게 누르기 → 카드 상세정보
 ════════════════════════════════════════════════ */
 let _lpTimer = null;
 let _lpStartX = 0;
 let _lpStartY = 0;
 let _lpDidFire = false;
 const LONG_PRESS_MS = 480; // 꾹 누르는 시간 (ms)
+
+// A new physical gesture must work even if the previous release emitted no click.
+document.addEventListener('pointerdown', () => { _lpDidFire = false; }, { capture: true });
+
+// The sheet/action row may appear under the finger: consume retargeted clicks too.
+document.addEventListener('click', event => {
+  if (!_lpDidFire) return;
+  _lpDidFire = false;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+}, { capture: true });
 
 function startLongPress(evt, el, type, subId, a, b, c) {
   cancelLongPress();
@@ -4710,16 +4720,16 @@ function startLongPress(evt, el, type, subId, a, b, c) {
     if (type === 'subgroup') globalIdx = getSubgroupCardGlobalIdx(a, b, c);
     else if (type === 'group') globalIdx = getGroupCardGlobalIdx(a, b);
     else globalIdx = a;
-    const wasSelected = Boolean(selectedCards[subId]?.has(globalIdx));
-    if (wasSelected && isCardLocked(subId, globalIdx)) return;
-
-    if (type === 'subgroup') subgroupCardDblClick(subId, a, b, c);
-    else if (type === 'group') groupCardDblClick(subId, a, b);
-    else {
-      cardClick(subId, a);
-      toggleCardSelect(subId, a);
-    }
-    UI_SOUND.play(wasSelected ? 'cancel' : 'category5');
+    const card = getCardByGlobalIdx(subId, globalIdx);
+    const path = type === 'subgroup'
+      ? { type, groupIdx: a, sgIdx: b, cardIdx: c }
+      : type === 'group' ? { type, groupIdx: a, cardIdx: b } : undefined;
+    // Establish the target directly: clicking an already focused card would close it.
+    focusedCard = { subId, idx: globalIdx, path,
+      name: card.name, icon: card.icon, img: card.img, desc: card.desc };
+    renderCardInfo();
+    openDetailSheet('card');
+    UI_SOUND.play('click');
   }, LONG_PRESS_MS);
 }
 
