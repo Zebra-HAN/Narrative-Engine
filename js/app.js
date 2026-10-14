@@ -3391,6 +3391,7 @@ function openLocationInfo(context = getInfoPanelContext()) {
   document.getElementById('detail-name').textContent = item.label;
   document.getElementById('detail-desc').textContent = description;
   configureDetailDescSelection();
+  document.querySelector('.detail-sheet').dataset.cardKey = '';
   document.getElementById('detail-divider').style.display = detail ? '' : 'none';
   const body = document.getElementById('detail-body');
   body.replaceChildren();
@@ -3447,6 +3448,7 @@ function toggleCurrentCardLock() {
   if (cardEl) cardEl.classList.toggle('locked', isCardLocked(subId, idx));
   refreshCardInfo();
   syncDetailDescSelection(subId, idx);
+  syncDetailCardState(subId, idx);
   // Synchronize the existing disabled presentation without changing any choices.
   document.querySelectorAll('#detail-body button[onclick]').forEach(button => {
     const action = button.getAttribute('onclick');
@@ -3597,6 +3599,7 @@ function renderDetailIdeaBlock(subId, globalIdx, itemIdx, item, isChecked) {
 }
 
 function openDetailSheet(mode) {
+  document.querySelector('.detail-sheet').dataset.cardKey = mode === 'card' && focusedCard ? `${focusedCard.subId}__${focusedCard.idx}` : '';
   configureDetailMainImage();
   if (mode === 'card' && !focusedCard) return;
   if (mode === 'category' && !currentSubId) return;
@@ -3696,12 +3699,23 @@ divEl.style.display = 'none';
   showDetailOverlay();
 }
 
+function syncDetailCardState(subId, idx) {
+  const sheet = document.querySelector('.detail-sheet');
+  if (sheet.dataset.cardKey !== `${subId}__${idx}`) return;
+  sheet.classList.toggle('card-locked', isCardLocked(subId, idx));
+  sheet.classList.toggle('card-selected', Boolean(selectedCards[subId]?.has(idx)));
+}
+
 function showDetailOverlay() {
   const sheet = document.querySelector('.detail-sheet');
-  const behavior = sheet.style.scrollBehavior;
-  sheet.style.scrollBehavior = 'auto';
-  sheet.scrollTop = 0;
-  sheet.style.scrollBehavior = behavior;
+  const key = sheet.dataset.cardKey;
+  sheet.classList.remove('card-locked', 'card-selected');
+  if (key) { const [subId, idx] = key.split('__'); syncDetailCardState(subId, Number(idx)); }
+  const content = document.getElementById('detail-content');
+  const behavior = content.style.scrollBehavior;
+  content.style.scrollBehavior = 'auto';
+  content.scrollTop = 0;
+  content.style.scrollBehavior = behavior;
   document.getElementById('detail-overlay').classList.add('active');
   attachSwipeToClose(
     document.querySelector('.detail-overlay .popup-swipe-frame'),
@@ -3759,6 +3773,7 @@ function toggleMainImageCheck(subId, idx) {
 }
 
 function syncDetailDescSelection(subId, idx) {
+  syncDetailCardState(subId, idx);
   syncDetailMainImageSelection(subId, idx);
   const element = document.getElementById('detail-desc');
   const key = `${subId}__${idx}`;
@@ -3871,6 +3886,7 @@ function toggleSubImageCheck(subId, globalIdx) {
 
 function _syncCardSelectedDOM(subId, globalIdx) {
   syncDetailMainImageSelection(subId, globalIdx);
+  syncDetailCardState(subId, globalIdx);
   const cardEl = currentSubId === subId
     ? document.querySelector(`.center-page.active .data-card[data-global-idx="${globalIdx}"]`)
     : null;
@@ -4733,7 +4749,7 @@ subs.forEach(sub => {
 (function () {
   function onTouchStart(e) {
     const el = e.target.closest('.pressable');
-    if (!el) return;
+    if (!el || el.disabled || el.getAttribute('aria-disabled') === 'true') return;
     el.classList.add('is-pressing');
   }
 
@@ -5039,18 +5055,12 @@ function initCardMinimap() {
   const toggle = document.getElementById('card-minimap-toggle');
   const panel = document.getElementById('card-minimap');
   const content = document.getElementById('card-minimap-content');
-  const close = document.getElementById('card-minimap-close');
   const overlay = document.getElementById('card-minimap-overlay');
   const swipeFrame = overlay?.querySelector('.popup-swipe-frame');
   const title = document.getElementById('card-minimap-title');
   const expand = document.getElementById('card-minimap-expand');
   const collapse = document.getElementById('card-minimap-collapse');
-  if (!area || !toggle || !panel || !content || !close || !overlay || !swipeFrame || !title || !expand || !collapse) return;
-  const closeImage = close.querySelector('img');
-  const checkCloseImage = () => close.classList.toggle('image-failed', !closeImage.naturalWidth);
-  closeImage.addEventListener('load', checkCloseImage);
-  closeImage.addEventListener('error', checkCloseImage);
-  if (closeImage.complete) checkCloseImage();
+  if (!area || !toggle || !panel || !content || !overlay || !swipeFrame || !title || !expand || !collapse) return;
   expand.addEventListener('click', () => content.querySelectorAll('details').forEach(section => { section.open = true; }));
   collapse.addEventListener('click', () => content.querySelectorAll('details').forEach(section => { section.open = false; }));
   toggle.classList.add('pressable');
@@ -5240,7 +5250,7 @@ function initCardMinimap() {
     if (!fullyOpen) UI_SOUND.play('page');
     fullyOpen = true;
     closing = false;
-    close.focus({ preventScroll: true });
+    expand.focus({ preventScroll: true });
   }
   function hide(restoreFocus = false, immediate = false, onClosed = null) {
     if (!overlay.hidden && !immediate) {
@@ -5349,7 +5359,9 @@ function initCardMinimap() {
       if (!outline.sectioned) { list.appendChild(tags(group.cards, page, renderedCards, nextIndex)); return; }
       const groupCards = Array.from(renderedCards).slice(nextIndex.value, nextIndex.value + group.cards.length);
       const section = document.createElement('details');
+      section.open = !!group.unclassified || outline.groups.filter(entry => !entry.unclassified).length <= 3;
       const heading = document.createElement('summary');
+      heading.classList.add('pressable');
       setOutlineLabel(heading, group.label, group.cards.length);
       const badge = document.createElement('span');
       badge.className = 'card-minimap-count';
@@ -5477,7 +5489,6 @@ function initCardMinimap() {
   for (const type of ['pointerdown', 'mousedown', 'touchstart', 'touchmove', 'touchend', 'click', 'contextmenu']) {
     document.addEventListener(type, consumeOutside, { capture: true, passive: false });
   }
-  close.addEventListener('click', () => hide(true));
   panel.addEventListener('keydown', event => {
     if (event.key === 'Escape') { event.preventDefault(); hide(true); }
     if (event.key === 'Tab') {

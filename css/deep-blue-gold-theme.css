@@ -865,3 +865,48 @@
 .card-minimap-separator { opacity: .3; }
 .card-minimap-group .card-minimap-total { font-family: 'Cinzel', 'Noto Serif KR', serif; font-weight: 400; }
 .card-minimap summary .card-minimap-total { font-family: 'Cinzel', 'Noto Serif KR', serif; }
+
+/* Outline opening defaults and lightweight section feedback. */
+.card-minimap summary { list-style: none; display: block; transition: transform 120ms ease; }
+.card-minimap summary::-webkit-details-marker { display: none; }
+.card-minimap summary::marker { content: ''; }
+.card-minimap summary:active, .card-minimap summary.is-pressing { transform: scale(.97); }
+.card-minimap-header { padding-right: max(10px, env(safe-area-inset-right)); }
+
+/* Keep the corner seal fixed while only the detail content scrolls. */
+.detail-sheet { overflow: visible; }
+.detail-content { height: 100%; box-sizing: border-box; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #8fa7b6 transparent; }
+.detail-sheet.card-selected::after, .detail-sheet.card-locked::after {
+  content: ''; position: absolute; z-index: 10;
+  width: clamp(76px, 23vw, 140px); aspect-ratio: 1;
+  left: -12px; top: -20px;
+  background: url('../images/core/buttons/check.webp') center / contain no-repeat;
+  pointer-events: none;
+}
+.detail-sheet.card-locked::after { background-image: url('../images/core/buttons/lock.webp'); width: clamp(84px, 25vw, 154px); top: -16px; }
+.detail-body .detail-idea-block { position: relative; overflow: visible; }
+.detail-body .detail-idea-block.checked::after {
+  content: ''; position: absolute; top: 0; right: 0;
+  width: 32px; height: 32px; transform: translate(50%, -50%); z-index: 2;
+  background: url('../images/core/buttons/check.webp') center / contain no-repeat;
+  pointer-events: none;
+}
+.detail-section-items { padding-right: 16px; padding-top: 16px; }
+.detail-icon.main-image-selectable:not(.checked) .detail-image-selection-frame::after {
+  background: url('../images/core/buttons/cancel.webp') center / clamp(72px, 30%, 150px) auto no-repeat;
+}
+.detail-desc.card-desc-selectable { position: relative; }
+.detail-desc.card-desc-selectable:not(.checked)::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: url('../images/core/buttons/cancel.webp') center / 52px 52px no-repeat;
+}
+/* Reuse the exact frozen idea surface and ink, including its muted filter. */
+.detail-sheet.card-locked .detail-desc.card-desc-selectable.checked {
+  background: linear-gradient(165deg, #bdcad4, #b1c0cc 50%, #a3b4c2);
+  color: #2b4055;
+  box-shadow: inset 0 0 0 1px #58708455, inset 0 -2px 3px #1e344844;
+  filter: saturate(.35) brightness(.72);
+}
+.detail-sheet.card-locked :is(#detail-name, .detail-section-title) { color: #2b4055; filter: saturate(.35) brightness(.72); }
+.detail-sheet :is(button:disabled, [aria-disabled="true"]) { pointer-events: none; transform: none !important; }
+@media (prefers-reduced-motion: reduce) { .card-minimap summary { transition: none; } }
