@@ -5071,6 +5071,7 @@ function initCardMinimap() {
     for (const { section, cards } of sectionEntries) {
       const count = new Set(cards.filter(card => card.classList.contains('selected'))
         .map(card => card.dataset.globalIdx)).size;
+      section.classList.toggle('has-chosen-cards', cards.some(card => card.classList.contains('selected') || card.classList.contains('locked')));
       const badge = section.querySelector('.card-minimap-count');
       badge.hidden = count === 0;
       badge.textContent = String(count);
@@ -5152,6 +5153,12 @@ function initCardMinimap() {
     const from = page.scrollTop;
     const to = Math.max(0, Math.min(page.scrollHeight - page.clientHeight,
       from + target.getBoundingClientRect().top - visibleTop - 8));
+    scrollToPosition(page, to);
+  }
+  function scrollToPosition(page, to) {
+    cancelSectionScroll();
+    if (activePage() !== page || !page.isConnected) return;
+    const from = page.scrollTop;
     if (Math.abs(to - from) < 1 || matchMedia('(prefers-reduced-motion: reduce)').matches) {
       page.scrollTop = to;
       return;
@@ -5309,6 +5316,7 @@ function initCardMinimap() {
     const renderedItems = page.querySelectorAll('.card-section-header, .data-card');
     const nextIndex = { value: 0 };
     title.textContent = '전체 목록';
+    title.hidden = true;
     listObserver.disconnect();
     listObserver.observe(content);
     list = document.createElement('div');
@@ -5320,12 +5328,7 @@ function initCardMinimap() {
     groupShortcut.className = 'card-minimap-group pressable';
     groupShortcut.textContent = `${page.minimapGroup?.label || getSubInfo(currentSubId)?.label || '카드'} — ${cards.filter(card => !isSectionItem(card)).length}`;
     groupShortcut.addEventListener('click', () => {
-      cancelSectionScroll();
-      hide(true, true);
-      const behavior = page.style.scrollBehavior;
-      page.style.scrollBehavior = 'auto';
-      page.scrollTop = 0;
-      page.style.scrollBehavior = behavior;
+      hide(true, false, () => scrollToPosition(page, 0));
     });
     list.appendChild(groupShortcut);
     sectionEntries = [];
