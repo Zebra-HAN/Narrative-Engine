@@ -824,10 +824,10 @@
 .card-minimap-tag.is-locked { background: #b8d3e5; color: #193e59; }
 .card-minimap summary { position: relative; padding-right: 40px; }
 .card-minimap-count {
-  position: absolute; right: 7px; top: 6px;
+  position: absolute; right: 7px; top: 50%; transform: translateY(-50%);
   min-width: 24px; height: 24px; padding: 0 3px;
   display: grid; place-items: center; border-radius: 50%;
-  background: #d4dfbe; color: #2d442a; border: 1px solid #80936a;
+  background: #963c3c; color: #ffffff; border: 1px solid #7b3030;
   font: 600 12px/1 system-ui;
 }
 .card-minimap-count[hidden] { display: none; }
@@ -843,14 +843,14 @@
 .card-minimap details { border-top: 1px solid #947a5233; padding-top: 4px; }
 .card-minimap summary {
   background: transparent; border: 0; border-radius: 0; box-shadow: none;
-  padding: 10px 40px 6px 4px; color: #584433; font-weight: 400;
+  padding: 8px 40px 8px 4px; color: #584433; font-weight: 400;
 }
 .card-minimap-tags { padding-top: 4px; }
 .card-minimap details.is-current-section > summary {
-  background: transparent; border: 0; color: #946c25; font-weight: 700;
+  background: transparent; border: 0; color: #b34f18; font-weight: 700;
 }
 .card-minimap details.has-chosen-cards > summary {
-  color: #306b38; font-weight: 700; text-shadow: 0 0 8px #7ea56966;
+  color: #306b38; font-weight: 700; text-shadow: none;
 }
 .card-minimap-tag { border: 0; padding: 5px 8px; }
 .card-minimap-group {
@@ -858,6 +858,10 @@
   text-align: center; font-family: 'Cinzel', 'Noto Serif KR', serif;
   font-size: 21px; font-weight: 600;
 }
-.card-minimap-header { justify-content: flex-end; padding-right: 56px; }
+.card-minimap-header { justify-content: flex-end; padding-right: 64px; }
 #card-minimap-close { right: 10px; top: 15px; padding: 0; }
 #card-minimap-close .close-icon { width: 41.6px; height: 41.6px; }
+
+.card-minimap-separator { opacity: .3; }
+.card-minimap-group .card-minimap-total { font-family: 'Noto Sans KR', sans-serif; }
+.card-minimap summary .card-minimap-total { font-family: 'Cinzel', 'Noto Serif KR', serif; }

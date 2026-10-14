@@ -28,7 +28,7 @@ const { chromium } = require('playwright');
         const sections = page.locator('#card-minimap details.is-current-section');
         assert.equal(await sections.count(), 1);
         assert.equal(await page.locator('#card-minimap summary[aria-current="location"]').count(), 1);
-        return sections.locator('summary').evaluate(n=>[...n.childNodes].filter(c=>c.nodeType===3).map(c=>c.textContent).join(''));
+        return sections.locator('summary').evaluate(n=>[...n.childNodes].filter(c=>c.nodeType===3||!c.classList?.contains('card-minimap-count')).map(c=>c.textContent).join(''));
       };
       const open = async () => { await toggle.click(); await page.waitForTimeout(250); };
       const dismiss = async () => { await close.click(); await page.waitForTimeout(250); };

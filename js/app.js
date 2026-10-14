@@ -5304,6 +5304,18 @@ function initCardMinimap() {
     });
     return list;
   }
+  function setOutlineLabel(element, label, count) {
+    const name = document.createElement('span');
+    name.className = 'card-minimap-label';
+    name.textContent = label;
+    const separator = document.createElement('span');
+    separator.className = 'card-minimap-separator';
+    separator.textContent = ' — ';
+    const total = document.createElement('span');
+    total.className = 'card-minimap-total';
+    total.textContent = String(count);
+    element.append(name, separator, total);
+  }
   function show(preview = false) {
     if (!overlay.hidden) return;
     cancelSectionScroll();
@@ -5326,7 +5338,7 @@ function initCardMinimap() {
     const groupShortcut = document.createElement('button');
     groupShortcut.type = 'button';
     groupShortcut.className = 'card-minimap-group pressable';
-    groupShortcut.textContent = `${page.minimapGroup?.label || getSubInfo(currentSubId)?.label || '카드'} — ${cards.filter(card => !isSectionItem(card)).length}`;
+    setOutlineLabel(groupShortcut, page.minimapGroup?.label || getSubInfo(currentSubId)?.label || '카드', cards.filter(card => !isSectionItem(card)).length);
     groupShortcut.addEventListener('click', () => {
       hide(true, false, () => scrollToPosition(page, 0));
     });
@@ -5338,7 +5350,7 @@ function initCardMinimap() {
       const groupCards = Array.from(renderedCards).slice(nextIndex.value, nextIndex.value + group.cards.length);
       const section = document.createElement('details');
       const heading = document.createElement('summary');
-      heading.textContent = `${group.label} — ${group.cards.length}`;
+      setOutlineLabel(heading, group.label, group.cards.length);
       const badge = document.createElement('span');
       badge.className = 'card-minimap-count';
       badge.hidden = true;
