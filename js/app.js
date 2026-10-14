@@ -550,6 +550,24 @@ let excludedMainImages = {}; // Default included; only explicit exclusions are s
 let selectedDescs = {}; // { "subId__globalIdx": true/false }, omitted means included by default
 let focusedCard  = null;  // { subId, idx, name, icon }
 let addressTrail = [];
+// Routes only; existing renderers own data, selection, scroll and background memory.
+const groupCardReentries = new Map();
+function rememberGroupCardReentry(subId, groupIdx, sgIdx) {
+  const route = { subId, groupIdx, sgIdx };
+  groupCardReentries.set(`${currentNav}:group:${subId}`, route);
+  if (sgIdx !== undefined) groupCardReentries.set(`${currentNav}:subgroup:${subId}:${groupIdx}`, route);
+}
+function getGroupCardReentry(page) {
+  if (!page || !['group', 'subgroup'].includes(page.dataset.chromeView)) return null;
+  const route = groupCardReentries.get(page.dataset.reentryKey);
+  const group = route && CARD_DATA[route.subId]?.groups?.[route.groupIdx];
+  if (!group || !Array.isArray(route.sgIdx === undefined ? group.cards : group.subgroups?.[route.sgIdx]?.cards)) return null;
+  return route;
+}
+function reenterGroupCards(route) {
+  return route.sgIdx === undefined ? showGroupCards(route.subId, route.groupIdx)
+    : showSubgroupCards(route.subId, route.groupIdx, route.sgIdx);
+}
 
 const MAIN_CATEGORY_INFO = {
   character:  { icon: '🛡️' },
@@ -865,6 +883,9 @@ function initCenterBackSwipe() {
   let gestureWidth = 0;
   let returnAnimation = null;
   let returnPage = null;
+  let forwardRoute = null;
+  let forwardDragging = false;
+  let forwardPending = false;
 
   const activePage = () => area.querySelector('.center-page.active[data-chrome-view]')
     || area.querySelector('.center-page.active');
@@ -911,7 +932,7 @@ function initCenterBackSwipe() {
   }
 
   function resetDragStyles() {
-    area.classList.remove('is-back-swiping');
+    area.classList.remove('is-back-swiping', 'is-forward-swiping');
     returnToRest(dragPage, dragOffset);
     dragPage = null;
     dragOffset = 0;
@@ -919,7 +940,12 @@ function initCenterBackSwipe() {
   }
 
   function onTouchStart(e) {
-    if (e.touches.length !== 1 || !canNavigateBackInTrail()) return;
+    if (e.touches.length !== 1 || forwardPending) return;
+    const page = activePage();
+    forwardRoute = !isExtraMenuOpen() && !document.getElementById('screen-create').classList.contains('bottom-panel-visible')
+      ? getGroupCardReentry(page) : null;
+    forwardDragging = false;
+    if (!canNavigateBackInTrail() && !forwardRoute) return;
     const touch = e.touches[0];
     dragPage = activePage();
     gestureWidth = area.clientWidth;
@@ -954,7 +980,7 @@ function initCenterBackSwipe() {
     const dy = touch.clientY - startY;
     lastX = touch.clientX;
     lastY = touch.clientY;
-    furthestX = Math.max(furthestX, dx);
+    furthestX = Math.max(furthestX, forwardDragging ? -dx : dx);
 
     if (!isDragging) {
       if (Math.hypot(dx, dy) < DIRECTION_LOCK_DISTANCE) return;
@@ -964,7 +990,12 @@ function initCenterBackSwipe() {
         return;
       }
 
-      if (dx > 0 && dx > Math.abs(dy) * HORIZONTAL_BIAS) {
+      if (dx < 0 && -dx > Math.abs(dy) * HORIZONTAL_BIAS && forwardRoute) {
+        forwardDragging = true;
+        isDragging = true;
+        furthestX = -dx;
+        area.classList.add('is-forward-swiping');
+      } else if (dx > 0 && dx > Math.abs(dy) * HORIZONTAL_BIAS && canNavigateBackInTrail()) {
         isDragging = true;
         area.classList.add('is-back-swiping');
         APP_PERF?.mark('swipe.drag-start', { page: dragPage?.id });
@@ -973,7 +1004,9 @@ function initCenterBackSwipe() {
 
     if (isDragging) {
       e.preventDefault();
-      dragOffset = Math.min(dragOrigin + dx * 0.35, 42);
+      dragOffset = forwardDragging
+        ? Math.max(-42, Math.min(0, dragOrigin + dx * 0.35))
+        : Math.min(dragOrigin + dx * 0.35, 42);
       if (dragPage) dragPage.style.transform = `translateX(${dragOffset}px)`;
     }
   }
@@ -1014,11 +1047,17 @@ function initCenterBackSwipe() {
     isVerticalGesture = false;
 
     if (shouldGoBack) {
-      area.classList.remove('is-back-swiping');
+      area.classList.remove('is-back-swiping', 'is-forward-swiping');
       UI_SOUND.play('page');
       const key = pageKeys.get(sourcePage);
       if (key) scrollMemory.set(key, APP_PERF ? APP_PERF.measure('scroll.read', () => sourcePage.scrollTop, { page: sourcePage.id }) : sourcePage.scrollTop);
-      navigateAddressBack();
+      if (forwardDragging) {
+        const route = forwardRoute;
+        forwardPending = true;
+        Promise.resolve(reenterGroupCards(route)).then(moved => {
+          if (moved && activePage() !== sourcePage) returnToRest(activePage(), offset);
+        }).finally(() => { forwardPending = false; });
+      } else navigateAddressBack();
       // 사라질 이전 페이지를 먼저 원점으로 튕기지 않는다. 새 페이지는 같은
       // 드래그 위치에서 기존 복귀 곡선을 따라 원점에 안착한다.
       sourcePage?.style.removeProperty('transform');
@@ -1026,7 +1065,7 @@ function initCenterBackSwipe() {
       dragPage = null;
       dragOffset = 0;
       dragOrigin = 0;
-      returnToRest(activePage(), offset);
+      if (!forwardDragging) returnToRest(activePage(), offset);
     }
   }
 
@@ -2109,6 +2148,7 @@ function switchNav(navId, skipAnimation, options = {}, backgroundPrepared = fals
     // Explicit NAV entry starts a new exploration; ancestor navigation restores
     // the current one. Reset only chosen routes, never decoded image caches.
     if (!options.restoreBackground) {
+      groupCardReentries.clear();
       creativeBackgroundMemory.clear();
       backgroundSessionSubId = null;
     }
@@ -2184,7 +2224,10 @@ function renderSubnav(navId, animate) {
 ════════════════════════════════════════════════ */
 function selectSub(subId, navId, backgroundPrepared = false, restoreBackground = false) {
   if (!backgroundPrepared) {
-    if (!restoreBackground) beginBackgroundCategorySession(subId, navId || currentNav);
+    if (!restoreBackground) {
+      groupCardReentries.clear();
+      beginBackgroundCategorySession(subId, navId || currentNav);
+    }
     const grouped = Boolean(CARD_DATA[subId]?.groups);
     return applyCreativeBackground({ navId: navId || currentNav, stage: grouped ? 'group' : 'card',
       screenKey: `${grouped ? 'group' : 'cards'}:${subId}` }, () => selectSub(subId, navId, true, restoreBackground));
@@ -2383,6 +2426,7 @@ function showGroupPage(subId, animate = true, backgroundPrepared = false) {
   const page = document.createElement('div');
   page.className = 'center-page active';
   page.dataset.chromeView = 'group';
+  page.dataset.reentryKey = `${currentNav}:group:${subId}`;
   page.id = 'page-' + subId;
 
   const groupLayoutClass = getGroupLayoutClass(data.groups.length);
@@ -2457,6 +2501,7 @@ function showSubgroupPage(subId, groupIdx, backgroundPrepared = false) {
   const page = document.createElement('div');
   page.className = 'center-page active';
   page.dataset.chromeView = 'subgroup';
+  page.dataset.reentryKey = `${currentNav}:subgroup:${subId}:${groupIdx}`;
   page.id = 'page-' + subId + '_sg_' + grp.id;
 
    const subgroupLayoutClass = getGroupLayoutClass(grp.subgroups.length);
@@ -2516,6 +2561,7 @@ function showSubgroupCards(subId, groupIdx, sgIdx, backgroundPrepared = false, t
   if (!sg) return;
   preloadCards(sg.cards);
   const titleCard = createPageTitleCard(sg, subId, titleAssets);
+  rememberGroupCardReentry(subId, groupIdx, sgIdx);
 
   document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
 
@@ -2656,6 +2702,7 @@ function showGroupCards(subId, groupIdx, backgroundPrepared = false, titleAssets
   if (!grp) return;
   preloadCards(grp.cards);
   const titleCard = createPageTitleCard(grp, subId, titleAssets);
+  rememberGroupCardReentry(subId, groupIdx);
 
   document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
 
