@@ -3554,12 +3554,14 @@ function openDetailSheet(mode) {
             onclick="toggleSubImageCheck('${focusedCard.subId}', ${focusedCard.idx})"
             aria-pressed="${subImageChecked ? 'true' : 'false'}"
           >
+            <span class="detail-image-selection-frame">
             <img
               class="detail-sub-img"
               src="${card.subImg}"
               alt="${focusedCard.name} 서브 이미지"
               draggable="false"
             >
+            </span>
           </button>`;
       }
       bodyEl.innerHTML = bodyHtml;
@@ -3614,6 +3616,13 @@ function configureDetailMainImage(subId = null, idx = null) {
   element.classList.remove('main-image-selectable', 'checked');
   ['role', 'aria-pressed', 'aria-disabled', 'tabindex', 'aria-label'].forEach(name => element.removeAttribute(name));
   if (!subId || !getCardByGlobalIdx(subId, idx)?.img) return;
+  const image = element.querySelector('.detail-card-img');
+  if (image && !image.parentElement.classList.contains('detail-image-selection-frame')) {
+    const frame = document.createElement('span');
+    frame.className = 'detail-image-selection-frame';
+    image.replaceWith(frame);
+    frame.appendChild(image);
+  }
   element.dataset.mainImageKey = `${subId}__${idx}`;
   element.classList.add('main-image-selectable');
   element.setAttribute('role', 'button');
