@@ -5055,6 +5055,24 @@ function initCardMinimap() {
     toggle.disabled = view !== 'cards';
   }
   let sectionEntries = [];
+  let tagEntries = [];
+  function updateOutlineSelection() {
+    if (overlay.hidden) return;
+    for (const { tag, card } of tagEntries) {
+      tag.classList.toggle('is-selected', card.classList.contains('selected'));
+      tag.classList.toggle('is-locked', card.classList.contains('locked'));
+    }
+    for (const { section, cards } of sectionEntries) {
+      const count = new Set(cards.filter(card => card.classList.contains('selected'))
+        .map(card => card.dataset.globalIdx)).size;
+      const badge = section.querySelector('.card-minimap-count');
+      badge.hidden = count === 0;
+      badge.textContent = String(count);
+      badge.setAttribute('aria-label', `선택 카드 ${count}개`);
+    }
+  }
+  new MutationObserver(updateOutlineSelection).observe(area,
+    { subtree: true, attributes: true, attributeFilter: ['class'] });
   let currentSection = -1;
   let sectionFrame = 0;
   function updateCurrentSection(initial = false) {
@@ -5148,7 +5166,7 @@ function initCardMinimap() {
     // Compress the approach only. The original final 30% keeps its timing and curve.
     const range = Math.max(0, Math.min(1, (distance - 800) / 2200));
     const compression = range * range * (3 - 2 * range);
-    const approach = .7 - .5 * compression;
+    const approach = .7 - .35 * compression;
     const initialSpeed = 1.4 / approach - 1;
     for (const type of ['pointerdown', 'touchstart', 'wheel', 'keydown']) {
       document.addEventListener(type, cancelSectionScroll, { capture: true, passive: true });
@@ -5233,6 +5251,7 @@ function initCardMinimap() {
     toggle.setAttribute('aria-expanded', 'false');
     content.replaceChildren();
     sectionEntries = [];
+    tagEntries = [];
     currentSection = -1;
     if (sectionFrame) cancelAnimationFrame(sectionFrame);
     sectionFrame = 0;
@@ -5264,6 +5283,7 @@ function initCardMinimap() {
       tag.className = 'card-minimap-tag pressable';
       tag.textContent = String(card.name ?? '');
       const target = renderedCards[nextIndex.value++];
+      tagEntries.push({ tag, card: target });
       tag.addEventListener('click', () => {
         hide(true, false, () => scrollToSection(page, target));
       });
@@ -5282,12 +5302,26 @@ function initCardMinimap() {
     const renderedCards = page.querySelectorAll('.data-card');
     const renderedItems = page.querySelectorAll('.card-section-header, .data-card');
     const nextIndex = { value: 0 };
-    title.textContent = `${page.minimapGroup?.label || ''} — ${cards.filter(card => !isSectionItem(card)).length}`;
+    title.textContent = '전체 목록';
     listObserver.disconnect();
     listObserver.observe(content);
     list = document.createElement('div');
     list.className = 'card-minimap-list';
     content.replaceChildren(list);
+    tagEntries = [];
+    const groupShortcut = document.createElement('button');
+    groupShortcut.type = 'button';
+    groupShortcut.className = 'card-minimap-group pressable';
+    groupShortcut.textContent = `${page.minimapGroup?.label || getSubInfo(currentSubId)?.label || '카드'} — ${cards.filter(card => !isSectionItem(card)).length}`;
+    groupShortcut.addEventListener('click', () => {
+      cancelSectionScroll();
+      hide(true, true);
+      const behavior = page.style.scrollBehavior;
+      page.style.scrollBehavior = 'auto';
+      page.scrollTop = 0;
+      page.style.scrollBehavior = behavior;
+    });
+    list.appendChild(groupShortcut);
     sectionEntries = [];
     currentSection = -1;
     outline.groups.forEach(group => {
@@ -5296,6 +5330,10 @@ function initCardMinimap() {
       const section = document.createElement('details');
       const heading = document.createElement('summary');
       heading.textContent = `${group.label} — ${group.cards.length}`;
+      const badge = document.createElement('span');
+      badge.className = 'card-minimap-count';
+      badge.hidden = true;
+      heading.appendChild(badge);
       section.append(heading, tags(group.cards, page, renderedCards, nextIndex));
       list.appendChild(section);
       const anchor = renderedItems[group.startIndex];
@@ -5305,6 +5343,7 @@ function initCardMinimap() {
     overlay.hidden = false;
     panel.hidden = false;
     updateCurrentSection(true);
+    updateOutlineSelection();
     fullyOpen = false;
     scrollAllowance = 0;
     measureList(true);

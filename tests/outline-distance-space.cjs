@@ -3,10 +3,11 @@ const {execFileSync}=require('node:child_process');
 const {chromium}=require('playwright');
 (async()=>{
  const browser=await chromium.launch({executablePath:'/usr/bin/chromium',args:['--no-sandbox']});
- const baseline=execFileSync('git',['show','9920a5f:js/app.js'],{encoding:'utf8'});
+ const original=execFileSync('git',['show','9920a5f:js/app.js'],{encoding:'utf8'}),previous=execFileSync('git',['show','8ea6212:js/app.js'],{encoding:'utf8'});
  try{
   const results=[];
-  for(const old of [true,false]){
+  for(const baseline of [original,previous,null]){
+   const old=Boolean(baseline);
    const page=await browser.newPage({viewport:{width:393,height:852},hasTouch:true,serviceWorkers:'block'});
    await page.route(/fonts\.(googleapis|gstatic)\.com/,r=>r.abort());
    if(old)await page.route('**/js/app.js',r=>r.fulfill({body:baseline,contentType:'application/javascript'}));
@@ -16,11 +17,12 @@ const {chromium}=require('playwright');
    await page.evaluate(()=>{showGroupCards('race',2,true);window.source=document.querySelector('.center-page.active[data-chrome-view=cards]');source.querySelectorAll('.data-card').forEach(c=>c.classList.remove('card-deal'));});
    await page.waitForTimeout(500);assert.equal(await page.locator('.center-page.active .data-card').count(),139);
    const trips=[];
-   for(const short of [false,true]){
-    await page.evaluate(short=>{source.scrollTop=short?120:0;},short);
+   for(const kind of ['down','up','short']){
+    const short=kind==='short';
+    await page.evaluate(kind=>{source.scrollTop=kind==='short'?120:kind==='up'?source.scrollHeight:0;},kind);
     await page.locator('#card-minimap-toggle').click();await page.waitForTimeout(250);await page.locator('#card-minimap-expand').click();
-    const tag=page.locator('.card-minimap-tag').nth(short?2:138);await tag.scrollIntoViewIfNeeded();
-    if(!old&&!short){
+    const tag=page.locator('.card-minimap-tag').nth(short?2:kind==='up'?0:138);await tag.scrollIntoViewIfNeeded();
+    if(!old&&kind==='down'){
      const space=await page.evaluate(()=>{const content=document.querySelector('.card-minimap-content'),last=[...content.querySelectorAll('.card-minimap-tag')].at(-1);content.scrollTop=content.scrollHeight;return {top:content.scrollTop,lastBottom:last.getBoundingClientRect().bottom,center:content.getBoundingClientRect().top+content.clientHeight/2};});
      assert(Math.abs(space.lastBottom-space.center)<35,'last card can rest at viewport center');await page.waitForTimeout(300);
      const bounds=await page.locator('.card-minimap-content').boundingBox(),touch=await page.context().newCDPSession(page);
@@ -40,16 +42,19 @@ const {chromium}=require('playwright');
    results.push(trips);await page.close();
   }
 
-  const ratio=results[1][0].duration/results[0][0].duration;
-  assert(ratio>.4&&ratio<.6,`139 cards duration ratio ${ratio}`);
-  assert(Math.abs(results[1][1].duration-results[0][1].duration)<100,'short trip timing preserved');
-  assert.equal(results[0][0].to,results[1][0].to,'same section-start destination');
+  const ratio=results[2][0].duration/results[0][0].duration;
+  assert(results[2][0].duration>results[1][0].duration*1.15,'more relaxed than the fast prior release');
+  assert(ratio>.55&&ratio<.8,`139 cards duration ratio ${ratio}`);
+  assert(Math.abs(results[2][2].duration-results[0][2].duration)<100,'short trip timing preserved');
+  assert.equal(results[0][0].to,results[2][0].to,'same section-start destination');
+  assert.equal(results[0][1].to,results[2][1].to,'same reverse section-start destination');
+  assert(results[2][1].duration>results[1][1].duration*1.15,'reverse long trip also more relaxed');
   // The final glide retains its old trajectory when aligned by arrival, within frame/rounding tolerance.
   for(const remaining of [150,250,350]){
    const offsets=results.map(r=>{const trip=r[0],time=trip.duration-remaining,p=trip.samples.reduce((a,b)=>Math.abs(b.t-time)<Math.abs(a.t-time)?b:a);return Math.abs(p.y-trip.to);});
-   assert(Math.abs(offsets[0]-offsets[1])<8,JSON.stringify({remaining,offsets,results:results.map(r=>({distance:r[0].distance,duration:r[0].duration}))}));
+   assert(Math.abs(offsets[0]-offsets[2])<8,JSON.stringify({remaining,offsets,results:results.map(r=>({distance:r[0].distance,duration:r[0].duration}))}));
   }
-  console.log(JSON.stringify({cards:139,baselineMs:results[0][0].duration,newMs:results[1][0].duration,ratio,shortBaselineMs:results[0][1].duration,shortNewMs:results[1][1].duration}));
+  console.log(JSON.stringify({cards:139,baselineMs:results[0][0].duration,previousMs:results[1][0].duration,newMs:results[2][0].duration,ratio,reversePreviousMs:results[1][1].duration,reverseNewMs:results[2][1].duration,shortBaselineMs:results[0][2].duration,shortNewMs:results[2][2].duration}));
   console.log('PASS actual 139-card timing, short timing, original tail, exact stable destination and real bottom space');
  }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1});
