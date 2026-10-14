@@ -3798,6 +3798,11 @@ function closeDetailSheet(e) {
 function openStatusOverlay() {
   setBottomNavState('idea');
   renderStatusContent();
+  const body = document.getElementById('status-body');
+  const behavior = body.style.scrollBehavior;
+  body.style.scrollBehavior = 'auto';
+  body.scrollTop = 0;
+  body.style.scrollBehavior = behavior;
   document.getElementById('status-overlay').classList.add('active');
   attachSwipeToClose(
     document.querySelector('.status-overlay .popup-swipe-frame'),
@@ -4388,6 +4393,7 @@ function isExtraMenuOpen() {
 }
 function setExtraMenuOpen(scope, open, instant = false) {
   extraMenuState[scope] = open;
+  document.getElementById('screen-create').classList.toggle('extra-menu-active', isExtraMenuOpen());
   const panel = document.getElementById(scope === 'dock' ? 'card-extra-menu-panel' : 'extra-menu-panel');
   const button = document.getElementById(scope === 'dock' ? 'card-menu-toggle' : 'btn-extra-menu');
   if (instant) panel?.classList.add('menu-resetting');

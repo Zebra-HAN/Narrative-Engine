@@ -7,7 +7,9 @@ const {chromium}=require('playwright');
    const page=await browser.newPage({viewport,hasTouch:true,serviceWorkers:'block'});const errors=[];page.on('pageerror',e=>errors.push(e.message));
    await page.route(/fonts\.(googleapis|gstatic)\.com/,r=>r.abort());
    await page.goto(process.env.PERF_TEST_URL);await page.waitForTimeout(1600);
-   await page.evaluate(()=>{goToCreate();switchNav('character',true);selectSub('race');showGroupCards('race',2,true);const i=CARD_DATA.race.groups[2].cards.findIndex(c=>c.type!=='section');window.testIndex=i;window.testCard=CARD_DATA.race.groups[2].cards[i];testCard.subImg=testCard.img;testCard.detail='【Ideas】\nFirst idea\nSecond idea';groupCardClick('race',2,i);openDetailSheet('card');});
+   await page.evaluate(()=>{goToCreate();switchNav('character',true);selectSub('race');});
+   await page.waitForFunction(()=>document.querySelector('#page-race.active[data-chrome-view=group]'));
+   await page.evaluate(()=>{showGroupCards('race',2,true);const i=CARD_DATA.race.groups[2].cards.findIndex(c=>c.type!=='section');window.testIndex=i;window.testCard=CARD_DATA.race.groups[2].cards[i];testCard.subImg=testCard.img;testCard.detail='【Ideas】\nFirst idea\nSecond idea';groupCardClick('race',2,i);openDetailSheet('card');});
    const paint=()=>page.evaluate(()=>{
     const main=document.querySelector('#detail-icon img'),sub=document.querySelector('.detail-sub-img');
     const state=img=>{const s=getComputedStyle(img),frame=getComputedStyle(img.parentElement,'::after');let opacity=1;for(let n=img;n&&n!==document.querySelector('.detail-sheet');n=n.parentElement)opacity*=Number(getComputedStyle(n).opacity);return {opacity,filter:s.filter,overlay:frame.backgroundColor,edge:frame.boxShadow};};

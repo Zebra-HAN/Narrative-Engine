@@ -466,9 +466,9 @@
 .detail-sheet .detail-name::after { width: 100%; }
 
 /* A local CSS close control preserves the 44px hit area and the shared artwork. */
-.detail-sheet .detail-close {
-  top: 0;
-  right: 0;
+.detail-sheet .detail-close { top: 0; right: 0; }
+.status-panel .status-close { position: relative; }
+:is(.detail-sheet .detail-close, .status-panel .status-close) {
   border-radius: 50%;
   background:
     radial-gradient(circle, transparent 62%, #a58d6788 66%, #d0b88a55 70%, transparent 71%) content-box,
@@ -476,8 +476,9 @@
   color: #f0e9dc;
   z-index: 1;
 }
-.detail-sheet .detail-close .close-icon { display: none; }
-.detail-sheet .detail-close::before, .detail-sheet .detail-close::after {
+:is(.detail-sheet .detail-close, .status-panel .status-close) .close-icon { display: none; }
+:is(.detail-sheet .detail-close, .status-panel .status-close)::before,
+:is(.detail-sheet .detail-close, .status-panel .status-close)::after {
   content: '';
   position: absolute;
   top: 50%;
@@ -489,7 +490,7 @@
   pointer-events: none;
   transform: translate(-50%, -50%) rotate(45deg);
 }
-.detail-sheet .detail-close::after { transform: translate(-50%, -50%) rotate(-45deg); }
+:is(.detail-sheet .detail-close, .status-panel .status-close)::after { transform: translate(-50%, -50%) rotate(-45deg); }
 
 /* Category artwork is contained at its original ratio, with no diamond crop. */
 .status-panel .status-category-mark {
@@ -731,3 +732,29 @@
 .detail-sheet .detail-sub-image-row:disabled { opacity: 1; cursor: default; }
 #screen-create.card-controls-mode > .card-panel-toggle,
 #screen-create.card-controls-mode > .card-panel-toggle::before { opacity: 1; }
+
+/* Match only the two popup scroll surfaces to their ivory frame accents. */
+.detail-sheet, .status-body { scrollbar-width: thin; scrollbar-color: #f0e9dc transparent; }
+:is(.detail-sheet, .status-body)::-webkit-scrollbar { width: 4px; }
+:is(.detail-sheet, .status-body)::-webkit-scrollbar-thumb { background: #f0e9dc; border-radius: 2px; }
+:is(.detail-sheet, .status-body)::-webkit-scrollbar-track { background: transparent; }
+
+.status-panel .status-chip { padding-top: 2px; padding-left: 3px; padding-right: 3px; }
+.status-panel .status-card-meta { margin-bottom: 0; }
+.status-panel .status-card-meta + .status-chip-img { margin-top: -5px; }
+
+#screen-create.extra-menu-active > .card-panel-toggle { visibility: hidden; pointer-events: none; }
+#screen-create.card-controls-mode > .card-panel-toggle {
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+#screen-create.card-controls-mode > .card-panel-toggle:is(:active, :focus, :focus-visible) {
+  background: transparent;
+  box-shadow: none;
+  outline: none;
+  filter: none;
+}
+#screen-create.card-controls-mode > .card-panel-toggle:focus-visible::before {
+  outline: 2px solid #f0e9dc;
+  outline-offset: 2px;
+}
