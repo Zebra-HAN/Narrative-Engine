@@ -4919,17 +4919,17 @@ function buildCardMinimapGroups(cards) {
   const groups = [];
   let current = null;
   let sectioned = false;
-  for (const card of cards) {
+  for (const [startIndex, card] of cards.entries()) {
     if (isSectionItem(card)) {
       const formatted = document.createElement('template');
       formatted.innerHTML = formatSectionHeaderLabel(card.label);
       const label = formatted.content.querySelector('.card-section-title')?.textContent || '';
-      current = label ? { label, cards: [] } : null;
+      current = label ? { label, cards: [], startIndex } : null;
       if (current) { groups.push(current); sectioned = true; }
     } else {
       if (!current) {
         const last = groups[groups.length - 1];
-        current = last?.unclassified ? last : { label: '미분류', cards: [], unclassified: true };
+        current = last?.unclassified ? last : { label: '미분류', cards: [], unclassified: true, startIndex };
         if (current !== last) groups.push(current);
       }
       current.cards.push(card);
@@ -4964,6 +4964,51 @@ function initCardMinimap() {
     toggle.hidden = !['group', 'subgroup', 'cards'].includes(view);
     toggle.disabled = view !== 'cards';
   }
+  let sectionEntries = [];
+  let currentSection = -1;
+  let sectionFrame = 0;
+  function updateCurrentSection(initial = false) {
+    const page = activePage();
+    if (overlay.hidden || !page || !sectionEntries.length) return;
+    const view = page.getBoundingClientRect();
+    const info = document.getElementById('info-panel');
+    const infoBottom = getComputedStyle(info).visibility === 'hidden' ? 0 : info.getBoundingClientRect().bottom;
+    const visibleTop = Math.max(0, view.top + page.clientTop, infoBottom);
+    const probe = visibleTop + 24;
+    const positions = sectionEntries.map(entry => entry.anchor.getBoundingClientRect().top);
+    let next = 0;
+    for (let i = 1; i < positions.length; i++) {
+      if (positions[i] <= probe) next = i;
+    }
+    const atBottom = page.scrollHeight > page.clientHeight
+      && page.scrollTop >= page.scrollHeight - page.clientHeight - 1;
+    if (atBottom) next = sectionEntries.length - 1;
+    // Require twelve pixels beyond a boundary before changing an existing marker.
+    if (!initial && !atBottom && currentSection >= 0) {
+      if (next > currentSection && positions[next] > probe - 12) next = currentSection;
+      if (next < currentSection && positions[currentSection] < probe + 12) next = currentSection;
+    }
+    currentSection = next;
+    sectionEntries.forEach((entry, index) => {
+      const active = index === next;
+      entry.section.classList.toggle('is-current-section', active);
+      const heading = entry.section.querySelector('summary');
+      if (active) heading.setAttribute('aria-current', 'location');
+      else heading.removeAttribute('aria-current');
+    });
+  }
+  function requestSectionUpdate() {
+    if (overlay.hidden || sectionFrame) return;
+    sectionFrame = requestAnimationFrame(() => {
+      sectionFrame = 0;
+      updateCurrentSection();
+    });
+  }
+  area.addEventListener('scroll', event => {
+    if (event.target === activePage()) requestSectionUpdate();
+  }, { capture: true, passive: true });
+  area.addEventListener('load', requestSectionUpdate, true);
+  window.addEventListener('resize', requestSectionUpdate, { passive: true });
   let scrollJob = null;
   function cancelSectionScroll() {
     if (!scrollJob) return;
@@ -4978,11 +5023,7 @@ function initCardMinimap() {
   function scrollToSection(page, card) {
     cancelSectionScroll();
     if (activePage() !== page || !card?.isConnected) return;
-    const grid = card.closest('.card-grid-section') || card.closest('.card-grid');
-    if (!grid) return;
-    let heading = grid.previousElementSibling;
-    while (heading && !heading.classList.contains('card-section-header')) heading = heading.previousElementSibling;
-    const target = heading || grid;
+    const target = card;
     const view = page.getBoundingClientRect();
     const info = document.getElementById('info-panel');
     const infoBottom = getComputedStyle(info).visibility === 'hidden' ? 0 : info.getBoundingClientRect().bottom;
@@ -5004,7 +5045,8 @@ function initCardMinimap() {
     job.popupObserver.observe(page, { childList: true });
     page.style.scrollBehavior = 'auto';
     const started = performance.now();
-    const duration = Math.min(1050, 180 + Math.sqrt(Math.abs(to - from)) * 14);
+    // A bounded, distance-aware glide with a longer, gently settling final quarter.
+    const duration = Math.min(2600, 220 + Math.sqrt(Math.abs(to - from)) * 30);
     for (const type of ['pointerdown', 'touchstart', 'wheel', 'keydown']) {
       document.addEventListener(type, cancelSectionScroll, { capture: true, passive: true });
     }
@@ -5015,7 +5057,7 @@ function initCardMinimap() {
         return;
       }
       const t = Math.min(1, (performance.now() - started) / duration);
-      page.scrollTop = from + (to - from) * (1 - Math.pow(1 - t, 3));
+      page.scrollTop = from + (to - from) * (1 - Math.pow(1 - t, 4));
       job.lastTop = page.scrollTop;
       if (t < 1) job.frame = requestAnimationFrame(step);
       else cancelSectionScroll();
@@ -5082,6 +5124,10 @@ function initCardMinimap() {
     syncToggle();
     toggle.setAttribute('aria-expanded', 'false');
     content.replaceChildren();
+    sectionEntries = [];
+    currentSection = -1;
+    if (sectionFrame) cancelAnimationFrame(sectionFrame);
+    sectionFrame = 0;
     if (restoreFocus && !toggle.hidden) toggle.focus({ preventScroll: true });
     onClosed?.();
   }
@@ -5125,6 +5171,7 @@ function initCardMinimap() {
     const cards = page.minimapCards || [];
     const outline = buildCardMinimapGroups(cards);
     const renderedCards = page.querySelectorAll('.data-card');
+    const renderedItems = page.querySelectorAll('.card-section-header, .data-card');
     const nextIndex = { value: 0 };
     title.textContent = `${page.minimapGroup?.label || ''} — ${cards.filter(card => !isSectionItem(card)).length}`;
     listObserver.disconnect();
@@ -5132,6 +5179,8 @@ function initCardMinimap() {
     list = document.createElement('div');
     list.className = 'card-minimap-list';
     content.replaceChildren(list);
+    sectionEntries = [];
+    currentSection = -1;
     outline.groups.forEach(group => {
       if (!outline.sectioned) { list.appendChild(tags(group.cards, page, renderedCards, nextIndex)); return; }
       const section = document.createElement('details');
@@ -5139,10 +5188,13 @@ function initCardMinimap() {
       heading.textContent = `${group.label} — ${group.cards.length}`;
       section.append(heading, tags(group.cards, page, renderedCards, nextIndex));
       list.appendChild(section);
+      const anchor = renderedItems[group.startIndex];
+      if (anchor) sectionEntries.push({ section, anchor });
     });
     toggle.setAttribute('aria-expanded', 'true');
     overlay.hidden = false;
     panel.hidden = false;
+    updateCurrentSection(true);
     fullyOpen = false;
     scrollAllowance = 0;
     measureList(true);

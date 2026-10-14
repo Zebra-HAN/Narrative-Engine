@@ -758,3 +758,10 @@
   outline: 2px solid #f0e9dc;
   outline-offset: 2px;
 }
+
+/* A single live location marker on the parchment outline; card sections are unchanged. */
+.card-minimap details.is-current-section > summary {
+  background: linear-gradient(180deg, #d4b060, #b88c3d);
+  color: #302315;
+  border-color: #88652d;
+}
