@@ -642,6 +642,10 @@
   content: ''; display: block; height: var(--outline-scroll-space, 0px);
 }
 
+.card-minimap-content::after {
+  height: calc(var(--outline-scroll-space, 0px) + var(--outline-bottom-space, 0px));
+}
+
 /* Locked text keeps its selected surface, with a clear muted treatment. */
 .detail-body .detail-idea-block:disabled,
 .detail-desc.card-desc-selectable[aria-disabled="true"] {

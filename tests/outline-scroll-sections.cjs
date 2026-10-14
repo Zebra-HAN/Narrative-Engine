@@ -37,7 +37,8 @@ const { chromium } = require('playwright');
       await page.locator('#card-minimap summary').first().click(); assert.equal(await page.locator('#card-minimap details').first().evaluate(n => n.open), false);
       // Update the underlying page while the outline is open, including boundary noise.
       const boundary = await page.evaluate(() => {
-        const heading = scrollPage.querySelectorAll('.data-card')[23];
+        const rows=[...new Set([...scrollPage.querySelectorAll('.data-card')].slice(0,24).map(c=>c.getBoundingClientRect().top))].sort((a,b)=>a-b);
+        const heading={getBoundingClientRect:()=>({top:rows[Math.max(0,rows.length-3)]})};
         return scrollPage.scrollTop + heading.getBoundingClientRect().top - scrollPage.getBoundingClientRect().top;
       });
       for (const delta of [-7, -4, -3]) {
@@ -87,11 +88,10 @@ const { chromium } = require('playwright');
         assert(moving.length > 3, `${label}: animated travel`);
         if (label !== 'short') {
           const duration = moving.at(-1).time - moving[0].time;
-          const oldDuration = Math.min(1050, 180 + Math.sqrt(Math.abs(motion.to - motion.from)) * 14);
-          assert(duration > oldDuration * 1.4, `${label}: noticeably longer than the previous glide`);
-          const halfway = moving[0].time + motion.duration * .5;
+          const d=Math.abs(motion.to-motion.from),r=Math.max(0,Math.min(1,(d-800)/2200)),compression=r*r*(3-2*r);
+          const halfway = moving[0].time + motion.duration * (.65-.5*compression);
           const early = moving.find(p => p.time >= halfway);
-          const tail = moving.find(p => p.time >= moving[0].time + motion.duration * .75);
+          const tail = moving.find(p => p.time >= moving[0].time + motion.duration * (.75-.5*compression));
           assert(early && tail);
           assert(Math.abs(early.top - motion.to) < Math.abs(motion.to - motion.from) * .09, JSON.stringify({motion,first:moving[0],last:moving.at(-1),early,tail}));
           assert(Math.abs(tail.top - motion.to) < Math.abs(motion.to - motion.from) * .01);
@@ -125,7 +125,7 @@ const { chromium } = require('playwright');
       });
       await open(); assert((await active()).startsWith('미분류'));
       await page.evaluate(() => { scrollPage.scrollTop = scrollPage.scrollHeight; }); await page.waitForTimeout(40);
-      const expectedEdge=await page.evaluate(()=>{const view=scrollPage.getBoundingClientRect(),info=document.getElementById('info-panel'),top=Math.max(view.top,getComputedStyle(info).visibility==='hidden'?0:info.getBoundingClientRect().bottom),cards=[...scrollPage.querySelectorAll('.data-card')];let index=0;if(Math.max(...cards.slice(0,30).map(c=>c.getBoundingClientRect().top))<=top)index=1;if(cards[30].getBoundingClientRect().top<=top)index=2;return ['미분류 — 30','Repeated — 1','Repeated — 0'][index];});
+      const expectedEdge=await page.evaluate(()=>{const view=scrollPage.getBoundingClientRect(),info=document.getElementById('info-panel'),top=Math.max(view.top,getComputedStyle(info).visibility==='hidden'?0:info.getBoundingClientRect().bottom),cards=[...scrollPage.querySelectorAll('.data-card')];let index=0;if([...new Set(cards.slice(0,30).map(c=>c.getBoundingClientRect().top))].sort((a,b)=>a-b).at(-3)<=top)index=1;if(cards[30].getBoundingClientRect().top<=top)index=2;return ['미분류 — 30','Repeated — 1','Repeated — 0'][index];});
       assert.equal(await active(), expectedEdge); await dismiss();
       assert.deepEqual(errors, []); await page.close();
     }

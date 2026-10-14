@@ -5017,16 +5017,15 @@ function initCardMinimap() {
     const info = document.getElementById('info-panel');
     const infoBottom = getComputedStyle(info).visibility === 'hidden' ? 0 : info.getBoundingClientRect().bottom;
     const visibleTop = Math.max(0, view.top + page.clientTop, infoBottom);
-    const layoutTop = card => {
-      let top = 0;
-      for (let node = card; node && node !== page; node = node.offsetParent) top += node.offsetTop;
-      return top;
-    };
-    // Measure the actual last row, including partial rows and responsive grid changes.
+    // Use fractional screen coordinates: offsetTop rounds nested grid rows.
     const boundaries = sectionEntries.map(entry => {
-      const top = entry.cards.length
-        ? Math.max(...entry.cards.map(layoutTop)) : layoutTop(entry.anchor);
-      return view.top + page.clientTop + top - page.scrollTop;
+      const rows = [];
+      for (const card of entry.cards) {
+        const top = card.getBoundingClientRect().top;
+        if (!rows.some(row => Math.abs(row - top) < 1)) rows.push(top);
+      }
+      rows.sort((a, b) => a - b);
+      return rows.length ? rows[Math.max(0, rows.length - 3)] : entry.anchor.getBoundingClientRect().top;
     });
     let next = 0;
     for (let i = 0; i < boundaries.length - 1; i++) {
@@ -5096,8 +5095,14 @@ function initCardMinimap() {
     job.popupObserver.observe(page, { childList: true });
     page.style.scrollBehavior = 'auto';
     const started = performance.now();
-    // A bounded, distance-aware glide with a longer, gently settling final quarter.
-    const duration = Math.min(2600, 220 + Math.sqrt(Math.abs(to - from)) * 30);
+    // Retain the short-distance quartic glide and its bounded finish.
+    const distance = Math.abs(to - from);
+    const duration = Math.min(2600, 220 + Math.sqrt(distance) * 30);
+    // Compress the approach only. The original final 30% keeps its timing and curve.
+    const range = Math.max(0, Math.min(1, (distance - 800) / 2200));
+    const compression = range * range * (3 - 2 * range);
+    const approach = .7 - .5 * compression;
+    const initialSpeed = 1.4 / approach - 1;
     for (const type of ['pointerdown', 'touchstart', 'wheel', 'keydown']) {
       document.addEventListener(type, cancelSectionScroll, { capture: true, passive: true });
     }
@@ -5107,7 +5112,12 @@ function initCardMinimap() {
         cancelSectionScroll();
         return;
       }
-      const t = Math.min(1, (performance.now() - started) / duration);
+      const elapsed = (performance.now() - started) / duration;
+      const phase = Math.min(1, elapsed / approach);
+      const t = elapsed < approach
+        ? approach * (initialSpeed * phase - (initialSpeed - 1) * Math.pow(phase, 3)
+          + .5 * (initialSpeed - 1) * Math.pow(phase, 4))
+        : Math.min(1, .7 + elapsed - approach);
       page.scrollTop = from + (to - from) * (1 - Math.pow(1 - t, 4));
       job.lastTop = page.scrollTop;
       if (t < 1) job.frame = requestAnimationFrame(step);
@@ -5193,6 +5203,7 @@ function initCardMinimap() {
     const previous = scrollAllowance;
     scrollAllowance = travel;
     content.style.setProperty('--outline-scroll-space', `${Math.max(0, padding)}px`);
+    content.style.setProperty('--outline-bottom-space', `${short ? 0 : Math.max(0, height / 2)}px`);
     content.scrollTop = initial ? travel : Math.max(0, content.scrollTop + travel - previous);
   }
   const listObserver = new ResizeObserver(() => measureList());

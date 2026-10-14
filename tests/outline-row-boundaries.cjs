@@ -9,26 +9,26 @@ const {chromium}=require('playwright');
    await page.evaluate(()=>{goToCreate();switchNav('character',true);selectSub('race');});await page.waitForFunction(()=>document.querySelector('#page-race.active[data-chrome-view=group]'));
    const toggle=page.locator('#card-minimap-toggle'),close=page.locator('#card-minimap-close');
    const active=async()=>{assert.equal(await page.locator('#card-minimap details.is-current-section').count(),1);return page.locator('#card-minimap details.is-current-section summary').textContent();};
-   for(const count of [1,2,3,4]){
+   for(const count of [1,2,3,4,8,12,17]){
     await page.evaluate(count=>{
      const cards=n=>Array.from({length:n},(_,i)=>({name:'Card '+i,icon:'✦'}));
-     CARD_DATA.race.groups[2].layoutType='4';CARD_DATA.race.groups[2].cards=[{type:'section',label:'First'},...cards(4+count),{type:'section',label:'Second'},...cards(4+count),{type:'section',label:'Last'},...cards(60)];
+     CARD_DATA.race.groups[2].layoutType='4';CARD_DATA.race.groups[2].cards=[{type:'section',label:'First'},...cards(count),{type:'section',label:'Second'},...cards(count),{type:'section',label:'Last'},...cards(60)];
      selectedCards.race=new Set([2001]);lockedCards.race=new Set([2001]);showGroupCards('race',2,true);
      window.rowPage=document.querySelector('.center-page.active[data-chrome-view="cards"]');
-     rowPage.querySelectorAll('.data-card').forEach(c=>c.classList.remove('card-deal'));window.firstCount=4+count;
+     rowPage.querySelectorAll('.data-card').forEach(c=>c.classList.remove('card-deal'));window.firstCount=count;
     },count);
     await page.waitForTimeout(350);await page.evaluate(()=>{rowPage.scrollTop=0;});await toggle.click();await page.waitForTimeout(250);assert((await active()).startsWith('First'));
     const boundary=await page.evaluate(()=>{
-     const cards=[...rowPage.querySelectorAll('.data-card')].slice(0,firstCount),tops=cards.map(c=>c.getBoundingClientRect().top),last=Math.max(...tops);
-     return {at:rowPage.scrollTop+last-rowPage.getBoundingClientRect().top,rowCount:tops.filter(t=>Math.abs(t-last)<1).length};
-    });assert.equal(boundary.rowCount,count,'real final row occupancy');
+     const cards=[...rowPage.querySelectorAll('.data-card')].slice(0,firstCount),tops=cards.map(c=>c.getBoundingClientRect().top),rows=[...new Set(tops)].sort((a,b)=>a-b),last=rows[Math.max(0,rows.length-3)];
+     return {at:Math.ceil(rowPage.scrollTop+last-rowPage.getBoundingClientRect().top),rowCount:tops.filter(t=>Math.abs(t-last)<1).length};
+    });assert(boundary.rowCount>=1&&boundary.rowCount<=4,'actual reference row occupancy');
     await rowPageSet(boundary.at-1);assert((await active()).startsWith('First'));
-    await rowPageSet(boundary.at);assert((await active()).startsWith('Second'),'changes at the clipping edge, not halfway');
+    await rowPageSet(boundary.at);assert((await active()).startsWith('Second'),JSON.stringify({boundary,count,active:await active(),position:await page.evaluate(()=>({scroll:rowPage.scrollTop,top:rowPage.getBoundingClientRect().top,info:document.getElementById('info-panel').getBoundingClientRect().bottom,cards:[...rowPage.querySelectorAll('.data-card')].slice(0,firstCount).map(c=>({top:c.getBoundingClientRect().top,offset:c.offsetTop,parent:c.offsetParent.className}))}))}));
     for(const delta of [-1,0,1,-1]){await rowPageSet(boundary.at+delta);assert((await active()).startsWith('Second'),'small jitter does not flash');}
     await rowPageSet(boundary.at-3);assert((await active()).startsWith('First'),'reverse crossing returns to the previous section');
     await rowPageSet(boundary.at+1);await close.click();await page.waitForTimeout(250);await toggle.click();await page.waitForTimeout(250);assert((await active()).startsWith('Second'),'reopen uses the new boundary');
     await close.click();await page.waitForTimeout(250);assert(await page.evaluate(()=>selectedCards.race.has(2001)&&lockedCards.race.has(2001)));
-    console.log(`PASS ${viewport.width} final row ${count}: measured row, exact onset, reverse, jitter, reopen, single marker and protected selection/lock`);
+    console.log(`PASS ${viewport.width} section cards ${count}: measured row, exact onset, reverse, jitter, reopen, single marker and protected selection/lock`);
    }
    assert.deepEqual(errors,[]);await page.close();
    async function rowPageSet(top){await page.evaluate(top=>{rowPage.scrollTop=top;},top);await page.waitForTimeout(40);}
