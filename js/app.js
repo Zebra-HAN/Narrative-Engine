@@ -1656,6 +1656,7 @@ function initScrollResponsiveChrome() {
   let lastTouchX = null;
   let lastTouchY = null;
   let touchDirection = null;
+  let menuSwipeSuppressClickUntil = 0;
   let targetTopProgress = 0;
   let targetBottomProgress = 0;
   let renderedTopProgress = 0;
@@ -1701,6 +1702,8 @@ function initScrollResponsiveChrome() {
     bottomChrome.classList.toggle('bottom-chrome-hidden', renderedBottomProgress > 0.98);
     screen.classList.toggle('bottom-panel-visible', dockMode
       && (targetBottomProgress < 1 || renderedBottomProgress < 1));
+    screen.classList.toggle('bottom-panel-closing', dockMode
+      && targetBottomProgress === 1 && renderedBottomProgress < 1);
     if (timeProgress < 1) {
       animationFrame = requestAnimationFrame(renderChrome);
     } else {
@@ -1719,6 +1722,8 @@ function initScrollResponsiveChrome() {
     const nextBottomProgress = Math.max(0, Math.min(1, bottomProgress));
     screen.classList.toggle('bottom-panel-visible', dockMode
       && (nextBottomProgress < 1 || renderedBottomProgress < 1));
+    screen.classList.toggle('bottom-panel-closing', dockMode
+      && nextBottomProgress === 1 && renderedBottomProgress < 1);
     if (nextTopProgress === targetTopProgress
         && nextBottomProgress === targetBottomProgress
         && animationFrame) return;
@@ -1755,8 +1760,8 @@ function initScrollResponsiveChrome() {
     if (dockMode && progress > 0) panelToggle?.setAttribute('aria-expanded', 'false');
     // 하단 크롬이 숨기 시작하면 열린 유틸리티 메뉴도 함께 닫는다.
     // 메뉴를 단순히 아래로 끌고 가지 않아 다음 표시 때 닫힌 상태가 유지된다.
-    const closingMenu = progress > 0 ? 'main' : 'dock';
-    if (extraMenuState[closingMenu]) closeExtraMenu({ instant: true, scope: closingMenu });
+    if (progress > 0 && isExtraMenuOpen()) closeExtraMenu();
+    else if (progress === 0 && extraMenuState.dock) closeExtraMenu({ instant: true, scope: 'dock' });
     animateChrome(cardPanelMode ? 1 : progress, progress);
   }
 
@@ -1781,6 +1786,8 @@ function initScrollResponsiveChrome() {
     }
     lastGestureAt = timestamp;
     gestureDistance += Math.abs(delta);
+    // An open menu may retreat on a deliberate upward drag without blocking scrolling.
+    if (direction > 0 && gestureDistance >= 24 && isExtraMenuOpen()) closeExtraMenu();
 
     const elapsed = Math.max(16, timestamp - gestureStartedAt);
     const velocity = gestureDistance / elapsed;
@@ -1834,7 +1841,9 @@ function initScrollResponsiveChrome() {
     if (touchDirection === 'horizontal') return;
     lastTouchX = currentX;
     lastDirectInputAt = performance.now();
+    const menuWasOpen = isExtraMenuOpen();
     trackGesture(lastTouchY - currentY);
+    if (menuWasOpen && !isExtraMenuOpen()) menuSwipeSuppressClickUntil = performance.now() + 450;
     lastTouchY = currentY;
   }
 
@@ -1868,6 +1877,29 @@ function initScrollResponsiveChrome() {
   bottomChrome.addEventListener('touchmove', onChromeTouchMove, { passive: true });
   bottomChrome.addEventListener('touchend', onChromeTouchEnd, { passive: true });
   bottomChrome.addEventListener('touchcancel', onChromeTouchEnd, { passive: true });
+  let dockMenuTouch = false;
+  dock.addEventListener('touchstart', event => {
+    dockMenuTouch = extraMenuState.dock;
+    if (dockMenuTouch) onChromeTouchStart(event);
+  }, { passive: true });
+  dock.addEventListener('touchmove', event => {
+    if (dockMenuTouch) onChromeTouchMove(event);
+  }, { passive: true });
+  const endDockMenuTouch = () => {
+    if (dockMenuTouch) onChromeTouchEnd();
+    dockMenuTouch = false;
+  };
+  dock.addEventListener('touchend', endDockMenuTouch, { passive: true });
+  dock.addEventListener('touchcancel', endDockMenuTouch, { passive: true });
+  // Closing a moving drawer must not activate the button under the released finger.
+  document.addEventListener('pointerdown', () => { menuSwipeSuppressClickUntil = 0; }, true);
+  document.addEventListener('keydown', () => { menuSwipeSuppressClickUntil = 0; }, true);
+  document.addEventListener('click', event => {
+    if (performance.now() >= menuSwipeSuppressClickUntil) return;
+    menuSwipeSuppressClickUntil = 0;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }, true);
 
   // 같은 스크롤/애니메이션 상태를 화면 종류별 기본 정책에도 사용한다.
   const pageObserver = new MutationObserver(() => {
@@ -1902,6 +1934,8 @@ function initScrollResponsiveChrome() {
     } else if (view !== 'subgroup') setProgress(0);
     screen.classList.toggle('bottom-panel-visible', dockMode
       && (targetBottomProgress < 1 || renderedBottomProgress < 1));
+    screen.classList.toggle('bottom-panel-closing', dockMode
+      && targetBottomProgress === 1 && renderedBottomProgress < 1);
     previousView = view;
     resetGesture();
   });

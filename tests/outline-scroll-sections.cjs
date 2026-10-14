@@ -10,7 +10,10 @@ const { chromium } = require('playwright');
       await page.route(/fonts\.(googleapis|gstatic)\.com/, r => r.abort());
       await page.goto(process.env.PERF_TEST_URL); await page.waitForTimeout(1600);
       await page.evaluate(() => {
-        goToCreate(); switchNav('character', true);
+        goToCreate(); switchNav('character', true); selectSub('race');
+      });
+      await page.waitForFunction(() => document.querySelector('#page-race.active[data-chrome-view=group]'));
+      await page.evaluate(() => {
         CARD_DATA.outlineScroll = Array.from({ length: 6 }, (_, section) => [
           { type: 'section', label: `Section ${section + 1} — description` },
           ...Array.from({ length: 24 }, (_, card) => ({ name: `Card ${section + 1}.${card + 1}`, icon: '✦' }))
@@ -90,7 +93,7 @@ const { chromium } = require('playwright');
           const early = moving.find(p => p.time >= halfway);
           const tail = moving.find(p => p.time >= moving[0].time + motion.duration * .75);
           assert(early && tail);
-          assert(Math.abs(early.top - motion.to) < Math.abs(motion.to - motion.from) * .09);
+          assert(Math.abs(early.top - motion.to) < Math.abs(motion.to - motion.from) * .09, JSON.stringify({motion,first:moving[0],last:moving.at(-1),early,tail}));
           assert(Math.abs(tail.top - motion.to) < Math.abs(motion.to - motion.from) * .01);
           assert(Math.abs(tail.top - motion.to) > .5, 'tail still glides before settling');
         } else assert(motion.duration < 1100, 'short trips remain bounded');

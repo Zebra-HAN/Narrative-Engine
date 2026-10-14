@@ -362,7 +362,7 @@
 .status-panel .status-chip-name { color: #f0e9dc; }
 .status-panel .status-chip-desc {
   background: transparent;
-  color: #e5e6df;
+  color: #b6c6d2;
   border: 0;
   border-radius: 0;
   box-shadow: none;
@@ -538,7 +538,7 @@
   bottom: calc(var(--card-dock-plate-height, 65px) - 6px);
   left: 50%;
   transform: translateX(-50%);
-  z-index: 51;
+  z-index: 39;
   width: 50px;
   height: 50px;
   padding: 0;
@@ -726,9 +726,9 @@
 #screen-create.card-controls-mode > .card-panel-toggle::before { opacity: 1; }
 
 /* Match only the two popup scroll surfaces to their ivory frame accents. */
-.detail-sheet, .status-body { scrollbar-width: thin; scrollbar-color: #f0e9dc transparent; }
+.detail-sheet, .status-body { scrollbar-width: thin; scrollbar-color: #8fa7b6 transparent; }
 :is(.detail-sheet, .status-body)::-webkit-scrollbar { width: 4px; }
-:is(.detail-sheet, .status-body)::-webkit-scrollbar-thumb { background: #f0e9dc; border-radius: 2px; }
+:is(.detail-sheet, .status-body)::-webkit-scrollbar-thumb { background: #8fa7b6; border-radius: 2px; }
 :is(.detail-sheet, .status-body)::-webkit-scrollbar-track { background: transparent; }
 
 .status-panel .status-chip { padding-top: 2px; padding-left: 3px; padding-right: 3px; }
@@ -765,9 +765,33 @@
 .detail-icon.main-image-selectable:is(:active, .is-pressing) { transform: scale(.96); transition-duration: 80ms; }
 :is(.detail-icon.main-image-selectable, .detail-desc.card-desc-selectable)[aria-disabled="true"] { transform: none; }
 
-#screen-create.bottom-panel-visible > .card-panel-toggle { visibility: hidden; pointer-events: none; }
+#screen-create.bottom-panel-visible:not(.bottom-panel-closing) > .card-panel-toggle { visibility: hidden; pointer-events: none; }
 #screen-create.card-controls-mode > .card-panel-toggle { transition: transform 120ms ease; }
 #screen-create.card-controls-mode > .card-panel-toggle:is(:active, .is-pressing) {
   transform: translateX(-50%) scale(.94);
   transition-duration: 80ms;
 }
+
+/* Only the general page scrollbar still inherited the original forest green. */
+.center-page { scrollbar-color: #3c5a73 transparent; }
+.center-page::-webkit-scrollbar-thumb { background: #3c5a73; }
+
+/* Story structure uses the reading popup palette without changing its box metrics. */
+#screen-narrative {
+  --text-muted: #91a9b9;
+  --text-secondary: #b6c6d2;
+  background: linear-gradient(160deg, #224257, #19354b 45%, #102439);
+  color: #f0e9dc;
+}
+#screen-narrative :is(.narrative-main-btn, .narrative-sub-btn) {
+  background: linear-gradient(160deg, #2a4b62, #19354b);
+  border-color: #d0b88a;
+  box-shadow: inset 0 0 0 1px #a58d6780, inset 0 1px 0 #f0e9dc33,
+    inset 0 -2px 4px #071b2c66, 0 5px 14px #07152166;
+}
+#screen-narrative :is(.narrative-header h2, .narrative-main-btn-title, .narrative-sub-btn-text) { color: #f0e9dc; }
+#screen-narrative .narrative-main-btn-sub { color: #b6c6d2; }
+#screen-narrative :is(.narrative-sub-btn-icon, .narrative-back-btn) { color: #d0b88a; }
+#screen-narrative .narrative-back-btn:active { color: #f0e9dc; }
+#screen-narrative .narrative-divider { background: linear-gradient(90deg, transparent, #d0b88a, transparent); }
+#screen-narrative button:focus-visible { outline: 2px solid #d0b88a; outline-offset: 3px; }
