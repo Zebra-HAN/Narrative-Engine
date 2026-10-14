@@ -891,7 +891,6 @@
   background: url('../images/core/buttons/check.webp') center / contain no-repeat;
   pointer-events: none;
 }
-.detail-section-items { padding-right: 16px; padding-top: 16px; }
 .detail-icon.main-image-selectable:not(.checked) .detail-image-selection-frame::after {
   background: url('../images/core/buttons/cancel.webp') center / clamp(72px, 30%, 150px) auto no-repeat;
 }
