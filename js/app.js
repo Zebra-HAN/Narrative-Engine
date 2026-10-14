@@ -3781,6 +3781,7 @@ function syncDetailDescSelection(subId, idx) {
   const locked = isCardLocked(subId, idx);
   const included = selectedDescs[key] !== false;
   element.classList.toggle('checked', included);
+  element.parentElement.classList.toggle('desc-excluded', !included);
   element.setAttribute('aria-pressed', String(included));
   element.setAttribute('aria-disabled', String(locked));
   element.tabIndex = locked ? -1 : 0;
@@ -3791,6 +3792,7 @@ function configureDetailDescSelection(subId = null, idx = null) {
   element.onclick = null;
   element.onkeydown = null;
   delete element.dataset.descKey;
+  element.parentElement.classList.remove('desc-excluded');
   element.classList.remove('card-desc-selectable', 'checked', 'pressable');
   ['role', 'aria-pressed', 'aria-disabled', 'tabindex'].forEach(name => element.removeAttribute(name));
   if (subId === null || !getCardByGlobalIdx(subId, idx)?.desc) return;

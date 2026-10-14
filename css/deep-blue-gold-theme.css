@@ -896,9 +896,12 @@
   background: url('../images/core/buttons/cancel.webp') center / clamp(72px, 30%, 150px) auto no-repeat;
 }
 .detail-desc.card-desc-selectable { position: relative; }
-.detail-desc.card-desc-selectable:not(.checked)::after {
-  content: ''; position: absolute; inset: 0; pointer-events: none;
-  background: url('../images/core/buttons/cancel.webp') center / 52px 52px no-repeat;
+.detail-desc-selection-frame { position: relative; overflow: visible; }
+.detail-desc-selection-frame.desc-excluded::after {
+  content: ''; position: absolute; left: 50%; top: 50%;
+  width: 65px; height: 65px; transform: translate(-50%, -50%);
+  pointer-events: none; z-index: 2;
+  background: url('../images/core/buttons/cancel.webp') center / 65px 65px no-repeat;
 }
 /* Reuse the exact frozen idea surface and ink, including its muted filter. */
 .detail-sheet.card-locked .detail-desc.card-desc-selectable.checked {
@@ -910,3 +913,12 @@
 .detail-sheet.card-locked :is(#detail-name, .detail-section-title) { color: #2b4055; filter: saturate(.35) brightness(.72); }
 .detail-sheet :is(button:disabled, [aria-disabled="true"]) { pointer-events: none; transform: none !important; }
 @media (prefers-reduced-motion: reduce) { .card-minimap summary { transition: none; } }
+
+/* Share the 32px idea seal, anchored to the sub-image itself. */
+.detail-sub-image-row .detail-image-selection-frame { overflow: visible; }
+.detail-sub-image-row.checked .detail-image-selection-frame::before {
+  content: ''; position: absolute; top: 0; right: 0;
+  width: 32px; height: 32px; transform: translate(50%, -50%); z-index: 2;
+  background: url('../images/core/buttons/check.webp') center / contain no-repeat;
+  pointer-events: none;
+}
