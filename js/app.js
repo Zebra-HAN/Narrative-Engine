@@ -4983,20 +4983,24 @@ function initCardMinimap() {
     const info = document.getElementById('info-panel');
     const infoBottom = getComputedStyle(info).visibility === 'hidden' ? 0 : info.getBoundingClientRect().bottom;
     const visibleTop = Math.max(0, view.top + page.clientTop, infoBottom);
-    const probe = visibleTop + 24;
-    const positions = sectionEntries.map(entry => entry.anchor.getBoundingClientRect().top);
+    const layoutTop = card => {
+      let top = 0;
+      for (let node = card; node && node !== page; node = node.offsetParent) top += node.offsetTop;
+      return top;
+    };
+    // Measure the actual last row, including partial rows and responsive grid changes.
+    const boundaries = sectionEntries.map(entry => {
+      const top = entry.cards.length
+        ? Math.max(...entry.cards.map(layoutTop)) : layoutTop(entry.anchor);
+      return view.top + page.clientTop + top - page.scrollTop;
+    });
     let next = 0;
-    for (let i = 1; i < positions.length; i++) {
-      if (positions[i] <= probe) next = i;
+    for (let i = 0; i < boundaries.length - 1; i++) {
+      if (boundaries[i] <= visibleTop) next = i + 1;
     }
-    const atBottom = page.scrollHeight > page.clientHeight
-      && page.scrollTop >= page.scrollHeight - page.clientHeight - 1;
-    if (atBottom) next = sectionEntries.length - 1;
-    // Require twelve pixels beyond a boundary before changing an existing marker.
-    if (!initial && !atBottom && currentSection >= 0) {
-      if (next > currentSection && positions[next] > probe - 12) next = currentSection;
-      if (next < currentSection && positions[currentSection] < probe + 12) next = currentSection;
-    }
+    // Forward changes happen at clipping onset; a 2px return band prevents jitter.
+    if (!initial && next < currentSection && currentSection > 0
+        && boundaries[currentSection - 1] < visibleTop + 2) next = currentSection;
     currentSection = next;
     sectionEntries.forEach((entry, index) => {
       const active = index === next;
@@ -5032,7 +5036,11 @@ function initCardMinimap() {
   function scrollToSection(page, card) {
     cancelSectionScroll();
     if (activePage() !== page || !card?.isConnected) return;
-    const target = card;
+    const grid = card.closest('.card-grid-section') || card.closest('.card-grid');
+    if (!grid) return;
+    let heading = grid.previousElementSibling;
+    while (heading && !heading.classList.contains('card-section-header')) heading = heading.previousElementSibling;
+    const target = heading || grid;
     const view = page.getBoundingClientRect();
     const info = document.getElementById('info-panel');
     const infoBottom = getComputedStyle(info).visibility === 'hidden' ? 0 : info.getBoundingClientRect().bottom;
@@ -5192,13 +5200,14 @@ function initCardMinimap() {
     currentSection = -1;
     outline.groups.forEach(group => {
       if (!outline.sectioned) { list.appendChild(tags(group.cards, page, renderedCards, nextIndex)); return; }
+      const groupCards = Array.from(renderedCards).slice(nextIndex.value, nextIndex.value + group.cards.length);
       const section = document.createElement('details');
       const heading = document.createElement('summary');
       heading.textContent = `${group.label} — ${group.cards.length}`;
       section.append(heading, tags(group.cards, page, renderedCards, nextIndex));
       list.appendChild(section);
       const anchor = renderedItems[group.startIndex];
-      if (anchor) sectionEntries.push({ section, anchor });
+      if (anchor) sectionEntries.push({ section, anchor, cards: groupCards });
     });
     toggle.setAttribute('aria-expanded', 'true');
     overlay.hidden = false;
@@ -5244,7 +5253,7 @@ function initCardMinimap() {
     }
     const touch = event.touches[0], dx = touch.clientX - gesture.x, dy = touch.clientY - gesture.y;
     if (!gesture.locked) {
-      if (Math.hypot(dx, dy) < 10) return;
+      if (Math.hypot(dx, dy) < (gesture.inPage ? 8 : 10)) return;
       if (Math.abs(dy) >= Math.abs(dx) / 1.3 || (gesture.inPage ? dx <= 0 : dx >= 0)) {
         gesture = null; return;
       }
@@ -5280,8 +5289,16 @@ function initCardMinimap() {
     const recent = performance.now() - current.lastTime < 100;
     const velocity = recent ? current.velocity : 0;
     const travel = current.inPage ? position : width - position;
-    const flick = travel >= 28 && Math.abs(velocity) > .45;
-    const open = flick ? velocity < 0 : position < width * (current.inPage ? .35 : .65);
+    let open;
+    if (current.inPage) {
+      const closingFlick = travel >= 10 && velocity > .2;
+      const reversed = velocity < -.2;
+      open = reversed || (!closingFlick && travel < Math.min(28, width * .08));
+    } else {
+      // Opening retains its original distance and velocity thresholds.
+      const flick = travel >= 28 && Math.abs(velocity) > .45;
+      open = flick ? velocity < 0 : position < width * .65;
+    }
     if (open) settle(0, opened);
     else hide(true);
   }, { capture: true, passive: false });

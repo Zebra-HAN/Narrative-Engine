@@ -34,16 +34,16 @@ const { chromium } = require('playwright');
       await page.locator('#card-minimap summary').first().click(); assert.equal(await page.locator('#card-minimap details').first().evaluate(n => n.open), false);
       // Update the underlying page while the outline is open, including boundary noise.
       const boundary = await page.evaluate(() => {
-        const heading = scrollPage.querySelectorAll('.card-section-header')[1];
-        return scrollPage.scrollTop + heading.getBoundingClientRect().top - scrollPage.getBoundingClientRect().top - 24;
+        const heading = scrollPage.querySelectorAll('.data-card')[23];
+        return scrollPage.scrollTop + heading.getBoundingClientRect().top - scrollPage.getBoundingClientRect().top;
       });
-      for (const delta of [0, 4, -3, 7, -5]) {
+      for (const delta of [-7, -4, -3]) {
         await page.evaluate(top => { scrollPage.scrollTop = top; }, boundary + delta); await page.waitForTimeout(40);
         assert((await active()).startsWith('Section 1'), 'small boundary jitter retains the marker');
       }
-      await page.evaluate(top => { scrollPage.scrollTop = top; }, boundary + 20); await page.waitForTimeout(40);
+      await page.evaluate(top => { scrollPage.scrollTop = top; }, boundary + 1); await page.waitForTimeout(40);
       assert((await active()).startsWith('Section 2'));
-      for (const delta of [4, -3, 7, -5]) {
+      for (const delta of [0, -1, 1]) {
         await page.evaluate(top => { scrollPage.scrollTop = top; }, boundary + delta); await page.waitForTimeout(40);
         assert((await active()).startsWith('Section 2'));
       }
@@ -51,17 +51,22 @@ const { chromium } = require('playwright');
       await page.evaluate(() => { scrollPage.scrollTop = scrollPage.scrollHeight; });
       await open(); assert((await active()).startsWith('Section 6')); await dismiss();
       // Actual title clicks: compare slow glide samples and the precise card destination.
-      for (const [index, label] of [[2, 'short'], [107, 'long'], [26, 'reverse']]) {
+      let previousSectionDestination;
+      for (const [index, label] of [[2, 'short'], [107, 'long'], [119, 'same-section'], [26, 'reverse']]) {
         await page.evaluate(() => { closeCardInfo(); });
-        if (label !== 'reverse') await page.evaluate(() => { scrollPage.scrollTop = 0; });
+        if (label !== 'reverse') await page.evaluate(label => { scrollPage.scrollTop = label === 'short' ? 120 : 0; }, label);
         await open(); await page.locator('#card-minimap-expand').click();
         const target = page.locator('.card-minimap-tag').nth(index); await target.scrollIntoViewIfNeeded();
         const motion = await page.evaluate(index => {
           const card = scrollPage.querySelectorAll('.data-card')[index];
+          const grid = card.closest('.card-grid-section') || card.closest('.card-grid');
+          let heading = grid.previousElementSibling;
+          while (heading && !heading.classList.contains('card-section-header')) heading = heading.previousElementSibling;
+          const target = heading || grid;
           const view = scrollPage.getBoundingClientRect(), info = document.getElementById('info-panel');
           const top = Math.max(0, view.top + scrollPage.clientTop, getComputedStyle(info).visibility === 'hidden' ? 0 : info.getBoundingClientRect().bottom);
           const from = scrollPage.scrollTop;
-          const to = Math.max(0, Math.min(scrollPage.scrollHeight - scrollPage.clientHeight, from + card.getBoundingClientRect().top - top - 8));
+          const to = Math.max(0, Math.min(scrollPage.scrollHeight - scrollPage.clientHeight, from + target.getBoundingClientRect().top - top - 8));
           window.trace = []; window.recordMotion = true;
           const sample = () => { if (!recordMotion) return; trace.push({ time: performance.now(), top: scrollPage.scrollTop }); requestAnimationFrame(sample); }; requestAnimationFrame(sample);
           return { from, to, duration: Math.min(2600, 220 + Math.sqrt(Math.abs(to - from)) * 30), index };
@@ -69,7 +74,9 @@ const { chromium } = require('playwright');
         await target.click(); await page.waitForTimeout(motion.duration + 500);
         const trace = await page.evaluate(() => { recordMotion = false; return trace; });
         const destination = await page.evaluate(() => scrollPage.scrollTop);
-        assert(Math.abs(destination - motion.to) <= 1, `${label}: exact clicked-card destination`);
+        assert(Math.abs(destination - motion.to) <= 1, `${label}: exact section-start destination`);
+        if (label === 'long') previousSectionDestination = destination;
+        if (label === 'same-section') assert.equal(destination, previousSectionDestination);
         assert.equal(await page.locator('#card-minimap').isVisible(), false);
         const sign = Math.sign(motion.to - motion.from);
         for (let i = 1; i < trace.length; i++) assert((trace[i].top - trace[i - 1].top) * sign >= -1, `${label}: no rebound`);
@@ -89,7 +96,7 @@ const { chromium } = require('playwright');
         } else assert(motion.duration < 1100, 'short trips remain bounded');
         await page.waitForTimeout(200); assert.equal(await page.evaluate(() => scrollPage.scrollTop), destination);
         await open(); assert((await active()).startsWith(`Section ${Math.floor(index / 24) + 1}`)); await dismiss();
-        console.log(`PASS ${viewport.width} ${label}: exact card target, monotonic glide, slow tail, bounded finish, correct section`);
+        console.log(`PASS ${viewport.width} ${label}: exact section target, monotonic glide, slow tail, bounded finish, correct section`);
       }
       // Direct touch/wheel takes precedence; no resumed animation or forced correction.
       for (const input of ['touchstart', 'wheel']) {
@@ -115,7 +122,8 @@ const { chromium } = require('playwright');
       });
       await open(); assert((await active()).startsWith('미분류'));
       await page.evaluate(() => { scrollPage.scrollTop = scrollPage.scrollHeight; }); await page.waitForTimeout(40);
-      assert.equal(await active(), 'Repeated — 0'); await dismiss();
+      const expectedEdge=await page.evaluate(()=>{const view=scrollPage.getBoundingClientRect(),info=document.getElementById('info-panel'),top=Math.max(view.top,getComputedStyle(info).visibility==='hidden'?0:info.getBoundingClientRect().bottom),cards=[...scrollPage.querySelectorAll('.data-card')];let index=0;if(Math.max(...cards.slice(0,30).map(c=>c.getBoundingClientRect().top))<=top)index=1;if(cards[30].getBoundingClientRect().top<=top)index=2;return ['미분류 — 30','Repeated — 1','Repeated — 0'][index];});
+      assert.equal(await active(), expectedEdge); await dismiss();
       assert.deepEqual(errors, []); await page.close();
     }
   } finally { await browser.close(); }
