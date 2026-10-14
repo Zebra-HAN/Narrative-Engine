@@ -414,12 +414,6 @@
   -webkit-tap-highlight-color: transparent;
   transition: background .18s ease, color .18s ease, transform .12s ease;
 }
-.detail-desc.card-desc-selectable.checked {
-  background: linear-gradient(165deg, #486a7e, #3f6175 52%, #34556a);
-  color: #f0e9dc;
-  border-color: #d0b88a;
-  box-shadow: inset 0 1px 0 #8ca6b877, inset 0 -2px 4px #10243944;
-}
 .detail-desc.card-desc-selectable[aria-disabled="true"] { cursor: default; pointer-events: none; opacity: 1; }
 
 /* Two reading popups only: keep every box metric, paint a fine antique-metal rim. */
@@ -683,20 +677,18 @@
 .status-panel .status-card-meta { align-items: center; gap: 2px; margin-bottom: 8px; flex-wrap: wrap; }
 .status-panel .status-category-name, .status-panel .status-card-path { opacity: .6; }
 .status-panel .status-category-mark { opacity: 1; }
-.detail-desc.card-desc-selectable.checked {
-  background: linear-gradient(165deg, #f3ead6, #eadfc5 52%, #ddcfae);
-  color: #704c2c;
-  border-color: #b99a60;
-  box-shadow: inset 0 1px #fff8e9, inset 0 -1px 2px #a68b6233;
-}
-.detail-icon.main-image-selectable { cursor: pointer; }
+.detail-icon.main-image-selectable { cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .detail-icon.main-image-selectable .detail-card-img { opacity: 1; filter: none; }
 .detail-icon.main-image-selectable[aria-disabled="true"] { cursor: default; }
 .center-area::before {
-  background-color: #14263d;
-  border-color: #f0e9dc;
-  border-width: 3px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f0e9dc' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m11 7-5 5 5 5m7-10-5 5 5 5'/%3E%3C/svg%3E");
+  width: 35px;
+  height: 35px;
+  border: 1px solid #d0b88a;
+  border-radius: 50%;
+  background-color: transparent;
+  background-size: 21px 21px, 100% 100%;
+  box-shadow: inset 0 1px 0 #f0e9dc22, 0 1px 3px #10243955;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f0e9dc' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m11 7-5 5 5 5m7-10-5 5 5 5'/%3E%3C/svg%3E"), linear-gradient(155deg, #2a4b62, #19354b);
 }
 
 /* Image inclusion changes the frame, never the source image's rendering. */
@@ -722,7 +714,7 @@
   border-radius: inherit;
   pointer-events: none;
 }
-:is(.detail-icon.main-image-selectable, .detail-sub-image-row).checked .detail-image-selection-frame::after {
+.detail-sub-image-row.checked .detail-image-selection-frame::after {
   background: rgba(208, 184, 138, .2);
   box-shadow: inset 0 0 0 4px #f0e9dc, inset 0 0 0 5px #c5a266;
 }
@@ -764,4 +756,18 @@
   background: linear-gradient(180deg, #d4b060, #b88c3d);
   color: #302315;
   border-color: #88652d;
+}
+
+/* Included main image and description retain their original paint. */
+.detail-icon.main-image-selectable:not(.checked) .detail-card-img { filter: grayscale(.9) brightness(.45); }
+.detail-desc.card-desc-selectable:not(.checked) { filter: brightness(.5) saturate(.65); }
+.detail-icon.main-image-selectable, .detail-desc.card-desc-selectable { transition: transform 120ms ease; }
+.detail-icon.main-image-selectable:is(:active, .is-pressing) { transform: scale(.96); transition-duration: 80ms; }
+:is(.detail-icon.main-image-selectable, .detail-desc.card-desc-selectable)[aria-disabled="true"] { transform: none; }
+
+#screen-create.bottom-panel-visible > .card-panel-toggle { visibility: hidden; pointer-events: none; }
+#screen-create.card-controls-mode > .card-panel-toggle { transition: transform 120ms ease; }
+#screen-create.card-controls-mode > .card-panel-toggle:is(:active, .is-pressing) {
+  transform: translateX(-50%) scale(.94);
+  transition-duration: 80ms;
 }

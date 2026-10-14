@@ -547,7 +547,7 @@ let lockedCards = {};     // { subId: Set<idx> } - random/partial reset에서 �
 let selectedDetails = {}; // { "subId__globalIdx": Set<detailItemIdx> }
 let selectedSubImages = {}; // { "subId__globalIdx": true }
 let excludedMainImages = {}; // Default included; only explicit exclusions are stored.
-let selectedDescs = {}; // { "subId__globalIdx": true }, independent of card/detail selection
+let selectedDescs = {}; // { "subId__globalIdx": true/false }, omitted means included by default
 let focusedCard  = null;  // { subId, idx, name, icon }
 let addressTrail = [];
 
@@ -1699,6 +1699,8 @@ function initScrollResponsiveChrome() {
     bottomChrome.style.transform = `translate3d(0, ${renderedBottomProgress * 100}%, 0)`;
     infoPanel.classList.toggle('top-chrome-hidden', renderedTopProgress > 0.98);
     bottomChrome.classList.toggle('bottom-chrome-hidden', renderedBottomProgress > 0.98);
+    screen.classList.toggle('bottom-panel-visible', dockMode
+      && (targetBottomProgress < 1 || renderedBottomProgress < 1));
     if (timeProgress < 1) {
       animationFrame = requestAnimationFrame(renderChrome);
     } else {
@@ -1715,6 +1717,8 @@ function initScrollResponsiveChrome() {
   function animateChrome(topProgress, bottomProgress) {
     const nextTopProgress = Math.max(0, Math.min(1, topProgress));
     const nextBottomProgress = Math.max(0, Math.min(1, bottomProgress));
+    screen.classList.toggle('bottom-panel-visible', dockMode
+      && (nextBottomProgress < 1 || renderedBottomProgress < 1));
     if (nextTopProgress === targetTopProgress
         && nextBottomProgress === targetBottomProgress
         && animationFrame) return;
@@ -1859,6 +1863,11 @@ function initScrollResponsiveChrome() {
   area.addEventListener('touchcancel', onChromeTouchEnd, { passive: true });
   infoPanel.addEventListener('touchend', onChromeTouchEnd, { passive: true });
   infoPanel.addEventListener('touchcancel', onChromeTouchEnd, { passive: true });
+  // With the call arrow hidden, the open panel must still accept its closing gesture.
+  bottomChrome.addEventListener('touchstart', onChromeTouchStart, { passive: true });
+  bottomChrome.addEventListener('touchmove', onChromeTouchMove, { passive: true });
+  bottomChrome.addEventListener('touchend', onChromeTouchEnd, { passive: true });
+  bottomChrome.addEventListener('touchcancel', onChromeTouchEnd, { passive: true });
 
   // 같은 스크롤/애니메이션 상태를 화면 종류별 기본 정책에도 사용한다.
   const pageObserver = new MutationObserver(() => {
@@ -1891,6 +1900,8 @@ function initScrollResponsiveChrome() {
       if (isExtraMenuOpen()) closeExtraMenu({ instant: true });
       renderChrome();
     } else if (view !== 'subgroup') setProgress(0);
+    screen.classList.toggle('bottom-panel-visible', dockMode
+      && (targetBottomProgress < 1 || renderedBottomProgress < 1));
     previousView = view;
     resetGesture();
   });
@@ -2539,7 +2550,7 @@ function subgroupCardDblClick(subId, groupIdx, sgIdx, idx) {
     selectedCards[subId].delete(globalIdx);
     clearCardDetailSelection(subId, globalIdx);
   } else {
-    selectedCards[subId].add(globalIdx);
+    selectCardWithDefaults(subId, globalIdx);
   }
 
   const grp = CARD_DATA[subId].groups[groupIdx];
@@ -2678,7 +2689,7 @@ function groupCardDblClick(subId, groupIdx, idx) {
     selectedCards[subId].delete(globalIdx);
     clearCardDetailSelection(subId, globalIdx);
   } else {
-    selectedCards[subId].add(globalIdx);
+    selectCardWithDefaults(subId, globalIdx);
   }
 
   const page = document.getElementById('page-' + subId + '_' + CARD_DATA[subId].groups[groupIdx].id);
@@ -3385,6 +3396,20 @@ function clearDeselectedDetails(subId) {
     });
 }
 
+function includeCardDefaults(subId, idx) {
+  const key = `${subId}__${idx}`;
+  delete excludedMainImages[key];
+  if (getCardByGlobalIdx(subId, idx)?.desc) selectedDescs[key] = true;
+  syncDetailDescSelection(subId, idx);
+}
+
+function selectCardWithDefaults(subId, idx) {
+  if (!selectedCards[subId]) selectedCards[subId] = new Set();
+  if (selectedCards[subId].has(idx)) return;
+  selectedCards[subId].add(idx);
+  includeCardDefaults(subId, idx);
+}
+
 function toggleCardSelect(subId, idx) {
   if (!selectedCards[subId]) selectedCards[subId] = new Set();
   if (selectedCards[subId].has(idx)) {
@@ -3392,7 +3417,7 @@ function toggleCardSelect(subId, idx) {
     selectedCards[subId].delete(idx);
     clearCardDetailSelection(subId, idx);
   } else {
-    selectedCards[subId].add(idx);
+    selectCardWithDefaults(subId, idx);
   }
 
   // 카드 UI 업데이트
@@ -3600,7 +3625,7 @@ function showDetailOverlay() {
 function syncDetailMainImageSelection(subId, idx) {
   const element = document.getElementById('detail-icon');
   if (element.dataset.mainImageKey !== `${subId}__${idx}`) return;
-  const included = Boolean(selectedCards[subId]?.has(idx) && !excludedMainImages[`${subId}__${idx}`]);
+  const included = !excludedMainImages[`${subId}__${idx}`];
   const locked = isCardLocked(subId, idx);
   element.classList.toggle('checked', included);
   element.setAttribute('aria-pressed', String(included));
@@ -3613,7 +3638,7 @@ function configureDetailMainImage(subId = null, idx = null) {
   element.onclick = null;
   element.onkeydown = null;
   delete element.dataset.mainImageKey;
-  element.classList.remove('main-image-selectable', 'checked');
+  element.classList.remove('main-image-selectable', 'checked', 'pressable');
   ['role', 'aria-pressed', 'aria-disabled', 'tabindex', 'aria-label'].forEach(name => element.removeAttribute(name));
   if (!subId || !getCardByGlobalIdx(subId, idx)?.img) return;
   const image = element.querySelector('.detail-card-img');
@@ -3624,7 +3649,7 @@ function configureDetailMainImage(subId = null, idx = null) {
     frame.appendChild(image);
   }
   element.dataset.mainImageKey = `${subId}__${idx}`;
-  element.classList.add('main-image-selectable');
+  element.classList.add('main-image-selectable', 'pressable');
   element.setAttribute('role', 'button');
   element.setAttribute('aria-label', '아이디어 통합창에 메인 이미지 포함');
   element.onclick = () => toggleMainImageCheck(subId, idx);
@@ -3639,10 +3664,7 @@ function configureDetailMainImage(subId = null, idx = null) {
 function toggleMainImageCheck(subId, idx) {
   if (isCardLocked(subId, idx) || !getCardByGlobalIdx(subId, idx)?.img) return;
   const key = `${subId}__${idx}`;
-  if (!selectedCards[subId]?.has(idx)) {
-    toggleCardSelect(subId, idx);
-    delete excludedMainImages[key];
-  } else if (excludedMainImages[key]) delete excludedMainImages[key];
+  if (excludedMainImages[key]) delete excludedMainImages[key];
   else excludedMainImages[key] = true;
   syncDetailMainImageSelection(subId, idx);
   _syncCardSelectedDOM(subId, idx);
@@ -3655,8 +3677,9 @@ function syncDetailDescSelection(subId, idx) {
   const key = `${subId}__${idx}`;
   if (element.dataset.descKey !== key) return;
   const locked = isCardLocked(subId, idx);
-  element.classList.toggle('checked', Boolean(selectedDescs[key]));
-  element.setAttribute('aria-pressed', String(Boolean(selectedDescs[key])));
+  const included = selectedDescs[key] !== false;
+  element.classList.toggle('checked', included);
+  element.setAttribute('aria-pressed', String(included));
   element.setAttribute('aria-disabled', String(locked));
   element.tabIndex = locked ? -1 : 0;
 }
@@ -3684,17 +3707,7 @@ function configureDetailDescSelection(subId = null, idx = null) {
 function toggleDescCheck(subId, idx) {
   if (isCardLocked(subId, idx) || !getCardByGlobalIdx(subId, idx)?.desc) return;
   const key = `${subId}__${idx}`;
-  if (selectedDescs[key]) {
-    delete selectedDescs[key];
-  } else {
-    selectedDescs[key] = true;
-    if (!selectedCards[subId]) selectedCards[subId] = new Set();
-    selectedCards[subId].add(idx);
-    renderSubnav(currentNav, false);
-    const activeSub = document.querySelector(`[data-sub-id="${currentSubId}"]`);
-    if (activeSub) activeSub.classList.add('active');
-    updateNavBadges();
-  }
+  selectedDescs[key] = selectedDescs[key] === false;
   syncDetailDescSelection(subId, idx);
   _syncCardSelectedDOM(subId, idx);
   refreshStatusIfOpen();
@@ -3714,7 +3727,7 @@ function toggleDetailCheck(subId, globalIdx, lineIdx) {
     set.add(lineIdx);
     // 카드도 자동 선택 상태로
     if (!selectedCards[subId]) selectedCards[subId] = new Set();
-    selectedCards[subId].add(globalIdx);
+    selectCardWithDefaults(subId, globalIdx);
     renderSubnav(currentNav, false);
     const el = document.querySelector(`[data-sub-id="${subId}"]`);
     if (el) el.classList.add('active');
@@ -3750,7 +3763,7 @@ function toggleSubImageCheck(subId, globalIdx) {
   } else {
     selectedSubImages[detailKey] = true;
     if (!selectedCards[subId]) selectedCards[subId] = new Set();
-    selectedCards[subId].add(globalIdx);
+    selectCardWithDefaults(subId, globalIdx);
     renderSubnav(currentNav, false);
     const el = document.querySelector(`[data-sub-id="${subId}"]`);
     if (el) el.classList.add('active');
@@ -3878,7 +3891,7 @@ function renderStatusContent() {
             ? `<img class="status-chip-sub-img" src="${card.subImg}" alt="" draggable="false">`
             : '';
           const metaHtml = renderStatusCategoryMeta(sub.id, globalIdx);
-          const chipDescHtml = card.desc && selectedDescs[detailKey]
+          const chipDescHtml = card.desc && selectedDescs[detailKey] !== false
             ? `<span class="status-chip-desc">${card.desc}</span>`
             : '';
           const extraHtml = (detailHtml || subImageHtml)
@@ -4563,9 +4576,7 @@ async function randomSelectCurrent() {
 
   selectedCards[currentSubId] = new Set(lockedCards[currentSubId] || []);
   selectedCards[currentSubId].add(pick.globalIdx);
-  if (pick.desc) selectedDescs[`${currentSubId}__${pick.globalIdx}`] = true;
-  delete excludedMainImages[`${currentSubId}__${pick.globalIdx}`];
-  syncDetailDescSelection(currentSubId, pick.globalIdx);
+  includeCardDefaults(currentSubId, pick.globalIdx);
   clearDeselectedDetails(currentSubId);
 
   // UI 갱신
@@ -4609,9 +4620,7 @@ subs.forEach(sub => {
   const pick = allCards[Math.floor(Math.random() * allCards.length)];
   selectedCards[sub.id] = new Set(lockedCards[sub.id] || []);
   selectedCards[sub.id].add(pick.globalIdx);
-  if (pick.desc) selectedDescs[`${sub.id}__${pick.globalIdx}`] = true;
-  delete excludedMainImages[`${sub.id}__${pick.globalIdx}`];
-  syncDetailDescSelection(sub.id, pick.globalIdx);
+  includeCardDefaults(sub.id, pick.globalIdx);
   clearDeselectedDetails(sub.id);
 });
    

@@ -9,7 +9,8 @@ const { chromium } = require('playwright');
    await page.route(/fonts\.(googleapis|gstatic)\.com/,r=>r.abort());
    await page.addInitScript(() => {window.serializeStateForLP=()=>({cards:Object.fromEntries(Object.entries(selectedCards).map(([k,v])=>[k,[...v]])),locks:Object.fromEntries(Object.entries(lockedCards).map(([k,v])=>[k,[...v]])),details:Object.fromEntries(Object.entries(selectedDetails).map(([k,v])=>[k,[...v]])),descs:selectedDescs,images:selectedSubImages,excluded:excludedMainImages});});
    await page.goto(process.env.PERF_TEST_URL); await page.waitForTimeout(1600);
-   await page.evaluate(()=>{goToCreate();switchNav('character',true);});
+   await page.evaluate(()=>{goToCreate();switchNav('character',true);selectSub('race');});
+   await page.waitForFunction(()=>document.querySelector('#page-race.active[data-chrome-view=group]'));
    const cdp=await page.context().newCDPSession(page);
    for (const kind of ['card','group','subgroup']) {
     await page.evaluate(kind=>{
