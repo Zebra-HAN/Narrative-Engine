@@ -863,5 +863,5 @@
 #card-minimap-close .close-icon { width: 41.6px; height: 41.6px; }
 
 .card-minimap-separator { opacity: .3; }
-.card-minimap-group .card-minimap-total { font-family: 'Noto Sans KR', sans-serif; }
+.card-minimap-group .card-minimap-total { font-family: 'Cinzel', 'Noto Serif KR', serif; font-weight: 400; }
 .card-minimap summary .card-minimap-total { font-family: 'Cinzel', 'Noto Serif KR', serif; }
