@@ -553,18 +553,23 @@ let addressTrail = [];
 // Routes only; existing renderers own data, selection, scroll and background memory.
 const groupCardReentries = new Map();
 function rememberGroupCardReentry(subId, groupIdx, sgIdx) {
-  const route = { subId, groupIdx, sgIdx };
-  groupCardReentries.set(`${currentNav}:group:${subId}`, route);
-  if (sgIdx !== undefined) groupCardReentries.set(`${currentNav}:subgroup:${subId}:${groupIdx}`, route);
+  const route = { type: 'cards', subId, groupIdx, sgIdx };
+  // Each button screen remembers only its immediate child, never a descendant.
+  const key = sgIdx === undefined ? `${currentNav}:group:${subId}`
+    : `${currentNav}:subgroup:${subId}:${groupIdx}`;
+  groupCardReentries.set(key, route);
 }
 function getGroupCardReentry(page) {
   if (!page || !['group', 'subgroup'].includes(page.dataset.chromeView)) return null;
   const route = groupCardReentries.get(page.dataset.reentryKey);
   const group = route && CARD_DATA[route.subId]?.groups?.[route.groupIdx];
-  if (!group || !Array.isArray(route.sgIdx === undefined ? group.cards : group.subgroups?.[route.sgIdx]?.cards)) return null;
-  return route;
+  if (!group) return null;
+  if (route.type === 'subgroup') return page.dataset.chromeView === 'group' && Array.isArray(group.subgroups) ? route : null;
+  if (page.dataset.chromeView !== (route.sgIdx === undefined ? 'group' : 'subgroup')) return null;
+  return Array.isArray(route.sgIdx === undefined ? group.cards : group.subgroups?.[route.sgIdx]?.cards) ? route : null;
 }
 function reenterGroupCards(route) {
+  if (route.type === 'subgroup') return showSubgroupPage(route.subId, route.groupIdx);
   return route.sgIdx === undefined ? showGroupCards(route.subId, route.groupIdx)
     : showSubgroupCards(route.subId, route.groupIdx, route.sgIdx);
 }
@@ -1054,12 +1059,12 @@ function initCenterBackSwipe() {
       if (forwardDragging) {
         const route = forwardRoute;
         forwardPending = true;
-        Promise.resolve(reenterGroupCards(route)).then(moved => {
-          if (moved && activePage() !== sourcePage) returnToRest(activePage(), offset);
-        }).finally(() => { forwardPending = false; });
+        // Use the normal button-entry renderer. Animating the incoming scroll
+        // page here adds an ancestor transform while its 3D card flips start.
+        Promise.resolve(reenterGroupCards(route)).finally(() => { forwardPending = false; });
       } else navigateAddressBack();
-      // 사라질 이전 페이지를 먼저 원점으로 튕기지 않는다. 새 페이지는 같은
-      // 드래그 위치에서 기존 복귀 곡선을 따라 원점에 안착한다.
+      // 뒤로 가기는 기존 복귀 곡선을 유지한다. 재진입 목적지는 일반 버튼
+      // 진입처럼 표시해 카드 뒤집기에 별도의 페이지 이동을 겹치지 않는다.
       sourcePage?.style.removeProperty('transform');
       sourcePage?.style.removeProperty('transition');
       dragPage = null;
@@ -2493,6 +2498,7 @@ function showSubgroupPage(subId, groupIdx, backgroundPrepared = false) {
 
   const grp = data.groups[groupIdx];
   if (!grp || !grp.subgroups) return;
+  groupCardReentries.set(`${currentNav}:group:${subId}`, { type: 'subgroup', subId, groupIdx });
   IMAGE_LOADER.preload(imageSources(grp.subgroups));
   grp.subgroups.forEach(sg => preloadCards(sg.cards));
 
