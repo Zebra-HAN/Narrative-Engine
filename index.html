@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#203448" />
+  <!-- iOS standalone supports bright icons on opaque black, not an arbitrary RGB color.
+       Keep the current viewport and launch mode: translucent/edge-to-edge changes layout. -->
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   <title>Narrative Builder — 창조주의 설계도</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -59,7 +63,7 @@
     <button class="home-link pressable" id="btn-narrative" onclick="goToNarrative()">스토리 구조</button>
     <button class="home-link pressable" id="btn-create" onclick="goToCreate()">창작 시작</button>
   </div>
-  <p class="home-version">v26.1014.2041</p>
+  <p class="home-version">v26.1014.2057</p>
 </div>
 
 
