@@ -4923,6 +4923,7 @@ function attachSwipeToClose(panelEl, closeFn, { lockDirection = false, suppressS
   let startY = null;
   let isDragging = false;
   let axis = null;
+  let pressTarget = null;
   let suppressClickUntil = 0;
   let closeTimer = null;
   let resetTimer = null;
@@ -4943,12 +4944,22 @@ function attachSwipeToClose(panelEl, closeFn, { lockDirection = false, suppressS
     }
   }
 
+  function clearPanFeedback() {
+    panelEl.querySelectorAll('.detail-pan-cancelled').forEach(node => {
+      if (!node.classList.contains('is-pressing')) node.classList.remove('detail-pan-cancelled');
+    });
+  }
+
   function onTouchStart(e) {
     startX = e.touches[0].clientX;
     startY = e.touches[0].clientY;
     isDragging = false;
     axis = null;
     suppressClickUntil = 0;
+    if (nativeVerticalScroll) {
+      clearPanFeedback();
+      pressTarget = e.target.closest('.pressable');
+    }
     if (!nativeVerticalScroll) {
       panelEl.style.transition = 'none';
       if (overlayEl) overlayEl.style.transition = 'none';
@@ -4959,6 +4970,13 @@ function attachSwipeToClose(panelEl, closeFn, { lockDirection = false, suppressS
     if (startX === null) return;
     const dx = e.touches[0].clientX - startX;
     const dy = e.touches[0].clientY - startY;
+
+    // Scrolling cancels pressed paint, not the browser's native pan or click rules.
+    if (nativeVerticalScroll && pressTarget && Math.hypot(dx, dy) > 8) {
+      pressTarget.classList.add('detail-pan-cancelled');
+      pressTarget.classList.remove('is-pressing');
+      pressTarget = null;
+    }
 
     if (lockDirection) {
       if (!axis && Math.max(Math.abs(dx), Math.abs(dy)) > 12) {
@@ -4989,6 +5007,8 @@ function attachSwipeToClose(panelEl, closeFn, { lockDirection = false, suppressS
   }
 
   function onTouchEnd(e) {
+    if (nativeVerticalScroll) requestAnimationFrame(() => { if (startX === null) clearPanFeedback(); });
+    pressTarget = null;
     if (!isDragging) {
       if (!nativeVerticalScroll) resetInlineStyles();
       startX = null;
@@ -5031,6 +5051,8 @@ function attachSwipeToClose(panelEl, closeFn, { lockDirection = false, suppressS
   }
 
   function onTouchCancel() {
+    if (nativeVerticalScroll) requestAnimationFrame(() => { if (startX === null) clearPanFeedback(); });
+    pressTarget = null;
     if (!nativeVerticalScroll || isDragging) resetInlineStyles();
     startX = null; isDragging = false;
   }
@@ -5046,6 +5068,8 @@ function attachSwipeToClose(panelEl, closeFn, { lockDirection = false, suppressS
   panelEl.addEventListener('touchend',   onTouchEnd,   { passive: true });
 
   panelEl._swipeCleanup = () => {
+    pressTarget = null;
+    clearPanFeedback();
     clearTimeout(closeTimer);
     clearTimeout(resetTimer);
     resetInlineStyles();

@@ -969,3 +969,9 @@
 
 /* Native vertical panning; horizontal dismiss remains a passive JS gesture. */
 .detail-overlay .popup-swipe-frame { touch-action: pan-y; }
+
+/* Release pressed paint immediately once a detail touch becomes a pan. */
+.detail-overlay .pressable.detail-pan-cancelled {
+  transform: none !important;
+  transition: none !important;
+}
