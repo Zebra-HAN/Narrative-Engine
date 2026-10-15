@@ -44,6 +44,7 @@ const { execFileSync } = require('node:child_process');
         if (!process.env.BASELINE_COMMIT) {
           assert.equal(animation.duration, 100); assert.equal(animation.scales[0], .95);
           assert(animation.scales.every((s, i, a) => s >= .95 && s <= 1 && (!i || s >= a[i - 1])));
+          assert(animation.scales[1] < .98, 'keep visible expansion beyond the first quarter of the entrance');
           assert.equal(animation.end, 'none', 'release scale after entrance');
         }
         assert.equal(animation.opacity, '1'); assert.equal(animation.scroll, 100); assert(animation.sameRoot); assert.equal(animation.width, animation.client);
