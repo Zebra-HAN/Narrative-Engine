@@ -934,8 +934,8 @@
 .detail-content { padding-bottom: 8px; scrollbar-width: none; }
 .detail-content::-webkit-scrollbar { display: none; width: 0; height: 0; }
 
-/* Card description only: luminous cyan edges around a deep-blue reading surface. */
-.detail-sheet #detail-desc.card-desc-selectable:not([aria-disabled="true"]) {
+/* Shared card/title description: luminous cyan edges around a deep-blue reading surface. */
+.detail-sheet #detail-desc:is(.card-desc-selectable, .detail-static-desc):not([aria-disabled="true"]) {
   color: #f4f1e6;
   border-color: #a2def0;
   background:
@@ -952,18 +952,18 @@
     0 3px 6px #06172666;
 }
 
-/* Ornament and spacing belong only to card detail views. */
+/* Shared ornament and spacing for card and title-card detail views. */
 .detail-title-divider { display: none; pointer-events: none; }
-.detail-sheet[data-card-key]:not([data-card-key=""]) #detail-icon { margin-bottom: 6px; }
-.detail-sheet[data-card-key]:not([data-card-key=""]) #detail-name { padding-bottom: 0; }
-.detail-sheet[data-card-key]:not([data-card-key=""]) #detail-name::after { content: none; }
-.detail-sheet[data-card-key]:not([data-card-key=""]) .detail-title-divider {
+.detail-sheet.detail-modern #detail-icon { margin-bottom: 6px; }
+.detail-sheet.detail-modern #detail-name { padding-bottom: 0; }
+.detail-sheet.detail-modern #detail-name::after { content: none; }
+.detail-sheet.detail-modern .detail-title-divider {
   display: block; width: 94%; height: auto; flex-shrink: 0;
   align-self: center; margin-top: -6px;
 }
-.detail-sheet[data-card-key]:not([data-card-key=""]) #detail-divider { display: none !important; }
-.detail-sheet[data-card-key]:not([data-card-key=""]) #detail-body:not(:empty) { margin-top: 36px; }
-.detail-sheet[data-card-key]:not([data-card-key=""]) #detail-desc:not([aria-disabled="true"]) {
+.detail-sheet.detail-modern #detail-divider { display: none !important; }
+.detail-sheet.detail-modern #detail-body:not(:empty) { margin-top: 36px; }
+.detail-sheet.detail-modern #detail-desc:not([aria-disabled="true"]) {
   text-shadow: 0 1px 1px #061c35cc, 0 0 4px #072541cc, 0 0 8px #09294199;
 }
 

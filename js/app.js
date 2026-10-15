@@ -3392,14 +3392,16 @@ function openLocationInfo(context = getInfoPanelContext()) {
   document.getElementById('detail-name').textContent = item.label;
   document.getElementById('detail-desc').textContent = description;
   configureDetailDescSelection();
+  document.getElementById('detail-desc').classList.toggle('detail-static-desc', Boolean(context.isTitleCard));
   document.querySelector('.detail-sheet').dataset.cardKey = '';
   document.getElementById('detail-divider').style.display = detail ? '' : 'none';
   const body = document.getElementById('detail-body');
   body.replaceChildren();
   const content = document.createElement('div');
   content.className = 'location-info-detail';
+  if (context.isTitleCard && detail?.trim()) content.classList.add('detail-idea-block');
   content.textContent = detail;
-  body.appendChild(content);
+  if (!context.isTitleCard || detail?.trim()) body.appendChild(content);
   showDetailOverlay();
 }
 
@@ -3714,6 +3716,7 @@ function syncDetailCardState(subId, idx) {
 function showDetailOverlay() {
   const sheet = document.querySelector('.detail-sheet');
   const key = sheet.dataset.cardKey;
+  sheet.classList.toggle('detail-modern', Boolean(key) || document.getElementById('detail-desc').classList.contains('detail-static-desc'));
   sheet.classList.remove('card-locked', 'card-selected');
   if (key) { const [subId, idx] = key.split('__'); syncDetailCardState(subId, Number(idx)); }
   const content = document.getElementById('detail-content');
@@ -3799,7 +3802,7 @@ function configureDetailDescSelection(subId = null, idx = null) {
   element.onkeydown = null;
   delete element.dataset.descKey;
   element.parentElement.classList.remove('desc-excluded');
-  element.classList.remove('card-desc-selectable', 'checked', 'pressable');
+  element.classList.remove('card-desc-selectable', 'checked', 'pressable', 'detail-static-desc');
   ['role', 'aria-pressed', 'aria-disabled', 'tabindex'].forEach(name => element.removeAttribute(name));
   if (subId === null || !getCardByGlobalIdx(subId, idx)?.desc) return;
   element.dataset.descKey = `${subId}__${idx}`;
@@ -5717,7 +5720,7 @@ function createPageTitleCard(group, subId, preparedAssets = null) {
   frame.addEventListener('click', () => {
     const parent = getInfoPanelContext(true);
     closeCardInfo();
-    openLocationInfo({ item: group,
+    openLocationInfo({ item: group, isTitleCard: true,
       description: group.description?.trim() ? group.description : parent.description,
       detail: group.detail?.trim() ? group.detail : parent.detail });
   });

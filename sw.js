@@ -1,4 +1,4 @@
-const SHELL_CACHE = 'narrative-shell-v19';
+const SHELL_CACHE = 'narrative-shell-v20';
 const IMAGE_CACHE = 'narrative-images-v3';
 const SHELL = ['./', './index.html', './css/style.css', './css/layout-3.css',
   './css/fantasy-bottom-ui.css', './css/fantasy-top-panel.css', './css/deep-blue-gold-theme.css', './js/app.js', './images/core/buttons/check.webp',
