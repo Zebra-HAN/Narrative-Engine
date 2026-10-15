@@ -542,6 +542,7 @@ function beginBackgroundCategorySession(subId, navId = currentNav) {
 ════════════════════════════════════════════════ */
 let currentNav   = 'character';
 let currentSubId = null;
+const autoSelectedCardKeys = new Set();
 let selectedCards = {};   // { subId: Set<idx> }
 let lockedCards = {};     // { subId: Set<idx> } - random/partial reset에서 유지할 카드
 let selectedDetails = {}; // { "subId__globalIdx": Set<detailItemIdx> }
@@ -3460,6 +3461,7 @@ function toggleCurrentCardLock() {
 }
 
 function clearCardDetailSelection(subId, idx) {
+  autoSelectedCardKeys.delete(`${subId}__${idx}`);
   const key = `${subId}__${idx}`;
   delete selectedDetails[key];
   delete selectedSubImages[key];
@@ -3492,7 +3494,10 @@ function includeCardDefaults(subId, idx) {
   syncDetailDescSelection(subId, idx);
 }
 
-function selectCardWithDefaults(subId, idx) {
+function selectCardWithDefaults(subId, idx, automatic = false) {
+  const key = `${subId}__${idx}`;
+  if (!automatic) autoSelectedCardKeys.delete(key);
+  else if (!selectedCards[subId]?.has(idx)) autoSelectedCardKeys.add(key);
   if (!selectedCards[subId]) selectedCards[subId] = new Set();
   if (selectedCards[subId].has(idx)) return;
   selectedCards[subId].add(idx);
@@ -3832,7 +3837,7 @@ function toggleDetailCheck(subId, globalIdx, lineIdx) {
     set.add(lineIdx);
     // 카드도 자동 선택 상태로
     if (!selectedCards[subId]) selectedCards[subId] = new Set();
-    selectCardWithDefaults(subId, globalIdx);
+    selectCardWithDefaults(subId, globalIdx, true);
     renderSubnav(currentNav, false);
     const el = document.querySelector(`[data-sub-id="${subId}"]`);
     if (el) el.classList.add('active');
@@ -3852,6 +3857,7 @@ function toggleDetailCheck(subId, globalIdx, lineIdx) {
   // 세부정보가 하나도 없으면 selectedDetails 키 삭제
   if (set.size === 0) delete selectedDetails[detailKey];
 
+  reconcileAutoSelectedCard(subId, globalIdx);
   _syncCardSelectedDOM(subId, globalIdx);
 
   // 아이디어 통합 창 갱신
@@ -3868,7 +3874,7 @@ function toggleSubImageCheck(subId, globalIdx) {
   } else {
     selectedSubImages[detailKey] = true;
     if (!selectedCards[subId]) selectedCards[subId] = new Set();
-    selectCardWithDefaults(subId, globalIdx);
+    selectCardWithDefaults(subId, globalIdx, true);
     renderSubnav(currentNav, false);
     const el = document.querySelector(`[data-sub-id="${subId}"]`);
     if (el) el.classList.add('active');
@@ -3883,11 +3889,26 @@ function toggleSubImageCheck(subId, globalIdx) {
       block.setAttribute('aria-pressed', isChecked ? 'true' : 'false');
     });
 
+  reconcileAutoSelectedCard(subId, globalIdx);
   _syncCardSelectedDOM(subId, globalIdx);
   refreshStatusIfOpen();
 }
 
+function reconcileAutoSelectedCard(subId, idx) {
+  const key = `${subId}__${idx}`;
+  if (!autoSelectedCardKeys.has(key) || selectedDetails[key]?.size || selectedSubImages[key] || isCardLocked(subId, idx)) return;
+  selectedCards[subId]?.delete(idx);
+  clearCardDetailSelection(subId, idx);
+  renderSubnav(currentNav, false);
+  document.querySelector(`[data-sub-id="${subId}"]`)?.classList.add('active');
+  updateNavBadges();
+}
+
 function _syncCardSelectedDOM(subId, globalIdx) {
+  if (CARD_DATA[subId]?.groups) {
+    updateGroupBadges(subId);
+    if (globalIdx >= 1000000) updateSubgroupBadges(subId, Math.floor(globalIdx / 1000000) - 1);
+  }
   syncDetailMainImageSelection(subId, globalIdx);
   syncDetailCardState(subId, globalIdx);
   const cardEl = currentSubId === subId
@@ -4682,6 +4703,7 @@ async function randomSelectCurrent() {
 
   selectedCards[currentSubId] = new Set(lockedCards[currentSubId] || []);
   selectedCards[currentSubId].add(pick.globalIdx);
+  autoSelectedCardKeys.delete(`${currentSubId}__${pick.globalIdx}`);
   includeCardDefaults(currentSubId, pick.globalIdx);
   clearDeselectedDetails(currentSubId);
 
@@ -4726,6 +4748,7 @@ subs.forEach(sub => {
   const pick = allCards[Math.floor(Math.random() * allCards.length)];
   selectedCards[sub.id] = new Set(lockedCards[sub.id] || []);
   selectedCards[sub.id].add(pick.globalIdx);
+  autoSelectedCardKeys.delete(`${sub.id}__${pick.globalIdx}`);
   includeCardDefaults(sub.id, pick.globalIdx);
   clearDeselectedDetails(sub.id);
 });

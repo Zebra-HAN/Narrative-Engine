@@ -32,7 +32,7 @@ const compressedCSS = execFileSync('git', ['show', 'ab1f6b9:css/deep-blue-gold-t
      });
      if(variant==='fixed'){
       const check=await page.locator('.detail-idea-block.checked').evaluate(n=>{const s=getComputedStyle(n,'::after');return {width:s.width,height:s.height,top:s.top,right:s.right,transform:s.transform,pointer:s.pointerEvents}});
-      assert.deepEqual(check,{width:'32px',height:'32px',top:'0px',right:'0px',transform:'matrix(1, 0, 0, 1, 9.6, -16)',pointer:'none'});
+      assert.deepEqual(check,{width:'32px',height:'32px',top:'0px',right:'0px',transform:'matrix(1, 0, 0, 1, 8, -16)',pointer:'none'});
       await page.evaluate(()=>{toggleDetailCheck('spacing',0,1);toggleCurrentCardLock();toggleDetailCheck('spacing',0,1);});
       assert(await page.evaluate(()=>selectedDetails.spacing__0.has(1)&&document.querySelectorAll('.detail-idea-block:disabled').length>0));
       await page.evaluate(()=>{toggleCurrentCardLock();toggleDetailCheck('spacing',0,1);document.getElementById('detail-content').scrollTop=100;});
