@@ -7,3 +7,5 @@ General and title-card detail sheets now scale from 90% to 100% in 170ms using e
 Home version: v26.1016.0543. Shell cache: v24; image cache unchanged. Actual iPhone Safari/PWA and resolution of the previously reported short-flick inertia issue remain unverified.
 
 Validation passed: detail-quick-entrance, detail-native-scroll and detail-selection-origin at all three viewports, plus syntax/whitespace checks. Running-frame samples included 90%, 91.6%, 93.0%, 94.4%, 95.6%, 96.7% and subsequent progression to 100% for both detail types.
+
+Follow-up adjustment: the entrance now starts at 85% and lasts 200ms, retaining 100% final scale, ease-out, no overshoot, released transform and reduced-motion handling. The same rendering-frame and native-input regression test covers these new values. The home version remains v26.1016.0543; shell cache v25 refreshes this adjustment.

@@ -42,8 +42,8 @@ const { execFileSync } = require('node:child_process');
           return { duration, scales, end: getComputedStyle(sheet).transform, opacity: getComputedStyle(sheet).opacity, scroll: root.scrollTop, sameRoot: savedScrollRoot === root, width: root.scrollWidth, client: root.clientWidth };
         }, title);
         if (!process.env.BASELINE_COMMIT) {
-          assert.equal(animation.duration, 170); assert.equal(animation.scales[0], .9);
-          assert(animation.scales.every((s, i, a) => s >= .9 && s <= 1 && (!i || s >= a[i - 1])));
+          assert.equal(animation.duration, 200); assert.equal(animation.scales[0], .85);
+          assert(animation.scales.every((s, i, a) => s >= .85 && s <= 1 && (!i || s >= a[i - 1])));
           assert(animation.scales[1] < .95, 'keep visible expansion beyond the first quarter of the entrance');
           assert.equal(animation.end, 'none', 'release scale after entrance');
         }
@@ -70,8 +70,8 @@ const { execFileSync } = require('node:child_process');
           return result;
         }, title);
         if (!process.env.BASELINE_COMMIT) {
-          assert(frames.some(f => f.scale > .9 && f.scale < .99), 'running entrance must render an intermediate scale');
-          assert(frames.every(f => f.scale >= .9 && f.scale <= 1), 'running entrance must not overshoot');
+          assert(frames.some(f => f.scale > .85 && f.scale < .99), 'running entrance must render an intermediate scale');
+          assert(frames.every(f => f.scale >= .85 && f.scale <= 1), 'running entrance must not overshoot');
           assert.equal(frames.at(-1).scale, 1);
         }
         assert(frames.every(f => f.scroll === 100 && f.sameRoot), 'running entrance preserves scroll position and root');

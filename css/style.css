@@ -1453,12 +1453,12 @@ body::after {
 
 /* A single short lift; release the scale transform once the entrance finishes. */
 @keyframes detailSheetAppear {
-  from { opacity: 0; transform: scale(.9); }
+  from { opacity: 0; transform: scale(.85); }
   to { opacity: 1; transform: scale(1); }
 }
 .detail-overlay.active .detail-sheet {
   opacity: 1;
-  animation: detailSheetAppear 170ms ease-out backwards;
+  animation: detailSheetAppear 200ms ease-out backwards;
 }
 
 
