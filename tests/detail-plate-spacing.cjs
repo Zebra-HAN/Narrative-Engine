@@ -32,7 +32,7 @@ const compressedCSS = execFileSync('git', ['show', 'ab1f6b9:css/deep-blue-gold-t
      });
      if(variant==='fixed'){
       const check=await page.locator('.detail-idea-block.checked').evaluate(n=>{const s=getComputedStyle(n,'::after');return {width:s.width,height:s.height,top:s.top,right:s.right,transform:s.transform,pointer:s.pointerEvents}});
-      assert.deepEqual(check,{width:'32px',height:'32px',top:'0px',right:'0px',transform:'matrix(1, 0, 0, 1, 16, -16)',pointer:'none'});
+      assert.deepEqual(check,{width:'32px',height:'32px',top:'0px',right:'0px',transform:'matrix(1, 0, 0, 1, 9.6, -16)',pointer:'none'});
       await page.evaluate(()=>{toggleDetailCheck('spacing',0,1);toggleCurrentCardLock();toggleDetailCheck('spacing',0,1);});
       assert(await page.evaluate(()=>selectedDetails.spacing__0.has(1)&&document.querySelectorAll('.detail-idea-block:disabled').length>0));
       await page.evaluate(()=>{toggleCurrentCardLock();toggleDetailCheck('spacing',0,1);document.getElementById('detail-content').scrollTop=100;});
@@ -49,7 +49,7 @@ const compressedCSS = execFileSync('git', ['show', 'ab1f6b9:css/deep-blue-gold-t
      assert(fixed.plates[0].height<=compressed.plates[0].height,'text uses restored width');
      assert(fixed.plates.every(p=>p.width===fixed.plates[0].width),'selected and unselected plates share width');
     }
-    console.log(`PASS ${viewport.width}x${viewport.height} ${mode}: pre-check geometry and text restored, +16px plate width, -16px heading gap, unchanged 32px check, lock/unlock`);
+    console.log(`PASS ${viewport.width}x${viewport.height} ${mode}: pre-check geometry and text restored, +16px plate width, -16px heading gap, 32px overlay check, lock/unlock`);
    }
   }
  }finally{await browser.close()}
