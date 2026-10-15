@@ -1,8 +1,8 @@
-const SHELL_CACHE = 'narrative-shell-v15';
+const SHELL_CACHE = 'narrative-shell-v16';
 const IMAGE_CACHE = 'narrative-images-v3';
 const SHELL = ['./', './index.html', './css/style.css', './css/layout-3.css',
   './css/fantasy-bottom-ui.css', './css/fantasy-top-panel.css', './css/deep-blue-gold-theme.css', './js/app.js', './images/core/buttons/check.webp',
-  './images/core/buttons/cancel.webp', './images/core/buttons/lock.webp'];
+  './images/core/buttons/cancel.webp', './images/core/buttons/lock.webp', './images/core/sub-nav/title_divider.webp'];
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(SHELL_CACHE).then(cache => cache.addAll(SHELL)));

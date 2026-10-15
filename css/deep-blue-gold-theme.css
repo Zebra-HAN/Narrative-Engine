@@ -951,3 +951,18 @@
     0 0 8px #58b7df33,
     0 3px 6px #06172666;
 }
+
+/* Ornament and spacing belong only to card detail views. */
+.detail-title-divider { display: none; pointer-events: none; }
+.detail-sheet[data-card-key]:not([data-card-key=""]) #detail-icon { margin-bottom: 6px; }
+.detail-sheet[data-card-key]:not([data-card-key=""]) #detail-name { padding-bottom: 0; }
+.detail-sheet[data-card-key]:not([data-card-key=""]) #detail-name::after { content: none; }
+.detail-sheet[data-card-key]:not([data-card-key=""]) .detail-title-divider {
+  display: block; width: 94%; height: auto; flex-shrink: 0;
+  align-self: center; margin-top: -6px;
+}
+.detail-sheet[data-card-key]:not([data-card-key=""]) #detail-divider { display: none !important; }
+.detail-sheet[data-card-key]:not([data-card-key=""]) #detail-body:not(:empty) { margin-top: 36px; }
+.detail-sheet[data-card-key]:not([data-card-key=""]) #detail-desc:not([aria-disabled="true"]) {
+  text-shadow: 0 1px 1px #061c35cc, 0 0 4px #072541cc, 0 0 8px #09294199;
+}
