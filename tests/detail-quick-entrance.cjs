@@ -42,16 +42,43 @@ const { execFileSync } = require('node:child_process');
           return { duration, scales, end: getComputedStyle(sheet).transform, opacity: getComputedStyle(sheet).opacity, scroll: root.scrollTop, sameRoot: savedScrollRoot === root, width: root.scrollWidth, client: root.clientWidth };
         }, title);
         if (!process.env.BASELINE_COMMIT) {
-          assert.equal(animation.duration, 100); assert.equal(animation.scales[0], .95);
-          assert(animation.scales.every((s, i, a) => s >= .95 && s <= 1 && (!i || s >= a[i - 1])));
-          assert(animation.scales[1] < .98, 'keep visible expansion beyond the first quarter of the entrance');
+          assert.equal(animation.duration, 170); assert.equal(animation.scales[0], .9);
+          assert(animation.scales.every((s, i, a) => s >= .9 && s <= 1 && (!i || s >= a[i - 1])));
+          assert(animation.scales[1] < .95, 'keep visible expansion beyond the first quarter of the entrance');
           assert.equal(animation.end, 'none', 'release scale after entrance');
         }
         assert.equal(animation.opacity, '1'); assert.equal(animation.scroll, 100); assert(animation.sameRoot); assert.equal(animation.width, animation.client);
         console.log(JSON.stringify({ width, title, animation }));
       }
+      // Observe the running entrance across rendering frames, without seeking or pausing it.
+      for (const title of [false, true]) {
+        const frames = await page.evaluate(async title => {
+          closeDetailSheet();
+          await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+          if (title) openLocationInfo({ item: { label: 'Title fixture' }, description: 'Description remains unchanged', detail: fixtureDetail, isTitleCard: true });
+          else openDetailSheet('card');
+          const sheet = document.querySelector('.detail-sheet'), root = document.getElementById('detail-content');
+          root.scrollTop = 100;
+          const result = [], started = performance.now();
+          await new Promise(resolve => {
+            const sample = now => {
+              result.push({ elapsed: now - started, scale: new DOMMatrixReadOnly(getComputedStyle(sheet).transform).a, scroll: root.scrollTop, sameRoot: root === document.getElementById('detail-content') });
+              if (now - started < 240) requestAnimationFrame(sample); else resolve();
+            };
+            requestAnimationFrame(sample);
+          });
+          return result;
+        }, title);
+        if (!process.env.BASELINE_COMMIT) {
+          assert(frames.some(f => f.scale > .9 && f.scale < .99), 'running entrance must render an intermediate scale');
+          assert(frames.every(f => f.scale >= .9 && f.scale <= 1), 'running entrance must not overshoot');
+          assert.equal(frames.at(-1).scale, 1);
+        }
+        assert(frames.every(f => f.scroll === 100 && f.sameRoot), 'running entrance preserves scroll position and root');
+        console.log(JSON.stringify({ width, title, renderedFrames: frames }));
+      }
       const cdp = await page.context().newCDPSession(page);
-      for (const delay of [0, 160]) for (const [distance, wait, steps] of [[40, 4, 2], [180, 65, 5]]) {
+      for (const delay of [0, 220]) for (const [distance, wait, steps] of [[40, 4, 2], [180, 65, 5]]) {
         const point = await page.evaluate(() => {
           closeDetailSheet(); document.querySelector('.detail-sheet').getBoundingClientRect();
           selectedCards = {}; selectedDetails = {}; autoSelectedCardKeys.clear(); openDetailSheet('card');
@@ -78,7 +105,7 @@ const { execFileSync } = require('node:child_process');
         assert(!state.events.some(e => e.type === 'click' || e.prevented));
         console.log(JSON.stringify({ width, delay, distance, atRelease: release - point.start, afterRelease: state.after - point.start, momentumObserved: state.after > release + 5 }));
       }
-      await page.evaluate(() => { closeDetailSheet(); openDetailSheet('card'); }); await page.waitForTimeout(160);
+      await page.evaluate(() => { closeDetailSheet(); openDetailSheet('card'); }); await page.waitForTimeout(220);
       const idea = page.locator('.detail-idea-block').first(); await idea.tap(); assert.equal(await idea.getAttribute('aria-pressed'), 'true'); await idea.tap(); assert.equal(await idea.getAttribute('aria-pressed'), 'false');
       await page.emulateMedia({ reducedMotion: 'reduce' });
       await page.evaluate(() => { closeDetailSheet(); openDetailSheet('card'); });
