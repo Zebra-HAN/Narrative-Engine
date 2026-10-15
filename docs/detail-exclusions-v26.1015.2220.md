@@ -1,0 +1,9 @@
+# Independent detail exclusions — v26.1015.2220
+
+Card/idea selection no longer resets the main-image and description output preferences. These preferences remain independent when the first idea automatically selects a card, the final idea automatically deselects it, a subimage changes selection, the card is explicitly selected/cancelled, or random selection changes the selected cards. Explicit card cancellation still clears all selected ideas and subimages.
+
+Previously `includeCardDefaults` overwrote both preferences on selection, and `clearCardDetailSelection` deleted them on deselection. Missing preference entries already mean included. Selection now preserves existing entries; category/full reset explicitly request exclusion reset. Locked-card protection is unchanged. The existing state objects and output rendering remain in use; no new storage format or persistence mechanism is introduced.
+
+Regression coverage: `tests/detail-exclusion-state.cjs` checks each exclusion individually and together, exclusion before/after idea selection, final-idea removal, multiple ideas, reentry/card isolation, direct selection/cancellation, subimages, locks, random cleanup, explicit resets, actual tap handlers and integrated output at 320/393/852px. With `BASELINE_COMMIT=b20daac` it reproduces the original failure on the first image-exclusion/idea-selection sequence. `default-card-inclusion.cjs` now expects preferences to survive direct selection and random selection rather than the old automatic reset behavior.
+
+No CSS, animations, touch handlers or scroll structure changed. Shell cache v21 refreshes the updated application. Actual iPhone Safari/PWA testing is not available; Chromium touch emulation does not establish real-device validation or resolution of the separately reported inertial-scroll issue.

@@ -3462,13 +3462,16 @@ function toggleCurrentCardLock() {
   });
 }
 
-function clearCardDetailSelection(subId, idx) {
+function clearCardDetailSelection(subId, idx, { resetExclusions = false } = {}) {
   autoSelectedCardKeys.delete(`${subId}__${idx}`);
   const key = `${subId}__${idx}`;
   delete selectedDetails[key];
   delete selectedSubImages[key];
-  delete selectedDescs[key];
-  delete excludedMainImages[key];
+  // Selection and output exclusions have independent lifetimes.
+  if (resetExclusions) {
+    delete selectedDescs[key];
+    delete excludedMainImages[key];
+  }
   syncDetailDescSelection(subId, idx);
   document.querySelectorAll('#detail-body [onclick]').forEach(block => {
     if (block.getAttribute('onclick').includes(`('${subId}', ${idx},`) || block.getAttribute('onclick').includes(`('${subId}', ${idx})`)) {
@@ -3478,21 +3481,20 @@ function clearCardDetailSelection(subId, idx) {
   });
 }
 
-function clearDeselectedDetails(subId) {
+function clearDeselectedDetails(subId, { resetExclusions = false } = {}) {
   const prefix = `${subId}__`;
   new Set([...Object.keys(selectedDetails), ...Object.keys(selectedSubImages), ...Object.keys(selectedDescs), ...Object.keys(excludedMainImages)])
     .forEach(key => {
       if (key.startsWith(prefix)) {
         const idx = Number(key.slice(prefix.length));
-        if (!selectedCards[subId]?.has(idx)) clearCardDetailSelection(subId, idx);
+        if (!selectedCards[subId]?.has(idx)) clearCardDetailSelection(subId, idx, { resetExclusions });
       }
     });
 }
 
 function includeCardDefaults(subId, idx) {
-  const key = `${subId}__${idx}`;
-  delete excludedMainImages[key];
-  if (getCardByGlobalIdx(subId, idx)?.desc) selectedDescs[key] = true;
+  // Missing exclusion entries already mean included; selecting a card must not
+  // overwrite the user's image or description preferences.
   syncDetailDescSelection(subId, idx);
 }
 
@@ -4363,7 +4365,7 @@ async function partialReset() {
     } else {
       delete selectedCards[sub.id];
     }
-    clearDeselectedDetails(sub.id);
+    clearDeselectedDetails(sub.id, { resetExclusions: true });
 
   });
   if (currentSubId) showCardPage(currentSubId, false);
@@ -4385,7 +4387,7 @@ async function fullReset() {
   lockedCards = {};
   Object.keys(selectedDetails).concat(Object.keys(selectedSubImages), Object.keys(selectedDescs), Object.keys(excludedMainImages)).forEach(key => {
     const [subId, idx] = key.split('__');
-    clearCardDetailSelection(subId, Number(idx));
+    clearCardDetailSelection(subId, Number(idx), { resetExclusions: true });
   });
   selectedDetails = {};
    selectedSubImages = {};

@@ -33,8 +33,9 @@ const { chromium } = require('playwright');
    await page.evaluate(()=>{toggleMainImageCheck(cardIdentity.subId,cardIdentity.idx);toggleDescCheck(cardIdentity.subId,cardIdentity.idx);});
    assert(await page.evaluate(()=>!selectedCards[cardIdentity.subId]?.has(cardIdentity.idx)));
    await page.evaluate(()=>{closeDetailSheet();});await page.locator('.card-info-select').click();
-   assert(await page.evaluate(()=>selectedCards[cardIdentity.subId].has(cardIdentity.idx)&&selectedDescs[cardKey]===true&&!excludedMainImages[cardKey]));
-   await page.evaluate(()=>openDetailSheet('card'));await page.waitForTimeout(400);assert.deepEqual(await includedPaint(),original);
+   assert(await page.evaluate(()=>selectedCards[cardIdentity.subId].has(cardIdentity.idx)&&selectedDescs[cardKey]===false&&excludedMainImages[cardKey]));
+   await page.evaluate(()=>openDetailSheet('card'));await page.waitForTimeout(400);assert.notEqual((await includedPaint()).main,'none');assert.notEqual((await includedPaint()).descFilter,'none');
+   await page.evaluate(()=>{toggleMainImageCheck(cardIdentity.subId,cardIdentity.idx);toggleDescCheck(cardIdentity.subId,cardIdentity.idx);});assert.deepEqual(await includedPaint(),original);
    const assertStatus=async(main,desc,sub)=>{
     await page.evaluate(()=>openStatusOverlay());
     assert.equal(await page.locator('#status-body .status-chip-img').count(),main);
@@ -66,7 +67,7 @@ const { chromium } = require('playwright');
    await page.evaluate(()=>{toggleMainImageCheck(cardIdentity.subId,cardIdentity.idx);toggleDescCheck(cardIdentity.subId,cardIdentity.idx);toggleDetailCheck(cardIdentity.subId,cardIdentity.idx,0);toggleSubImageCheck(cardIdentity.subId,cardIdentity.idx);});await assertStatus(0,0,1);
    assert(await page.evaluate(()=>selectedDetails[cardKey].has(0)&&selectedSubImages[cardKey]));
    await page.evaluate(()=>{toggleCurrentCardLock();closeDetailSheet();selectCurrentCard();selectCurrentCard();openDetailSheet('card');});
-   await page.waitForTimeout(400);assert.deepEqual(await includedPaint(),original);await assertStatus(1,1,0);
+   await page.waitForTimeout(400);assert.notEqual((await includedPaint()).main,'none');assert.notEqual((await includedPaint()).descFilter,'none');await assertStatus(0,0,0);
    // Long press still opens detail, without changing card selection or defaults.
    await page.evaluate(()=>{closeDetailSheet();const el=getFocusedCardElement();window.beforeLongPress=JSON.stringify({cards:[...selectedCards[cardIdentity.subId]],selectedDescs,excludedMainImages});el.dispatchEvent(new MouseEvent('mousedown',{bubbles:true,clientX:100,clientY:200}));});
    await page.waitForTimeout(550);assert(await page.locator('#detail-overlay').evaluate(n=>n.classList.contains('active')));
@@ -95,11 +96,11 @@ const { chromium } = require('playwright');
     const style=s=>({width:s.width,height:s.height,border:s.border,color:s.backgroundColor,radius:s.borderRadius,shadow:s.boxShadow});return {lower:style(lower),back:style(back),lowerBG:lower.backgroundImage,backBG:back.backgroundImage,backSize:back.backgroundSize};
    });assert.deepEqual(plates.lower,plates.back);assert(plates.backBG.includes(plates.lowerBG));assert(plates.backBG.includes('m11%207-5%205%205%205m7-10-5%205%205%205')||plates.backBG.includes('m11 7-5 5 5 5m7-10-5 5 5 5'));assert(plates.backSize.startsWith('21px 21px'));
    await page.locator('#card-menu-toggle').click();assert.equal(await toggle.isVisible(),false);await page.locator('#card-menu-toggle').click();await page.waitForTimeout(250);assert(await toggle.isVisible());
-   // Both random commands reset exclusions and include descriptions on each picked card.
-   await page.evaluate(async()=>{window.savedConfirm=showAppConfirm;showAppConfirm=async()=>true;Math.random=()=>0;excludedMainImages[cardKey]=true;selectedDescs[cardKey]=false;await randomSelectCurrent();});
-   assert(await page.evaluate(()=>{const pick=[...selectedCards[currentSubId]][0],key=`${currentSubId}__${pick}`;return !excludedMainImages[key]&&selectedDescs[key]===true;}));
+   // Random commands change selected cards without overwriting exclusion preferences.
+   await page.evaluate(async()=>{window.savedConfirm=showAppConfirm;showAppConfirm=async()=>true;Math.random=()=>0;excludedMainImages[cardKey]=true;selectedDescs[cardKey]=false;window.beforeRandom=JSON.stringify([excludedMainImages,selectedDescs]);await randomSelectCurrent();});
+   assert(await page.evaluate(()=>JSON.stringify([excludedMainImages,selectedDescs])===beforeRandom));
    await page.evaluate(async()=>{lockedCards={};await randomSelectAll();showAppConfirm=savedConfirm;});
-   assert(await page.evaluate(()=>Object.entries(selectedCards).every(([id,set])=>[...set].every(idx=>{const c=getCardByGlobalIdx(id,idx);return !excludedMainImages[`${id}__${idx}`]&&(!c?.desc||selectedDescs[`${id}__${idx}`]===true);}))))
+   assert(await page.evaluate(()=>JSON.stringify([excludedMainImages,selectedDescs])===beforeRandom));
    assert.deepEqual(errors,[]);console.log(`PASS ${config.width}x${config.height} ${config.kind}: defaults, independent exclusions, original/dim paint, feedback, status, lock/reselect/random, long press, panel/menu visibility and matching gesture plate`);await page.close();
   }
  }finally{await browser.close();}
