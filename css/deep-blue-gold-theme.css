@@ -966,3 +966,6 @@
 .detail-sheet[data-card-key]:not([data-card-key=""]) #detail-desc:not([aria-disabled="true"]) {
   text-shadow: 0 1px 1px #061c35cc, 0 0 4px #072541cc, 0 0 8px #09294199;
 }
+
+/* Native vertical panning; horizontal dismiss remains a passive JS gesture. */
+.detail-overlay .popup-swipe-frame { touch-action: pan-y; }

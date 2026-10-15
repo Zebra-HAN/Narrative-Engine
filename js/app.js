@@ -3725,7 +3725,7 @@ function showDetailOverlay() {
   attachSwipeToClose(
     document.querySelector('.detail-overlay .popup-swipe-frame'),
     () => document.getElementById('detail-overlay').classList.remove('active'),
-    { lockDirection: true, suppressSwipeClick: true }
+    { lockDirection: true, suppressSwipeClick: true, nativeVerticalScroll: true }
   );
 }
 
@@ -4909,7 +4909,7 @@ document.addEventListener('touchmove', (e) => {
 /* ════════════════════════════════════════════════
    스와이프로 닫기(왼쪽 스와이프로 패널 닫기)
 ════════════════════════════════════════════════ */
-function attachSwipeToClose(panelEl, closeFn, { lockDirection = false, suppressSwipeClick = false } = {}) {
+function attachSwipeToClose(panelEl, closeFn, { lockDirection = false, suppressSwipeClick = false, nativeVerticalScroll = false } = {}) {
   if (!panelEl) return;
 
   // 이전에 붙인 리스너 제거 (중복 방지)
@@ -4949,8 +4949,10 @@ function attachSwipeToClose(panelEl, closeFn, { lockDirection = false, suppressS
     isDragging = false;
     axis = null;
     suppressClickUntil = 0;
-    panelEl.style.transition = 'none';
-     if (overlayEl) overlayEl.style.transition = 'none';
+    if (!nativeVerticalScroll) {
+      panelEl.style.transition = 'none';
+      if (overlayEl) overlayEl.style.transition = 'none';
+    }
   }
 
   function onTouchMove(e) {
@@ -4967,11 +4969,15 @@ function attachSwipeToClose(panelEl, closeFn, { lockDirection = false, suppressS
     // 수평 스와이프 판정 (세로 스크롤과 구분)
     if (!isDragging && Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 8) {
       isDragging = true;
+      if (nativeVerticalScroll) {
+        panelEl.style.transition = 'none';
+        if (overlayEl) overlayEl.style.transition = 'none';
+      }
     }
     if (isDragging) {
       if (suppressSwipeClick) {
         suppressClickUntil = performance.now() + 500;
-        if (e.cancelable) e.preventDefault();
+        if (!nativeVerticalScroll && e.cancelable) e.preventDefault();
         panelEl.querySelectorAll('.is-pressing').forEach(node => node.classList.remove('is-pressing'));
       }
       const distance = Math.abs(dx);
@@ -4984,7 +4990,7 @@ function attachSwipeToClose(panelEl, closeFn, { lockDirection = false, suppressS
 
   function onTouchEnd(e) {
     if (!isDragging) {
-      resetInlineStyles();
+      if (!nativeVerticalScroll) resetInlineStyles();
       startX = null;
       return;
     }
@@ -5024,7 +5030,10 @@ function attachSwipeToClose(panelEl, closeFn, { lockDirection = false, suppressS
     isDragging = false;
   }
 
-  function onTouchCancel() { startX = null; isDragging = false; resetInlineStyles(); }
+  function onTouchCancel() {
+    if (!nativeVerticalScroll || isDragging) resetInlineStyles();
+    startX = null; isDragging = false;
+  }
   function onClick(event) {
     if ((lockDirection || suppressSwipeClick) && (isDragging || performance.now() < suppressClickUntil)) {
       event.preventDefault(); event.stopImmediatePropagation();
@@ -5033,7 +5042,7 @@ function attachSwipeToClose(panelEl, closeFn, { lockDirection = false, suppressS
   panelEl.addEventListener('click', onClick, true);
   panelEl.addEventListener('touchcancel', onTouchCancel, { passive: true });
   panelEl.addEventListener('touchstart', onTouchStart, { passive: true });
-  panelEl.addEventListener('touchmove',  onTouchMove,  { passive: !suppressSwipeClick });
+  panelEl.addEventListener('touchmove',  onTouchMove,  { passive: nativeVerticalScroll || !suppressSwipeClick });
   panelEl.addEventListener('touchend',   onTouchEnd,   { passive: true });
 
   panelEl._swipeCleanup = () => {
