@@ -933,3 +933,21 @@
 .detail-sheet { padding-bottom: 4px; }
 .detail-content { padding-bottom: 8px; scrollbar-width: none; }
 .detail-content::-webkit-scrollbar { display: none; width: 0; height: 0; }
+
+/* Card description only: luminous cyan edges around a deep-blue reading surface. */
+.detail-sheet #detail-desc.card-desc-selectable:not([aria-disabled="true"]) {
+  color: #f4f1e6;
+  border-color: #a2def0;
+  background:
+    radial-gradient(ellipse at 0% 0%, #d0f5ff70, transparent 46%),
+    radial-gradient(ellipse at 100% 0%, #aeeeff60, transparent 46%),
+    radial-gradient(ellipse at 50% 48%, #0b263f 12%, #102f48b8 62%, transparent 100%),
+    linear-gradient(90deg, #5aa8c5, #245777 14%, #123650 40%, #123650 60%, #245777 86%, #5aa8c5);
+  box-shadow:
+    inset 0 1px 0 #edfbffb3,
+    inset 2px 0 7px #a3e9ff55,
+    inset -2px 0 7px #a3e9ff55,
+    inset 0 -1px 3px #8ed2ee66,
+    0 0 8px #58b7df33,
+    0 3px 6px #06172666;
+}
