@@ -166,7 +166,7 @@ const COMPASS_CARDS = {
   value_direction: {
     groups: [
       {
-        id: 'proof', label: '표현 · 증명', icon: '🎯',
+        id: 'proof', label: '표현 · 증명', icon: '🎯', img:'images/compass/group/value_proof.jpg',
         description: '어떻게 보여줄까?', detail: '', layoutType: '2',
         cards: [
 
@@ -490,9 +490,11 @@ const COMPASS_CARDS = {
            
         ]
       },
+
+       
       {
          
-        id: 'reevaluation', label: '발견 · 재평가', icon: '🔍',
+        id: 'reevaluation', label: '발견 · 재평가', icon: '🔍',  img:'images/compass/group/value_reevaluation.jpg',
         description: '어떻게 알아볼까?', detail: '', layoutType: '2',
         cards: [
           { type: 'section', label: '직접 증명' },
@@ -675,8 +677,11 @@ const COMPASS_CARDS = {
           { icon: '🌊', name: '절망에서 희망으로', desc: '', detail: '' },
         ]
       },
+
+
+       
       {
-        id: 'visual_direction', label: '시각 · 연출', icon: '🎬',
+        id: 'visual_direction', label: '시각 · 연출', icon: '🎬',  img:'images/compass/group/value_visual.jpg',
         description: '어떻게 그릴까?', detail: '', layoutType: '2',
         cards: [
           { type: 'section', label: '규모 · 구도' },
