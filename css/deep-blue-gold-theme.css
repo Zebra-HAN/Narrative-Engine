@@ -613,7 +613,7 @@
   background: transparent; border: 0; box-shadow: none;
 }
 .card-minimap-content { padding: 12px; padding-right: max(12px, env(safe-area-inset-right, 0px)); }
-.card-minimap details { margin-bottom: 12px; }
+.card-minimap details { margin-bottom: 6px; }
 .card-minimap summary {
   padding: 10px 8px;
   color: #493523;
@@ -839,13 +839,13 @@
   cursor: pointer; touch-action: manipulation;
 }
 
-/* Text-led outline sections: one divider per section/card bundle. */
-.card-minimap details { border-top: 1px solid #947a5233; padding-top: 4px; }
+/* Outline spacing: halve each existing inset independently, including the card list. */
+.card-minimap details { border-top: 1px solid #947a5233; padding-top: 2px; }
 .card-minimap summary {
   background: transparent; border: 0; border-radius: 0; box-shadow: none;
-  padding: 8px 40px 8px 4px; color: #584433; font-weight: 400;
+  padding: 4px 40px 4px 4px; color: #584433; font-weight: 400;
 }
-.card-minimap-tags { padding-top: 4px; }
+.card-minimap-tags { padding: 2px 0 4px; }
 .card-minimap details.is-current-section > summary {
   background: transparent; border: 0; color: #b34f18; font-weight: 700;
 }

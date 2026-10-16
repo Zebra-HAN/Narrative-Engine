@@ -2066,17 +2066,23 @@ body::after {
 
     /* 선택된 카운트 배지  -마름모 카테고리에 선택된 카드 숫자 표시  */
     .selection-badge {
-  position: absolute; 
+  position: absolute;
   top: -2px;
   right: 1px;
-  width: 14px; height: 14px;
-  border-radius: 50%;
-  background: var(--selection-badge-blue);
+  min-width: 16.8px;
+  height: 16.8px;
+  padding: 0 3px;
+  border-radius: 4px;
+  background: var(--nav-badge-red);
   color: #fff;
-  font-size: 0.55rem;
+  font-size: 0.66rem;
+  line-height: 1;
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 0 6px 0.2px rgba(22, 135, 217, 0.4);  /*  7px=블러, 0.2px=블러확장 rgba괄호속 0.4=투명도 1=100% */
+  box-shadow: 0 0 6px 0.2px rgba(229, 57, 53, 0.4);
+  pointer-events: none;
   z-index: 10;
     }
 
@@ -2304,18 +2310,25 @@ body::after {
 /* 하단 메인 버튼 카운트 배지 -  4대 Nav 네비게이션  */
 .nav-btn { position: relative; }
 .nav-badge {
-  position: absolute; top: 5px; right: 11px;  /* 음수= 버튼벽 끝으로 가까워짐 바짝붙음 */
+  position: absolute; top: 5px; right: 11px;
   z-index: 22;
   pointer-events: none;
-  min-width: 14px; height: 14px;
-  border-radius: 7px;
+  /* 1.4x the 14px seal; extra digits grow a circle without moving the icon. */
+  min-width: 19.6px;
+  min-height: 19.6px;
+  width: max-content;
+  aspect-ratio: 1;
+  border-radius: 50%;
   background: var(--nav-badge-red);
   color: #fff;
-  font-size: 0.5rem;
+  font-size: 0.7rem;
+  line-height: 1;
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
   display: flex; align-items: center; justify-content: center;
-  padding: 0 3px;
-  box-shadow: 0 0 6px 0.3px rgba(229, 57, 53, 0.6);  /* 원본 box-shadow: 0 0 6px rgba(240,128,48,0.5); 7px=블러,0.2px=블러확장 */
+  padding: 0 4.2px;
+  box-shadow: 0 0 6px 0.3px rgba(229, 57, 53, 0.6);
 }
 
 
