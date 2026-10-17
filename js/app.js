@@ -269,7 +269,7 @@ const UI_SOUND = (() => {
 
 function initUiSounds() {
   const cardSounds = ['pong1', 'pong2', 'pong3', 'pong4', 'pong5'];
-  const categorySounds = ['card', 'card1', 'card2'];
+  const categorySounds = ['card', 'card1'];
 
   function playRandom(sounds) {
     UI_SOUND.play(sounds[Math.floor(Math.random() * sounds.length)]);
