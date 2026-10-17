@@ -164,28 +164,30 @@ const UI_SOUND = (() => {
   const sources = {
     // 기존 파일명을 유지하지만 재생 방식은 다른 버튼과 같은 단발성 SFX다.
     start: 'sounds/bgm_start.mp3',
-    touch: 'sounds/se_touch.mp3',
-    page: 'sounds/se_page.mp3',
-    nav: 'sounds/se_nav.mp3',
-    click: 'sounds/se_click.mp3',
-    card: 'sounds/se_card.mp3',
-    card1: 'sounds/se_card1.mp3',
-    card2: 'sounds/se_card2.mp3',
-    category1: 'sounds/se_category1.mp3',
-    category2: 'sounds/se_category2.mp3',
-    category3: 'sounds/se_category3.mp3',
-    category4: 'sounds/se_category4.mp3',
-    category5: 'sounds/se_category5.mp3',
-    delete: 'sounds/se_delete.mp3',
-    delete2: 'sounds/se_delete2.mp3',
-    cancel: 'sounds/se_cancel.mp3',
-    selectYes: 'sounds/se_select_yes.mp3',
-    selectNo: 'sounds/se_select_no.mp3',
-    pong1: 'sounds/se_pong1.mp3',
-    pong2: 'sounds/se_pong2.mp3',
-    pong3: 'sounds/se_pong3.mp3',
-    pong4: 'sounds/se_pong4.mp3',
-    pong5: 'sounds/se_pong5.mp3'
+    touch: 'sounds/se/se_touch.mp3',
+    cardOpen1: 'sounds/card_open_1.mp3',
+    cardOpen2: 'sounds/card_open_2.mp3',
+    page: 'sounds/se/se_page.mp3',
+    nav: 'sounds/se/se_nav.mp3',
+    click: 'sounds/se/se_touch_new1.mp3',
+    card: 'sounds/se/se_card.mp3',
+    card1: 'sounds/se/se_card1.mp3',
+    card2: 'sounds/se/se_card2.mp3',
+    category1: 'sounds/se/se_category1.mp3',
+    category2: 'sounds/se/se_category2.mp3',
+    category3: 'sounds/se/se_category3.mp3',
+    category4: 'sounds/se/se_category4.mp3',
+    category5: 'sounds/se/se_category5.mp3',
+    delete: 'sounds/se/se_delete.mp3',
+    delete2: 'sounds/se/se_delete2.mp3',
+    cancel: 'sounds/se/se_cancel.mp3',
+    selectYes: 'sounds/se/se_select_yes.mp3',
+    selectNo: 'sounds/se/se_select_no.mp3',
+    pong1: 'sounds/se/se_pong1.mp3',
+    pong2: 'sounds/se/se_pong2.mp3',
+    pong3: 'sounds/se/se_pong3.mp3',
+    pong4: 'sounds/se/se_pong4.mp3',
+    pong5: 'sounds/se/se_pong5.mp3'
   };
   // 지원되는 Safari/PWA에서는 외부 음악과 혼합하는 세션을 요청한다.
   // 지원하지 않는 브라우저에서는 표준 Web Audio 효과음으로 동작한다.
@@ -2616,6 +2618,7 @@ function showSubgroupCards(subId, groupIdx, sgIdx, backgroundPrepared = false, t
   markFirstCardRow(page);
   setupCardRevealAnimations(page);
   area.appendChild(page);
+  UI_SOUND.play(Math.random() < 0.5 ? 'cardOpen1' : 'cardOpen2');
    setSubgroupAddress(subId, groupIdx, sgIdx);
 }
 
@@ -2757,6 +2760,7 @@ function showGroupCards(subId, groupIdx, backgroundPrepared = false, titleAssets
   markFirstCardRow(page);
   setupCardRevealAnimations(page);
   area.appendChild(page);
+  UI_SOUND.play(Math.random() < 0.5 ? 'cardOpen1' : 'cardOpen2');
    setGroupAddress(subId, groupIdx, true);
 }
 
@@ -2909,6 +2913,7 @@ function showCardPage(subId, animate = true, backgroundPrepared = false) {
   // card-deal 애니메이션 끝난 뒤 클래스 제거 → pressable 눌림효과 항상 작동
   setupCardRevealAnimations(page);
   area.appendChild(page);
+  UI_SOUND.play(Math.random() < 0.5 ? 'cardOpen1' : 'cardOpen2');
 }
 
 
