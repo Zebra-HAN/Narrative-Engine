@@ -975,3 +975,22 @@
   transform: none !important;
   transition: none !important;
 }
+
+/* Outline headings only; symmetric insets keep the numbered label centered. */
+.card-minimap summary {
+  padding-left: 40px;
+  text-align: center;
+}
+
+/* Expand only panoramic artwork belonging to three/five-group categories.
+   Transforming the image preserves the banner grid, copy and click target. */
+.page-title-card[data-image-layout="wide"]:is([data-group-count="3"], [data-group-count="5"]) .page-title-media {
+  overflow: visible;
+}
+.page-title-card[data-image-layout="wide"]:is([data-group-count="3"], [data-group-count="5"]) .page-title-image {
+  transform: scale(1.16);
+  transform-origin: 50% calc(100% - var(--title-image-letterbox, 0px));
+}
+.page-title-card[data-image-layout="wide"]:is([data-group-count="3"], [data-group-count="5"]) .page-title-hint {
+  transform: translate(10px, -4px);
+}
