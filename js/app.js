@@ -165,11 +165,17 @@ const UI_SOUND = (() => {
     // 기존 파일명을 유지하지만 재생 방식은 다른 버튼과 같은 단발성 SFX다.
     start: 'sounds/bgm_start.mp3',
     touch: 'sounds/se/se_touch.mp3',
+    detailItem: 'sounds/click_2.mp3',
+    cardInfo: 'sounds/click_3.mp3',
+    paper1: 'sounds/paper_1.mp3',
+    paper2: 'sounds/paper_2.mp3',
+    paper3: 'sounds/paper_3.mp3',
+    paper4: 'sounds/paper_4.mp3',
     cardOpen1: 'sounds/card_open_1.mp3',
     cardOpen2: 'sounds/card_open_2.mp3',
     page: 'sounds/se/se_page.mp3',
     nav: 'sounds/se/se_nav.mp3',
-    click: 'sounds/se/se_touch_new1.mp3',
+    click: 'sounds/click_1.mp3',
     card: 'sounds/se/se_card.mp3',
     card1: 'sounds/se/se_card1.mp3',
     card2: 'sounds/se/se_card2.mp3',
@@ -267,6 +273,10 @@ const UI_SOUND = (() => {
   };
 })();
 
+function playPaperSound() {
+  UI_SOUND.play(['paper1', 'paper2', 'paper3', 'paper4'][Math.floor(Math.random() * 4)]);
+}
+
 function initUiSounds() {
   const cardSounds = ['pong1', 'pong2', 'pong3', 'pong4', 'pong5'];
   const categorySounds = ['card', 'card1'];
@@ -284,17 +294,26 @@ function initUiSounds() {
     if (target.matches('#btn-create')) {
       // 코드로 실행한 이동이나 합성 클릭에서는 시작 효과음을 재생하지 않는다.
       if (event.isTrusted) UI_SOUND.play('start');
+    } else if (target.matches('.detail-close, .status-close, #detail-overlay, #status-overlay, #card-minimap-toggle, .page-title-card')) {
+      // Opening/closing feedback belongs to the actual overlay transition.
+      return;
+    } else if (target.matches('#detail-icon, #detail-desc')) {
+      UI_SOUND.play('card');
+    } else if (target.matches('.detail-idea-block, .detail-sub-image-row')) {
+      UI_SOUND.play('detailItem');
+    } else if (target.matches('.card-info-detail, .card-info-popover')) {
+      UI_SOUND.play('cardInfo');
     } else if (target.matches('.data-card')) {
       playRandom(cardSounds);
     } else if (target.matches('#btn-extra-menu, #card-menu-toggle')) {
-      UI_SOUND.play(target.getAttribute('aria-expanded') === 'true' ? 'category4' : 'category3');
+      UI_SOUND.play('card');
     } else if (target.matches('.extra-btn-home')) {
       UI_SOUND.play('selectNo');
     } else if (target.matches('.extra-btn, .group-select-btn')) {
       UI_SOUND.play('click');
     } else if (target.matches('.subnav-item')) {
       playRandom(categorySounds);
-    } else if (target.matches('.app-dialog-btn-cancel, .status-close, .detail-close')) {
+    } else if (target.matches('.app-dialog-btn-cancel')) {
       UI_SOUND.play('cancel');
     } else if (target.matches('.app-dialog-btn-confirm, .card-info-select')) {
       // 확인 버튼에 지정된 효과음은 클릭이 확정되는 즉시 재생한다. 별도 효과음이 없는
@@ -307,8 +326,6 @@ function initUiSounds() {
       UI_SOUND.play(target.classList.contains('is-locked') ? 'cancel' : 'click');
     } else if (target.dataset.sound) {
       UI_SOUND.play(target.dataset.sound);
-    } else if (target.matches('.card-info-detail, .card-info-popover, .detail-idea-block, .detail-sub-image-row')) {
-      UI_SOUND.play('touch');
     } else if (target.closest('.bottom-nav')) {
       UI_SOUND.play('nav');
     } else {
@@ -3731,10 +3748,11 @@ function showDetailOverlay() {
   content.style.scrollBehavior = 'auto';
   content.scrollTop = 0;
   content.style.scrollBehavior = behavior;
+  if (!document.getElementById('detail-overlay').classList.contains('active')) playPaperSound();
   document.getElementById('detail-overlay').classList.add('active');
   attachSwipeToClose(
     document.querySelector('.detail-overlay .popup-swipe-frame'),
-    () => document.getElementById('detail-overlay').classList.remove('active'),
+    () => closeDetailSheet(),
     { lockDirection: true, suppressSwipeClick: true, nativeVerticalScroll: true }
   );
 }
@@ -3938,6 +3956,7 @@ function _syncCardSelectedDOM(subId, globalIdx) {
 
 function closeDetailSheet(e) {
   if (e && e.target !== document.getElementById('detail-overlay')) return;
+  if (document.getElementById('detail-overlay').classList.contains('active')) playPaperSound();
   document.getElementById('detail-overlay').classList.remove('active');
 }
 
@@ -3953,6 +3972,7 @@ function openStatusOverlay() {
   body.style.scrollBehavior = 'auto';
   body.scrollTop = 0;
   body.style.scrollBehavior = behavior;
+  if (!document.getElementById('status-overlay').classList.contains('active')) playPaperSound();
   document.getElementById('status-overlay').classList.add('active');
   attachSwipeToClose(
     document.querySelector('.status-overlay .popup-swipe-frame'),
@@ -3962,6 +3982,7 @@ function openStatusOverlay() {
 
 function closeStatusOverlay(e) {
   if (e && e.target !== document.getElementById('status-overlay')) return;
+  if (document.getElementById('status-overlay').classList.contains('active')) playPaperSound();
   document.getElementById('status-overlay').classList.remove('active');
     setBottomNavState(currentNav);
 }
@@ -4892,7 +4913,6 @@ function startLongPress(evt, el, type, subId, a, b, c) {
       name: card.name, icon: card.icon, img: card.img, desc: card.desc };
     renderCardInfo();
     openDetailSheet('card');
-    UI_SOUND.play('click');
   }, LONG_PRESS_MS);
 }
 
@@ -5031,7 +5051,8 @@ function attachSwipeToClose(panelEl, closeFn, { lockDirection = false, suppressS
     const closeDirection = dx < 0 ? -1 : 1;
 
     if (shouldClose) {
-      UI_SOUND.play('page');
+      // Detail/status lifecycle callbacks provide their own paper sound.
+      if (!['detail-overlay', 'status-overlay'].includes(overlayEl?.id)) UI_SOUND.play('page');
       // 충분히 밀었으면 스와이프 방향 그대로 닫기
       panelEl.style.transition = `transform ${CLOSE_DURATION}ms ease, opacity ${CLOSE_DURATION}ms ease`;
       panelEl.style.transform = `translateX(${closeDirection * 110}%)`;
@@ -5321,7 +5342,7 @@ function initCardMinimap() {
     };
   }
   function opened() {
-    if (!fullyOpen) UI_SOUND.play('page');
+    if (!fullyOpen) playPaperSound();
     fullyOpen = true;
     closing = false;
     expand.focus({ preventScroll: true });
@@ -5331,7 +5352,6 @@ function initCardMinimap() {
       if (closing) return;
       closing = true;
       settle(offscreen(), () => {
-        if (fullyOpen) UI_SOUND.play('page');
         hide(restoreFocus, true, onClosed);
       });
       return;
@@ -5339,6 +5359,7 @@ function initCardMinimap() {
     pageMotion?.cancel();
     pageMotion = null;
     closing = false;
+    if (fullyOpen) playPaperSound();
     fullyOpen = false;
     gesture = null;
     swipeFrame.style.removeProperty('transform');
