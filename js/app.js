@@ -2567,7 +2567,7 @@ function showSubgroupCards(subId, groupIdx, sgIdx, backgroundPrepared = false, t
   const sg = grp.subgroups[sgIdx];
   if (!sg) return;
   preloadCards(sg.cards);
-  const titleCard = createPageTitleCard(sg, subId, titleAssets);
+  const titleCard = createPageTitleCard(sg, subId, titleAssets, grp.subgroups.length);
   rememberGroupCardReentry(subId, groupIdx, sgIdx);
 
   document.querySelectorAll('.center-page:not(#page-default)').forEach(p => p.remove());
@@ -5424,14 +5424,14 @@ function initCardMinimap() {
     list.appendChild(groupShortcut);
     sectionEntries = [];
     currentSection = -1;
-    outline.groups.forEach(group => {
+    outline.groups.forEach((group, sectionIndex) => {
       if (!outline.sectioned) { list.appendChild(tags(group.cards, page, renderedCards, nextIndex)); return; }
       const groupCards = Array.from(renderedCards).slice(nextIndex.value, nextIndex.value + group.cards.length);
       const section = document.createElement('details');
       section.open = !!group.unclassified || outline.groups.filter(entry => !entry.unclassified).length <= 3;
       const heading = document.createElement('summary');
       heading.classList.add('pressable');
-      setOutlineLabel(heading, group.label, group.cards.length);
+      setOutlineLabel(heading, `${sectionIndex + 1}. ${group.label}`, group.cards.length);
       const badge = document.createElement('span');
       badge.className = 'card-minimap-count';
       badge.hidden = true;
@@ -5585,13 +5585,20 @@ function updateTitleImageClip(image) {
   const style = getComputedStyle(image);
   const width = parseFloat(style.width), height = parseFloat(style.height);
   if (!width || !height) return;
-  const imageRect = image.getBoundingClientRect(), mediaRect = media.getBoundingClientRect();
-  const scaleX = imageRect.width / width, scaleY = imageRect.height / height;
-  if (!scaleX || !scaleY) return;
   const fit = style.objectFit === 'cover' ? Math.max : Math.min;
   const scale = fit(width / image.naturalWidth, height / image.naturalHeight);
   const horizontal = (width - image.naturalWidth * scale) / 2;
   const vertical = (height - image.naturalHeight * scale) / 2;
+  if (frame.dataset.imageLayout === 'wide' && ['3', '5'].includes(frame.dataset.groupCount)) {
+    // Scale around the visible artwork's bottom, including contain letterboxing.
+    // The grid and copy never move; round the artwork without clipping its expansion.
+    image.style.setProperty('--title-image-letterbox', `${vertical}px`);
+    image.style.clipPath = `inset(${vertical}px ${horizontal}px round 12px)`;
+    return;
+  }
+  const imageRect = image.getBoundingClientRect(), mediaRect = media.getBoundingClientRect();
+  const scaleX = imageRect.width / width, scaleY = imageRect.height / height;
+  if (!scaleX || !scaleY) return;
   const left = Math.max(0, horizontal, (mediaRect.left - imageRect.left) / scaleX);
   const right = Math.max(0, horizontal, (imageRect.right - mediaRect.right) / scaleX);
   const top = Math.max(0, vertical, (mediaRect.top - imageRect.top) / scaleY);
@@ -5653,11 +5660,12 @@ function prepareTitleAssets(group) {
     .then(([plate, image]) => ({ plate, image }));
 }
 
-function createPageTitleCard(group, subId, preparedAssets = null) {
+function createPageTitleCard(group, subId, preparedAssets = null, groupCount = CARD_DATA[subId]?.groups?.length || 0) {
   const frame = document.createElement('button');
   frame.type = 'button';
   frame.className = 'page-title-card pressable';
   frame.dataset.bannerReady = 'false';
+  frame.dataset.groupCount = String(groupCount);
   frame.setAttribute('aria-hidden', 'true');
   frame.dataset.imageLayout = 'square';
   frame.setAttribute('aria-label', `${group.label || ''} 상세 정보 보기`);

@@ -3651,3 +3651,8 @@ body {
 #screen-create .card-edge-button.is-pressing { filter: none; }
 
 #screen-create .card-edge-actions { clip-path: inset(-8px -8px -8px -8px); }
+
+/* Exactly three list buttons: keep width, gap and the independent title plate. */
+.group-layout-list:has(> .group-select-btn:nth-child(3):last-child) > .group-select-btn {
+  min-height: 140.4px;
+}
