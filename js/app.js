@@ -171,8 +171,9 @@ const UI_SOUND = (() => {
     paper2: 'sounds/paper_2.mp3',
     paper3: 'sounds/paper_3.mp3',
     paper4: 'sounds/paper_4.mp3',
-    cardOpen1: 'sounds/card_open_1.mp3',
-    cardOpen2: 'sounds/card_open_2.mp3',
+    touchNew1: 'sounds/se/se_touch_new1.mp3',
+    touchNew2: 'sounds/se/se_touch_new2.mp3',
+    touchNew3: 'sounds/se/se_touch_new3.mp3',
     page: 'sounds/se/se_page.mp3',
     nav: 'sounds/se/se_nav.mp3',
     click: 'sounds/click_1.mp3',
@@ -275,6 +276,14 @@ const UI_SOUND = (() => {
 
 function playPaperSound() {
   UI_SOUND.play(['paper1', 'paper2', 'paper3', 'paper4'][Math.floor(Math.random() * 4)]);
+}
+
+function playNavigationSound() {
+  UI_SOUND.play(['touchNew1', 'touchNew2', 'touchNew3'][Math.floor(Math.random() * 3)]);
+}
+
+function playDetailCloseSound() {
+  UI_SOUND.play(['paper3', 'touchNew2', 'touchNew3'][Math.floor(Math.random() * 3)]);
 }
 
 function initUiSounds() {
@@ -1073,7 +1082,7 @@ function initCenterBackSwipe() {
 
     if (shouldGoBack) {
       area.classList.remove('is-back-swiping', 'is-forward-swiping');
-      UI_SOUND.play('page');
+      playNavigationSound();
       const key = pageKeys.get(sourcePage);
       if (key) scrollMemory.set(key, APP_PERF ? APP_PERF.measure('scroll.read', () => sourcePage.scrollTop, { page: sourcePage.id }) : sourcePage.scrollTop);
       if (forwardDragging) {
@@ -2635,7 +2644,6 @@ function showSubgroupCards(subId, groupIdx, sgIdx, backgroundPrepared = false, t
   markFirstCardRow(page);
   setupCardRevealAnimations(page);
   area.appendChild(page);
-  UI_SOUND.play(Math.random() < 0.5 ? 'cardOpen1' : 'cardOpen2');
    setSubgroupAddress(subId, groupIdx, sgIdx);
 }
 
@@ -2777,7 +2785,6 @@ function showGroupCards(subId, groupIdx, backgroundPrepared = false, titleAssets
   markFirstCardRow(page);
   setupCardRevealAnimations(page);
   area.appendChild(page);
-  UI_SOUND.play(Math.random() < 0.5 ? 'cardOpen1' : 'cardOpen2');
    setGroupAddress(subId, groupIdx, true);
 }
 
@@ -2930,7 +2937,6 @@ function showCardPage(subId, animate = true, backgroundPrepared = false) {
   // card-deal 애니메이션 끝난 뒤 클래스 제거 → pressable 눌림효과 항상 작동
   setupCardRevealAnimations(page);
   area.appendChild(page);
-  UI_SOUND.play(Math.random() < 0.5 ? 'cardOpen1' : 'cardOpen2');
 }
 
 
@@ -3748,7 +3754,7 @@ function showDetailOverlay() {
   content.style.scrollBehavior = 'auto';
   content.scrollTop = 0;
   content.style.scrollBehavior = behavior;
-  if (!document.getElementById('detail-overlay').classList.contains('active')) playPaperSound();
+  if (!document.getElementById('detail-overlay').classList.contains('active')) UI_SOUND.play('touchNew1');
   document.getElementById('detail-overlay').classList.add('active');
   attachSwipeToClose(
     document.querySelector('.detail-overlay .popup-swipe-frame'),
@@ -3956,7 +3962,7 @@ function _syncCardSelectedDOM(subId, globalIdx) {
 
 function closeDetailSheet(e) {
   if (e && e.target !== document.getElementById('detail-overlay')) return;
-  if (document.getElementById('detail-overlay').classList.contains('active')) playPaperSound();
+  if (document.getElementById('detail-overlay').classList.contains('active')) playDetailCloseSound();
   document.getElementById('detail-overlay').classList.remove('active');
 }
 
