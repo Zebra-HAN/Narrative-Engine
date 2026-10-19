@@ -575,44 +575,63 @@
 }
 #screen-create.card-controls-mode > .card-panel-toggle[aria-expanded="true"] .card-panel-arrow { transform: none; }
 
-/* The outline is a leaf of a book, anchored to the right viewport edge. */
+/* Book artwork and paper content have independent coordinates. The image keeps
+   its intrinsic 1088:1360 ratio; only the list is allowed to scroll.
+   Adjust zoom/x/y to tune the crop, and paper-left/right to tune text bounds. */
 .card-minimap-overlay {
   justify-content: flex-end;
-  padding: max(24px, env(safe-area-inset-top, 0px)) 0
-    max(24px, env(safe-area-inset-bottom, 0px)) max(22px, 7vw);
+  padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px);
   overflow: hidden;
-  background: #20180e26;
+  background: transparent;
 }
 .card-minimap-overlay .popup-swipe-frame {
-  width: min(640px, 100%);
+  width: 100%;
   max-width: 100%;
   height: 100%;
 }
 .card-minimap {
-  border: 1px solid #947a52;
-  border-right: 0;
-  border-radius: 9px 0 0 15px;
+  --book-zoom: 1.05;
+  --book-x: -3.5cqh;
+  --book-y: 50%;
+  --paper-left: max(8.5cqh, 14cqw);
+  --paper-right: max(16px, 4cqw, env(safe-area-inset-right, 0px));
+  container-type: size;
+  isolation: isolate;
+  border: 0;
+  border-radius: 0;
   color: #3d3026;
-  background:
-    repeating-linear-gradient(7deg, #6e503505 0 1px, transparent 1px 5px),
-    radial-gradient(ellipse at 25% 18%, #eadbb9cc, transparent 65%),
-    linear-gradient(90deg, #b59a6a 0, #dcc69a 3%, #e4d3af 12%, #dcc69a 86%, #bca477 100%);
-  box-shadow: -9px 5px 24px #21160866, inset 3px 0 9px #6e503533,
-    inset 0 1px #f5e7c5, inset 0 -6px 13px #6e503529;
+  background: transparent;
+  box-shadow: none;
+}
+.card-minimap::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  width: max(calc(80cqh * var(--book-zoom)), 125cqw);
+  aspect-ratio: 1088 / 1360;
+  left: min(var(--book-x), -5cqw);
+  top: var(--book-y);
+  transform: translateY(-50%);
+  background: url('../images/core/sub-nav/list_page.webp') left center / contain no-repeat;
 }
 .card-minimap-header {
-  padding-top: 16px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid #947a5280;
-  background: linear-gradient(180deg, #eadbb94d, #b59a6a19);
-  box-shadow: 0 1px #f2e4c255;
+  margin: 5cqh var(--paper-right) 0 var(--paper-left);
+  padding: 0;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 #card-minimap-title { color: #493523; font-family: Georgia, 'Noto Serif KR', serif; }
 .card-minimap-actions, #card-minimap-close { color: #493523; }
 .card-minimap-actions button {
   background: transparent; border: 0; box-shadow: none;
 }
-.card-minimap-content { padding: 12px; padding-right: max(12px, env(safe-area-inset-right, 0px)); }
+.card-minimap-content {
+  margin: 0 var(--paper-right) 10cqh var(--paper-left);
+  padding: 0;
+}
 .card-minimap details { margin-bottom: 6px; }
 .card-minimap summary {
   padding: 10px 8px;
@@ -840,7 +859,15 @@
 }
 
 /* Outline spacing: halve each existing inset independently, including the card list. */
-.card-minimap details { border-top: 1px solid #947a5233; padding-top: 2px; }
+.card-minimap details { border: 0; padding-top: 2px; }
+.card-minimap details::before {
+  content: '';
+  display: block;
+  width: 60%;
+  height: 1px;
+  margin: 0 auto;
+  background: linear-gradient(90deg, transparent, #947a5255 30%, #947a5255 70%, transparent);
+}
 .card-minimap summary {
   background: transparent; border: 0; border-radius: 0; box-shadow: none;
   padding: 4px 40px 4px 4px; color: #584433; font-weight: 400;
@@ -858,7 +885,7 @@
   text-align: center; font-family: 'Cinzel', 'Noto Serif KR', serif;
   font-size: 21px; font-weight: 600;
 }
-.card-minimap-header { justify-content: flex-end; padding-right: 64px; }
+.card-minimap-header { justify-content: flex-end; }
 #card-minimap-close { right: 10px; top: 15px; padding: 0; }
 #card-minimap-close .close-icon { width: 41.6px; height: 41.6px; }
 
@@ -871,7 +898,7 @@
 .card-minimap summary::-webkit-details-marker { display: none; }
 .card-minimap summary::marker { content: ''; }
 .card-minimap summary:active, .card-minimap summary.is-pressing { transform: scale(.97); }
-.card-minimap-header { padding-right: max(10px, env(safe-area-inset-right)); }
+.card-minimap-header { padding-right: 0; }
 
 /* Keep the corner seal fixed while only the detail content scrolls. */
 .detail-sheet { overflow: visible; }
@@ -994,3 +1021,6 @@
 .page-title-card[data-image-layout="wide"]:is([data-group-count="3"], [data-group-count="5"]) .page-title-hint {
   transform: translate(10px, -4px);
 }
+
+/* Keep all rows on the same paper axis, including unsectioned card lists. */
+.card-minimap-tags { justify-content: center; }
