@@ -85,7 +85,7 @@
     parent.style.setProperty('--mine-slot-count', modes[mode].fields.length);
     modes[mode].fields.forEach(([key,label])=> {
       let d=document.createElement('div');
-      d.className='slot'+(activeField===key?' open':'');
+      d.className='slot'+(locks[key]?' locked':'')+(activeField===key?' open':'');
       let head=document.createElement('div');
       head.className='slothead';
       let name=document.createElement('span');
@@ -111,6 +111,7 @@
         values[key]=input.value;
         if(key==='object')legacyObject=null;
         locks[key]=true;
+        d.classList.add('locked');
         lock.classList.add('on');
         lock.textContent='🔒';
         lock.setAttribute('aria-label',label+' 잠금 해제');
@@ -215,7 +216,7 @@
         locks[key]=true;
         renderResult();
         closeLibrary();
-        notice('선택한 재료를 자동으로 잠갔어.')
+        notice('선택한 재료가 잠금 처리되었습니다.')
       }
       ;
       grid.appendChild(b)
@@ -224,7 +225,7 @@
     if(!filtered.length) {
       let p=document.createElement('p');
       p.className='libempty';
-      p.textContent='일치하는 재료가 없어. 입력창에서 직접 작성할 수도 있어.';
+      p.textContent='검색 결과가 없습니다. 재료를 직접 입력할 수 있습니다.';
       grid.appendChild(p)
     }
     $('libMeta').textContent=`${filtered.length}개 표시 / 전체 ${pool.length}개 · 선택하면 자동 잠금`
@@ -244,7 +245,7 @@
     }
     );
     if(!count) {
-      notice('모든 재료가 고정되어 있어. 잠금을 해제해 줘.');
+      notice('모든 재료가 잠금 상태입니다.');
       return
     }
     rollCount++;
@@ -263,7 +264,7 @@
   }
   function save() {
     let text=$('result').textContent;
-    if(!text||text==='채굴 버튼을 눌러봐.')return;
+    if(!text||text==='채굴을 시작해 주세요.')return;
     let entry= {
       version:2,legacyObject,
       id:Date.now()+'_'+Math.random().toString(36).slice(2,6),text,mode:mode,values: {
@@ -278,7 +279,7 @@
     saves.unshift(entry);
     const stored=persist();
     drawSaved();
-    if(stored)notice('발견한 아이디어를 저장했어.')
+    if(stored)notice('아이디어가 저장되었습니다.')
   }
   function persist() {
     try {
@@ -286,7 +287,7 @@
       return true
     }
     catch(e) {
-      notice('브라우저 저장에 실패했어. 텍스트로 내보내 줘.')
+      notice('브라우저 저장에 실패했습니다. 텍스트 내보내기를 이용해 주세요.')
     }
   }
   function drawSaved() {
@@ -296,7 +297,7 @@
     if(!saves.length) {
       let p=document.createElement('p');
       p.className='hint';
-      p.textContent='아직 저장한 아이디어가 없어.';
+      p.textContent='저장된 아이디어가 없습니다.';
       box.appendChild(p);
       return
     }
@@ -354,7 +355,7 @@
   async function copyText(text) {
     try {
       await navigator.clipboard.writeText(text);
-      notice('복사했어.')
+      notice('복사되었습니다.')
     }
     catch(e) {
       let area=document.createElement('textarea');
@@ -363,15 +364,15 @@
       area.select();
       try {
         if(!document.execCommand('copy'))throw Error('copy');
-        notice('복사했어.')
+        notice('복사되었습니다.')
       }
       catch(e2) {
-        notice('복사에 실패했어. 텍스트를 직접 선택해 줘.')
+        notice('복사에 실패했습니다. 텍스트를 직접 선택해 주세요.')
       }
       area.remove()
     }
   }
-  const questions=[['원인','이 현상이 처음 시작된 이유는 무엇일까?'],['규칙','어떤 조건에서만 이 일이 발생할까?'],['대가','이것을 이용하면 무엇을 잃게 될까?'],['사건','이 때문에 누가 어떤 문제에 휘말릴까?'],['직업','이 현상을 관리하거나 이용하는 직업은?'],['세계관','이것이 당연한 세계의 생활은 어떻게 달라질까?'],['예외','유독 이 규칙이 통하지 않는 대상은?'],['캐릭터','이 현상을 가장 싫어하는 사람은 누구일까?'],['역이용','누군가 이 현상을 악용한다면?'],['도구','이 현상을 다루기 위한 도구는?'],['관계','누가 누구와 협력하거나 충돌할까?'],['결과','이 일이 100년 동안 지속되면?'],['반전','우리가 잘못 이해하고 있던 사실은?'],['약점','가장 사소한 약점은 무엇일까?'],['발견','어떤 아이가 우연히 이 현상을 발견한다면?'],['규모','이 현상이 단 한 명이 아니라 마을 전체에서 발생하면?']];
+  const questions=[['원인','이 현상이 처음 시작된 이유는 무엇입니까?'],['규칙','이 일이 발생하는 조건은 무엇입니까?'],['대가','이것을 이용할 때 잃게 되는 것은 무엇입니까?'],['사건','이로 인해 누가 어떤 문제에 휘말리게 됩니까?'],['직업','이 현상을 관리하거나 이용하는 직업은 무엇입니까?'],['세계관','이것이 일상인 세계의 생활은 어떻게 달라집니까?'],['예외','이 규칙이 적용되지 않는 대상은 무엇입니까?'],['캐릭터','이 현상을 가장 싫어하는 사람은 누구입니까?'],['역이용','누군가 이 현상을 악용하면 어떤 일이 발생합니까?'],['도구','이 현상을 다루는 도구는 무엇입니까?'],['관계','누가 누구와 협력하거나 충돌하게 됩니까?'],['결과','이 일이 100년 동안 지속되면 어떤 변화가 생깁니까?'],['반전','잘못 알려진 사실은 무엇입니까?'],['약점','가장 사소한 약점은 무엇입니까?'],['발견','어떤 아이가 우연히 이 현상을 발견하면 어떤 일이 발생합니까?'],['규모','이 현상이 마을 전체에서 발생하면 어떤 일이 생깁니까?']];
   function expand() {
     let box=$('expGrid');
     box.innerHTML='';
@@ -395,12 +396,11 @@
     )
   }
   $('roll').onclick=()=>reroll();
-  $('reroll').onclick=()=>reroll();
   $('unlock').onclick=()=> {
     locks= {}
     ;
     drawSlots();
-    notice('모든 잠금을 해제했어.')
+    notice('모든 잠금이 해제되었습니다.')
   }
   ;
   $('save').onclick=save;
@@ -417,7 +417,7 @@
   ;
   $('export').onclick=()=> {
     if(!saves.length) {
-      notice('저장된 아이디어가 없어.');
+      notice('저장된 아이디어가 없습니다.');
       return
     }
     let content='아이디어 광산 · 발견 기록\n\n'+saves.map((x,i)=>`${i+1}. ${x.text}\n   ${modes[x.mode]?.name||'조합'} · ${x.time}`).join('\n\n');
