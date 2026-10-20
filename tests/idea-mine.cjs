@@ -24,6 +24,19 @@ const root = path.resolve(__dirname, '..');
     await page.locator('#btn-idea-mine').click();
     const slots=page.locator('#mine-slots .slot');
     assert.equal(await slots.count(),3);
+    assert.equal(await page.locator('#mine-reroll').count(),0,'duplicate batch button removed');
+    const slotPaint=()=>slots.first().evaluate(n=>({background:getComputedStyle(n).backgroundImage,border:getComputedStyle(n).borderColor}));
+    const unlockedPaint=await slotPaint();
+    await slots.first().locator('.lock').click();
+    assert(await slots.first().evaluate(n=>n.classList.contains('locked')),'manual lock marks the complete slot');
+    assert.notDeepEqual(await slotPaint(),unlockedPaint);
+    await slots.first().locator('.browse').first().click();
+    assert(await slots.first().evaluate(n=>n.matches('.locked.open')));
+    assert.equal(await slots.first().evaluate(n=>getComputedStyle(n).outlineStyle),'solid','browse outline coexists with locked background');
+    await page.locator('#mine-closeLibrary').click();
+    await slots.first().locator('.lock').click();
+    assert.equal(await slots.first().evaluate(n=>n.classList.contains('locked')),false);
+    assert.deepEqual(await slotPaint(),unlockedPaint);
     assert.deepEqual(await slots.locator('.slotname').allTextContents(),['주체','대상','행동']);
     const rects=await slots.evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width}}));
     assert(rects.every(r=>Math.abs(r.y-rects[0].y)<1),'three slots share one row');
@@ -53,7 +66,9 @@ const root = path.resolve(__dirname, '..');
     await page.locator('#mine-libGrid button').click();
     assert.equal(await slots.first().locator('textarea').inputValue(),'나무');
     assert.equal(await slots.first().locator('.lock').getAttribute('aria-pressed'),'true');
-    await page.locator('#mine-reroll').click();
+    assert(await slots.first().evaluate(n=>n.classList.contains('locked')),'library selection marks full slot');
+    assert.equal(await page.locator('#mine-notice').textContent(),'선택한 재료가 잠금 처리되었습니다.');
+    await page.locator('#mine-roll').click();
     assert.equal(await slots.first().locator('textarea').inputValue(),'나무');
     assert(await slots.first().locator('.browse').last().isDisabled());
     await slots.first().locator('.lock').click();
@@ -65,6 +80,13 @@ const root = path.resolve(__dirname, '..');
     await slots.nth(1).locator('textarea').fill('구름');
     await slots.nth(2).locator('textarea').fill('기른다');
     assert.equal(await page.locator('#mine-result').textContent(),custom+'이 구름을 기른다');
+    assert.equal(await page.locator('#mine-slots .slot.locked').count(),3,'direct editing locks all slot surfaces');
+    await page.locator('#mine-roll').click();
+    assert.equal(await page.locator('#mine-notice').textContent(),'모든 재료가 잠금 상태입니다.');
+    assert.equal(await page.locator('#mine-result').textContent(),custom+'이 구름을 기른다');
+    await page.locator('#mine-unlock').click();
+    assert.equal(await page.locator('#mine-slots .slot.locked').count(),0);
+    assert.equal(await page.locator('#mine-notice').textContent(),'모든 잠금이 해제되었습니다.');
     await page.locator('#mine-expand').click();
     assert.equal(await page.locator('#mine-expGrid .exp').count(),6);
     const questions=await page.locator('#mine-expGrid .exp').evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return {x:r.x,y:r.y,height:r.height,overflow:n.scrollHeight>n.clientHeight}}));
@@ -72,18 +94,24 @@ const root = path.resolve(__dirname, '..');
     assert(questions.every(q=>!q.overflow),'question text is not clipped');
     await page.locator('#mine-save').click();
     const text=await page.locator('#mine-result').textContent();
+    assert.equal(await page.locator('#mine-notice').textContent(),'아이디어가 저장되었습니다.');
     assert.equal(await page.locator('#mine-saved .saveditem').count(),1);
     const dl=page.waitForEvent('download');await page.locator('#mine-export').click();assert((await dl).suggestedFilename().endsWith('.txt'));
     await page.reload();await page.waitForTimeout(1600);await page.evaluate(()=>switchScreen('screen-idea-mine',null,{type:'instant'}));
     await page.locator('#mine-saved button').first().click();
     assert.equal(await page.locator('#mine-result').textContent(),text);
-    await page.locator('#mine-reroll').click();assert.equal(await page.locator('#mine-result').textContent(),text);
+    assert.equal(await page.locator('#mine-slots .slot.locked').count(),3,'restored records paint all locks');
+    await page.locator('#mine-roll').click();assert.equal(await page.locator('#mine-result').textContent(),text);
+    assert.equal(await page.locator('#mine-notice').textContent(),'모든 재료가 잠금 상태입니다.');
     for(let i=0;i<6;i++){
      await page.locator('#mine-modes button').nth(i).click();
      assert(!(await page.locator('#mine-result').textContent()).includes('undefined'));
      assert(await page.evaluate(()=>{const s=document.getElementById('screen-idea-mine');return s.scrollWidth<=s.clientWidth}));
     }
     await page.locator('#mine-saved button').last().click();assert.equal(await page.locator('#mine-saved .saveditem').count(),0);
+    assert.equal(await page.locator('#mine-saved').textContent(),'저장된 아이디어가 없습니다.');
+    await page.locator('#mine-export').click();
+    assert.equal(await page.locator('#mine-notice').textContent(),'저장된 아이디어가 없습니다.');
     if(width===393){
      const legacy=[
       {mode:0,values:{subject:'나무',object:'구름을',verb:'삼킨다'},text:'나무가 구름을 삼킨다'},
@@ -103,7 +131,7 @@ const root = path.resolve(__dirname, '..');
      for(let i=0;i<legacy.length;i++){
       await page.locator('#mine-saved .saveditem').nth(i).locator('button').first().click();
       assert.equal(await page.locator('#mine-result').textContent(),legacy[i].text,'v1 record loads without changing its sentence');
-      await page.locator('#mine-reroll').click();
+      await page.locator('#mine-roll').click();
       assert.equal(await page.locator('#mine-result').textContent(),legacy[i].text,'loaded materials remain locked');
      }
      await page.locator('#mine-saved .saveditem').nth(1).locator('button').first().click();
@@ -119,7 +147,7 @@ const root = path.resolve(__dirname, '..');
     await page.evaluate(()=>goToNarrative());assert(await page.locator('#screen-narrative').evaluate(n=>n.classList.contains('active')));
     await page.evaluate(()=>goToCreate());assert(await page.locator('#screen-create').evaluate(n=>n.classList.contains('active')));
     assert.deepEqual(errors,[]);
-    console.log(`PASS ${engine.name()} ${width}: navigation, search/select/lock, single/batch random, edit, questions, persistence/load/delete/export, overflow`);
+    console.log(`PASS ${engine.name()} ${width}: navigation, search/select/lock, single/batch random, edit, questions, persistence/load/delete/export, full-slot lock paint/neutral notices, overflow`);
     await page.close();
    }
   } finally {await browser.close()}
