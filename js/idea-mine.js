@@ -1,9 +1,12 @@
 /* Isolated workbench: no existing creative data is read or written. */
 (()=> {
   'use strict';
+  const core = window.IdeaMineCore;
+  let legacyObject = null;
+  let loadedResult = null;
   const modes=[
   {
-    id:'action',name:'자유 조합',fields:[['subject','주체'],['verb','행동'],['object','대상']],build:v=>`${subject(v.subject)} ${v.object} ${v.verb}`
+    id:'action',name:'자유 조합',fields:[['subject','주체'],['object','대상'],['verb','행동']],build:v=>`${core.withParticle(v.subject,'subject')} ${v.object===legacyObject?v.object:core.withParticle(v.object,'object')} ${v.verb}`
   },
   {
     id:'quality',name:'특성 변형',fields:[['subject','대상'],['quality','특성']],build:v=>`${v.quality} ${v.subject}`
@@ -12,7 +15,7 @@
     id:'rule',name:'기묘한 규칙',fields:[['trigger','조건'],['effect','결과']],build:v=>`${v.trigger} ${v.effect}`
   },
   {
-    id:'relation',name:'관계 뒤집기',fields:[['subject','주체'],['relation','관계'],['object','대상']],build:v=>`${v.object}${hasFinal(v.object)?'을':'를'} ${v.relation} ${v.subject}`
+    id:'relation',name:'관계 뒤집기',fields:[['subject','주체'],['object','대상'],['relation','관계']],build:v=>`${core.withParticle(v.object,'object')} ${v.relation} ${v.subject}`
   },
   {
     id:'problem',name:'문제 · 해결',fields:[['problem','문제'],['solution','해결 방식']],build:v=>`${v.problem}에서 활동하는 ${v.solution}`
@@ -21,13 +24,6 @@
     id:'why',name:'원인 역산',fields:[['outcome','기묘한 결과'],['cause','숨겨진 원인']],build:v=>`${v.outcome} 왜냐하면 ${v.cause}`
   }
   ];
-  function subject(s) {
-    return s+(/[가-힣]$/.test(s)?(hasFinal(s)?'이':'가'):'이(가)')
-  }
-  function hasFinal(s) {
-    let c=s.charCodeAt(s.length-1);
-    return c>=0xAC00&&c<=0xD7A3&&(c-0xAC00)%28!==0
-  }
   const $=id=>document.getElementById('mine-'+id);
   modes.forEach(m=>m.fields.forEach(f=>f.push(window.IdeaMineCatalog.materials.filter(x=>x.roles.includes(f[0])&&(!x.modes||x.modes.includes(m.id))).map(x=>x.name))));
   let mode=0,values= {}
@@ -67,6 +63,8 @@
   }
   function switchMode(i) {
     mode=i;
+    legacyObject=null;
+    loadedResult=null;
     values= {}
     ;
     locks= {}
@@ -84,6 +82,7 @@
   function drawSlots() {
     let parent=$('slots');
     parent.innerHTML='';
+    parent.style.setProperty('--mine-slot-count', modes[mode].fields.length);
     modes[mode].fields.forEach(([key,label])=> {
       let d=document.createElement('div');
       d.className='slot'+(activeField===key?' open':'');
@@ -94,7 +93,9 @@
       name.textContent=label;
       let lock=document.createElement('button');
       lock.className='lock'+(locks[key]?' on':'');
-      lock.textContent=locks[key]?'🔒 고정':'🔓 잠금';
+      lock.textContent=locks[key]?'🔒':'🔓';
+      lock.setAttribute('aria-label',label+' '+(locks[key]?'잠금 해제':'잠금'));
+      lock.title=locks[key]?'잠금 해제':'잠금';
       lock.onclick=()=> {
         locks[key]=!locks[key];
         drawSlots()
@@ -106,10 +107,14 @@
       input.value=values[key]||'';
       input.setAttribute('aria-label',label);
       input.oninput=()=> {
+        loadedResult=null;
         values[key]=input.value;
+        if(key==='object')legacyObject=null;
         locks[key]=true;
         lock.classList.add('on');
-        lock.textContent='🔒 고정';
+        lock.textContent='🔒';
+        lock.setAttribute('aria-label',label+' 잠금 해제');
+        lock.title='잠금 해제';
         lock.setAttribute('aria-pressed','true');
         single.disabled=true;
         renderResult()
@@ -117,16 +122,19 @@
       ;
       let browse=document.createElement('button');
       browse.className='browse';
-      browse.textContent='▦ 목록에서 선택';
+      browse.textContent='▦ 목록 선택';
       browse.setAttribute('aria-label',label+' 목록 열기');
       browse.onclick=()=>openLibrary(key);
       let single=document.createElement('button');
       single.className='browse';
-      single.textContent='↻ 이 슬롯 재추첨';
+      single.textContent='↻ 재추첨';
+      single.setAttribute('aria-label',label+' 재추첨');
       single.disabled=!!locks[key];
       single.onclick=()=> {
         if(locks[key])return;
+        loadedResult=null;
         values[key]=sample(modes[mode].fields.find(f=>f[0]===key)[2],values[key]);
+        if(key==='object')legacyObject=null;
         drawSlots();
         renderResult()
       }
@@ -201,7 +209,9 @@
       b.className='libitem'+(values[key]===word?' selected':'');
       b.textContent=word;
       b.onclick=()=> {
+        loadedResult=null;
         values[key]=word;
+        if(key==='object')legacyObject=null;
         locks[key]=true;
         renderResult();
         closeLibrary();
@@ -226,7 +236,9 @@
     let count=0;
     modes[mode].fields.forEach(([key,,pool])=> {
       if(force||!locks[key]) {
+        loadedResult=null;
         values[key]=sample(pool,values[key]);
+        if(key==='object')legacyObject=null;
         count++
       }
     }
@@ -243,7 +255,9 @@
   function renderResult() {
     let m=modes[mode];
     $('resultType').textContent=m.name;
-    $('result').textContent=m.build(values);
+    // Preserve saved wording exactly while its restored materials are unchanged.
+    const unchanged=loadedResult&&m.fields.every(([key])=>values[key]===loadedResult.values[key]);
+    $('result').textContent=unchanged?loadedResult.text:m.build(values);
     $('expPanel').hidden=true;
     $('count').textContent=`채굴 ${rollCount}회`
   }
@@ -251,6 +265,7 @@
     let text=$('result').textContent;
     if(!text||text==='채굴 버튼을 눌러봐.')return;
     let entry= {
+      version:2,legacyObject,
       id:Date.now()+'_'+Math.random().toString(36).slice(2,6),text,mode:mode,values: {
         ...values
       }
@@ -299,11 +314,11 @@
       load.className='mini';
       load.textContent='작업대에서 열기';
       load.onclick=()=> {
-        mode=entry.mode;
-        values= {
-          ...entry.values
-        }
-        ;
+        const restored=core.restore(entry,window.IdeaMineCatalog);
+        mode=restored.mode;
+        legacyObject=restored.legacyObject;
+        values={...restored.values};
+        loadedResult={text:entry.text,values:{...values}};
         locks=Object.fromEntries(modes[mode].fields.map(([k])=>[k,true]));
         activeField=null;
         $('library').hidden=true;
@@ -433,3 +448,21 @@
   );
 }
 )();
+
+// Scoped pointer feedback also covers Safari touch presses and generated buttons.
+(()=>{
+  const screen = document.getElementById('screen-idea-mine');
+  let pressed = null;
+  const release = () => { pressed?.classList.remove('is-pressing'); pressed = null; };
+  screen.addEventListener('pointerdown', event => {
+    release();
+    const button = event.target.closest('button');
+    if (button && !button.disabled && event.isPrimary && event.button === 0) {
+      pressed = button;
+      pressed.classList.add('is-pressing');
+    }
+  }, {passive:true});
+  for (const event of ['pointerup', 'pointercancel']) document.addEventListener(event, release, {passive:true});
+  screen.addEventListener('scroll', release, {capture:true, passive:true});
+  window.addEventListener('blur', release);
+})();

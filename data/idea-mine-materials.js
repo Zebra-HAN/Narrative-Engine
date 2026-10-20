@@ -1,6 +1,6 @@
-// Static, extensible sample catalog. No server required.
+// Static catalog: nouns use base forms. legacyIds/legacyNames preserve v1 aliases.
 window.IdeaMineCatalog = {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "materials": [
     {
       "id": "action-subject-1",
@@ -8,12 +8,21 @@ window.IdeaMineCatalog = {
       "kind": "명사",
       "category": "자연",
       "roles": [
-        "subject"
+        "subject",
+        "object"
       ],
       "modes": [
-        "action"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [
+        "quality-subject-1",
+        "relation-subject-7",
+        "relation-object-7"
+      ],
+      "legacyNames": []
     },
     {
       "id": "action-subject-2",
@@ -21,12 +30,24 @@ window.IdeaMineCatalog = {
       "kind": "명사",
       "category": "추상·현상",
       "roles": [
-        "subject"
+        "subject",
+        "object"
       ],
       "modes": [
-        "action"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [
+        "action-object-5",
+        "quality-subject-17",
+        "relation-subject-2",
+        "relation-object-2"
+      ],
+      "legacyNames": [
+        "그림자를"
+      ]
     },
     {
       "id": "action-subject-3",
@@ -34,12 +55,23 @@ window.IdeaMineCatalog = {
       "kind": "명사",
       "category": "생물",
       "roles": [
-        "subject"
+        "subject",
+        "object"
       ],
       "modes": [
-        "action"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [
+        "action-object-16",
+        "relation-subject-3",
+        "relation-object-3"
+      ],
+      "legacyNames": [
+        "거인을"
+      ]
     },
     {
       "id": "action-subject-4",
@@ -47,12 +79,17 @@ window.IdeaMineCatalog = {
       "kind": "명사",
       "category": "생물",
       "roles": [
-        "subject"
+        "subject",
+        "object"
       ],
       "modes": [
-        "action"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [],
+      "legacyNames": []
     },
     {
       "id": "action-subject-5",
@@ -60,12 +97,23 @@ window.IdeaMineCatalog = {
       "kind": "명사",
       "category": "자연",
       "roles": [
-        "subject"
+        "subject",
+        "object"
       ],
       "modes": [
-        "action"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [
+        "action-object-1",
+        "relation-subject-12",
+        "relation-object-12"
+      ],
+      "legacyNames": [
+        "구름을"
+      ]
     },
     {
       "id": "action-subject-6",
@@ -73,12 +121,19 @@ window.IdeaMineCatalog = {
       "kind": "명사",
       "category": "물건",
       "roles": [
-        "subject"
+        "subject",
+        "object"
       ],
       "modes": [
-        "action"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [
+        "quality-subject-5"
+      ],
+      "legacyNames": []
     },
     {
       "id": "action-subject-7",
@@ -86,12 +141,19 @@ window.IdeaMineCatalog = {
       "kind": "명사",
       "category": "자연",
       "roles": [
-        "subject"
+        "subject",
+        "object"
       ],
       "modes": [
-        "action"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [
+        "quality-subject-2"
+      ],
+      "legacyNames": []
     },
     {
       "id": "action-subject-8",
@@ -99,12 +161,19 @@ window.IdeaMineCatalog = {
       "kind": "명사",
       "category": "물건",
       "roles": [
-        "subject"
+        "subject",
+        "object"
       ],
       "modes": [
-        "action"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [
+        "quality-subject-4"
+      ],
+      "legacyNames": []
     },
     {
       "id": "action-subject-9",
@@ -112,12 +181,17 @@ window.IdeaMineCatalog = {
       "kind": "명사",
       "category": "생물",
       "roles": [
-        "subject"
+        "subject",
+        "object"
       ],
       "modes": [
-        "action"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [],
+      "legacyNames": []
     },
     {
       "id": "action-subject-10",
@@ -125,12 +199,21 @@ window.IdeaMineCatalog = {
       "kind": "명사",
       "category": "자연",
       "roles": [
-        "subject"
+        "subject",
+        "object"
       ],
       "modes": [
-        "action"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [
+        "action-object-4"
+      ],
+      "legacyNames": [
+        "달을"
+      ]
     },
     {
       "id": "action-subject-11",
@@ -138,12 +221,19 @@ window.IdeaMineCatalog = {
       "kind": "명사",
       "category": "장소",
       "roles": [
-        "subject"
+        "subject",
+        "object"
       ],
       "modes": [
-        "action"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [
+        "quality-subject-13"
+      ],
+      "legacyNames": []
     },
     {
       "id": "action-subject-12",
@@ -151,25 +241,44 @@ window.IdeaMineCatalog = {
       "kind": "명사",
       "category": "인물",
       "roles": [
-        "subject"
+        "subject",
+        "object"
       ],
       "modes": [
-        "action"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [
+        "relation-subject-14",
+        "relation-object-14"
+      ],
+      "legacyNames": []
     },
     {
       "id": "action-subject-13",
       "name": "마을",
       "kind": "명사",
-      "category": "기타",
+      "category": "장소",
       "roles": [
-        "subject"
+        "subject",
+        "object"
       ],
       "modes": [
-        "action"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [
+        "action-object-15",
+        "relation-subject-11",
+        "relation-object-11"
+      ],
+      "legacyNames": [
+        "마을을"
+      ]
     },
     {
       "id": "action-subject-14",
@@ -177,12 +286,17 @@ window.IdeaMineCatalog = {
       "kind": "명사",
       "category": "장소",
       "roles": [
-        "subject"
+        "subject",
+        "object"
       ],
       "modes": [
-        "action"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [],
+      "legacyNames": []
     },
     {
       "id": "action-subject-15",
@@ -190,12 +304,19 @@ window.IdeaMineCatalog = {
       "kind": "명사",
       "category": "생물",
       "roles": [
-        "subject"
+        "subject",
+        "object"
       ],
       "modes": [
-        "action"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [
+        "quality-subject-15"
+      ],
+      "legacyNames": []
     },
     {
       "id": "action-subject-16",
@@ -203,12 +324,17 @@ window.IdeaMineCatalog = {
       "kind": "명사",
       "category": "인물",
       "roles": [
-        "subject"
+        "subject",
+        "object"
       ],
       "modes": [
-        "action"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [],
+      "legacyNames": []
     },
     {
       "id": "action-subject-17",
@@ -216,12 +342,20 @@ window.IdeaMineCatalog = {
       "kind": "명사",
       "category": "생물",
       "roles": [
-        "subject"
+        "subject",
+        "object"
       ],
       "modes": [
-        "action"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [
+        "relation-subject-10",
+        "relation-object-10"
+      ],
+      "legacyNames": []
     },
     {
       "id": "action-subject-18",
@@ -229,12 +363,22 @@ window.IdeaMineCatalog = {
       "kind": "명사",
       "category": "자연",
       "roles": [
-        "subject"
+        "subject",
+        "object"
       ],
       "modes": [
-        "action"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [
+        "action-object-7",
+        "quality-subject-14"
+      ],
+      "legacyNames": [
+        "별을"
+      ]
     },
     {
       "id": "action-subject-19",
@@ -242,12 +386,19 @@ window.IdeaMineCatalog = {
       "kind": "명사",
       "category": "물건",
       "roles": [
-        "subject"
+        "subject",
+        "object"
       ],
       "modes": [
-        "action"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [
+        "quality-subject-10"
+      ],
+      "legacyNames": []
     },
     {
       "id": "action-subject-20",
@@ -255,12 +406,17 @@ window.IdeaMineCatalog = {
       "kind": "명사",
       "category": "자연",
       "roles": [
-        "subject"
+        "subject",
+        "object"
       ],
       "modes": [
-        "action"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [],
+      "legacyNames": []
     },
     {
       "id": "action-verb-1",
@@ -458,290 +614,295 @@ window.IdeaMineCatalog = {
       "grammar": {}
     },
     {
-      "id": "action-object-1",
-      "name": "구름을",
-      "kind": "명사",
-      "category": "자연",
-      "roles": [
-        "object"
-      ],
-      "modes": [
-        "action"
-      ],
-      "grammar": {}
-    },
-    {
       "id": "action-object-2",
-      "name": "인간을",
+      "name": "인간",
       "kind": "명사",
       "category": "인물",
       "roles": [
+        "subject",
         "object"
       ],
       "modes": [
-        "action"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [
+        "relation-subject-1",
+        "relation-object-1"
+      ],
+      "legacyNames": [
+        "인간을"
+      ]
     },
     {
       "id": "action-object-3",
-      "name": "기억을",
+      "name": "기억",
       "kind": "명사",
       "category": "추상·현상",
       "roles": [
+        "subject",
         "object"
       ],
       "modes": [
-        "action"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
-    },
-    {
-      "id": "action-object-4",
-      "name": "달을",
-      "kind": "명사",
-      "category": "자연",
-      "roles": [
-        "object"
-      ],
-      "modes": [
-        "action"
-      ],
-      "grammar": {}
-    },
-    {
-      "id": "action-object-5",
-      "name": "그림자를",
-      "kind": "명사",
-      "category": "추상·현상",
-      "roles": [
-        "object"
-      ],
-      "modes": [
-        "action"
-      ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [],
+      "legacyNames": [
+        "기억을"
+      ]
     },
     {
       "id": "action-object-6",
-      "name": "꿈을",
+      "name": "꿈",
       "kind": "명사",
       "category": "추상·현상",
       "roles": [
+        "subject",
         "object"
       ],
       "modes": [
-        "action"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
-    },
-    {
-      "id": "action-object-7",
-      "name": "별을",
-      "kind": "명사",
-      "category": "자연",
-      "roles": [
-        "object"
-      ],
-      "modes": [
-        "action"
-      ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [],
+      "legacyNames": [
+        "꿈을"
+      ]
     },
     {
       "id": "action-object-8",
-      "name": "숲을",
+      "name": "숲",
       "kind": "명사",
       "category": "자연",
       "roles": [
+        "subject",
         "object"
       ],
       "modes": [
-        "action"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [],
+      "legacyNames": [
+        "숲을"
+      ]
     },
     {
       "id": "action-object-9",
-      "name": "시간을",
+      "name": "시간",
       "kind": "명사",
       "category": "추상·현상",
       "roles": [
+        "subject",
         "object"
       ],
       "modes": [
-        "action"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [],
+      "legacyNames": [
+        "시간을"
+      ]
     },
     {
       "id": "action-object-10",
-      "name": "괴물을",
+      "name": "괴물",
       "kind": "명사",
       "category": "생물",
       "roles": [
+        "subject",
         "object"
       ],
       "modes": [
-        "action"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [
+        "quality-subject-8",
+        "relation-subject-4",
+        "relation-object-4"
+      ],
+      "legacyNames": [
+        "괴물을"
+      ]
     },
     {
       "id": "action-object-11",
-      "name": "바다를",
+      "name": "바다",
       "kind": "명사",
       "category": "자연",
       "roles": [
+        "subject",
         "object"
       ],
       "modes": [
-        "action"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [
+        "quality-subject-11"
+      ],
+      "legacyNames": [
+        "바다를"
+      ]
     },
     {
       "id": "action-object-12",
-      "name": "태양을",
+      "name": "태양",
       "kind": "명사",
       "category": "자연",
       "roles": [
+        "subject",
         "object"
       ],
       "modes": [
-        "action"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [],
+      "legacyNames": [
+        "태양을"
+      ]
     },
     {
       "id": "action-object-13",
-      "name": "비밀을",
+      "name": "비밀",
       "kind": "명사",
       "category": "추상·현상",
       "roles": [
+        "subject",
         "object"
       ],
       "modes": [
-        "action"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [],
+      "legacyNames": [
+        "비밀을"
+      ]
     },
     {
       "id": "action-object-14",
-      "name": "문을",
+      "name": "문",
       "kind": "명사",
       "category": "물건",
       "roles": [
+        "subject",
         "object"
       ],
       "modes": [
-        "action"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
-    },
-    {
-      "id": "action-object-15",
-      "name": "마을을",
-      "kind": "명사",
-      "category": "장소",
-      "roles": [
-        "object"
+      "grammar": {},
+      "legacyIds": [
+        "quality-subject-12"
       ],
-      "modes": [
-        "action"
-      ],
-      "grammar": {}
-    },
-    {
-      "id": "action-object-16",
-      "name": "거인을",
-      "kind": "명사",
-      "category": "생물",
-      "roles": [
-        "object"
-      ],
-      "modes": [
-        "action"
-      ],
-      "grammar": {}
+      "legacyNames": [
+        "문을"
+      ]
     },
     {
       "id": "action-object-17",
-      "name": "바람을",
+      "name": "바람",
       "kind": "명사",
       "category": "자연",
       "roles": [
+        "subject",
         "object"
       ],
       "modes": [
-        "action"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [],
+      "legacyNames": [
+        "바람을"
+      ]
     },
     {
       "id": "action-object-18",
-      "name": "소리를",
+      "name": "소리",
       "kind": "명사",
       "category": "추상·현상",
       "roles": [
+        "subject",
         "object"
       ],
       "modes": [
-        "action"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [],
+      "legacyNames": [
+        "소리를"
+      ]
     },
     {
       "id": "action-object-19",
-      "name": "불꽃을",
+      "name": "불꽃",
       "kind": "명사",
       "category": "자연",
       "roles": [
+        "subject",
         "object"
       ],
       "modes": [
-        "action"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [],
+      "legacyNames": [
+        "불꽃을"
+      ]
     },
     {
       "id": "action-object-20",
-      "name": "지도를",
+      "name": "지도",
       "kind": "명사",
       "category": "물건",
       "roles": [
+        "subject",
         "object"
       ],
       "modes": [
-        "action"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
-    },
-    {
-      "id": "quality-subject-1",
-      "name": "나무",
-      "kind": "명사",
-      "category": "자연",
-      "roles": [
-        "subject"
-      ],
-      "modes": [
-        "quality"
-      ],
-      "grammar": {}
-    },
-    {
-      "id": "quality-subject-2",
-      "name": "돌",
-      "kind": "명사",
-      "category": "자연",
-      "roles": [
-        "subject"
-      ],
-      "modes": [
-        "quality"
-      ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [],
+      "legacyNames": [
+        "지도를"
+      ]
     },
     {
       "id": "quality-subject-3",
@@ -749,38 +910,17 @@ window.IdeaMineCatalog = {
       "kind": "명사",
       "category": "자연",
       "roles": [
-        "subject"
+        "subject",
+        "object"
       ],
       "modes": [
-        "quality"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
-    },
-    {
-      "id": "quality-subject-4",
-      "name": "우산",
-      "kind": "명사",
-      "category": "물건",
-      "roles": [
-        "subject"
-      ],
-      "modes": [
-        "quality"
-      ],
-      "grammar": {}
-    },
-    {
-      "id": "quality-subject-5",
-      "name": "거울",
-      "kind": "명사",
-      "category": "물건",
-      "roles": [
-        "subject"
-      ],
-      "modes": [
-        "quality"
-      ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [],
+      "legacyNames": []
     },
     {
       "id": "quality-subject-6",
@@ -788,12 +928,17 @@ window.IdeaMineCatalog = {
       "kind": "명사",
       "category": "장소",
       "roles": [
-        "subject"
+        "subject",
+        "object"
       ],
       "modes": [
-        "quality"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [],
+      "legacyNames": []
     },
     {
       "id": "quality-subject-7",
@@ -801,25 +946,17 @@ window.IdeaMineCatalog = {
       "kind": "명사",
       "category": "장소",
       "roles": [
-        "subject"
+        "subject",
+        "object"
       ],
       "modes": [
-        "quality"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
-    },
-    {
-      "id": "quality-subject-8",
-      "name": "괴물",
-      "kind": "명사",
-      "category": "생물",
-      "roles": [
-        "subject"
-      ],
-      "modes": [
-        "quality"
-      ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [],
+      "legacyNames": []
     },
     {
       "id": "quality-subject-9",
@@ -827,90 +964,17 @@ window.IdeaMineCatalog = {
       "kind": "명사",
       "category": "물건",
       "roles": [
-        "subject"
+        "subject",
+        "object"
       ],
       "modes": [
-        "quality"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
-    },
-    {
-      "id": "quality-subject-10",
-      "name": "시계",
-      "kind": "명사",
-      "category": "물건",
-      "roles": [
-        "subject"
-      ],
-      "modes": [
-        "quality"
-      ],
-      "grammar": {}
-    },
-    {
-      "id": "quality-subject-11",
-      "name": "바다",
-      "kind": "명사",
-      "category": "자연",
-      "roles": [
-        "subject"
-      ],
-      "modes": [
-        "quality"
-      ],
-      "grammar": {}
-    },
-    {
-      "id": "quality-subject-12",
-      "name": "문",
-      "kind": "명사",
-      "category": "물건",
-      "roles": [
-        "subject"
-      ],
-      "modes": [
-        "quality"
-      ],
-      "grammar": {}
-    },
-    {
-      "id": "quality-subject-13",
-      "name": "섬",
-      "kind": "명사",
-      "category": "장소",
-      "roles": [
-        "subject"
-      ],
-      "modes": [
-        "quality"
-      ],
-      "grammar": {}
-    },
-    {
-      "id": "quality-subject-14",
-      "name": "별",
-      "kind": "명사",
-      "category": "자연",
-      "roles": [
-        "subject"
-      ],
-      "modes": [
-        "quality"
-      ],
-      "grammar": {}
-    },
-    {
-      "id": "quality-subject-15",
-      "name": "물고기",
-      "kind": "명사",
-      "category": "생물",
-      "roles": [
-        "subject"
-      ],
-      "modes": [
-        "quality"
-      ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [],
+      "legacyNames": []
     },
     {
       "id": "quality-subject-16",
@@ -918,25 +982,20 @@ window.IdeaMineCatalog = {
       "kind": "명사",
       "category": "인물",
       "roles": [
-        "subject"
+        "subject",
+        "object"
       ],
       "modes": [
-        "quality"
+        "action",
+        "quality",
+        "relation"
       ],
-      "grammar": {}
-    },
-    {
-      "id": "quality-subject-17",
-      "name": "그림자",
-      "kind": "명사",
-      "category": "추상·현상",
-      "roles": [
-        "subject"
+      "grammar": {},
+      "legacyIds": [
+        "relation-subject-9",
+        "relation-object-9"
       ],
-      "modes": [
-        "quality"
-      ],
-      "grammar": {}
+      "legacyNames": []
     },
     {
       "id": "quality-quality-1",
@@ -1459,69 +1518,24 @@ window.IdeaMineCatalog = {
       "grammar": {}
     },
     {
-      "id": "relation-subject-1",
-      "name": "인간",
-      "kind": "명사",
-      "category": "인물",
-      "roles": [
-        "subject"
-      ],
-      "modes": [
-        "relation"
-      ],
-      "grammar": {}
-    },
-    {
-      "id": "relation-subject-2",
-      "name": "그림자",
-      "kind": "명사",
-      "category": "추상·현상",
-      "roles": [
-        "subject"
-      ],
-      "modes": [
-        "relation"
-      ],
-      "grammar": {}
-    },
-    {
-      "id": "relation-subject-3",
-      "name": "거인",
-      "kind": "명사",
-      "category": "생물",
-      "roles": [
-        "subject"
-      ],
-      "modes": [
-        "relation"
-      ],
-      "grammar": {}
-    },
-    {
-      "id": "relation-subject-4",
-      "name": "괴물",
-      "kind": "명사",
-      "category": "생물",
-      "roles": [
-        "subject"
-      ],
-      "modes": [
-        "relation"
-      ],
-      "grammar": {}
-    },
-    {
       "id": "relation-subject-5",
       "name": "왕",
       "kind": "명사",
       "category": "인물",
       "roles": [
-        "subject"
+        "subject",
+        "object"
       ],
       "modes": [
+        "action",
+        "quality",
         "relation"
       ],
-      "grammar": {}
+      "grammar": {},
+      "legacyIds": [
+        "relation-object-5"
+      ],
+      "legacyNames": []
     },
     {
       "id": "relation-subject-6",
@@ -1529,25 +1543,19 @@ window.IdeaMineCatalog = {
       "kind": "명사",
       "category": "인물",
       "roles": [
-        "subject"
+        "subject",
+        "object"
       ],
       "modes": [
+        "action",
+        "quality",
         "relation"
       ],
-      "grammar": {}
-    },
-    {
-      "id": "relation-subject-7",
-      "name": "나무",
-      "kind": "명사",
-      "category": "자연",
-      "roles": [
-        "subject"
+      "grammar": {},
+      "legacyIds": [
+        "relation-object-6"
       ],
-      "modes": [
-        "relation"
-      ],
-      "grammar": {}
+      "legacyNames": []
     },
     {
       "id": "relation-subject-8",
@@ -1555,64 +1563,19 @@ window.IdeaMineCatalog = {
       "kind": "명사",
       "category": "생물",
       "roles": [
-        "subject"
+        "subject",
+        "object"
       ],
       "modes": [
+        "action",
+        "quality",
         "relation"
       ],
-      "grammar": {}
-    },
-    {
-      "id": "relation-subject-9",
-      "name": "로봇",
-      "kind": "명사",
-      "category": "인물",
-      "roles": [
-        "subject"
+      "grammar": {},
+      "legacyIds": [
+        "relation-object-8"
       ],
-      "modes": [
-        "relation"
-      ],
-      "grammar": {}
-    },
-    {
-      "id": "relation-subject-10",
-      "name": "새",
-      "kind": "명사",
-      "category": "생물",
-      "roles": [
-        "subject"
-      ],
-      "modes": [
-        "relation"
-      ],
-      "grammar": {}
-    },
-    {
-      "id": "relation-subject-11",
-      "name": "마을",
-      "kind": "명사",
-      "category": "기타",
-      "roles": [
-        "subject"
-      ],
-      "modes": [
-        "relation"
-      ],
-      "grammar": {}
-    },
-    {
-      "id": "relation-subject-12",
-      "name": "구름",
-      "kind": "명사",
-      "category": "자연",
-      "roles": [
-        "subject"
-      ],
-      "modes": [
-        "relation"
-      ],
-      "grammar": {}
+      "legacyNames": []
     },
     {
       "id": "relation-subject-13",
@@ -1620,25 +1583,19 @@ window.IdeaMineCatalog = {
       "kind": "명사",
       "category": "생물",
       "roles": [
-        "subject"
+        "subject",
+        "object"
       ],
       "modes": [
+        "action",
+        "quality",
         "relation"
       ],
-      "grammar": {}
-    },
-    {
-      "id": "relation-subject-14",
-      "name": "인형",
-      "kind": "명사",
-      "category": "인물",
-      "roles": [
-        "subject"
+      "grammar": {},
+      "legacyIds": [
+        "relation-object-13"
       ],
-      "modes": [
-        "relation"
-      ],
-      "grammar": {}
+      "legacyNames": []
     },
     {
       "id": "relation-relation-1",
@@ -1803,188 +1760,6 @@ window.IdeaMineCatalog = {
       "category": "관계",
       "roles": [
         "relation"
-      ],
-      "modes": [
-        "relation"
-      ],
-      "grammar": {}
-    },
-    {
-      "id": "relation-object-1",
-      "name": "인간",
-      "kind": "명사",
-      "category": "인물",
-      "roles": [
-        "object"
-      ],
-      "modes": [
-        "relation"
-      ],
-      "grammar": {}
-    },
-    {
-      "id": "relation-object-2",
-      "name": "그림자",
-      "kind": "명사",
-      "category": "추상·현상",
-      "roles": [
-        "object"
-      ],
-      "modes": [
-        "relation"
-      ],
-      "grammar": {}
-    },
-    {
-      "id": "relation-object-3",
-      "name": "거인",
-      "kind": "명사",
-      "category": "생물",
-      "roles": [
-        "object"
-      ],
-      "modes": [
-        "relation"
-      ],
-      "grammar": {}
-    },
-    {
-      "id": "relation-object-4",
-      "name": "괴물",
-      "kind": "명사",
-      "category": "생물",
-      "roles": [
-        "object"
-      ],
-      "modes": [
-        "relation"
-      ],
-      "grammar": {}
-    },
-    {
-      "id": "relation-object-5",
-      "name": "왕",
-      "kind": "명사",
-      "category": "인물",
-      "roles": [
-        "object"
-      ],
-      "modes": [
-        "relation"
-      ],
-      "grammar": {}
-    },
-    {
-      "id": "relation-object-6",
-      "name": "아이",
-      "kind": "명사",
-      "category": "인물",
-      "roles": [
-        "object"
-      ],
-      "modes": [
-        "relation"
-      ],
-      "grammar": {}
-    },
-    {
-      "id": "relation-object-7",
-      "name": "나무",
-      "kind": "명사",
-      "category": "자연",
-      "roles": [
-        "object"
-      ],
-      "modes": [
-        "relation"
-      ],
-      "grammar": {}
-    },
-    {
-      "id": "relation-object-8",
-      "name": "용",
-      "kind": "명사",
-      "category": "생물",
-      "roles": [
-        "object"
-      ],
-      "modes": [
-        "relation"
-      ],
-      "grammar": {}
-    },
-    {
-      "id": "relation-object-9",
-      "name": "로봇",
-      "kind": "명사",
-      "category": "인물",
-      "roles": [
-        "object"
-      ],
-      "modes": [
-        "relation"
-      ],
-      "grammar": {}
-    },
-    {
-      "id": "relation-object-10",
-      "name": "새",
-      "kind": "명사",
-      "category": "생물",
-      "roles": [
-        "object"
-      ],
-      "modes": [
-        "relation"
-      ],
-      "grammar": {}
-    },
-    {
-      "id": "relation-object-11",
-      "name": "마을",
-      "kind": "명사",
-      "category": "기타",
-      "roles": [
-        "object"
-      ],
-      "modes": [
-        "relation"
-      ],
-      "grammar": {}
-    },
-    {
-      "id": "relation-object-12",
-      "name": "구름",
-      "kind": "명사",
-      "category": "자연",
-      "roles": [
-        "object"
-      ],
-      "modes": [
-        "relation"
-      ],
-      "grammar": {}
-    },
-    {
-      "id": "relation-object-13",
-      "name": "동물",
-      "kind": "명사",
-      "category": "생물",
-      "roles": [
-        "object"
-      ],
-      "modes": [
-        "relation"
-      ],
-      "grammar": {}
-    },
-    {
-      "id": "relation-object-14",
-      "name": "인형",
-      "kind": "명사",
-      "category": "인물",
-      "roles": [
-        "object"
       ],
       "modes": [
         "relation"

@@ -5,56 +5,90 @@
 ## 파일
 
 - `index.html`: 홈 버튼과 광산 화면 마크업, 모듈 로딩
-- `css/idea-mine.css`: 광산 화면 내부에만 적용되는 스타일
-- `js/idea-mine.js`: 여섯 조합 방식의 슬롯 정의/문장 규칙, 작업대, 보관함, 확장 질문
-- `data/idea-mine-materials.js`: 실험판에서 옮긴 초기 재료
+- `css/idea-mine.css`: 광산 내부의 작은 패널·3열 슬롯·2열 확장 질문·터치 피드백
+- `js/idea-mine.js`: 여섯 방식의 슬롯/문장 규칙, 작업대와 보관함
+- `js/idea-mine-core.js`: 이/가·을/를 처리와 이전 저장 기록 호환 함수
+- `data/idea-mine-materials.js`: schemaVersion 2 정적 카탈로그
 - `sw.js`: 광산 파일을 오프라인 셸에 포함
-- `tests/idea-mine.cjs`: Playwright 핵심 동작/모바일 폭 확인 (`node tests/idea-mine.cjs`)
+- `tests/idea-mine-core.cjs`: 이전 재료 190건 보존·조사·저장 호환 검증
+- `tests/idea-mine.cjs`: Playwright 핵심 동작/모바일 레이아웃 검증
 
-## 재료 추가
+## 명사 기본형 및 재료 추가
 
-`window.IdeaMineCatalog.materials` 배열에 다음 형식의 객체를 추가합니다. 분류 버튼은 데이터에서 자동 생성됩니다.
+`window.IdeaMineCatalog.materials` 배열에 객체를 추가합니다. `category` 분류 버튼은 자동 생성됩니다. 명사는 **조사 없는 기본형**으로 한 번만 등록하고 역할과 방식을 배열로 지정합니다.
 
 ```js
 {
-  id: 'custom-subject-001', // 전체 카탈로그 내 고유하고 안정적인 ID
-  name: '유리 고래',
-  kind: '생물',           // 재료 자체의 종류
-  category: '바다 생물',  // 목록 탐색용 분류
-  roles: ['subject'],     // 사용 가능한 슬롯 역할
-  modes: ['action', 'quality', 'relation'], // 생략하면 역할이 맞는 모든 방식
-  grammar: {}             // 향후 조사/연결형 등 확장 정보 (현재 자동 해석하지 않음)
+  id: 'custom-noun-0001', // 카탈로그 전체에서 고유하고 안정적인 ID
+  name: '유리 고래',     // '유리 고래를'처럼 조사를 붙이지 않음
+  kind: '명사',
+  category: '바다 생물', // 목록 탐색용 분류
+  roles: ['subject', 'object'],
+  modes: ['action', 'quality', 'relation'],
+  grammar: {}           // 향후 확장용; 현재 조사는 이름의 마지막 한글 받침으로 처리
 }
 ```
 
-방식/슬롯 역할:
+- `roles`는 슬롯 역할, `modes`는 사용 가능한 채굴 방식입니다. 두 조건이 모두 맞으면 후보에 포함됩니다.
+- `modes`를 생략하면 역할이 맞는 모든 방식에서 사용할 수 있습니다. 빈 배열이면 어느 방식에도 사용되지 않습니다.
+- 여러 역할·방식은 각각의 조합으로 적용됩니다. 역할별로 다른 방식 제한을 지정하는 별도 매핑은 없습니다.
+- `kind`, `grammar`, `schemaVersion`은 메타데이터이며 복잡한 의미 추론이나 품사 자동 변환은 하지 않습니다.
+- 같은 이름의 명사를 주체용·대상용으로 중복 등록하지 않습니다. ID도 재사용하지 않습니다.
+- 새로운 분류명은 데이터만으로 추가할 수 있습니다. `전체`는 UI의 특수 필터명이라 재료 분류명으로 사용하지 않습니다.
+- 후보 배열은 광산 스크립트 초기화 시 구성하므로 추가 파일은 그 전에 로드해야 합니다.
 
-|방식 ID|슬롯 역할|
-|---|---|
-|action|subject, verb, object|
-|quality|subject, quality|
-|rule|trigger, effect|
-|relation|subject, relation, object|
-|problem|problem, solution|
-|why|outcome, cause|
+현재 148개 레코드 = **공용 명사 43개 + 기존 비명사 105개**입니다. 이전 명사 등록 85건은 동일 기본형을 통합했습니다. 모든 명사는 주체·대상 역할을 함께 가지며 자유 조합·특성 변형·관계 뒤집기에서 재사용됩니다. 기존 비명사 재료는 변경하지 않았습니다. `마을`의 분류는 통합 시 `장소`로 정리했습니다.
 
-`action`의 object는 초기 실험판처럼 조사 포함 이름(예: `기억을`)을 사용합니다. `relation`의 object는 조사 없는 명사이며 문장 규칙이 을/를을 붙입니다. `verb`는 종결형, `quality`와 `relation`은 관형형입니다. 직접 입력한 문자열은 그대로 사용합니다.
+## 슬롯과 문장용 형태
 
-별도 파일을 추가하려면 기본 재료 스크립트 다음, `js/idea-mine.js` 앞에 로드하고 다음과 같이 추가합니다. 오프라인에서도 사용할 추가 파일은 `sw.js`의 SHELL 목록에도 등록합니다.
+|방식 ID|화면 슬롯 순서|입력 형태 및 문장 규칙|
+|---|---|---|
+|action|subject → object → verb|명사 기본형 + 이/가, 명사 기본형 + 을/를, 행동 종결형|
+|quality|subject → quality|대상은 명사 기본형, 특성은 `살아 움직이는` 같은 관형형; 결과는 특성 + 대상|
+|rule|trigger → effect|조건 연결 표현 + 결과 문장|
+|relation|subject → object → relation|주체·대상 모두 명사 기본형, 관계는 관형형; 결과는 대상 + 을/를 + 관계 + 주체|
+|problem|problem → solution|문제 + `에서 활동하는` + 해결자/직업 등의 명사구|
+|why|outcome → cause|결과 문장 + `왜냐하면` + `…기 때문이다` 형태의 원인|
+
+조사 예: `구름이`, `구름을`, `나무가`, `나무를`, `노을이`, `노을을`. 마지막 문자가 한글이 아니면 `이(가)`·`을(를)` 형태로 표시합니다. 숫자·영문 발음 추론은 하지 않습니다. 직접 입력한 새 명사도 기본형을 사용합니다. 비명사 표현의 활용형은 자동 변환하지 않습니다.
+
+별도 파일을 추가하려면 기본 재료 스크립트 다음, core/workbench 스크립트 앞에 로드하고 아래처럼 추가합니다. 오프라인 사용을 위해 `sw.js`의 SHELL 목록에도 파일을 등록합니다.
 
 ```js
 window.IdeaMineCatalog.materials.push({
-  id: 'extra-subject-001', name: '유리 고래', kind: '생물',
-  category: '바다 생물', roles: ['subject'], grammar: {}
+  id: 'extra-noun-0001', name: '유리 고래', kind: '명사',
+  category: '바다 생물', roles: ['subject', 'object'],
+  modes: ['action', 'quality', 'relation'], grammar: {}
 });
 ```
 
-## 보관 및 제한
+```html
+<script src="data/idea-mine-materials.js"></script>
+<script src="data/idea-mine-extra.js"></script>
+<script src="js/idea-mine-core.js"></script>
+<script src="js/idea-mine.js"></script>
+```
 
-- `narrative_idea_mine_saves_v1` localStorage 키만 사용합니다.
-- 목록 선택과 직접 편집은 자동 잠금, 불러온 조합은 전체 잠금입니다.
-- 잠금은 해당 슬롯 재추첨과 일괄 재조합 모두에 적용됩니다. 방식 전환 시 새 작업대를 시작합니다.
-- 저장 실패 시 성공 메시지를 표시하지 않고 현재 메모리 보관함에서 텍스트 내보내기를 할 수 있습니다. 새로고침 전 내보내야 합니다.
-- 문제·해결 및 원인 역산은 각각 별도 방식 정의의 단순 문장 조합이며 실험 기능입니다. AI 추론·장문 생성·서버·동기화·독창성 평가는 없습니다.
-- TXT 내보내기는 읽기/백업용이며 가져오기 기능은 없습니다.
-- 실제 iPhone Safari/홈 화면 PWA와 배포 후 서비스 워커 갱신은 별도 실기기 확인이 필요합니다.
+## 기존 재료 및 저장 호환
+
+- 통합 명사의 `id`는 처음 등록된 기존 ID를 유지했습니다. 통합된 다른 기존 ID는 `legacyIds` 배열에 보존했습니다. 전체 190개 이전 ID가 모두 남아 있습니다.
+- 이전 자유 조합 대상 이름(`구름을` 등)은 통합 명사의 `legacyNames`에 남깁니다. 이는 **이전 저장 기록을 읽기 위한 별칭**이며 일반 후보로 표시하지 않습니다. 새 재료에는 이 두 호환 필드를 넣지 않아도 됩니다.
+- localStorage 키 `narrative_idea_mine_saves_v1`을 유지합니다. 기존 기록을 일괄 삭제·변경하지 않습니다.
+- 불러온 재료를 변경하기 전에는 저장 당시 문장을 그대로 표시해 빈 입력·영문 등 이전 문법 예외도 보존합니다. 이전 기록의 문장과 보관함 표시는 유지합니다. 불러올 때 알려진 조사 포함 이름만 기본형으로 바꾸고, 조사는 다시 붙입니다.
+- 이전 사용자 직접 입력 대상은 임의로 조사나 글자를 제거하지 않습니다. 알려지지 않은 대상 표현은 `legacyObject` 호환 표시로 원문 그대로 조합합니다. 이 방식으로 `노을` 같은 단어가 잘못 잘리는 것도 방지합니다.
+- 새 저장 기록은 `version: 2`와 필요한 `legacyObject` 정보를 포함합니다. 이전 기록을 다시 저장해도 호환 정보가 유지됩니다.
+- 이전 직접 입력 대상이라도 사용자가 해당 슬롯을 새로 편집·선택·재추첨하면 이후에는 기본형 조사 규칙을 적용합니다.
+- 저장한 값은 여전히 이름 문자열이며 재료 ID 기반 참조로 전환하지 않았습니다. 방식 배열 순서도 유지해 기존 숫자 mode 값과 호환됩니다.
+
+## 사용 및 확인
+
+목록 선택·직접 편집은 자동 잠금, 불러온 조합은 전체 잠금입니다. 방식 전환은 새 작업대를 시작합니다. 저장 실패 시 성공 메시지 대신 내보내기를 안내하며, 메모리 보관함은 새로고침 전 내보내야 합니다. TXT 내보내기는 읽기/백업용이며 가져오기는 제공하지 않습니다.
+
+문제·해결과 원인 역산은 실험적인 단순 조합입니다. AI 추론·장문 생성·서버·동기화·독창성 평가는 없습니다.
+
+```sh
+node tests/idea-mine-core.cjs
+node tests/idea-mine.cjs
+```
+
+core 검증은 이전 병합 커밋 `94c52ff`의 재료와 비교하므로 해당 Git 이력이 필요합니다. 브라우저 검증은 설치된 Playwright Chromium/WebKit을 사용합니다. WebKit이 없으면 건너뛰며, 실제 iPhone Safari·홈 화면 PWA 확인을 대체하지 않습니다.
