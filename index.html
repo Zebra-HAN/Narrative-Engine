@@ -36,6 +36,7 @@
       pointer-events: none;
     }
   </style>
+  <link rel="stylesheet" href="css/idea-mine.css" />
 </head>
 <body>
 
@@ -58,11 +59,98 @@
 <div id="screen-home" class="screen">
   <div class="home-container">
     <button class="home-link pressable" id="btn-narrative" onclick="goToNarrative()">스토리 구조</button>
+    <button class="home-link pressable" id="btn-idea-mine">아이디어 광산</button>
     <button class="home-link pressable" id="btn-create" onclick="goToCreate()">창작 시작</button>
   </div>
-  <p class="home-version">v26.1019.1944</p>
+  <p class="home-version">v26.1020.2114</p>
 </div>
 
+
+<div id="screen-idea-mine" class="screen">
+<main class="mine-workbench">
+<button class="mini" id="mine-home">← 홈으로</button>
+<header class="top">
+<div class="eyebrow">NARRATIVE BUILDER</div>
+<h1>⛏ 아이디어 광산</h1>
+<div class="subtitle">발견하고 · 고정하고 · 다시 섞고 · 확장하기</div>
+</header>
+<section class="panel">
+<div class="sectionhead">
+<h2>1 · 채굴 방식</h2>
+<span class="hint">원하는 발상 방향을 선택</span>
+</div>
+<div class="modes" id="mine-modes">
+</div>
+</section>
+<section class="panel">
+<div class="sectionhead">
+<h2>2 · 조합 작업대</h2>
+<span class="hint">목록에서 선택 · 직접 수정 · 잠금</span>
+</div>
+<div class="slots" id="mine-slots">
+</div>
+<div class="library" id="mine-library" hidden>
+<div class="libtop">
+<strong id="mine-libTitle">재료 목록</strong>
+<button class="mini" id="mine-closeLibrary">닫기 ×</button>
+</div>
+<input class="libsearch" id="mine-libSearch" type="search" placeholder="재료 검색" aria-label="재료 검색">
+<div class="libtabs" id="mine-libTabs">
+</div>
+<div class="libgrid" id="mine-libGrid">
+</div>
+<p class="libmeta" id="mine-libMeta">
+</p>
+</div>
+<div class="actions">
+<button class="btn primary" id="mine-roll">✦ 채굴하기</button>
+<button class="btn" id="mine-reroll">↻ 고정 제외 재조합</button>
+<button class="btn alt" id="mine-unlock">잠금 해제</button>
+</div>
+<div class="toast" id="mine-notice" role="status" aria-live="polite">
+</div>
+</section>
+<section class="panel">
+<div class="sectionhead">
+<h2>3 · 발견한 아이디어</h2>
+<span class="counter" id="mine-count">
+</span>
+</div>
+<div class="result">
+<div class="tag" id="mine-resultType">자유 조합</div>
+<p id="mine-result">채굴 버튼을 눌러봐.</p>
+</div>
+<div class="actions">
+<button class="btn primary" id="mine-save">☆ 발견 저장</button>
+<button class="btn" id="mine-copy">문장 복사</button>
+<button class="btn alt" id="mine-expand">↘ 다른 가능성 탐색</button>
+</div>
+</section>
+<section class="panel" id="mine-expPanel" hidden>
+<div class="sectionhead">
+<h2>4 · 아이디어 확장</h2>
+<button class="mini" id="mine-refreshExpand">질문 다시 뽑기</button>
+</div>
+<div class="expandGrid" id="mine-expGrid">
+</div>
+<p class="hint">완성된 줄거리가 아니라, 상상을 자극하는 질문들이야.</p>
+</section>
+<section class="panel">
+<div class="sectionhead">
+<h2>발견 보관함</h2>
+<span class="counter" id="mine-saveCount">
+</span>
+</div>
+<div class="saved" id="mine-saved">
+</div>
+<div class="actions">
+<button class="btn alt" id="mine-export">저장한 아이디어 내보내기 (.txt)</button>
+</div>
+<p class="hint">보관함은 이 브라우저에 저장돼. 다른 기기로 자동 동기화되지는 않아.</p>
+</section>
+<footer class="foot">문제 · 해결과 원인 역산은 실험 기능입니다. 재료의 조합을 발상의 씨앗으로 활용하세요.</footer>
+</main>
+</div>
 
 <!-- ══════════════════════════════════════
      스토리 구조 페이지
@@ -380,5 +468,7 @@
 <script src="data/world.js"></script>
 <script src="data/compass.js"></script>
 <script src="js/app.js"></script>
+<script src="data/idea-mine-materials.js"></script>
+<script src="js/idea-mine.js"></script>
 </body>
 </html>
