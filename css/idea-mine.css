@@ -176,10 +176,16 @@
 
 /* Page navigation keeps the workbench state and the shared storage intact. */
 #screen-idea-mine .mine-page[hidden] { display: none; }
-#screen-idea-mine .mine-landing { min-height: calc(100vh - 70px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); min-height: calc(100dvh - 70px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; }
-#screen-idea-mine .mine-landing > .mini { align-self: flex-start; }
-#screen-idea-mine .mine-hero { flex: 1; min-height: 100px; text-align: center; padding-top: 24px; }
-#screen-idea-mine .mine-menu { display: grid; gap: 8px; width: 100%; max-width: 420px; margin: 24px auto 0; }
+#screen-idea-mine .mine-landing {
+  position: relative;
+  min-height: calc(100vh - 51px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  min-height: calc(100dvh - 51px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  display: grid;
+  grid-template-rows: minmax(100px, 1fr) auto minmax(16px, 1fr);
+}
+#screen-idea-mine .mine-landing > .mini { position: absolute; top: 0; left: 0; }
+#screen-idea-mine .mine-hero { grid-row: 1; text-align: center; padding-top: 54px; }
+#screen-idea-mine .mine-menu { grid-row: 2; display: grid; gap: 8px; width: 100%; max-width: 420px; margin: 0 auto; }
 #screen-idea-mine .mine-menu button { min-height: 44px; }
 #screen-idea-mine .slot-tools { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 4px; }
 #screen-idea-mine .slot-tools .browse { margin: 0; min-height: 44px; padding: 4px; font-size: 24px; display: flex; align-items: center; justify-content: center; }
@@ -190,3 +196,27 @@
 #screen-idea-mine .mode-panel h2 { font-size: 11px; margin-bottom: 4px; }
 #screen-idea-mine .modes { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; }
 #screen-idea-mine .mode { flex: 0 0 auto; white-space: nowrap; min-height: 36px; padding: 4px 9px; }
+
+/* The middle row absorbs free space and contains the upward-opening library. */
+#screen-idea-mine #mine-page-mining {
+  display: grid;
+  height: calc(100vh - 51px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  height: calc(100dvh - 51px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  min-height: 480px;
+  grid-template-rows: auto minmax(16px, 1fr) auto auto auto;
+}
+#screen-idea-mine #mine-page-mining[hidden] { display: none; }
+#screen-idea-mine #mine-page-mining > .panel:first-child { grid-row: 1; margin-top: 0; }
+#screen-idea-mine #mine-library { grid-row: 2; min-height: 0; overflow: hidden; display: flex; flex-direction: column; margin: 4px 0; }
+#screen-idea-mine #mine-library[hidden] { display: none; }
+#screen-idea-mine .mining-workbench { grid-row: 3; }
+#screen-idea-mine .mining-actions { grid-row: 4; }
+#screen-idea-mine .mode-panel { grid-row: 5; margin-bottom: 0; }
+#screen-idea-mine #mine-page-mining:has(#mine-library:not([hidden])) { min-height: 660px; }
+#screen-idea-mine .libtop { flex-shrink: 0; }
+#screen-idea-mine .libgrid { flex: 1; min-height: 40px; max-height: none; align-content: start; }
+#screen-idea-mine .libtabs { flex-wrap: nowrap; overflow-x: auto; flex-shrink: 0; padding: 4px 0; margin: 0; }
+#screen-idea-mine .libtab { flex: 0 0 auto; white-space: nowrap; }
+#screen-idea-mine .libsearch { flex-shrink: 0; margin: 0; }
+#screen-idea-mine .libmeta { flex-shrink: 0; }
+#screen-idea-mine #mine-page-mining > * { min-width: 0; }

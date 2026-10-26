@@ -57,6 +57,37 @@
     showPage('refinery');
     if(refineryIdea) { expandOffset=0; expand(); }
   }
+  let dialogPending=false;
+  async function mineDialog(message, confirm=true) {
+    if(dialogPending)return false;
+    dialogPending=true;
+    const trigger=document.activeElement;
+    const overlay=document.getElementById('app-dialog-overlay');
+    const dialog=overlay.querySelector('.app-dialog');
+    const result=confirm?showAppConfirm(message):showAppNotice(message);
+    dialog.setAttribute('role','dialog');
+    dialog.setAttribute('aria-modal','true');
+    dialog.setAttribute('aria-describedby','app-dialog-msg');
+    dialog.setAttribute('aria-label',confirm?'확인':'설명 보기');
+    const buttons=[...overlay.querySelectorAll('button')];
+    function keydown(e) {
+      if(e.key==='Escape') { e.preventDefault(); e.stopImmediatePropagation(); closeAppDialog(false); }
+      if(e.key==='Tab') {
+        e.preventDefault();
+        const i=buttons.indexOf(document.activeElement);
+        buttons[(i+(e.shiftKey?-1:1)+buttons.length)%buttons.length].focus();
+      }
+    }
+    document.addEventListener('keydown',keydown,true);
+    buttons[0]?.focus({preventScroll:true});
+    try { return await result; }
+    finally {
+      document.removeEventListener('keydown',keydown,true);
+      for(const name of ['role','aria-modal','aria-describedby','aria-label'])dialog.removeAttribute(name);
+      dialogPending=false;
+      if(trigger?.isConnected)trigger.focus({preventScroll:true});
+    }
+  }
   function sample(arr,prev) {
     const alternatives=arr.filter(x=>x!==prev);
     const pool=alternatives.length?alternatives:arr;
@@ -180,10 +211,8 @@
     $('library').hidden=false;
     drawSlots();
     drawLibrary();
-    $('library').scrollIntoView( {
-      behavior:'smooth',block:'nearest'
-    }
-    )
+    // Keep the lower controls anchored; only the material list scrolls.
+
   }
   function closeLibrary() {
     const previous=activeField;
@@ -285,11 +314,12 @@
     $('expPanel').hidden=true;
     $('count').textContent=`채굴 ${rollCount}회`
   }
-  function save() {
+  async function save() {
     const idea=currentPage==='refinery'?refineryIdea:{text:$('result').textContent,mode,values:{...values},legacyObject};
     if(!idea)return;
     let text=idea.text;
     if(!text||text==='채굴을 시작해 주세요.')return;
+    if(!await mineDialog('이 아이디어를 저장하시겠습니까?'))return;
     let entry= {
       version:2,legacyObject:idea.legacyObject,
       id:Date.now()+'_'+Math.random().toString(36).slice(2,6),text,mode:idea.mode,values: {
@@ -366,7 +396,8 @@
       let del=document.createElement('button');
       del.className='mini';
       del.textContent='삭제';
-      del.onclick=()=> {
+      del.onclick=async()=> {
+        if(!await mineDialog('정말 삭제하시겠습니까?'))return;
         saves=saves.filter(x=>x.id!==entry.id);
         persist();
         drawSaved()
@@ -422,13 +453,6 @@
     )
   }
   $('roll').onclick=()=>reroll();
-  $('unlock').onclick=()=> {
-    locks= {}
-    ;
-    drawSlots();
-    notice('모든 잠금이 해제되었습니다.')
-  }
-  ;
   $('save').onclick=save;
   $('copy').onclick=()=>copyText($('result').textContent);
   $('expand').onclick=()=>openRefinery(true);
@@ -465,7 +489,7 @@
   $('home').onclick=()=>goHome();
   $('open-mining').onclick=()=>showPage('mining');
   $('back').onclick=()=>showPage('main');
-  $('open-guide').onclick=()=>showPage('guide');
+  $('open-guide').onclick=()=>mineDialog('설명 보기\n\n설명은 추후 추가될 예정입니다.',false);
   $('open-storage').onclick=()=> { drawSaved(); showPage('storage'); };
   $('open-refinery').onclick=()=>openRefinery(false);
   $('refineryBack').onclick=()=>showPage(refineryOrigin);

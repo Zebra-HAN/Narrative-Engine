@@ -62,7 +62,7 @@
     <button class="home-link pressable" id="btn-idea-mine">아이디어 광산</button>
     <button class="home-link pressable" id="btn-create" onclick="goToCreate()">창작 시작</button>
   </div>
-  <p class="home-version">v26.1026.1919</p>
+  <p class="home-version">v26.1026.1938</p>
 </div>
 
 
@@ -77,10 +77,6 @@
 <button id="mine-open-refinery">아이디어 제련소</button>
 <button class="btn primary" id="mine-open-mining">아이디어 채굴하기</button>
 </nav>
-</section>
-<section id="mine-page-guide" class="mine-page" hidden>
-<h1>설명 보기</h1><p class="hint">설명은 추후 추가될 예정입니다.</p>
-<button class="mini" data-mine-main>← 돌아가기</button>
 </section>
 <section id="mine-page-mining" class="mine-page" hidden>
 <section class="panel">
@@ -99,27 +95,23 @@
 <button class="btn alt" id="mine-expand">아이디어 제련하기</button>
 </div>
 </section>
-<section class="panel">
+<div class="library" id="mine-library" hidden>
+<div class="libtop">
+<strong id="mine-libTitle">재료 목록</strong>
+<button class="mini" id="mine-closeLibrary">닫기 ×</button>
+</div>
+<div class="libgrid" id="mine-libGrid"></div>
+<div class="libtabs" id="mine-libTabs"></div>
+<input class="libsearch" id="mine-libSearch" type="search" placeholder="재료 검색" aria-label="재료 검색">
+<p class="libmeta" id="mine-libMeta"></p>
+</div>
+<section class="panel mining-workbench">
 <div class="sectionhead">
 <h2>조합 작업대</h2>
 
 </div>
 <div class="slots" id="mine-slots">
 </div>
-<div class="library" id="mine-library" hidden>
-<div class="libtop">
-<strong id="mine-libTitle">재료 목록</strong>
-<button class="mini" id="mine-closeLibrary">닫기 ×</button>
-</div>
-<input class="libsearch" id="mine-libSearch" type="search" placeholder="재료 검색" aria-label="재료 검색">
-<div class="libtabs" id="mine-libTabs">
-</div>
-<div class="libgrid" id="mine-libGrid">
-</div>
-<p class="libmeta" id="mine-libMeta">
-</p>
-</div>
-<div class="actions"><button class="mini" id="mine-unlock">잠금 해제</button></div>
 </section>
 <div class="actions mining-actions">
 <button class="btn" id="mine-back">← 돌아가기</button>
