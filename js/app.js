@@ -5768,3 +5768,53 @@ function createPageTitleCard(group, subId, preparedAssets = null, groupCount = C
   });
   return frame;
 }
+
+
+// Home return is limited to top-level screens; existing trail swipes stay independent.
+(()=> {
+  let gesture=null, suppressClickUntil=0;
+  function eligibleScreen() {
+    if(document.querySelector('.app-dialog-overlay.active, .detail-overlay.active, .status-overlay.active') || isExtraMenuOpen())return null;
+    const screen=document.querySelector('.screen.active');
+    if(screen?.id==='screen-narrative')return screen;
+    if(screen?.id==='screen-idea-mine' && !document.getElementById('mine-page-main').hidden)return screen;
+    if(screen?.id==='screen-create' && !currentSubId && document.getElementById('page-default').classList.contains('active') && !canNavigateBackInTrail())return screen;
+    return null;
+  }
+  document.addEventListener('touchstart',e=> {
+    gesture=null;
+    if(e.touches.length!==1)return;
+    const screen=eligibleScreen();
+    if(!screen || e.target.closest('a, input, textarea, select, [contenteditable], .subnav-scroll, .nav-tab'))return;
+    const t=e.touches[0], rect=screen.getBoundingClientRect(), x=t.clientX-rect.left;
+    // Leave the outer 16px to Safari's native browser-history edge gesture.
+    if(x<18 || x>72)return;
+    gesture={screen,x:t.clientX,y:t.clientY,time:performance.now(),horizontal:false};
+  },{passive:true});
+  document.addEventListener('touchmove',e=> {
+    if(!gesture)return;
+    if(e.touches.length!==1 || eligibleScreen()!==gesture.screen) { gesture=null; return; }
+    const dx=e.touches[0].clientX-gesture.x, dy=e.touches[0].clientY-gesture.y;
+    if(!gesture.horizontal) {
+      if(Math.hypot(dx,dy)<12)return;
+      if(dx<=0 || Math.abs(dy)>dx*.6) { gesture=null; return; }
+      gesture.horizontal=true;
+    }
+    if(e.cancelable)e.preventDefault();
+  },{passive:false});
+  document.addEventListener('touchend',e=> {
+    const g=gesture;gesture=null;
+    if(!g || !g.horizontal || e.touches.length || eligibleScreen()!==g.screen)return;
+    const t=e.changedTouches[0];
+    if(!t)return;
+    const dx=t.clientX-g.x, dy=t.clientY-g.y;
+    if(dx>=70 && Math.abs(dy)<dx*.6 && performance.now()-g.time<1200) {
+      suppressClickUntil=performance.now()+400;
+      goHome();
+    }
+  },{passive:true});
+  document.addEventListener('touchcancel',()=>gesture=null,{passive:true});
+  document.addEventListener('click',e=> {
+    if(performance.now()<suppressClickUntil) { e.preventDefault();e.stopImmediatePropagation(); }
+  },true);
+})();

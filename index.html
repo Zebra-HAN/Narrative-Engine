@@ -62,17 +62,16 @@
     <button class="home-link pressable" id="btn-idea-mine">아이디어 광산</button>
     <button class="home-link pressable" id="btn-create" onclick="goToCreate()">창작 시작</button>
   </div>
-  <p class="home-version">v26.1026.2005</p>
+  <p class="home-version">v26.1026.2033</p>
 </div>
 
 
 <div id="screen-idea-mine" class="screen">
 <main class="mine-workbench">
 <section id="mine-page-main" class="mine-page mine-landing">
-<button class="mini" id="mine-home">← Narrative Builder 홈</button>
 <header class="mine-hero"><h1>아이디어 광산</h1></header>
 <nav class="mine-menu" aria-label="아이디어 광산 메뉴">
-<button id="mine-open-guide">설명 보기</button>
+<div class="mine-menu-row"><button id="mine-home">되돌아가기</button><button id="mine-open-guide">설명</button></div>
 <button id="mine-open-storage">저장 창고</button>
 <button id="mine-open-refinery">아이디어 제련소</button>
 <button class="btn primary" id="mine-open-mining">아이디어 채굴하기</button>
@@ -80,7 +79,7 @@
 </section>
 <section id="mine-page-mining" class="mine-page" hidden>
 <div id="mine-content" class="mine-content" role="region" aria-label="아이디어와 재료 목록" tabindex="0">
-<section class="panel">
+<section class="panel mine-discovery" id="mine-discovery">
 <div class="sectionhead">
 <h2>발견한 아이디어</h2>
 <span class="counter" id="mine-count">
@@ -99,17 +98,16 @@
 <div class="library" id="mine-library" hidden>
 <div class="libtop">
 <strong id="mine-libTitle">재료 목록</strong>
-<button class="mini" id="mine-closeLibrary">닫기 ×</button>
 </div>
 <div class="libgrid" id="mine-libGrid"></div>
-<div class="libtabs" id="mine-libTabs"></div>
 <input class="libsearch" id="mine-libSearch" type="search" placeholder="재료 검색" aria-label="재료 검색">
 <p class="libmeta" id="mine-libMeta"></p>
+<div class="library-footer"><div class="libtabs" id="mine-libTabs"></div><button class="mini" id="mine-closeLibrary">X 닫기</button></div>
 </div>
 </div>
 <div class="mine-dock" aria-label="채굴 조작">
 <section class="panel mode-panel"><h2>채굴 방식</h2><div class="modes" id="mine-modes"></div></section>
-<div class="actions mining-actions">
+<div class="actions mining-actions" id="mine-miningActions">
 <button class="btn" id="mine-back">← 돌아가기</button>
 <button class="btn primary" id="mine-roll">✦ 채굴하기</button>
 </div>
