@@ -293,3 +293,7 @@
 }
 #screen-idea-mine .mine-menu .menu-arrow { width: 14px; height: 14px; }
 #screen-idea-mine .mine-landing .mine-menu button:focus-visible { outline: 3px solid #4b2918; outline-offset: 3px; }
+
+/* Hide only the mining-mode scrollbar, retaining native horizontal panning. */
+#screen-idea-mine .modes { scrollbar-width: none; -ms-overflow-style: none; }
+#screen-idea-mine .modes::-webkit-scrollbar { display: none; width: 0; height: 0; }

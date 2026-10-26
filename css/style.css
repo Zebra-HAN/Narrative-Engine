@@ -935,7 +935,7 @@ body::after {
       opacity: 0 !important;
       transition: none;
     }
-    .center-area::before {
+    .center-area::before, .home-return-cue {
       content: '';
       position: absolute;
       left: 12px;
@@ -955,7 +955,7 @@ body::after {
       transform: translate(-14px, -50%);
       transition: opacity 0.16s ease, transform 0.16s ease;
     }
-    .center-area.is-back-swiping::before {
+    .center-area.is-back-swiping::before, .screen.is-home-swiping > .home-return-cue {
       opacity: 1;
       transform: translate(0, -50%);
     }
@@ -3656,3 +3656,6 @@ body {
 .group-layout-list:has(> .group-select-btn:nth-child(3):last-child) > .group-select-btn {
   min-height: 140.4px;
 }
+
+/* Same cue as hierarchy back-swipes, above the root screen contents. */
+.home-return-cue { z-index: 140; }

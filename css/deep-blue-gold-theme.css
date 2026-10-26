@@ -703,7 +703,7 @@
 .detail-icon.main-image-selectable { cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .detail-icon.main-image-selectable .detail-card-img { opacity: 1; filter: none; }
 .detail-icon.main-image-selectable[aria-disabled="true"] { cursor: default; }
-.center-area::before, .center-area::after {
+.center-area::before, .center-area::after, .home-return-cue {
   width: 35px;
   height: 35px;
   border: 1px solid #d0b88a;
