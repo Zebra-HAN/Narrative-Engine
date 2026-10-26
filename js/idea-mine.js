@@ -41,12 +41,12 @@
   }
   const content=$('content');
   const modePanel=document.querySelector('#screen-idea-mine .mode-panel');
-  const contentObserver=new ResizeObserver(()=> {
-    content.style.setProperty('--mine-content-height',content.clientHeight+'px');
-  });
-  contentObserver.observe(content);
+  const miningPage=$('page-mining');
   function resetLibraryLayout() {
+    miningPage.classList.remove('is-selecting');
+    $('discovery').hidden=false;
     modePanel.hidden=false;
+    $('miningActions').hidden=false;
     content.scrollTop=0;
   }
   let currentPage='main', refineryIdea=null, refineryOrigin='main';
@@ -223,16 +223,13 @@
     $('library').hidden=false;
     drawSlots();
     drawLibrary();
+    miningPage.classList.add('is-selecting');
+    $('discovery').hidden=true;
     modePanel.hidden=true;
+    $('miningActions').hidden=true;
+    content.scrollTop=0;
     $('libGrid').scrollTop=0;
-    // Align the large library with the scrolling viewport, keeping the result above it.
-    requestAnimationFrame(()=> {
-      if(activeField===key&&!$('library').hidden) {
-        content.style.setProperty('--mine-content-height',content.clientHeight+'px');
-        content.scrollTop=$('library').offsetTop-content.offsetTop;
-        $('closeLibrary').focus({preventScroll:true});
-      }
-    });
+    $('closeLibrary').focus({preventScroll:true});
 
   }
   function closeLibrary() {
