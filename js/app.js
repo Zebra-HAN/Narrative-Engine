@@ -5770,9 +5770,15 @@ function createPageTitleCard(group, subId, preparedAssets = null, groupCount = C
 }
 
 
-// Home return is limited to top-level screens; existing trail swipes stay independent.
+// Root-only home return shares the hierarchy swipe's cue and distance/flick rules.
 (()=> {
   let gesture=null, suppressClickUntil=0;
+  for(const id of ['screen-idea-mine','screen-create','screen-narrative']) {
+    const cue=document.createElement('span');
+    cue.className='home-return-cue';
+    cue.setAttribute('aria-hidden','true');
+    document.getElementById(id).appendChild(cue);
+  }
   function eligibleScreen() {
     if(document.querySelector('.app-dialog-overlay.active, .detail-overlay.active, .status-overlay.active') || isExtraMenuOpen())return null;
     const screen=document.querySelector('.screen.active');
@@ -5781,39 +5787,56 @@ function createPageTitleCard(group, subId, preparedAssets = null, groupCount = C
     if(screen?.id==='screen-create' && !currentSubId && document.getElementById('page-default').classList.contains('active') && !canNavigateBackInTrail())return screen;
     return null;
   }
-  document.addEventListener('touchstart',e=> {
+  function resetGesture() {
+    gesture?.screen.classList.remove('is-home-swiping');
     gesture=null;
+  }
+  function horizontalControl(target,screen) {
+    if(target.closest('a, input, textarea, select, [contenteditable], .subnav-scroll, #bottom-nav'))return true;
+    for(let node=target;node&&node!==screen;node=node.parentElement) {
+      if(node.scrollWidth>node.clientWidth+1 && /^(auto|scroll)$/.test(getComputedStyle(node).overflowX))return true;
+    }
+    return false;
+  }
+  document.addEventListener('touchstart',e=> {
+    resetGesture();
     if(e.touches.length!==1)return;
     const screen=eligibleScreen();
-    if(!screen || e.target.closest('a, input, textarea, select, [contenteditable], .subnav-scroll, .nav-tab'))return;
-    const t=e.touches[0], rect=screen.getBoundingClientRect(), x=t.clientX-rect.left;
-    // Leave the outer 16px to Safari's native browser-history edge gesture.
-    if(x<18 || x>72)return;
-    gesture={screen,x:t.clientX,y:t.clientY,time:performance.now(),horizontal:false};
+    if(!screen || !screen.contains(e.target) || horizontalControl(e.target,screen))return;
+    const t=e.touches[0], rect=screen.getBoundingClientRect();
+    // Preserve Safari's native outer-edge history gesture, without an inner edge band.
+    if(t.clientX-rect.left<16)return;
+    gesture={screen,x:t.clientX,y:t.clientY,time:performance.now(),horizontal:false,furthest:0};
   },{passive:true});
   document.addEventListener('touchmove',e=> {
     if(!gesture)return;
-    if(e.touches.length!==1 || eligibleScreen()!==gesture.screen) { gesture=null; return; }
+    if(e.touches.length!==1 || eligibleScreen()!==gesture.screen) { resetGesture(); return; }
     const dx=e.touches[0].clientX-gesture.x, dy=e.touches[0].clientY-gesture.y;
     if(!gesture.horizontal) {
-      if(Math.hypot(dx,dy)<12)return;
-      if(dx<=0 || Math.abs(dy)>dx*.6) { gesture=null; return; }
+      if(Math.hypot(dx,dy)<6)return;
+      if(dx<=0 || dx<Math.abs(dy)*1.15) { resetGesture(); return; }
       gesture.horizontal=true;
+      gesture.screen.classList.add('is-home-swiping');
+      gesture.screen.querySelectorAll('.is-pressing').forEach(n=>n.classList.remove('is-pressing'));
     }
+    gesture.furthest=Math.max(gesture.furthest,dx);
     if(e.cancelable)e.preventDefault();
   },{passive:false});
   document.addEventListener('touchend',e=> {
-    const g=gesture;gesture=null;
+    const g=gesture;
+    resetGesture();
     if(!g || !g.horizontal || e.touches.length || eligibleScreen()!==g.screen)return;
+    // A horizontal drag must not become a button click, even when it falls short.
+    suppressClickUntil=performance.now()+400;
     const t=e.changedTouches[0];
     if(!t)return;
-    const dx=t.clientX-g.x, dy=t.clientY-g.y;
-    if(dx>=70 && Math.abs(dy)<dx*.6 && performance.now()-g.time<1200) {
-      suppressClickUntil=performance.now()+400;
-      goHome();
-    }
+    const elapsed=Math.max(1,performance.now()-g.time);
+    const threshold=Math.max(52,Math.min(80,g.screen.clientWidth*.14));
+    const fast=g.furthest>=28 && g.furthest/elapsed>=.35;
+    if(Math.abs(t.clientY-g.y)<g.furthest*1.5 && (g.furthest>=threshold||fast))goHome();
   },{passive:true});
-  document.addEventListener('touchcancel',()=>gesture=null,{passive:true});
+  document.addEventListener('touchcancel',resetGesture,{passive:true});
+  window.addEventListener('blur',resetGesture);
   document.addEventListener('click',e=> {
     if(performance.now()<suppressClickUntil) { e.preventDefault();e.stopImmediatePropagation(); }
   },true);

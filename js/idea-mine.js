@@ -125,8 +125,7 @@
     mode=i;
     legacyObject=null;
     loadedResult=null;
-    values= {}
-    ;
+    values=Object.fromEntries(modes[mode].fields.map(([key])=>[key,'']));
     locks= {}
     ;
     activeField=null;
@@ -135,7 +134,8 @@
     expandOffset=0;
     $('expPanel').hidden=true;
     drawModes();
-    reroll(true)
+    drawSlots();
+    renderResult()
   }
   function catalogCategory(key,word) {
     return window.IdeaMineCatalog.materials.find(x=>x.name===word&&x.roles.includes(key)&&(!x.modes||x.modes.includes(modes[mode].id)))?.category||'기타'
@@ -196,8 +196,11 @@
       single.disabled=!!locks[key];
       single.onclick=()=> {
         if(locks[key])return;
+        const pool=modes[mode].fields.find(f=>f[0]===key)[2];
+        if(!pool.length)return;
         loadedResult=null;
-        values[key]=sample(modes[mode].fields.find(f=>f[0]===key)[2],values[key]);
+        values[key]=sample(pool,values[key]);
+        rollCount++;
         if(key==='object')legacyObject=null;
         drawSlots();
         renderResult()
@@ -299,11 +302,11 @@
   }
   $('closeLibrary').onclick=closeLibrary;
   $('libSearch').oninput=drawLibrary;
-  function reroll(force=false) {
+  function reroll() {
     if(activeField!==null)closeLibrary();
     let count=0;
     modes[mode].fields.forEach(([key,,pool])=> {
-      if(force||!locks[key]) {
+      if(!locks[key]&&pool.length) {
         loadedResult=null;
         values[key]=sample(pool,values[key]);
         if(key==='object')legacyObject=null;
@@ -325,7 +328,9 @@
     $('resultType').textContent=m.name;
     // Preserve saved wording exactly while its restored materials are unchanged.
     const unchanged=loadedResult&&m.fields.every(([key])=>values[key]===loadedResult.values[key]);
-    $('result').textContent=unchanged?loadedResult.text:m.build(values);
+    const hasIdea=Boolean(unchanged||m.fields.some(([key])=>values[key]?.trim()));
+    $('result').textContent=unchanged?loadedResult.text:hasIdea?m.build(values):'채굴을 시작해 주세요.';
+    for(const id of ['save','copy','expand'])$(id).disabled=!hasIdea;
     $('expPanel').hidden=true;
     $('count').textContent=`채굴 ${rollCount}회`
   }
@@ -504,7 +509,6 @@
   $('back').onclick=()=>showPage('main');
   $('open-guide').onclick=()=>mineDialog('설명 보기\n\n설명은 추후 추가될 예정입니다.',false);
   $('open-storage').onclick=()=> { drawSaved(); showPage('storage'); };
-  $('open-refinery').onclick=()=>openRefinery(false);
   $('refineryBack').onclick=()=>showPage(refineryOrigin);
   document.querySelectorAll('[data-mine-main]').forEach(b=>b.onclick=()=>showPage('main'));
   $('library').addEventListener('keydown',e=> {
