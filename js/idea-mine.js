@@ -39,6 +39,24 @@
   catch(e) {
     saves=[]
   }
+  let currentPage='main', refineryIdea=null, refineryOrigin='main';
+  function showPage(page) {
+    currentPage=page;
+    document.querySelectorAll('#screen-idea-mine .mine-page').forEach(n=>n.hidden=n.id!=='mine-page-'+page);
+    $('notice').textContent='';
+    switchScreen('screen-idea-mine',null,{type:'instant'});
+    document.getElementById('screen-idea-mine').scrollTop=0;
+  }
+  function openRefinery(fromMining) {
+    refineryOrigin=fromMining?'mining':'main';
+    refineryIdea=fromMining?{text:$('result').textContent,mode,values:{...values},legacyObject}:null;
+    $('refineryResult').textContent=refineryIdea?.text||'전달된 아이디어가 없습니다.';
+    $('refineryType').textContent=refineryIdea?modes[refineryIdea.mode].name:'';
+    $('refinerySave').disabled=$('refineryExpand').disabled=!refineryIdea;
+    $('expPanel').hidden=true;
+    showPage('refinery');
+    if(refineryIdea) { expandOffset=0; expand(); }
+  }
   function sample(arr,prev) {
     const alternatives=arr.filter(x=>x!==prev);
     const pool=alternatives.length?alternatives:arr;
@@ -123,13 +141,15 @@
       ;
       let browse=document.createElement('button');
       browse.className='browse';
-      browse.textContent='▦ 목록 선택';
-      browse.setAttribute('aria-label',label+' 목록 열기');
+      browse.innerHTML='<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/></svg>';
+      browse.setAttribute('aria-label','목록 선택');
+      browse.title=label+' 목록 선택';
       browse.onclick=()=>openLibrary(key);
       let single=document.createElement('button');
       single.className='browse';
-      single.textContent='↻ 재추첨';
-      single.setAttribute('aria-label',label+' 재추첨');
+      single.textContent='↻';
+      single.setAttribute('aria-label','재추첨');
+      single.title=label+' 재추첨';
       single.disabled=!!locks[key];
       single.onclick=()=> {
         if(locks[key])return;
@@ -141,7 +161,10 @@
       }
       ;
       lock.setAttribute('aria-pressed',String(!!locks[key]));
-      d.append(head,input,browse,single);
+      const tools=document.createElement('div');
+      tools.className='slot-tools';
+      tools.append(browse,single);
+      d.append(head,input,tools);
       parent.appendChild(d)
     }
     )
@@ -263,12 +286,14 @@
     $('count').textContent=`채굴 ${rollCount}회`
   }
   function save() {
-    let text=$('result').textContent;
+    const idea=currentPage==='refinery'?refineryIdea:{text:$('result').textContent,mode,values:{...values},legacyObject};
+    if(!idea)return;
+    let text=idea.text;
     if(!text||text==='채굴을 시작해 주세요.')return;
     let entry= {
-      version:2,legacyObject,
-      id:Date.now()+'_'+Math.random().toString(36).slice(2,6),text,mode:mode,values: {
-        ...values
+      version:2,legacyObject:idea.legacyObject,
+      id:Date.now()+'_'+Math.random().toString(36).slice(2,6),text,mode:idea.mode,values: {
+        ...idea.values
       }
       ,time:new Date().toLocaleString('ko-KR', {
         timeZone:'Asia/Tokyo'
@@ -327,6 +352,7 @@
         drawSlots();
         renderResult();
         $('expPanel').hidden=true;
+        showPage('mining');
         document.getElementById('screen-idea-mine').scrollTo( {
           top:0,behavior:'smooth'
         }
@@ -405,11 +431,9 @@
   ;
   $('save').onclick=save;
   $('copy').onclick=()=>copyText($('result').textContent);
-  $('expand').onclick=()=> {
-    expandOffset=0;
-    expand()
-  }
-  ;
+  $('expand').onclick=()=>openRefinery(true);
+  $('refinerySave').onclick=save;
+  $('refineryExpand').onclick=()=> { if(refineryIdea)expand(); };
   $('refreshExpand').onclick=()=> {
     expandOffset=(expandOffset+5)%questions.length;
     expand()
@@ -437,11 +461,15 @@
   ;
   drawSaved();
   switchMode(0);
-  document.getElementById('btn-idea-mine').onclick=()=>switchScreen('screen-idea-mine',null, {
-    type:'instant'
-  }
-  );
-  document.getElementById('mine-home').onclick=()=>goHome();
+  document.getElementById('btn-idea-mine').onclick=()=>showPage('main');
+  $('home').onclick=()=>goHome();
+  $('open-mining').onclick=()=>showPage('mining');
+  $('back').onclick=()=>showPage('main');
+  $('open-guide').onclick=()=>showPage('guide');
+  $('open-storage').onclick=()=> { drawSaved(); showPage('storage'); };
+  $('open-refinery').onclick=()=>openRefinery(false);
+  $('refineryBack').onclick=()=>showPage(refineryOrigin);
+  document.querySelectorAll('[data-mine-main]').forEach(b=>b.onclick=()=>showPage('main'));
   $('library').addEventListener('keydown',e=> {
     if(e.key==='Escape')closeLibrary()
   }

@@ -62,30 +62,47 @@
     <button class="home-link pressable" id="btn-idea-mine">아이디어 광산</button>
     <button class="home-link pressable" id="btn-create" onclick="goToCreate()">창작 시작</button>
   </div>
-  <p class="home-version">v26.1020.2220</p>
+  <p class="home-version">v26.1026.1919</p>
 </div>
 
 
 <div id="screen-idea-mine" class="screen">
 <main class="mine-workbench">
-<button class="mini" id="mine-home">← 홈으로</button>
-<header class="top">
-<div class="eyebrow">NARRATIVE BUILDER</div>
-<h1>⛏ 아이디어 광산</h1>
-<div class="subtitle">발견 · 잠금 · 재조합 · 확장</div>
-</header>
+<section id="mine-page-main" class="mine-page mine-landing">
+<button class="mini" id="mine-home">← Narrative Builder 홈</button>
+<header class="mine-hero"><h1>아이디어 광산</h1></header>
+<nav class="mine-menu" aria-label="아이디어 광산 메뉴">
+<button id="mine-open-guide">설명 보기</button>
+<button id="mine-open-storage">저장 창고</button>
+<button id="mine-open-refinery">아이디어 제련소</button>
+<button class="btn primary" id="mine-open-mining">아이디어 채굴하기</button>
+</nav>
+</section>
+<section id="mine-page-guide" class="mine-page" hidden>
+<h1>설명 보기</h1><p class="hint">설명은 추후 추가될 예정입니다.</p>
+<button class="mini" data-mine-main>← 돌아가기</button>
+</section>
+<section id="mine-page-mining" class="mine-page" hidden>
 <section class="panel">
 <div class="sectionhead">
-<h2>1 · 채굴 방식</h2>
-<span class="hint">원하는 발상 방향을 선택</span>
+<h2>발견한 아이디어</h2>
+<span class="counter" id="mine-count">
+</span>
 </div>
-<div class="modes" id="mine-modes">
+<div class="result">
+<div class="tag" id="mine-resultType">자유 조합</div>
+<p id="mine-result">채굴을 시작해 주세요.</p>
+</div>
+<div class="actions">
+<button class="btn primary" id="mine-save">저장하기</button>
+<button class="btn" id="mine-copy">문장 복사</button>
+<button class="btn alt" id="mine-expand">아이디어 제련하기</button>
 </div>
 </section>
 <section class="panel">
 <div class="sectionhead">
-<h2>2 · 조합 작업대</h2>
-<span class="hint">목록에서 선택 · 직접 수정 · 잠금</span>
+<h2>조합 작업대</h2>
+
 </div>
 <div class="slots" id="mine-slots">
 </div>
@@ -102,42 +119,34 @@
 <p class="libmeta" id="mine-libMeta">
 </p>
 </div>
-<div class="actions">
+<div class="actions"><button class="mini" id="mine-unlock">잠금 해제</button></div>
+</section>
+<div class="actions mining-actions">
+<button class="btn" id="mine-back">← 돌아가기</button>
 <button class="btn primary" id="mine-roll">✦ 채굴하기</button>
-<button class="btn alt" id="mine-unlock">잠금 해제</button>
 </div>
-<p class="hint mining-hint">잠금된 재료는 유지됩니다.</p>
-<div class="toast" id="mine-notice" role="status" aria-live="polite">
-</div>
+<section class="panel mode-panel"><h2>채굴 방식</h2><div class="modes" id="mine-modes"></div></section>
 </section>
-<section class="panel">
-<div class="sectionhead">
-<h2>3 · 발견한 아이디어</h2>
-<span class="counter" id="mine-count">
-</span>
-</div>
-<div class="result">
-<div class="tag" id="mine-resultType">자유 조합</div>
-<p id="mine-result">채굴을 시작해 주세요.</p>
-</div>
-<div class="actions">
-<button class="btn primary" id="mine-save">☆ 발견 저장</button>
-<button class="btn" id="mine-copy">문장 복사</button>
-<button class="btn alt" id="mine-expand">↘ 다른 가능성 탐색</button>
-</div>
-</section>
+<section id="mine-page-refinery" class="mine-page" hidden>
+<h1>아이디어 제련소</h1>
+<div class="result"><div class="tag" id="mine-refineryType"></div><p id="mine-refineryResult">전달된 아이디어가 없습니다.</p></div>
+<div class="actions"><button class="btn primary" id="mine-refinerySave" disabled>저장하기</button>
+<button class="btn" id="mine-refineryExpand" disabled>다른 가능성 탐색</button></div>
 <section class="panel" id="mine-expPanel" hidden>
 <div class="sectionhead">
-<h2>4 · 아이디어 확장</h2>
+<h2>다른 가능성 탐색</h2>
 <button class="mini" id="mine-refreshExpand">질문 다시 뽑기</button>
 </div>
 <div class="expandGrid" id="mine-expGrid">
 </div>
 <p class="hint">아이디어 확장을 위한 질문입니다.</p>
 </section>
+<div class="actions"><button class="mini" id="mine-refineryBack">← 돌아가기</button></div>
+</section>
+<section id="mine-page-storage" class="mine-page" hidden>
 <section class="panel">
 <div class="sectionhead">
-<h2>발견 보관함</h2>
+<h2>저장 창고</h2>
 <span class="counter" id="mine-saveCount">
 </span>
 </div>
@@ -148,7 +157,9 @@
 </div>
 <p class="hint">아이디어는 현재 브라우저에 저장됩니다. 다른 기기와 자동으로 동기화되지 않습니다.</p>
 </section>
-<footer class="foot">문제 · 해결과 원인 역산은 실험 기능입니다. 조합 결과는 아이디어 발상을 위한 재료입니다.</footer>
+<button class="mini" data-mine-main>← 돌아가기</button>
+</section>
+<div class="toast" id="mine-notice" role="status" aria-live="polite"></div>
 </main>
 </div>
 
