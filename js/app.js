@@ -300,10 +300,7 @@ function initUiSounds() {
 
     // 완료된 `click`에서만 피드백을 재생한다. 특히 pointerdown/touchstart는 손가락이
     // 닿는 즉시뿐 아니라 스크롤이나 길게 누르기를 시작할 때도 발생하므로 사용하지 않는다.
-    if (target.matches('#btn-create')) {
-      // 코드로 실행한 이동이나 합성 클릭에서는 시작 효과음을 재생하지 않는다.
-      if (event.isTrusted) UI_SOUND.play('start');
-    } else if (target.matches('.detail-close, .status-close, #detail-overlay, #status-overlay, #card-minimap-toggle, .page-title-card')) {
+    if (target.matches('.detail-close, .status-close, #detail-overlay, #status-overlay, #card-minimap-toggle, .page-title-card')) {
       // Opening/closing feedback belongs to the actual overlay transition.
       return;
     } else if (target.matches('#detail-icon, #detail-desc')) {
