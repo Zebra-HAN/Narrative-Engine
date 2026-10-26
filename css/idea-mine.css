@@ -297,3 +297,9 @@
 /* Hide only the mining-mode scrollbar, retaining native horizontal panning. */
 #screen-idea-mine .modes { scrollbar-width: none; -ms-overflow-style: none; }
 #screen-idea-mine .modes::-webkit-scrollbar { display: none; width: 0; height: 0; }
+
+/* Hide material-picker scrollbars while retaining native scrolling on both axes. */
+#screen-idea-mine #mine-library .libgrid,
+#screen-idea-mine #mine-library .libtabs { scrollbar-width: none; -ms-overflow-style: none; }
+#screen-idea-mine #mine-library .libgrid::-webkit-scrollbar,
+#screen-idea-mine #mine-library .libtabs::-webkit-scrollbar { display: none; width: 0; height: 0; }
