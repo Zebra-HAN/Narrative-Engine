@@ -244,3 +244,52 @@
   #screen-idea-mine .is-selecting .libsearch { min-height: 32px; padding: 3px; }
   #screen-idea-mine .is-selecting .libitem { min-height: 36px; padding: 4px; }
 }
+
+/* Artwork and capsule controls belong only to the mine landing page. */
+#screen-idea-mine .mine-landing::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: url('../images/core/mine/idea-mine-bg.jpg') center center / cover no-repeat;
+}
+#screen-idea-mine .mine-landing .mine-hero { padding-top: clamp(10px, 3vh, 24px); }
+#screen-idea-mine .mine-landing .mine-hero h1 { margin: 0; }
+#screen-idea-mine .mine-hero img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 82%;
+  max-height: 28vh;
+  max-height: 28dvh;
+  margin-inline: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 4px #3a240b40);
+}
+#screen-idea-mine .mine-landing .mine-menu button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border: 1.5px solid #fff9e5;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fffaf0, #f7ecd7);
+  color: #4b2918;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: inset 0 1px 2px #ffffffd9, 0 3px 0 #58371e33, 0 5px 12px #38240f26;
+  text-shadow: 0 1px 0 #ffffff6b;
+}
+#screen-idea-mine .mine-landing .mine-menu-row button { gap: 4px; padding-inline: 4px; font-size: 11px; }
+#screen-idea-mine .mine-menu .menu-icon { width: 22px; height: 22px; flex: 0 0 auto; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+#screen-idea-mine .mine-menu-row .menu-icon { width: 17px; height: 17px; }
+#screen-idea-mine .mine-landing #mine-open-mining {
+  min-height: 46px;
+  background: linear-gradient(180deg, #ffe985, #ffd14a);
+  border-color: #fff1ad;
+  box-shadow: inset 0 2px 2px #fff8c3e6, 0 4px 0 #a66c2059, 0 6px 14px #50320f38;
+}
+#screen-idea-mine .mine-menu .menu-arrow { width: 14px; height: 14px; }
+#screen-idea-mine .mine-landing .mine-menu button:focus-visible { outline: 3px solid #4b2918; outline-offset: 3px; }
