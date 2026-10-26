@@ -39,6 +39,16 @@
   catch(e) {
     saves=[]
   }
+  const content=$('content');
+  const modePanel=document.querySelector('#screen-idea-mine .mode-panel');
+  const contentObserver=new ResizeObserver(()=> {
+    content.style.setProperty('--mine-content-height',content.clientHeight+'px');
+  });
+  contentObserver.observe(content);
+  function resetLibraryLayout() {
+    modePanel.hidden=false;
+    content.scrollTop=0;
+  }
   let currentPage='main', refineryIdea=null, refineryOrigin='main';
   function showPage(page) {
     currentPage=page;
@@ -46,6 +56,7 @@
     $('notice').textContent='';
     switchScreen('screen-idea-mine',null,{type:'instant'});
     document.getElementById('screen-idea-mine').scrollTop=0;
+    if(page==='mining' && $('library').hidden)resetLibraryLayout();
   }
   function openRefinery(fromMining) {
     refineryOrigin=fromMining?'mining':'main';
@@ -120,6 +131,7 @@
     ;
     activeField=null;
     $('library').hidden=true;
+    resetLibraryLayout();
     expandOffset=0;
     $('expPanel').hidden=true;
     drawModes();
@@ -211,13 +223,23 @@
     $('library').hidden=false;
     drawSlots();
     drawLibrary();
-    // Keep the lower controls anchored; only the material list scrolls.
+    modePanel.hidden=true;
+    $('libGrid').scrollTop=0;
+    // Align the large library with the scrolling viewport, keeping the result above it.
+    requestAnimationFrame(()=> {
+      if(activeField===key&&!$('library').hidden) {
+        content.style.setProperty('--mine-content-height',content.clientHeight+'px');
+        content.scrollTop=$('library').offsetTop-content.offsetTop;
+        $('closeLibrary').focus({preventScroll:true});
+      }
+    });
 
   }
   function closeLibrary() {
     const previous=activeField;
     activeField=null;
     $('library').hidden=true;
+    resetLibraryLayout();
     drawSlots();
     if(previous) {
       const i=modes[mode].fields.findIndex(f=>f[0]===previous);
@@ -225,10 +247,6 @@
         preventScroll:true
       }
       );
-      $('slots').children[i]?.scrollIntoView( {
-        block:'nearest'
-      }
-      )
     }
   }
   function drawLibrary() {
@@ -378,6 +396,7 @@
         locks=Object.fromEntries(modes[mode].fields.map(([k])=>[k,true]));
         activeField=null;
         $('library').hidden=true;
+        resetLibraryLayout();
         drawModes();
         drawSlots();
         renderResult();
@@ -447,10 +466,7 @@
       box.appendChild(d)
     }
     $('expPanel').hidden=false;
-    $('expPanel').scrollIntoView( {
-      behavior:'smooth',block:'nearest'
-    }
-    )
+    // Keep the idea at the start of the refinery reading area on entry.
   }
   $('roll').onclick=()=>reroll();
   $('save').onclick=save;

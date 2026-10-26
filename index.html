@@ -62,7 +62,7 @@
     <button class="home-link pressable" id="btn-idea-mine">아이디어 광산</button>
     <button class="home-link pressable" id="btn-create" onclick="goToCreate()">창작 시작</button>
   </div>
-  <p class="home-version">v26.1026.1938</p>
+  <p class="home-version">v26.1026.2005</p>
 </div>
 
 
@@ -79,6 +79,7 @@
 </nav>
 </section>
 <section id="mine-page-mining" class="mine-page" hidden>
+<div id="mine-content" class="mine-content" role="region" aria-label="아이디어와 재료 목록" tabindex="0">
 <section class="panel">
 <div class="sectionhead">
 <h2>발견한 아이디어</h2>
@@ -105,6 +106,13 @@
 <input class="libsearch" id="mine-libSearch" type="search" placeholder="재료 검색" aria-label="재료 검색">
 <p class="libmeta" id="mine-libMeta"></p>
 </div>
+</div>
+<div class="mine-dock" aria-label="채굴 조작">
+<section class="panel mode-panel"><h2>채굴 방식</h2><div class="modes" id="mine-modes"></div></section>
+<div class="actions mining-actions">
+<button class="btn" id="mine-back">← 돌아가기</button>
+<button class="btn primary" id="mine-roll">✦ 채굴하기</button>
+</div>
 <section class="panel mining-workbench">
 <div class="sectionhead">
 <h2>조합 작업대</h2>
@@ -113,17 +121,12 @@
 <div class="slots" id="mine-slots">
 </div>
 </section>
-<div class="actions mining-actions">
-<button class="btn" id="mine-back">← 돌아가기</button>
-<button class="btn primary" id="mine-roll">✦ 채굴하기</button>
 </div>
-<section class="panel mode-panel"><h2>채굴 방식</h2><div class="modes" id="mine-modes"></div></section>
 </section>
-<section id="mine-page-refinery" class="mine-page" hidden>
+<section id="mine-page-refinery" class="mine-page mine-balanced" hidden>
+<div class="mine-balanced-content">
 <h1>아이디어 제련소</h1>
 <div class="result"><div class="tag" id="mine-refineryType"></div><p id="mine-refineryResult">전달된 아이디어가 없습니다.</p></div>
-<div class="actions"><button class="btn primary" id="mine-refinerySave" disabled>저장하기</button>
-<button class="btn" id="mine-refineryExpand" disabled>다른 가능성 탐색</button></div>
 <section class="panel" id="mine-expPanel" hidden>
 <div class="sectionhead">
 <h2>다른 가능성 탐색</h2>
@@ -133,10 +136,13 @@
 </div>
 <p class="hint">아이디어 확장을 위한 질문입니다.</p>
 </section>
-<div class="actions"><button class="mini" id="mine-refineryBack">← 돌아가기</button></div>
+</div>
+<div class="actions mine-page-actions"><button class="btn primary" id="mine-refinerySave" disabled>저장하기</button>
+<button class="btn" id="mine-refineryExpand" disabled>다른 가능성 탐색</button><button class="mini" id="mine-refineryBack">← 돌아가기</button></div>
+
 </section>
-<section id="mine-page-storage" class="mine-page" hidden>
-<section class="panel">
+<section id="mine-page-storage" class="mine-page mine-balanced" hidden>
+<section class="panel mine-balanced-content">
 <div class="sectionhead">
 <h2>저장 창고</h2>
 <span class="counter" id="mine-saveCount">
@@ -144,12 +150,13 @@
 </div>
 <div class="saved" id="mine-saved">
 </div>
-<div class="actions">
-<button class="btn alt" id="mine-export">저장한 아이디어 내보내기 (.txt)</button>
-</div>
 <p class="hint">아이디어는 현재 브라우저에 저장됩니다. 다른 기기와 자동으로 동기화되지 않습니다.</p>
 </section>
+<div class="actions mine-page-actions">
+<button class="btn alt" id="mine-export">저장한 아이디어 내보내기 (.txt)</button>
 <button class="mini" data-mine-main>← 돌아가기</button>
+</div>
+
 </section>
 <div class="toast" id="mine-notice" role="status" aria-live="polite"></div>
 </main>
