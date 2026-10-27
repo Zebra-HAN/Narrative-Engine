@@ -3663,5 +3663,5 @@ body {
 /* Translate the complete source canvas above an inert previous-page preview. */
 .screen.back-motion-source { z-index: 150 !important; will-change: transform; box-shadow: -8px 0 24px #0003; }
 
-/* Home-return gestures move only the existing arrow plate, never the screen. */
-.screen.is-home-swiping > .home-return-cue { transform: translate(var(--home-cue-offset, 0px), -50%); }
+/* A moving screen is its own back cue; never show an arrow alongside it. */
+.screen.back-motion-source > .home-return-cue { display: none; }

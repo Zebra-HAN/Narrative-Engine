@@ -5831,8 +5831,8 @@ window.BackSwipeMotion=(()=> {
   return {begin,snapshot,get busy(){return busy;}};
 })();
 
-// Home-return routes use a stationary canvas and a moving arrow. Only mine
-// internal routes use the screen reveal. Creative descendants remain independent.
+// Entry screens and mining reuse the stationary hierarchy arrow. Refinery and
+// storage alone reveal the previous screen, without an additional arrow.
 (()=> {
   let gesture=null, suppressClickUntil=0;
   for(const id of ['screen-idea-mine','screen-create','screen-narrative']) {
@@ -5844,6 +5844,7 @@ window.BackSwipeMotion=(()=> {
     if(screen?.id==='screen-idea-mine') {
       const back=window.IdeaMineBackRoute?.();
       if(back) {
+        if(back.kind==='arrow')return {screen,kind:'arrow',commit:back.commit};
         const previous=BackSwipeMotion.snapshot(screen);
         previous.querySelectorAll('.mine-page').forEach(n=>n.hidden=n.id!=='mine-page-'+back.target);
         return {screen,previous,kind:'screen',commit:back.commit};
@@ -5856,7 +5857,6 @@ window.BackSwipeMotion=(()=> {
   }
   function resetGesture() {
     gesture?.screen.classList.remove('is-home-swiping');
-    gesture?.screen.style.removeProperty('--home-cue-offset');
     gesture=null;
   }
   function horizontalControl(target,screen) {
@@ -5880,11 +5880,11 @@ window.BackSwipeMotion=(()=> {
       if(dx<=0||dx<Math.abs(dy)*1.15) {resetGesture();return;}
       gesture.horizontal=true;
       if(gesture.kind==='screen')gesture.motion=BackSwipeMotion.begin(gesture.screen,gesture.previous);
-      gesture.screen.classList.add('is-home-swiping');gesture.screen.querySelectorAll('.is-pressing').forEach(n=>n.classList.remove('is-pressing'));
+      if(gesture.kind==='arrow')gesture.screen.classList.add('is-home-swiping');
+      gesture.screen.querySelectorAll('.is-pressing').forEach(n=>n.classList.remove('is-pressing'));
     }
     gesture.furthest=Math.max(gesture.furthest,dx);
-    if(gesture.kind==='arrow')gesture.screen.style.setProperty('--home-cue-offset',Math.max(0,Math.min(42,dx*.35))+'px');
-    else gesture.motion?.move(dx);
+    gesture.motion?.move(dx);
     if(e.cancelable)e.preventDefault();
   },{passive:false});
   document.addEventListener('touchend',e=> {
