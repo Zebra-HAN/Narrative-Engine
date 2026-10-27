@@ -252,7 +252,7 @@
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background: url('../images/core/mine/idea-mine-bg.jpg') center center / cover no-repeat;
+  background: url('../images/core/mine/idea-mine.jpg') center center / cover no-repeat;
 }
 #screen-idea-mine .mine-landing .mine-hero { padding-top: clamp(10px, 3vh, 24px); }
 #screen-idea-mine .mine-landing .mine-hero h1 { margin: 0; }
