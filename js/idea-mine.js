@@ -25,6 +25,23 @@
   }
   ];
   const $=id=>document.getElementById('mine-'+id);
+  const artwork=window.IdeaMineAppearance||{};
+  const iconPaths={
+    "lock": "<rect x=\"5\" y=\"10\" width=\"14\" height=\"12\" rx=\"2\"/><path d=\"M8 10V6a4 4 0 0 1 8 0v4M12 15v3\"/>",
+    "unlock": "<rect x=\"5\" y=\"10\" width=\"14\" height=\"12\" rx=\"2\"/><path d=\"M8 10V6a4 4 0 0 1 8 0M12 15v3\"/>",
+    "search": "<circle cx=\"10\" cy=\"10\" r=\"6.5\"/><path d=\"m15 15 7 7\"/>",
+    "refresh": "<path d=\"M18 6a8 8 0 1 0 2 10M18 1v6h-6\"/>",
+    "gem": "<path d=\"m12 2 8 8-3 11H7L4 10z\" fill=\"currentColor\" stroke=\"none\"/><path d=\"m12 2-3 8 3 11 3-11z\" fill=\"#fff\" opacity=\".35\" stroke=\"none\"/><path d=\"M4 10h16\" stroke=\"#fff\" opacity=\".4\"/>"
+  };
+  const uiIcon=name=>'<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'+iconPaths[name]+'</svg>';
+  function visual(name,source) {
+    const node=document.createElement('span');node.className=name;
+    node.setAttribute('aria-hidden','true');
+    if(source) {const img=document.createElement('img');img.src=source;img.alt='';node.append(img);}
+    else node.innerHTML=uiIcon('gem');
+    return node;
+  }
+
   modes.forEach(m=>m.fields.forEach(f=>f.push(window.IdeaMineCatalog.materials.filter(x=>x.roles.includes(f[0])&&(!x.modes||x.modes.includes(m.id))).map(x=>x.name))));
   let mode=0,values= {}
   ,locks= {}
@@ -56,7 +73,7 @@
     $('notice').textContent='';
     switchScreen('screen-idea-mine',null,{type:'instant'});
     document.getElementById('screen-idea-mine').scrollTop=0;
-    if(page==='mining' && $('library').hidden)resetLibraryLayout();
+    if(page==='mining' && $('library').hidden) { resetLibraryLayout(); miningPage.scrollTop=0; }
   }
   function openRefinery(fromMining) {
     refineryOrigin=fromMining?'mining':'main';
@@ -110,12 +127,17 @@
     notice.timer=setTimeout(()=>$('notice').textContent='',2400)
   }
   function drawModes() {
+    miningPage.dataset.mode=modes[mode].id;
+    const background=artwork.backgrounds?.[modes[mode].id];
+    miningPage.style.setProperty('--mine-mode-art',background?'url('+JSON.stringify(background)+')':'none');
     $('modes').innerHTML='';
     modes.forEach((m,i)=> {
       let b=document.createElement('button');
       b.setAttribute('aria-pressed',String(i===mode));
       b.className='mode'+(i===mode?' active':'');
-      b.textContent=m.name;
+      b.dataset.mode=m.id;
+      const label=document.createElement('span');label.className='mode-label';label.textContent=m.name;
+      b.append(visual('mode-art',artwork.modeIcons?.[m.id]),label);
       b.onclick=()=>switchMode(i);
       $('modes').appendChild(b)
     }
@@ -151,10 +173,11 @@
       head.className='slothead';
       let name=document.createElement('span');
       name.className='slotname';
-      name.textContent=label;
+      const nameText=document.createElement('span');nameText.textContent=label;
+      name.append(visual('field-art',artwork.fieldIcons?.[key]),nameText);
       let lock=document.createElement('button');
       lock.className='lock'+(locks[key]?' on':'');
-      lock.textContent=locks[key]?'🔒':'🔓';
+      lock.innerHTML=uiIcon(locks[key]?'lock':'unlock');
       lock.setAttribute('aria-label',label+' '+(locks[key]?'잠금 해제':'잠금'));
       lock.title=locks[key]?'잠금 해제':'잠금';
       lock.onclick=()=> {
@@ -165,6 +188,7 @@
       head.append(name,lock);
       let input=document.createElement('textarea');
       input.rows=2;
+      input.placeholder='재료 선택';
       input.value=values[key]||'';
       input.setAttribute('aria-label',label);
       input.oninput=()=> {
@@ -174,7 +198,7 @@
         locks[key]=true;
         d.classList.add('locked');
         lock.classList.add('on');
-        lock.textContent='🔒';
+        lock.innerHTML=uiIcon('lock');
         lock.setAttribute('aria-label',label+' 잠금 해제');
         lock.title='잠금 해제';
         lock.setAttribute('aria-pressed','true');
@@ -184,13 +208,13 @@
       ;
       let browse=document.createElement('button');
       browse.className='browse';
-      browse.innerHTML='<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/></svg>';
+      browse.innerHTML=uiIcon('search');
       browse.setAttribute('aria-label','목록 선택');
       browse.title=label+' 목록 선택';
       browse.onclick=()=>openLibrary(key);
       let single=document.createElement('button');
       single.className='browse';
-      single.textContent='↻';
+      single.innerHTML=uiIcon('refresh');
       single.setAttribute('aria-label','재추첨');
       single.title=label+' 재추첨';
       single.disabled=!!locks[key];
@@ -227,6 +251,7 @@
     $('library').hidden=false;
     drawSlots();
     drawLibrary();
+    miningPage.scrollTop=0;
     miningPage.classList.add('is-selecting');
     $('discovery').hidden=true;
     modePanel.hidden=true;
@@ -331,7 +356,7 @@
     const unchanged=loadedResult&&m.fields.every(([key])=>values[key]===loadedResult.values[key]);
     const hasIdea=Boolean(unchanged||m.fields.some(([key])=>values[key]?.trim()));
     $('result').textContent=unchanged?loadedResult.text:hasIdea?m.build(values):'채굴을 시작해 주세요.';
-    for(const id of ['save','copy','expand'])$(id).disabled=!hasIdea;
+    for(const id of ['save','copy','expand','refineShortcut'])$(id).disabled=!hasIdea;
     $('expPanel').hidden=true;
     $('count').textContent=`채굴 ${rollCount}회`
   }
@@ -475,6 +500,7 @@
   $('save').onclick=save;
   $('copy').onclick=()=>copyText($('result').textContent);
   $('expand').onclick=()=>openRefinery(true);
+  $('refineShortcut').onclick=$('expand').onclick;
   $('refinerySave').onclick=save;
   $('refineryExpand').onclick=()=> { if(refineryIdea)expand(); };
   $('refreshExpand').onclick=()=> {
@@ -502,6 +528,14 @@
     setTimeout(()=>URL.revokeObjectURL(url),1500)
   }
   ;
+  if(artwork.resultDecoration) {
+    const img=document.createElement('img');img.src=artwork.resultDecoration;img.alt='';img.className='result-decoration';
+    document.querySelector('#mine-discovery .idea-display').append(img);
+  }
+  if(artwork.buttonDecoration) {
+    const node=document.querySelector('#mine-roll .mine-button-decoration');node.replaceChildren();
+    const img=document.createElement('img');img.src=artwork.buttonDecoration;img.alt='';node.append(img);
+  }
   drawSaved();
   switchMode(0);
   document.getElementById('btn-idea-mine').onclick=()=>showPage('main');

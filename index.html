@@ -37,6 +37,7 @@
     }
   </style>
   <link rel="stylesheet" href="css/idea-mine.css" />
+  <link rel="stylesheet" href="css/idea-mine-mining.css" />
 </head>
 <body>
 
@@ -62,7 +63,7 @@
     <button class="home-link pressable" id="btn-idea-mine">아이디어 광산</button>
     <button class="home-link pressable" id="btn-create" onclick="goToCreate()">창작 시작</button>
   </div>
-  <p class="home-version">v26.1027.1657</p>
+  <p class="home-version">v26.1027.1842</p>
 </div>
 
 
@@ -79,19 +80,21 @@
 <section id="mine-page-mining" class="mine-page" hidden>
 <div id="mine-content" class="mine-content" role="region" aria-label="아이디어와 재료 목록" tabindex="0">
 <section class="panel mine-discovery" id="mine-discovery">
-<div class="sectionhead">
+<div class="sectionhead discovery-sign">
+<span class="sign-ropes" aria-hidden="true"></span><span class="sign-gem" aria-hidden="true"></span>
 <h2>발견한 아이디어</h2>
 <span class="counter" id="mine-count">
 </span>
 </div>
-<div class="result">
+<div class="result idea-display">
+<span class="display-gem" aria-hidden="true"></span>
 <div class="tag" id="mine-resultType">자유 조합</div>
 <p id="mine-result">채굴을 시작해 주세요.</p>
 </div>
 <div class="actions">
-<button class="btn primary" id="mine-save">저장하기</button>
-<button class="btn" id="mine-copy">문장 복사</button>
-<button class="btn alt" id="mine-expand">아이디어 제련하기</button>
+<button class="btn primary" id="mine-save"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14v19l-7-4-7 4z"/><path d="m12 6 1.4 2.8 3.1.5-2.2 2.2.5 3.1L12 13l-2.8 1.6.5-3.1-2.2-2.2 3.1-.5z" fill="currentColor" stroke="none"/></svg><span>저장하기</span></button>
+<button class="btn" id="mine-copy"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5h10l3 3v13H8zM3 16V2h11M14 5v5h7M11 14h7M11 17h5"/></svg><span>문장 복사</span></button>
+<button class="btn alt" id="mine-expand"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 16c0-3-3-3-3-7a7 7 0 0 1 14 0c0 4-3 4-3 7M8 17h8M9 20h6M11 23h2M12 0v-2M2 3 0 1M22 3l2-2"/></svg><span>아이디어 제련하기</span></button>
 </div>
 </section>
 <div class="library" id="mine-library" hidden>
@@ -105,18 +108,15 @@
 </div>
 </div>
 <div class="mine-dock" aria-label="채굴 조작">
-<section class="panel mining-workbench">
-<div class="sectionhead">
-<h2>조합 작업대</h2>
-
-</div>
+<section class="panel mode-panel"><div class="mode-heading"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m1 20 6-13 5 7 4-11 7 17H1z" fill="currentColor" stroke="none"/></svg><h2>채굴 방식</h2><span class="mode-divider" aria-hidden="true"></span><p>원하는 산을 선택하세요</p></div><div class="modes" id="mine-modes" aria-label="채굴 방식 선택"></div></section>
+<section class="panel mining-workbench" aria-label="재료 작업대">
 <div class="slots" id="mine-slots">
 </div>
 </section>
-<section class="panel mode-panel"><h2>채굴 방식</h2><div class="modes" id="mine-modes"></div></section>
 <div class="actions mining-actions" id="mine-miningActions">
-<button class="btn" id="mine-back">← 돌아가기</button>
-<button class="btn primary" id="mine-roll">✦ 채굴하기</button>
+<button class="btn" id="mine-back" aria-label="돌아가기" title="돌아가기"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5m7-7-7 7 7 7"/></svg></button>
+<button class="btn primary" id="mine-roll"><span class="mine-button-decoration" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m14 9-11 12 2 2 11-13M6 3c7-1 12 2 16 9l-7-3-4-4-5-2z"/></svg></span><span class="mine-roll-label">채굴하기</span></button>
+<button class="btn" id="mine-refineShortcut" aria-label="아이디어 제련하기" title="아이디어 제련소"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 16c0-3-3-3-3-7a7 7 0 0 1 14 0c0 4-3 4-3 7M8 17h8M9 20h6M11 23h2M12 0v-2M2 3 0 1M22 3l2-2"/></svg></button>
 </div>
 
 </div>
@@ -478,6 +478,7 @@
 <script src="js/app.js"></script>
 <script src="data/idea-mine-materials.js"></script>
 <script src="js/idea-mine-core.js"></script>
+<script src="data/idea-mine-appearance.js"></script>
 <script src="js/idea-mine.js"></script>
 </body>
 </html>
