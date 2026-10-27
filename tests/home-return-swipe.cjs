@@ -15,20 +15,13 @@ const path=require('node:path');
   });
   await page.goto('https://swipe.test/app/');await page.waitForTimeout(1600);
   const cdp=await page.context().newCDPSession(page);
-  async function swipe({x=150,y=420,dx=110,dy=0,cancel=false,expectCue=false,expectMotion=false,expectLegacy=false,expectExcluded=false,hold=0}={}){
-   if(expectExcluded) {
-    // Observe app behavior without triggering the browser's separate history gesture.
-    await guardedSwipe();
-    assert.equal(await page.locator('[data-back-preview]').count(),0);
-    assert.equal(await page.locator('body > .screen.active').evaluate(n=>new DOMMatrixReadOnly(getComputedStyle(n).transform).m41),0);
-    return;
-   }
+  async function swipe({x=150,y=420,dx=110,dy=0,cancel=false,expectCue=false,expectMotion=false,expectedPrevious=null,expectLegacy=false,hold=0}={}){
    await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});
    for(const progress of (dx>0&&dx<52?[1]:[.15,.4,.7,1])) {
     await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:x+dx*progress,y:y+dy*progress}]});
-    if(progress===.4 && (expectLegacy||expectExcluded)) {
-     assert.equal(await page.locator('[data-back-preview]').count(),0,'excluded screens do not show a previous-page preview');
-     assert.equal(await page.locator('body > .screen.active').evaluate(n=>new DOMMatrixReadOnly(getComputedStyle(n).transform).m41),0,'excluded screen canvas stays stationary');
+    if(progress===.4 && expectLegacy) {
+     assert.equal(await page.locator('[data-back-preview]').count(),0,'creative descendants do not show a previous-page preview');
+     assert.equal(await page.locator('body > .screen.active').evaluate(n=>new DOMMatrixReadOnly(getComputedStyle(n).transform).m41),0,'creative descendant canvas stays stationary');
      if(expectLegacy) {
       const offset=await page.locator('#center-area .center-page.active[data-chrome-view]').evaluate(n=>new DOMMatrixReadOnly(getComputedStyle(n).transform).m41);
       assert(Math.abs(offset-Math.min(dx*progress*.35,42))<2,'original partial content drag is retained');
@@ -39,7 +32,12 @@ const path=require('node:path');
      assert(Math.abs(offset-dx*progress)<2,'internal back also translates whole screen');
      assert(await page.locator('[data-back-preview]').count()>0,'internal previous page is shown');
      const previewBackground=await page.locator('[data-back-preview]').evaluate(n=>{const page=n.shadowRoot.querySelector('#mine-page-main:not([hidden])');return page?getComputedStyle(page,'::before').backgroundImage:null;});
-     if(previewBackground)assert(previewBackground.includes('/app/images/core/mine/idea-mine-bg.jpg'),'preview CSS asset paths retain hosted subdirectory');
+     if(previewBackground) {
+      assert(previewBackground.includes('/app/images/core/mine/'),'preview CSS asset paths retain hosted subdirectory');
+      const original=await page.evaluate(()=>getComputedStyle(document.getElementById('mine-page-main'),'::before').backgroundImage);
+      assert.equal(previewBackground,original,'preview uses the currently configured mine background');
+     }
+     if(expectedPrevious)assert.equal(await page.locator('[data-back-preview]').evaluate(n=>n.shadowRoot.querySelector('.mine-page:not([hidden])')?.id),expectedPrevious,'preview matches actual entry route');
     }
     if(progress===.4 && expectCue) {
      await page.waitForTimeout(180);
@@ -51,8 +49,10 @@ const path=require('node:path');
      });
      assert.equal(paint.opacity,'1');
      const motion=await page.locator('body > .screen.active').evaluate(n=>new DOMMatrixReadOnly(getComputedStyle(n).transform).m41);
-     assert(Math.abs(motion-dx*progress)<2,'whole screen follows the finger one-to-one');
-     assert(await page.locator('[data-back-preview]').count()>0,'previous screen is visible behind source');
+     assert.equal(motion,0,'home-return screen remains stationary');
+     const arrowOffset=await page.locator('body > .screen.active > .home-return-cue').evaluate(n=>new DOMMatrixReadOnly(getComputedStyle(n).transform).m41);
+     assert(Math.abs(arrowOffset-Math.min(42,dx*progress*.35))<2,'only the arrow follows the pull slightly');
+     assert.equal(await page.locator('[data-back-preview]').count(),0,'home never appears behind a home-return gesture');
      assert.deepEqual(paint.own,paint.reference,'existing double-arrow plate design and animation are reused');
     }
    }
@@ -82,6 +82,7 @@ const path=require('node:path');
   }
   await page.locator('#mine-open-guide').click();await guardedSwipe();assert.equal(await active(),'screen-idea-mine','popup blocks home swipe');
   await page.locator('#app-dialog-actions button').click();
+  await swipe({cancel:true,expectCue:true});assert.equal(await active(),'screen-idea-mine','canceled home arrow gesture stays in place');
   await swipe({expectCue:true});assert.equal(await active(),'screen-home','mine main returns home from center');
   for(const options of [{x:32,dx:100},{x:260,dx:90,dy:35},{x:150,dx:70,hold:1250},{x:150,dx:35}]) {
    await mine();await swipe(options);assert.equal(await active(),'screen-home','natural root swipe '+JSON.stringify(options));
@@ -90,25 +91,26 @@ const path=require('node:path');
   await swipe({expectCue:true});assert.equal(await active(),'screen-home','initial create returns home');
   await page.evaluate(()=>goToNarrative());await page.waitForTimeout(500);
   await swipe({expectCue:true});assert.equal(await active(),'screen-home','story structure returns home');
-  await mine();await page.locator('#mine-open-mining').click();await guardedSwipe();
+  await mine();await page.locator('#mine-open-mining').click();await swipe({x:160,y:260,expectMotion:true,expectedPrevious:'mine-page-main'});
   assert.equal(await active(),'screen-idea-mine');assert(await page.locator('#mine-page-main').isVisible(),'mine subpage swipes to mine main');
   await page.locator('#mine-open-mining').click();await page.locator('#mine-roll').click();
   const idea=await page.locator('#mine-result').textContent();
   const values=await page.locator('#mine-slots textarea').evaluateAll(ns=>ns.map(n=>n.value));
-  await swipe({x:160,y:260,cancel:true,expectMotion:true});
+  await swipe({x:160,y:260,cancel:true,expectMotion:true,expectedPrevious:'mine-page-main'});
   assert(await page.locator('#mine-page-mining').isVisible(),'canceled mine back stays in place');
   assert.equal(await page.locator('#mine-result').textContent(),idea);
   assert.deepEqual(await page.locator('#mine-slots textarea').evaluateAll(ns=>ns.map(n=>n.value)),values);
   await page.locator('#mine-expand').click();
-  await swipe({x:160,y:280,expectExcluded:true});
-  assert(await page.locator('#mine-page-refinery').isVisible(),'refinery is outside the four animated screens');
-  await page.locator('#mine-refineryBack').click();
-  assert(await page.locator('#mine-page-mining').isVisible(),'existing refinery return button keeps its mining origin');
+  await swipe({x:160,y:280,cancel:true,expectMotion:true,expectedPrevious:'mine-page-mining'});
+  assert(await page.locator('#mine-page-refinery').isVisible(),'canceled refinery swipe preserves its page');
+  await swipe({x:160,y:280,expectMotion:true,expectedPrevious:'mine-page-mining'});
+  assert(await page.locator('#mine-page-mining').isVisible(),'refinery swipe returns to actual mining origin');
   assert.equal(await page.locator('#mine-result').textContent(),idea);
   await page.locator('#mine-back').click();await page.locator('#mine-open-storage').click();
-  await swipe({x:160,y:280,expectExcluded:true});
-  assert(await page.locator('#mine-page-storage').isVisible(),'storage is outside the four animated screens');
-  await page.locator('#mine-page-storage [data-mine-main]').click();
+  await swipe({x:160,y:280,cancel:true,expectMotion:true,expectedPrevious:'mine-page-main'});
+  assert(await page.locator('#mine-page-storage').isVisible(),'canceled storage swipe preserves its page');
+  await swipe({x:160,y:280,expectMotion:true,expectedPrevious:'mine-page-main'});
+  assert(await page.locator('#mine-page-main').isVisible(),'storage swipe returns to actual entry page');
   await page.evaluate(()=>goToCreate());await page.waitForTimeout(250);
   const strip=await page.locator('#subnav-scroll').boundingBox();
   await swipe({x:strip.x+40,y:strip.y+strip.height/2,dx:100});
@@ -121,6 +123,6 @@ const path=require('node:path');
   assert(await page.locator('#page-default').evaluate(n=>n.classList.contains('active')),'existing group back returns to category selection');
   assert.equal(await page.locator('#center-area .center-page.active[data-chrome-view]').count(),0);
   assert.deepEqual(errors,[]);
-  console.log('PASS: full-screen motion limited to four routes; refinery/storage excluded; creative legacy drag and navigation restored');
+  console.log('PASS: three home returns move only arrows; mining/storage/refinery reveal their actual previous page; legacy creative navigation preserved');
  }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1});
