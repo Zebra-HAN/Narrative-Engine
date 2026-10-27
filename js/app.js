@@ -5831,8 +5831,8 @@ window.BackSwipeMotion=(()=> {
   return {begin,snapshot,get busy(){return busy;}};
 })();
 
-// Only the three initial screens and the mine workbench own this animation.
-// Creative descendants retain their pre-interactive swipe implementation unchanged.
+// Home-return routes use a stationary canvas and a moving arrow. Only mine
+// internal routes use the screen reveal. Creative descendants remain independent.
 (()=> {
   let gesture=null, suppressClickUntil=0;
   for(const id of ['screen-idea-mine','screen-create','screen-narrative']) {
@@ -5846,15 +5846,19 @@ window.BackSwipeMotion=(()=> {
       if(back) {
         const previous=BackSwipeMotion.snapshot(screen);
         previous.querySelectorAll('.mine-page').forEach(n=>n.hidden=n.id!=='mine-page-'+back.target);
-        return {screen,previous,commit:back.commit};
+        return {screen,previous,kind:'screen',commit:back.commit};
       }
       if(document.getElementById('mine-page-main').hidden)return null;
     } else if(screen?.id==='screen-create') {
       if(currentSubId||!document.getElementById('page-default').classList.contains('active')||canNavigateBackInTrail())return null;
     } else if(screen?.id!=='screen-narrative')return null;
-    return {screen,previous:document.getElementById('screen-home'),commit:()=>goHome({instant:true})};
+    return {screen,kind:'arrow',commit:()=>goHome()};
   }
-  function resetGesture() {gesture?.screen.classList.remove('is-home-swiping');gesture=null;}
+  function resetGesture() {
+    gesture?.screen.classList.remove('is-home-swiping');
+    gesture?.screen.style.removeProperty('--home-cue-offset');
+    gesture=null;
+  }
   function horizontalControl(target,screen) {
     if(target.closest('a, input, textarea, select, [contenteditable], .subnav-scroll, #bottom-nav'))return true;
     for(let node=target;node&&node!==screen;node=node.parentElement)if(node.scrollWidth>node.clientWidth+1 && /^(auto|scroll)$/.test(getComputedStyle(node).overflowX))return true;
@@ -5874,10 +5878,13 @@ window.BackSwipeMotion=(()=> {
     if(!gesture.horizontal) {
       if(Math.hypot(dx,dy)<6)return;
       if(dx<=0||dx<Math.abs(dy)*1.15) {resetGesture();return;}
-      gesture.horizontal=true;gesture.motion=BackSwipeMotion.begin(gesture.screen,gesture.previous);
+      gesture.horizontal=true;
+      if(gesture.kind==='screen')gesture.motion=BackSwipeMotion.begin(gesture.screen,gesture.previous);
       gesture.screen.classList.add('is-home-swiping');gesture.screen.querySelectorAll('.is-pressing').forEach(n=>n.classList.remove('is-pressing'));
     }
-    gesture.furthest=Math.max(gesture.furthest,dx);gesture.motion?.move(dx);
+    gesture.furthest=Math.max(gesture.furthest,dx);
+    if(gesture.kind==='arrow')gesture.screen.style.setProperty('--home-cue-offset',Math.max(0,Math.min(42,dx*.35))+'px');
+    else gesture.motion?.move(dx);
     if(e.cancelable)e.preventDefault();
   },{passive:false});
   document.addEventListener('touchend',e=> {

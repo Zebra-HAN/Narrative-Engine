@@ -49,7 +49,7 @@
     $('miningActions').hidden=false;
     content.scrollTop=0;
   }
-  let currentPage='main', refineryIdea=null, refineryOrigin='main';
+  let currentPage='main', refineryIdea=null, refineryOrigin='main', storageOrigin='main';
   function showPage(page) {
     currentPage=page;
     document.querySelectorAll('#screen-idea-mine .mine-page').forEach(n=>n.hidden=n.id!=='mine-page-'+page);
@@ -509,12 +509,13 @@
   $('open-mining').onclick=()=>showPage('mining');
   $('back').onclick=()=>showPage('main');
   $('open-guide').onclick=()=>mineDialog('설명 보기\n\n설명은 추후 추가될 예정입니다.',false);
-  $('open-storage').onclick=()=> { drawSaved(); showPage('storage'); };
+  $('open-storage').onclick=()=> { storageOrigin=currentPage; drawSaved(); showPage('storage'); };
   $('refineryBack').onclick=()=>showPage(refineryOrigin);
-  // Only mining -> mine main participates in the whole-screen drag animation.
+  // Match each internal gesture to the page that its existing entry came from.
   window.IdeaMineBackRoute=()=> {
-    if(currentPage!=='mining'||!$('library').hidden)return null;
-    return {target:'main',commit:()=>showPage('main')};
+    if(currentPage==='mining'&&!$('library').hidden)return null;
+    const target={mining:'main',storage:storageOrigin,refinery:refineryOrigin}[currentPage];
+    return target?{target,commit:()=>showPage(target)}:null;
   };
   document.querySelectorAll('[data-mine-main]').forEach(b=>b.onclick=()=>showPage('main'));
   $('library').addEventListener('keydown',e=> {
