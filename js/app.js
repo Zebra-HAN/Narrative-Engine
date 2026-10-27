@@ -917,11 +917,10 @@ function initCenterBackSwipe() {
   let forwardRoute = null;
   let forwardDragging = false;
   let forwardPending = false;
-  let backMotion = null;
 
   const activePage = () => area.querySelector('.center-page.active[data-chrome-view]')
     || area.querySelector('.center-page.active');
-  // 실제 복귀 렌더에는 좌표만 재사용한다. 시각적 스와이프 미리보기는 별도로 격리된다.
+  // 좌표만 기억한다. 이전 페이지 DOM/이미지/선택 데이터는 캐시하지 않는다.
   const pageKeys = new WeakMap();
   const scrollMemory = new Map();
   const rememberPage = page => {
@@ -964,7 +963,6 @@ function initCenterBackSwipe() {
   }
 
   function resetDragStyles() {
-    if(backMotion) { backMotion.finish(false); backMotion=null; dragOffset=0; }
     area.classList.remove('is-back-swiping', 'is-forward-swiping');
     returnToRest(dragPage, dragOffset);
     dragPage = null;
@@ -973,7 +971,7 @@ function initCenterBackSwipe() {
   }
 
   function onTouchStart(e) {
-    if (e.touches.length !== 1 || forwardPending || window.BackSwipeMotion?.busy) return;
+    if (e.touches.length !== 1 || forwardPending) return;
     const page = activePage();
     forwardRoute = !isExtraMenuOpen() && !document.getElementById('screen-create').classList.contains('bottom-panel-visible')
       ? getGroupCardReentry(page) : null;
@@ -1031,22 +1029,16 @@ function initCenterBackSwipe() {
       } else if (dx > 0 && dx > Math.abs(dy) * HORIZONTAL_BIAS && canNavigateBackInTrail()) {
         isDragging = true;
         area.classList.add('is-back-swiping');
-        backMotion=window.BackSwipeMotion?.begin(document.getElementById('screen-create'),window.BackSwipeMotion.creativeTarget());
         APP_PERF?.mark('swipe.drag-start', { page: dragPage?.id });
       }
     }
 
     if (isDragging) {
       e.preventDefault();
-      if(backMotion) {
-        dragOffset=Math.max(0,Math.min(dx,gestureWidth));
-        backMotion.move(dragOffset);
-      } else {
-        dragOffset = forwardDragging
-          ? Math.max(-42, Math.min(0, dragOrigin + dx * 0.35))
-          : Math.min(dragOrigin + dx * 0.35, 42);
-        if (dragPage) dragPage.style.transform = `translateX(${dragOffset}px)`;
-      }
+      dragOffset = forwardDragging
+        ? Math.max(-42, Math.min(0, dragOrigin + dx * 0.35))
+        : Math.min(dragOrigin + dx * 0.35, 42);
+      if (dragPage) dragPage.style.transform = `translateX(${dragOffset}px)`;
     }
   }
 
@@ -1075,8 +1067,7 @@ function initCenterBackSwipe() {
 
     APP_PERF?.mark('swipe.decision', { back: shouldGoBack, distance: furthestX, elapsedMs: elapsed });
     const sourcePage = dragPage;
-    const animatedBack=Boolean(backMotion&&!forwardDragging);
-    const offset = animatedBack?0:dragOffset;
+    const offset = dragOffset;
     if (!shouldGoBack) resetDragStyles();
     startX = null;
     startY = null;
@@ -1087,30 +1078,25 @@ function initCenterBackSwipe() {
     isVerticalGesture = false;
 
     if (shouldGoBack) {
-      const commit=()=> {
-        area.classList.remove('is-back-swiping', 'is-forward-swiping');
-        playNavigationSound();
-        const key = pageKeys.get(sourcePage);
-        if (key) scrollMemory.set(key, APP_PERF ? APP_PERF.measure('scroll.read', () => sourcePage.scrollTop, { page: sourcePage.id }) : sourcePage.scrollTop);
-        if (forwardDragging) {
-          const route = forwardRoute;
-          forwardPending = true;
-          // Use the normal button-entry renderer. Animating the incoming scroll
-          // page here adds an ancestor transform while its 3D card flips start.
-          Promise.resolve(reenterGroupCards(route)).finally(() => { forwardPending = false; });
-        } else navigateAddressBack();
-        // 뒤로 가기는 기존 복귀 곡선을 유지한다. 재진입 목적지는 일반 버튼
-        // 진입처럼 표시해 카드 뒤집기에 별도의 페이지 이동을 겹치지 않는다.
-        sourcePage?.style.removeProperty('transform');
-        sourcePage?.style.removeProperty('transition');
-        dragPage = null;
-        dragOffset = 0;
-        dragOrigin = 0;
-        if (!forwardDragging) returnToRest(activePage(), offset);
-        if(animatedBack)return window.BackSwipeMotion.waitFor(()=>activePage()!==sourcePage);
-      };
-      if(animatedBack) { const motion=backMotion;backMotion=null;motion.finish(true,commit); }
-      else commit();
+      area.classList.remove('is-back-swiping', 'is-forward-swiping');
+      playNavigationSound();
+      const key = pageKeys.get(sourcePage);
+      if (key) scrollMemory.set(key, APP_PERF ? APP_PERF.measure('scroll.read', () => sourcePage.scrollTop, { page: sourcePage.id }) : sourcePage.scrollTop);
+      if (forwardDragging) {
+        const route = forwardRoute;
+        forwardPending = true;
+        // Use the normal button-entry renderer. Animating the incoming scroll
+        // page here adds an ancestor transform while its 3D card flips start.
+        Promise.resolve(reenterGroupCards(route)).finally(() => { forwardPending = false; });
+      } else navigateAddressBack();
+      // 뒤로 가기는 기존 복귀 곡선을 유지한다. 재진입 목적지는 일반 버튼
+      // 진입처럼 표시해 카드 뒤집기에 별도의 페이지 이동을 겹치지 않는다.
+      sourcePage?.style.removeProperty('transform');
+      sourcePage?.style.removeProperty('transition');
+      dragPage = null;
+      dragOffset = 0;
+      dragOrigin = 0;
+      if (!forwardDragging) returnToRest(activePage(), offset);
     }
   }
 
@@ -2189,7 +2175,6 @@ function setBottomNavState(navId) {
    주 내비게이션 전환
 ════════════════════════════════════════════════ */
 function switchNav(navId, skipAnimation, options = {}, backgroundPrepared = false) {
-  window.BackSwipeMotion?.rememberCreative();
   const prev = currentNav;
   if (!backgroundPrepared) {
     // Explicit NAV entry starts a new exploration; ancestor navigation restores
@@ -2270,7 +2255,6 @@ function renderSubnav(navId, animate) {
    하위 메뉴 선택
 ════════════════════════════════════════════════ */
 function selectSub(subId, navId, backgroundPrepared = false, restoreBackground = false) {
-  window.BackSwipeMotion?.rememberCreative();
   if (!backgroundPrepared) {
     if (!restoreBackground) {
       groupCardReentries.clear();
@@ -2533,7 +2517,6 @@ sg.cards.forEach((card, cIdx) => {
    ─ 그룹 안에 subgroups 배열이 있을 때 그룹 버튼 클릭 시 열림
 ════════════════════════════════════════════════ */
 function showSubgroupPage(subId, groupIdx, backgroundPrepared = false) {
-  window.BackSwipeMotion?.rememberCreative();
   if (!backgroundPrepared) return applyCreativeBackground({ navId: currentNav, stage: 'group', screenKey: `subgroup:${subId}:${groupIdx}` }, () => showSubgroupPage(subId, groupIdx, true));
   closeCardInfo();
   const area = document.getElementById('center-area');
@@ -2598,7 +2581,6 @@ function showSubgroupPage(subId, groupIdx, backgroundPrepared = false) {
    서브그룹 카드 목록 렌더 (2단계 → 카드)
 ════════════════════════════════════════════════ */
 function showSubgroupCards(subId, groupIdx, sgIdx, backgroundPrepared = false, titleAssets = null) {
-  window.BackSwipeMotion?.rememberCreative();
   if (!backgroundPrepared) return applyCreativeBackground({ navId: currentNav, stage: 'card', screenKey: `subgroup-cards:${subId}:${groupIdx}:${sgIdx}` }, assets => showSubgroupCards(subId, groupIdx, sgIdx, true, assets), CARD_DATA[subId]?.groups?.[groupIdx]?.subgroups?.[sgIdx]);
   closeCardInfo();
   const area = document.getElementById('center-area');
@@ -2743,7 +2725,6 @@ function updateSubgroupBadges(subId, groupIdx) {
    그룹 버튼 클릭 → 해당 그룹의 카드 목록 열기 (1단계 그룹용)
 ════════════════════════════════════════════════ */
 function showGroupCards(subId, groupIdx, backgroundPrepared = false, titleAssets = null) {
-  window.BackSwipeMotion?.rememberCreative();
   if (!backgroundPrepared) return applyCreativeBackground({ navId: currentNav, stage: 'card', screenKey: `group-cards:${subId}:${groupIdx}` }, assets => showGroupCards(subId, groupIdx, true, assets), CARD_DATA[subId]?.groups?.[groupIdx]);
   closeCardInfo();
   const area = document.getElementById('center-area');
@@ -2887,7 +2868,6 @@ function updateGroupBadges(subId) {
 
 
 function showCardPage(subId, animate = true, backgroundPrepared = false) {
-  window.BackSwipeMotion?.rememberCreative();
 
   // type:'group' 인 경우 그룹 선택 화면을 열고 종료
   const navInfo2 = Object.values(NAV_DATA).find(n => n.subs.find(s => s.id === subId));
@@ -5791,9 +5771,7 @@ function createPageTitleCard(group, subId, preparedAssets = null, groupCount = C
 // Interactive back previews are isolated in a shadow root: no duplicate document IDs,
 // event handlers, or app state are introduced by visual copies of previous screens.
 window.BackSwipeMotion=(()=> {
-  const previews=new Map();
   let busy=false, css=null;
-  const routeKey=trail=>JSON.stringify((trail.length?trail:[{type:'nav',navId:currentNav}]).map(({type,navId,subId,groupIdx,sgIdx})=>({type,navId,subId,groupIdx,sgIdx})));
   function snapshot(source) {
     const clone=source.cloneNode(true), originals=[source,...source.querySelectorAll('*')], copies=[clone,...clone.querySelectorAll('*')];
     const index=new Map(originals.map((node,i)=>[node,i]));
@@ -5814,22 +5792,6 @@ window.BackSwipeMotion=(()=> {
     clone.style.removeProperty('transform');clone.style.removeProperty('transition');clone.style.removeProperty('clip-path');
     clone.querySelectorAll('.center-page').forEach(n=>{n.style.removeProperty('transform');n.style.removeProperty('transition');});
     return clone;
-  }
-  function rememberCreative() {
-    const screen=document.getElementById('screen-create');
-    if(busy||!screen.classList.contains('active'))return;
-    const key=routeKey(addressTrail);
-    previews.delete(key);previews.set(key,snapshot(screen));
-    if(previews.size>12) {
-      const ancestors=new Set(Array.from({length:addressTrail.length+1},(_,i)=>routeKey(addressTrail.slice(0,i))));
-      const disposable=Array.from(previews.keys()).find(key=>!ancestors.has(key));
-      if(disposable)previews.delete(disposable);
-    }
-  }
-  function creativeTarget() { return previews.get(routeKey(addressTrail.slice(0,-1))); }
-  function waitFor(predicate) {
-    const started=performance.now();
-    return new Promise(resolve=>{const check=()=>{if(predicate()||performance.now()-started>1000)resolve();else requestAnimationFrame(check);};check();});
   }
   function begin(source,previous) {
     if(busy||!previous)return null;
@@ -5866,10 +5828,11 @@ window.BackSwipeMotion=(()=> {
     }
     return {move,finish};
   }
-  return {begin,snapshot,rememberCreative,creativeTarget,waitFor,get busy(){return busy;}};
+  return {begin,snapshot,get busy(){return busy;}};
 })();
 
-// Only route ownership changes here; hierarchy/forward gestures retain their handlers.
+// Only the three initial screens and the mine workbench own this animation.
+// Creative descendants retain their pre-interactive swipe implementation unchanged.
 (()=> {
   let gesture=null, suppressClickUntil=0;
   for(const id of ['screen-idea-mine','screen-create','screen-narrative']) {
