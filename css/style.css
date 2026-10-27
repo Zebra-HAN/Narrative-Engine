@@ -3659,3 +3659,6 @@ body {
 
 /* Same cue as hierarchy back-swipes, above the root screen contents. */
 .home-return-cue { z-index: 140; }
+
+/* Translate the complete source canvas above an inert previous-page preview. */
+.screen.back-motion-source { z-index: 150 !important; will-change: transform; box-shadow: -8px 0 24px #0003; }

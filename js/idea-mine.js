@@ -198,6 +198,7 @@
         if(locks[key])return;
         const pool=modes[mode].fields.find(f=>f[0]===key)[2];
         if(!pool.length)return;
+        if(activeField!==null)closeLibrary();
         loadedResult=null;
         values[key]=sample(pool,values[key]);
         rollCount++;
@@ -510,6 +511,12 @@
   $('open-guide').onclick=()=>mineDialog('설명 보기\n\n설명은 추후 추가될 예정입니다.',false);
   $('open-storage').onclick=()=> { drawSaved(); showPage('storage'); };
   $('refineryBack').onclick=()=>showPage(refineryOrigin);
+  // Expose the existing return routes, without changing their button behavior.
+  window.IdeaMineBackRoute=()=> {
+    if(currentPage==='main'||!$('library').hidden)return null;
+    const target=currentPage==='refinery'?refineryOrigin:'main';
+    return {target,commit:()=>showPage(target)};
+  };
   document.querySelectorAll('[data-mine-main]').forEach(b=>b.onclick=()=>showPage('main'));
   $('library').addEventListener('keydown',e=> {
     if(e.key==='Escape')closeLibrary()
