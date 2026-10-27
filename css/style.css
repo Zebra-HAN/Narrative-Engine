@@ -270,7 +270,7 @@ body::after {
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: clamp(34px, 6vh, 56px);
+      gap: 6px;
       width: 100%;
       min-height: 76vh;
       padding: 24px;
@@ -278,40 +278,42 @@ body::after {
       z-index: 1;
       transform: translateY(-1vh);
     }
-    .home-link {
-      background: none;
-      border: none;
+    #screen-home .home-link {
+      position: relative;
+      isolation: isolate;
+      width: min(100%, 300px);
+      min-height: 68px;
+      padding: 10px 12px 13px;
+      background: transparent;
+      border: 0;
+      border-radius: 0;
       cursor: pointer;
-       font-family: 'Jua', 'Noto Sans KR', sans-serif;
-      font-size: clamp(2rem, 6.8vw, 3.1rem);
-      font-weight: 700;
-      color: #ffffff;
-      letter-spacing: 0.08em;
-      line-height: 1.05;
-      padding: 8px 18px;
-      -webkit-text-stroke: 0.8px #061a2a;
-      text-shadow:
-         2px 0 0 #061a2a,
-        -2px 0 0 #061a2a,
-        0 2px 0 #061a2a,
-        0 -2px 0 #061a2a,
-        4px 4px 0 #122638,
-        6px 6px 0 #050d16;
-      opacity: 0;     /* 처음엔 안 보이게 투명도만 0으로 유지 */
-      transition: transform 0.12s ease, filter 0.18s ease, text-shadow 0.18s ease;
+      font-family: 'Noto Serif KR', 'Noto Serif CJK KR', 'AppleMyungjo', 'Batang', serif;
+      font-size: clamp(28px, 7.8vw, 34px);
+      font-weight: 600;
+      color: #f5dfa0;
+      letter-spacing: 0.035em;
+      line-height: 1.3;
+      text-align: center;
+      white-space: nowrap;
+      -webkit-text-stroke: 0;
+      text-shadow: 0 -1px 0 #fff0bd88, 0 1px 0 #9e793a, 1px 3px 2px #030b17, 0 4px 5px #030b17cc;
+      opacity: 0;
+      transition: transform 0.12s ease, filter 0.18s ease;
       -webkit-tap-highlight-color: transparent;
     }
-    .home-link:hover {
-      filter: brightness(1.08);
-      transform: translate(-1px, -1px);
-      text-shadow:
-         2px 0 0 #061a2a,
-        -2px 0 0 #061a2a,
-        0 2px 0 #061a2a,
-        0 -2px 0 #061a2a,
-        5px 5px 0 #122638,
-        7px 7px 0 #050d16;
+    #screen-home .home-link::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: url('../images/core/buttons/home-navy-panel.svg') center / 100% 100% no-repeat;
+      pointer-events: none;
     }
+    #screen-home .home-link:nth-child(2)::before { transform: scaleX(-1); filter: brightness(1.06); }
+    #screen-home .home-link:nth-child(3)::before { transform: scaleY(-1); filter: brightness(.94); }
+    #screen-home .home-link:hover { filter: brightness(1.06); }
+    #screen-home .home-link:focus-visible { outline: 2px solid #f5dfa0; outline-offset: 3px; border-radius: 8px; }
     #screen-home.home-animate .home-link {
       /*  창작시작,스토리구조 홈버튼의 등장 타이밍. 기존 애니메이션 유지 */
       /* 1초 뒤에(1s) 시작해서, 1.2초 동안(1.2s)느긋하게 나타남. 더 부드러운 곡선(ease-in-out)을 줬어 */
@@ -321,16 +323,9 @@ body::after {
       from { opacity: 0; } /* 시작: 완전히 투명 (안 보임) */
       to { opacity: 1; }   /* 끝: 완전히 불투명 (선명해짐) */
     }
-    .home-link:active {
-       transform: translate(2px, 2px) scale(0.98);
-      filter: brightness(1.02);
-      text-shadow:
-        2px 0 0 #061a2a,
-        -2px 0 0 #061a2a,
-        0 2px 0 #061a2a,
-        0 -2px 0 #061a2a,
-        2px 2px 0 #122638,
-        3px 3px 0 #050d16;
+    #screen-home .home-link:active {
+      transform: translateY(1px) scale(.98);
+      filter: brightness(1.08);
     }
 
 
