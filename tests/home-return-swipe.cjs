@@ -31,6 +31,8 @@ const path=require('node:path');
      const offset=await page.locator('body > .screen.active').evaluate(n=>new DOMMatrixReadOnly(getComputedStyle(n).transform).m41);
      assert(Math.abs(offset-dx*progress)<2,'internal back also translates whole screen');
      assert(await page.locator('[data-back-preview]').count()>0,'internal previous page is shown');
+     assert.equal(await page.locator('body > .screen.active > .home-return-cue').evaluate(n=>getComputedStyle(n).display),'none','moving refinery/storage screen has no arrow');
+     assert.equal(await page.locator('[data-back-preview]').evaluate(n=>getComputedStyle(n.shadowRoot.querySelector('.home-return-cue')).display),'none','previous-screen preview also has no arrow');
      const previewBackground=await page.locator('[data-back-preview]').evaluate(n=>{const page=n.shadowRoot.querySelector('#mine-page-main:not([hidden])');return page?getComputedStyle(page,'::before').backgroundImage:null;});
      if(previewBackground) {
       assert(previewBackground.includes('/app/images/core/mine/'),'preview CSS asset paths retain hosted subdirectory');
@@ -39,19 +41,20 @@ const path=require('node:path');
      }
      if(expectedPrevious)assert.equal(await page.locator('[data-back-preview]').evaluate(n=>n.shadowRoot.querySelector('.mine-page:not([hidden])')?.id),expectedPrevious,'preview matches actual entry route');
     }
+    if(expectCue && progress>=.7)assert.equal(await page.locator('body > .screen.active > .home-return-cue').evaluate(n=>new DOMMatrixReadOnly(getComputedStyle(n).transform).m41),0,'continued pulling never moves the settled arrow');
     if(progress===.4 && expectCue) {
      await page.waitForTimeout(180);
      assert(await page.locator('body > .screen.active').evaluate(n=>n.classList.contains('is-home-swiping')),'drag shows home cue');
      const paint=await page.locator('body > .screen.active > .home-return-cue').evaluate(n=>{
       const s=getComputedStyle(n), ref=getComputedStyle(document.getElementById('center-area'),'::before');
-      const keys=['width','height','borderRadius','borderColor','backgroundImage','boxShadow','transitionDuration'];
+      const keys=['width','height','left','top','borderRadius','borderColor','backgroundImage','boxShadow','transitionDuration','transitionTimingFunction'];
       return {opacity:s.opacity,own:keys.map(k=>s[k]),reference:keys.map(k=>ref[k])};
      });
      assert.equal(paint.opacity,'1');
      const motion=await page.locator('body > .screen.active').evaluate(n=>new DOMMatrixReadOnly(getComputedStyle(n).transform).m41);
      assert.equal(motion,0,'home-return screen remains stationary');
      const arrowOffset=await page.locator('body > .screen.active > .home-return-cue').evaluate(n=>new DOMMatrixReadOnly(getComputedStyle(n).transform).m41);
-     assert(Math.abs(arrowOffset-Math.min(42,dx*progress*.35))<2,'only the arrow follows the pull slightly');
+     assert.equal(arrowOffset,0,'arrow rests at the same fixed position as hierarchy back cues');
      assert.equal(await page.locator('[data-back-preview]').count(),0,'home never appears behind a home-return gesture');
      assert.deepEqual(paint.own,paint.reference,'existing double-arrow plate design and animation are reused');
     }
@@ -91,12 +94,12 @@ const path=require('node:path');
   await swipe({expectCue:true});assert.equal(await active(),'screen-home','initial create returns home');
   await page.evaluate(()=>goToNarrative());await page.waitForTimeout(500);
   await swipe({expectCue:true});assert.equal(await active(),'screen-home','story structure returns home');
-  await mine();await page.locator('#mine-open-mining').click();await swipe({x:160,y:260,expectMotion:true,expectedPrevious:'mine-page-main'});
+  await mine();await page.locator('#mine-open-mining').click();await swipe({x:160,y:260,expectCue:true});
   assert.equal(await active(),'screen-idea-mine');assert(await page.locator('#mine-page-main').isVisible(),'mine subpage swipes to mine main');
   await page.locator('#mine-open-mining').click();await page.locator('#mine-roll').click();
   const idea=await page.locator('#mine-result').textContent();
   const values=await page.locator('#mine-slots textarea').evaluateAll(ns=>ns.map(n=>n.value));
-  await swipe({x:160,y:260,cancel:true,expectMotion:true,expectedPrevious:'mine-page-main'});
+  await swipe({x:160,y:260,cancel:true,expectCue:true});
   assert(await page.locator('#mine-page-mining').isVisible(),'canceled mine back stays in place');
   assert.equal(await page.locator('#mine-result').textContent(),idea);
   assert.deepEqual(await page.locator('#mine-slots textarea').evaluateAll(ns=>ns.map(n=>n.value)),values);
@@ -123,6 +126,6 @@ const path=require('node:path');
   assert(await page.locator('#page-default').evaluate(n=>n.classList.contains('active')),'existing group back returns to category selection');
   assert.equal(await page.locator('#center-area .center-page.active[data-chrome-view]').count(),0);
   assert.deepEqual(errors,[]);
-  console.log('PASS: three home returns move only arrows; mining/storage/refinery reveal their actual previous page; legacy creative navigation preserved');
+  console.log('PASS: four stationary screens reuse fixed hierarchy arrows; refinery/storage reveal previous pages with no arrows; legacy creative navigation preserved');
  }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1});

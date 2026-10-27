@@ -515,7 +515,7 @@
   window.IdeaMineBackRoute=()=> {
     if(currentPage==='mining'&&!$('library').hidden)return null;
     const target={mining:'main',storage:storageOrigin,refinery:refineryOrigin}[currentPage];
-    return target?{target,commit:()=>showPage(target)}:null;
+    return target?{target,kind:currentPage==='mining'?'arrow':'screen',commit:()=>showPage(target)}:null;
   };
   document.querySelectorAll('[data-mine-main]').forEach(b=>b.onclick=()=>showPage('main'));
   $('library').addEventListener('keydown',e=> {
