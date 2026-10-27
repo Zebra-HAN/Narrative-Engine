@@ -511,11 +511,10 @@
   $('open-guide').onclick=()=>mineDialog('설명 보기\n\n설명은 추후 추가될 예정입니다.',false);
   $('open-storage').onclick=()=> { drawSaved(); showPage('storage'); };
   $('refineryBack').onclick=()=>showPage(refineryOrigin);
-  // Expose the existing return routes, without changing their button behavior.
+  // Only mining -> mine main participates in the whole-screen drag animation.
   window.IdeaMineBackRoute=()=> {
-    if(currentPage==='main'||!$('library').hidden)return null;
-    const target=currentPage==='refinery'?refineryOrigin:'main';
-    return {target,commit:()=>showPage(target)};
+    if(currentPage!=='mining'||!$('library').hidden)return null;
+    return {target:'main',commit:()=>showPage('main')};
   };
   document.querySelectorAll('[data-mine-main]').forEach(b=>b.onclick=()=>showPage('main'));
   $('library').addEventListener('keydown',e=> {
