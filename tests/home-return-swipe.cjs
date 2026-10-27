@@ -103,7 +103,7 @@ const path=require('node:path');
   assert(await page.locator('#mine-page-mining').isVisible(),'canceled mine back stays in place');
   assert.equal(await page.locator('#mine-result').textContent(),idea);
   assert.deepEqual(await page.locator('#mine-slots textarea').evaluateAll(ns=>ns.map(n=>n.value)),values);
-  await page.locator('#mine-expand').click();
+  await page.locator('#mine-refineShortcut').click();
   await swipe({x:160,y:280,cancel:true,expectMotion:true,expectedPrevious:'mine-page-mining'});
   assert(await page.locator('#mine-page-refinery').isVisible(),'canceled refinery swipe preserves its page');
   await swipe({x:160,y:280,expectMotion:true,expectedPrevious:'mine-page-mining'});
