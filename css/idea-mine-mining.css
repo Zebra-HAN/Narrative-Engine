@@ -1,0 +1,200 @@
+/* Mining-only presentation. Gameplay, storage and other pages retain their styles. */
+#screen-idea-mine:has(#mine-page-mining:not([hidden])) { background: linear-gradient(#72bdf7, #a4d7fb 66%, #f1e7d7 90%); }
+#screen-idea-mine #mine-page-mining {
+  --mine-ink: #162a46;
+  --mine-paper: #f8f0e3;
+  --mine-brass: #ba935c;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  color: var(--mine-ink);
+  background: transparent;
+  border-radius: 0;
+  scrollbar-width: none;
+}
+#screen-idea-mine #mine-page-mining[hidden] { display: none; }
+#screen-idea-mine #mine-page-mining::-webkit-scrollbar { display: none; }
+#screen-idea-mine #mine-page-mining .ui-icon { width: 20px; height: 20px; flex: 0 0 auto; }
+#screen-idea-mine #mine-page-mining .mine-content {
+  flex: 1 0 auto;
+  min-height: 300px;
+  overflow: visible;
+  background: var(--mine-mode-art, none) center / cover no-repeat;
+}
+#screen-idea-mine #mine-page-mining .mine-discovery {
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+  min-height: 300px;
+  margin: 0;
+  padding: 0 0 6px;
+  background: transparent;
+  border: 0;
+}
+#screen-idea-mine #mine-page-mining .discovery-sign {
+  position: relative;
+  flex: 0 0 auto;
+  justify-content: center;
+  gap: 12px;
+  width: 65%;
+  min-width: 215px;
+  max-width: 280px;
+  min-height: 38px;
+  margin: 15px auto auto;
+  padding: 8px 12px;
+  background: linear-gradient(155deg, #514853, #34323d);
+  border: 2px solid #b28b5d;
+  border-radius: 15px;
+  box-shadow: 0 2px 0 #5a4539, inset 0 0 0 2px #272734, inset 0 3px 2px #fff3;
+}
+#screen-idea-mine #mine-page-mining .discovery-sign h2,
+#screen-idea-mine #mine-page-mining .discovery-sign .counter { color: #f7f3ef; font-size: 11px; font-weight: 500; }
+#screen-idea-mine #mine-page-mining .sign-ropes { position: absolute; left: 14%; right: 14%; top: -19px; height: 19px; border-inline: 3px ridge #a78046; pointer-events: none; }
+#screen-idea-mine #mine-page-mining .sign-gem,
+#screen-idea-mine #mine-page-mining .display-gem {
+  position: absolute;
+  z-index: 1;
+  left: calc(50% - 7px);
+  top: -9px;
+  width: 14px;
+  height: 17px;
+  transform: rotate(45deg);
+  background: linear-gradient(135deg, #e4fcff 10%, #60d5ed 45%, #10a2c5 50%, #74e4f5);
+  border: 2px solid #d9b677;
+  box-shadow: 0 0 0 2px #745c45;
+  pointer-events: none;
+}
+#screen-idea-mine #mine-page-mining .idea-display {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  justify-content: center;
+  width: 87%;
+  min-height: 110px;
+  margin: 25px auto 0;
+  padding: 10px 12px 12px;
+  background: linear-gradient(115deg, #fff6df, #f8e6c6 52%, #fff3dc);
+  color: var(--mine-ink);
+  border: 3px solid #92704e;
+  border-radius: 20px 20px 12px 12px;
+  box-shadow: 0 0 0 2px #cfb17b, inset 0 0 0 3px #fff7e6, 0 5px 0 #624b36a6, 0 8px 12px #58422f42;
+}
+#screen-idea-mine #mine-page-mining .idea-display .tag {
+  flex: 0 0 auto;
+  min-width: 90px;
+  margin: 0 auto 5px;
+  padding: 3px 13px;
+  color: #332715;
+  background: linear-gradient(90deg, #dfbe86, #edd29b, #dfbe86);
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 650;
+}
+#screen-idea-mine #mine-page-mining .idea-display p { margin: auto 0; font-size: clamp(22px, 6vw, 27px); font-weight: 750; line-height: 1.4; color: var(--mine-ink); text-align: center; overflow-wrap: anywhere; }
+#screen-idea-mine #mine-page-mining .result-decoration { position: absolute; inset: auto -5% -8%; width: 110%; max-height: 140%; object-fit: contain; pointer-events: none; }
+#screen-idea-mine #mine-page-mining .mine-discovery > .actions {
+  display: grid;
+  grid-template-columns: 1fr .95fr 1.2fr;
+  flex: 0 0 auto;
+  gap: 5px;
+  margin: 9px 0 0;
+  padding: 4px 8px 5px;
+  background: linear-gradient(#a47751, #755039);
+  border-top: 3px solid #c49f71;
+  box-shadow: inset 0 1px 0 #f8ddb180, 0 3px 0 #5e402e;
+}
+#screen-idea-mine #mine-page-mining .mine-discovery .btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+  min-height: 40px;
+  padding: 6px 3px;
+  border: 2px solid #91b7e2;
+  border-radius: 9px;
+  color: #f5f8ff;
+  background: linear-gradient(155deg, #487fc3, #244a85);
+  box-shadow: inset 0 2px 0 #fff5, inset 0 -2px 0 #17375e66, 0 3px 0 #3d2d24;
+  font-size: clamp(9px, 2.7vw, 11px);
+  font-weight: 650;
+}
+#screen-idea-mine #mine-page-mining .mine-discovery .btn .ui-icon { width: 16px; height: 18px; }
+#screen-idea-mine #mine-page-mining #mine-save { color: #29303b; border-color: #ffe6a1; background: linear-gradient(#ffdc79, #efb546); box-shadow: inset 0 2px 0 #fffa, inset 0 -2px 0 #c48b3d66, 0 3px 0 #78552c; }
+#screen-idea-mine #mine-page-mining .mine-dock {
+  flex: 0 0 auto;
+  max-height: none;
+  overflow: visible;
+  margin-top: 0;
+  padding: 5px 0 0;
+  border: 3px solid #fff9ee;
+  border-bottom: 0;
+  border-radius: 15px 15px 0 0;
+  background: linear-gradient(120deg, #fcf7ec, #eee2ce);
+  box-shadow: inset 0 2px 0 #e0d1b9, 0 -2px 8px #735c3d24;
+}
+#screen-idea-mine #mine-page-mining .mode-panel { padding: 0 7px; margin: 0; border: 0; background: transparent; }
+#screen-idea-mine #mine-page-mining .mode-heading { display: flex; align-items: center; gap: 6px; min-height: 18px; margin: 0 2px 3px; }
+#screen-idea-mine #mine-page-mining .mode-heading .ui-icon { width: 19px; height: 17px; color: #9c7d53; }
+#screen-idea-mine #mine-page-mining .mode-heading h2 { margin: 0; font-size: 11px; font-weight: 650; color: #455d7b; }
+#screen-idea-mine #mine-page-mining .mode-divider { width: 1px; height: 12px; background: #a49379; margin-inline: 2px; }
+#screen-idea-mine #mine-page-mining .mode-heading p { margin: 0; font-size: 9px; color: #6c665d; }
+#screen-idea-mine #mine-page-mining .modes { gap: 5px; padding: 1px 1px 4px; }
+#screen-idea-mine #mine-page-mining .mode { display: flex; flex: 0 0 60px; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 68px; padding: 5px 3px; border: 1px solid #ddcfb9; border-radius: 10px; background: #faf5e9; box-shadow: 0 1px 1px #b4a38b55, inset 0 1px 0 #fff; }
+#screen-idea-mine #mine-page-mining .mode-label { font-size: 10px; font-weight: 600; line-height: 1.2; color: #1b2b3f; white-space: normal; word-break: keep-all; text-align: center; }
+#screen-idea-mine #mine-page-mining .mode.active { border-color: #dfa43a; background: linear-gradient(#fff0b9, #ffe09a); box-shadow: 0 0 0 1px #e6bc62, inset 0 1px 0 #fff9df, 0 2px 5px #b8873b33; }
+#screen-idea-mine #mine-page-mining .mode-art { display: grid; place-items: center; width: 34px; height: 34px; color: #8d94a2; }
+#screen-idea-mine #mine-page-mining .mode-art svg { width: 33px; height: 33px; filter: drop-shadow(0 2px 1px #5b50352b); }
+#screen-idea-mine #mine-page-mining [data-mode=quality] .mode-art { color: #dc754c; }
+#screen-idea-mine #mine-page-mining [data-mode=rule] .mode-art { color: #52b9ed; }
+#screen-idea-mine #mine-page-mining [data-mode=relation] .mode-art { color: #78a466; }
+#screen-idea-mine #mine-page-mining [data-mode=problem] .mode-art { color: #edb64e; }
+#screen-idea-mine #mine-page-mining [data-mode=why] .mode-art { color: #9a6ce1; }
+#screen-idea-mine #mine-page-mining .mode-art img, #screen-idea-mine #mine-page-mining .field-art img { width: 100%; height: 100%; object-fit: contain; }
+#screen-idea-mine #mine-page-mining .mining-workbench { margin: 0; padding: 5px 7px; border: 0; background: transparent; }
+#screen-idea-mine #mine-page-mining .slots { gap: 5px; }
+#screen-idea-mine #mine-page-mining .slot { padding: 4px; border: 1px solid #d6c7ae; border-radius: 10px; background: linear-gradient(125deg, #f7f0e2, #e9deca); box-shadow: inset 0 1px 0 #fff; }
+#screen-idea-mine #mine-page-mining .slot.locked { border-color: #c19548; background: linear-gradient(125deg, #fff1d1, #e5d1aa); box-shadow: inset 0 0 0 1px #d6b27177; }
+#screen-idea-mine #mine-page-mining .slot.open { outline-color: #6da5ca; }
+#screen-idea-mine #mine-page-mining .slothead { gap: 3px; margin-bottom: 3px; }
+#screen-idea-mine #mine-page-mining .slotname { display: flex; align-items: center; gap: 3px; min-width: 0; padding-left: 0; color: #213b5e; font-size: 11px; font-weight: 650; }
+#screen-idea-mine #mine-page-mining .field-art { display: inline-flex; width: 18px; height: 22px; flex: 0 0 auto; color: #898d9c; }
+#screen-idea-mine #mine-page-mining .field-art svg { width: 18px; height: 22px; }
+#screen-idea-mine #mine-page-mining .slot:nth-child(2) .field-art { color: #8d6ed3; }
+#screen-idea-mine #mine-page-mining .slot:nth-child(3) .field-art { color: #c69949; }
+#screen-idea-mine #mine-page-mining .lock { width: 30px; min-width: 30px; min-height: 36px; padding: 4px; border: 1px solid #e6d5b8; border-radius: 6px; background: #c6a675; color: #fffdf4; box-shadow: inset 0 1px 0 #fff8; }
+#screen-idea-mine #mine-page-mining .lock.on { background: #aa824c; }
+#screen-idea-mine #mine-page-mining .lock svg { width: 18px; height: 20px; vertical-align: middle; }
+#screen-idea-mine #mine-page-mining .slot textarea { height: 54px; padding: 5px; align-content: center; border: 0; border-radius: 7px; background: #343e53; color: #fff; box-shadow: inset 0 1px 0 #a9b2c844; text-align: center; font-size: 16px; line-height: 1.35; }
+#screen-idea-mine #mine-page-mining .slot textarea::placeholder { color: #cdd5e3a6; font-size: 13px; }
+#screen-idea-mine #mine-page-mining .slot-tools { gap: 4px; margin-top: 4px; }
+#screen-idea-mine #mine-page-mining .slot-tools .browse { min-height: 40px; padding: 4px; border: 1px solid #fff9; border-radius: 7px; box-shadow: inset 0 1px 0 #fff6, 0 1px 0 #a18c6d55; }
+#screen-idea-mine #mine-page-mining .slot-tools .browse:first-child { background: linear-gradient(#9acbe1, #74accb); color: #fff; }
+#screen-idea-mine #mine-page-mining .slot-tools .browse:last-child { background: linear-gradient(#dfcaab, #cfb58e); color: #4d351d; }
+#screen-idea-mine #mine-page-mining .slot-tools svg { width: 24px; height: 24px; stroke-width: 2.4; }
+#screen-idea-mine #mine-page-mining .mining-actions { display: grid; grid-template-columns: 48px minmax(0, 1fr) 48px; gap: 9px; align-items: center; margin: 9px 8px 10px; }
+#screen-idea-mine #mine-page-mining .mining-actions > .btn { position: relative; display: grid; place-items: center; min-width: 0; min-height: 54px; padding: 6px; border: 3px solid #fff8e9; border-radius: 15px; background: #d8c6a9; color: #725336; box-shadow: 0 4px 0 #b69b7c77, inset 0 1px 0 #fffc; }
+#screen-idea-mine #mine-page-mining .mining-actions > .btn > .ui-icon { width: 29px; height: 29px; }
+#screen-idea-mine #mine-page-mining #mine-roll { min-height: 62px; padding: 6px 32px; border: 4px solid #9a6c31; border-radius: 32px; background: linear-gradient(#ffe984, #ffd14b 45%, #f4b936); color: #30200c; box-shadow: 0 0 0 2px #e6b659, inset 0 0 0 2px #fff5c0, inset 0 3px 2px #fff9, 0 5px 0 #70502c, 0 7px 12px #6c482c55; }
+#screen-idea-mine #mine-page-mining .mine-roll-label { font-size: clamp(22px, 6vw, 27px); font-weight: 800; line-height: 1.2; white-space: nowrap; text-align: center; }
+#screen-idea-mine #mine-page-mining .mine-button-decoration { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); width: 25px; height: 30px; color: #79522b; }
+#screen-idea-mine #mine-page-mining .mine-button-decoration svg, #screen-idea-mine #mine-page-mining .mine-button-decoration img { width: 100%; height: 100%; object-fit: contain; }
+/* Selection still replaces the upper area; its own list remains independently scrollable. */
+#screen-idea-mine #mine-page-mining.is-selecting { overflow: hidden; }
+#screen-idea-mine #mine-page-mining.is-selecting .mine-content { flex: 1; min-height: 0; overflow: hidden; }
+#screen-idea-mine #mine-page-mining.is-selecting .mine-dock { padding-top: 4px; margin: 0; }
+#screen-idea-mine #mine-page-mining.is-selecting .mode-panel, #screen-idea-mine #mine-page-mining.is-selecting .mining-actions { display: none; }
+#screen-idea-mine #mine-page-mining.is-selecting .mine-discovery { display: none; }
+#screen-idea-mine #mine-page-mining.is-selecting .mining-workbench { padding-bottom: 3px; }
+#screen-idea-mine #mine-page-mining #mine-library { border-color: #d4c7b4; background: #faf3e6; color: #213650; }
+#screen-idea-mine #mine-page-mining .libtop strong, #screen-idea-mine #mine-page-mining .libmeta { color: #6b614e; }
+#screen-idea-mine #mine-page-mining .libsearch { background: #fff9ef; color: #203550; border-color: #d8c6a8; }
+#screen-idea-mine #mine-page-mining .libtab { background: #e7d9be; color: #5e482e; border-color: transparent; }
+#screen-idea-mine #mine-page-mining .libtab.active { background: #d8b371; color: #3a2d1c; }
+#screen-idea-mine #mine-page-mining .libitem { background: #f1e6d1; color: #253b56; border-color: #dbccb2; }
+
+#screen-idea-mine:has(#mine-page-mining:not([hidden])) .toast { color: #655034; }
