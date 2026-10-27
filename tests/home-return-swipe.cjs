@@ -9,30 +9,44 @@ const path=require('node:path');
   page.on('pageerror',e=>errors.push(e.message));
   await page.route('**/*',async route=>{
    const u=new URL(route.request().url());if(u.hostname!=='swipe.test')return route.abort();
-   const file=path.join(__dirname,'..',u.pathname==='/'?'index.html':decodeURIComponent(u.pathname));
+   const pathname=decodeURIComponent(u.pathname.replace(/^\/app(?=\/)/,''));
+   const file=path.join(__dirname,'..',pathname==='/'?'index.html':pathname);
    try{await route.fulfill({body:await fs.readFile(file),contentType:file.endsWith('.js')?'application/javascript':file.endsWith('.css')?'text/css':file.endsWith('.html')?'text/html':'image/webp'})}catch{await route.fulfill({status:404,body:''})}
   });
-  await page.goto('https://swipe.test/');await page.waitForTimeout(1600);
+  await page.goto('https://swipe.test/app/');await page.waitForTimeout(1600);
   const cdp=await page.context().newCDPSession(page);
-  async function swipe({x=150,y=420,dx=110,dy=0,cancel=false,expectCue=false,hold=0}={}){
+  async function swipe({x=150,y=420,dx=110,dy=0,cancel=false,expectCue=false,expectMotion=false,hold=0}={}){
    await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});
    for(const progress of (dx>0&&dx<52?[1]:[.15,.4,.7,1])) {
     await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:x+dx*progress,y:y+dy*progress}]});
+    if(progress===.4 && expectMotion) {
+     const offset=await page.locator('body > .screen.active').evaluate(n=>new DOMMatrixReadOnly(getComputedStyle(n).transform).m41);
+     assert(Math.abs(offset-dx*progress)<2,'internal back also translates whole screen');
+     assert(await page.locator('[data-back-preview]').count()>0,'internal previous page is shown');
+     const previewBackground=await page.locator('[data-back-preview]').evaluate(n=>{const page=n.shadowRoot.querySelector('#mine-page-main:not([hidden])');return page?getComputedStyle(page,'::before').backgroundImage:null;});
+     if(previewBackground)assert(previewBackground.includes('/app/images/core/mine/idea-mine-bg.jpg'),'preview CSS asset paths retain hosted subdirectory');
+    }
     if(progress===.4 && expectCue) {
      await page.waitForTimeout(180);
-     assert(await page.locator('.screen.active').evaluate(n=>n.classList.contains('is-home-swiping')),'drag shows home cue');
-     const paint=await page.locator('.screen.active > .home-return-cue').evaluate(n=>{
+     assert(await page.locator('body > .screen.active').evaluate(n=>n.classList.contains('is-home-swiping')),'drag shows home cue');
+     const paint=await page.locator('body > .screen.active > .home-return-cue').evaluate(n=>{
       const s=getComputedStyle(n), ref=getComputedStyle(document.getElementById('center-area'),'::before');
       const keys=['width','height','borderRadius','borderColor','backgroundImage','boxShadow','transitionDuration'];
       return {opacity:s.opacity,own:keys.map(k=>s[k]),reference:keys.map(k=>ref[k])};
      });
-     assert.equal(paint.opacity,'1');assert.deepEqual(paint.own,paint.reference,'existing double-arrow plate design and animation are reused');
+     assert.equal(paint.opacity,'1');
+     const motion=await page.locator('body > .screen.active').evaluate(n=>new DOMMatrixReadOnly(getComputedStyle(n).transform).m41);
+     assert(Math.abs(motion-dx*progress)<2,'whole screen follows the finger one-to-one');
+     assert(await page.locator('[data-back-preview]').count()>0,'previous screen is visible behind source');
+     assert.deepEqual(paint.own,paint.reference,'existing double-arrow plate design and animation are reused');
     }
    }
    if(hold)await page.waitForTimeout(hold);
    await cdp.send('Input.dispatchTouchEvent',{type:cancel?'touchCancel':'touchEnd',touchPoints:[]});
-   await page.waitForTimeout(500);
+   await page.waitForTimeout(700);
    assert.equal(await page.locator('.is-home-swiping').count(),0,'cue clears on finish/cancel');
+   assert.equal(await page.locator('[data-back-preview]').count(),0,'preview is removed after settle');
+   assert.equal(await page.locator('.back-motion-source').count(),0,'source positioning is restored');
   }
   // Isolate app routing guards from Chromium's own browser-history overscroll.
   async function guardedSwipe(){
@@ -43,9 +57,9 @@ const path=require('node:path');
      const t=touch(x);target.dispatchEvent(new TouchEvent(type,{bubbles:true,cancelable:true,touches:type==='touchend'?[]:[t],changedTouches:[t]}));
     }
    });
-   await page.waitForTimeout(500);
+   await page.waitForTimeout(700);
   }
-  const active=async()=>{const id=await page.locator('.screen.active').getAttribute('id',{timeout:1500}).catch(()=>null);assert(id,'active screen missing at '+page.url());return id};
+  const active=async()=>{const id=await page.locator('body > .screen.active').getAttribute('id',{timeout:1500}).catch(()=>null);assert(id,'active screen missing at '+page.url());return id};
   async function mine(){await page.evaluate(()=>switchScreen('screen-home',null,{type:'instant'}));await page.locator('#btn-idea-mine').click()}
   await mine();
   for(const invalid of [{dx:24},{dx:0,dy:150},{dx:-25},{cancel:true}]){
@@ -62,7 +76,21 @@ const path=require('node:path');
   await page.evaluate(()=>goToNarrative());await page.waitForTimeout(500);
   await swipe({expectCue:true});assert.equal(await active(),'screen-home','story structure returns home');
   await mine();await page.locator('#mine-open-mining').click();await guardedSwipe();
-  assert.equal(await active(),'screen-idea-mine');assert(await page.locator('#mine-page-mining').isVisible(),'mine subpage does not return home');
+  assert.equal(await active(),'screen-idea-mine');assert(await page.locator('#mine-page-main').isVisible(),'mine subpage swipes to mine main');
+  await page.locator('#mine-open-mining').click();await page.locator('#mine-roll').click();
+  const idea=await page.locator('#mine-result').textContent();
+  const values=await page.locator('#mine-slots textarea').evaluateAll(ns=>ns.map(n=>n.value));
+  await swipe({x:160,y:260,cancel:true,expectMotion:true});
+  assert(await page.locator('#mine-page-mining').isVisible(),'canceled mine back stays in place');
+  assert.equal(await page.locator('#mine-result').textContent(),idea);
+  assert.deepEqual(await page.locator('#mine-slots textarea').evaluateAll(ns=>ns.map(n=>n.value)),values);
+  await page.locator('#mine-expand').click();
+  await swipe({x:160,y:280,expectMotion:true});
+  assert(await page.locator('#mine-page-mining').isVisible(),'refinery back returns to its mining origin');
+  assert.equal(await page.locator('#mine-result').textContent(),idea);
+  await page.locator('#mine-back').click();await page.locator('#mine-open-storage').click();
+  await swipe({x:160,y:280,expectMotion:true});
+  assert(await page.locator('#mine-page-main').isVisible(),'storage back returns to mine main');
   await page.evaluate(()=>goToCreate());await page.waitForTimeout(250);
   const strip=await page.locator('#subnav-scroll').boundingBox();
   await swipe({x:strip.x+40,y:strip.y+strip.height/2,dx:100});
@@ -70,7 +98,7 @@ const path=require('node:path');
   await page.evaluate(()=>selectSub('race'));await page.waitForTimeout(500);
   assert.equal(await page.locator('.center-page.active[data-chrome-view]').getAttribute('data-chrome-view'),'group');
   const bounds=await page.locator('#center-area').boundingBox();
-  await swipe({x:bounds.x+32,y:bounds.y+40});
+  await swipe({x:bounds.x+32,y:bounds.y+40,expectMotion:true});
   assert.equal(await active(),'screen-create','existing group back stays in creative flow');
   assert(await page.locator('#page-default').evaluate(n=>n.classList.contains('active')),'existing group back returns to category selection');
   assert.deepEqual(errors,[]);

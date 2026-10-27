@@ -917,10 +917,11 @@ function initCenterBackSwipe() {
   let forwardRoute = null;
   let forwardDragging = false;
   let forwardPending = false;
+  let backMotion = null;
 
   const activePage = () => area.querySelector('.center-page.active[data-chrome-view]')
     || area.querySelector('.center-page.active');
-  // 좌표만 기억한다. 이전 페이지 DOM/이미지/선택 데이터는 캐시하지 않는다.
+  // 실제 복귀 렌더에는 좌표만 재사용한다. 시각적 스와이프 미리보기는 별도로 격리된다.
   const pageKeys = new WeakMap();
   const scrollMemory = new Map();
   const rememberPage = page => {
@@ -963,6 +964,7 @@ function initCenterBackSwipe() {
   }
 
   function resetDragStyles() {
+    if(backMotion) { backMotion.finish(false); backMotion=null; dragOffset=0; }
     area.classList.remove('is-back-swiping', 'is-forward-swiping');
     returnToRest(dragPage, dragOffset);
     dragPage = null;
@@ -971,7 +973,7 @@ function initCenterBackSwipe() {
   }
 
   function onTouchStart(e) {
-    if (e.touches.length !== 1 || forwardPending) return;
+    if (e.touches.length !== 1 || forwardPending || window.BackSwipeMotion?.busy) return;
     const page = activePage();
     forwardRoute = !isExtraMenuOpen() && !document.getElementById('screen-create').classList.contains('bottom-panel-visible')
       ? getGroupCardReentry(page) : null;
@@ -1029,16 +1031,22 @@ function initCenterBackSwipe() {
       } else if (dx > 0 && dx > Math.abs(dy) * HORIZONTAL_BIAS && canNavigateBackInTrail()) {
         isDragging = true;
         area.classList.add('is-back-swiping');
+        backMotion=window.BackSwipeMotion?.begin(document.getElementById('screen-create'),window.BackSwipeMotion.creativeTarget());
         APP_PERF?.mark('swipe.drag-start', { page: dragPage?.id });
       }
     }
 
     if (isDragging) {
       e.preventDefault();
-      dragOffset = forwardDragging
-        ? Math.max(-42, Math.min(0, dragOrigin + dx * 0.35))
-        : Math.min(dragOrigin + dx * 0.35, 42);
-      if (dragPage) dragPage.style.transform = `translateX(${dragOffset}px)`;
+      if(backMotion) {
+        dragOffset=Math.max(0,Math.min(dx,gestureWidth));
+        backMotion.move(dragOffset);
+      } else {
+        dragOffset = forwardDragging
+          ? Math.max(-42, Math.min(0, dragOrigin + dx * 0.35))
+          : Math.min(dragOrigin + dx * 0.35, 42);
+        if (dragPage) dragPage.style.transform = `translateX(${dragOffset}px)`;
+      }
     }
   }
 
@@ -1067,7 +1075,8 @@ function initCenterBackSwipe() {
 
     APP_PERF?.mark('swipe.decision', { back: shouldGoBack, distance: furthestX, elapsedMs: elapsed });
     const sourcePage = dragPage;
-    const offset = dragOffset;
+    const animatedBack=Boolean(backMotion&&!forwardDragging);
+    const offset = animatedBack?0:dragOffset;
     if (!shouldGoBack) resetDragStyles();
     startX = null;
     startY = null;
@@ -1078,25 +1087,30 @@ function initCenterBackSwipe() {
     isVerticalGesture = false;
 
     if (shouldGoBack) {
-      area.classList.remove('is-back-swiping', 'is-forward-swiping');
-      playNavigationSound();
-      const key = pageKeys.get(sourcePage);
-      if (key) scrollMemory.set(key, APP_PERF ? APP_PERF.measure('scroll.read', () => sourcePage.scrollTop, { page: sourcePage.id }) : sourcePage.scrollTop);
-      if (forwardDragging) {
-        const route = forwardRoute;
-        forwardPending = true;
-        // Use the normal button-entry renderer. Animating the incoming scroll
-        // page here adds an ancestor transform while its 3D card flips start.
-        Promise.resolve(reenterGroupCards(route)).finally(() => { forwardPending = false; });
-      } else navigateAddressBack();
-      // 뒤로 가기는 기존 복귀 곡선을 유지한다. 재진입 목적지는 일반 버튼
-      // 진입처럼 표시해 카드 뒤집기에 별도의 페이지 이동을 겹치지 않는다.
-      sourcePage?.style.removeProperty('transform');
-      sourcePage?.style.removeProperty('transition');
-      dragPage = null;
-      dragOffset = 0;
-      dragOrigin = 0;
-      if (!forwardDragging) returnToRest(activePage(), offset);
+      const commit=()=> {
+        area.classList.remove('is-back-swiping', 'is-forward-swiping');
+        playNavigationSound();
+        const key = pageKeys.get(sourcePage);
+        if (key) scrollMemory.set(key, APP_PERF ? APP_PERF.measure('scroll.read', () => sourcePage.scrollTop, { page: sourcePage.id }) : sourcePage.scrollTop);
+        if (forwardDragging) {
+          const route = forwardRoute;
+          forwardPending = true;
+          // Use the normal button-entry renderer. Animating the incoming scroll
+          // page here adds an ancestor transform while its 3D card flips start.
+          Promise.resolve(reenterGroupCards(route)).finally(() => { forwardPending = false; });
+        } else navigateAddressBack();
+        // 뒤로 가기는 기존 복귀 곡선을 유지한다. 재진입 목적지는 일반 버튼
+        // 진입처럼 표시해 카드 뒤집기에 별도의 페이지 이동을 겹치지 않는다.
+        sourcePage?.style.removeProperty('transform');
+        sourcePage?.style.removeProperty('transition');
+        dragPage = null;
+        dragOffset = 0;
+        dragOrigin = 0;
+        if (!forwardDragging) returnToRest(activePage(), offset);
+        if(animatedBack)return window.BackSwipeMotion.waitFor(()=>activePage()!==sourcePage);
+      };
+      if(animatedBack) { const motion=backMotion;backMotion=null;motion.finish(true,commit); }
+      else commit();
     }
   }
 
@@ -2079,7 +2093,7 @@ function switchScreen(targetId, callback, options = {}) {
   if (type === 'instant' || !current || current === target) {
     screens.forEach(screen => screen.classList.add('no-transition'));
     setActiveScreen(target, screens);
-    if (targetId === 'screen-home') restartHomeIntro();
+    if (targetId === 'screen-home' && !options.skipHomeIntro) restartHomeIntro();
     if (callback) callback();
     requestAnimationFrame(() => {
       if (transitionToken === screenTransitionToken) clearScreenTransitionState(screens);
@@ -2093,7 +2107,7 @@ function switchScreen(targetId, callback, options = {}) {
   current.classList.add(TRANSITION_SOURCE_CLASS);
   target.classList.add(TRANSITION_TARGET_CLASS);
   target.classList.add('active');
-  if (targetId === 'screen-home') restartHomeIntro();
+  if (targetId === 'screen-home' && !options.skipHomeIntro) restartHomeIntro();
   if (callback) callback();
 
   requestAnimationFrame(() => {
@@ -2123,7 +2137,7 @@ function switchScreen(targetId, callback, options = {}) {
 /* ════════════════════════════════════════════════
    내비게이션
 ════════════════════════════════════════════════ */
-function goHome() {
+function goHome({ instant = false } = {}) {
   closeCardInfo();
   closeDetailSheet();
   closeStatusOverlay();
@@ -2134,7 +2148,8 @@ function goHome() {
   resetCreativeBackgroundActivation();
 
   switchScreen('screen-home', null, {
-    type: 'dissolve',
+    type: instant ? 'instant' : 'dissolve',
+    skipHomeIntro: instant,
     duration: FADE_MS_BACK,
     easing: 'cubic-bezier(0.22, 0.61, 0.36, 1)'
   });
@@ -2174,6 +2189,7 @@ function setBottomNavState(navId) {
    주 내비게이션 전환
 ════════════════════════════════════════════════ */
 function switchNav(navId, skipAnimation, options = {}, backgroundPrepared = false) {
+  window.BackSwipeMotion?.rememberCreative();
   const prev = currentNav;
   if (!backgroundPrepared) {
     // Explicit NAV entry starts a new exploration; ancestor navigation restores
@@ -2254,6 +2270,7 @@ function renderSubnav(navId, animate) {
    하위 메뉴 선택
 ════════════════════════════════════════════════ */
 function selectSub(subId, navId, backgroundPrepared = false, restoreBackground = false) {
+  window.BackSwipeMotion?.rememberCreative();
   if (!backgroundPrepared) {
     if (!restoreBackground) {
       groupCardReentries.clear();
@@ -2516,6 +2533,7 @@ sg.cards.forEach((card, cIdx) => {
    ─ 그룹 안에 subgroups 배열이 있을 때 그룹 버튼 클릭 시 열림
 ════════════════════════════════════════════════ */
 function showSubgroupPage(subId, groupIdx, backgroundPrepared = false) {
+  window.BackSwipeMotion?.rememberCreative();
   if (!backgroundPrepared) return applyCreativeBackground({ navId: currentNav, stage: 'group', screenKey: `subgroup:${subId}:${groupIdx}` }, () => showSubgroupPage(subId, groupIdx, true));
   closeCardInfo();
   const area = document.getElementById('center-area');
@@ -2580,6 +2598,7 @@ function showSubgroupPage(subId, groupIdx, backgroundPrepared = false) {
    서브그룹 카드 목록 렌더 (2단계 → 카드)
 ════════════════════════════════════════════════ */
 function showSubgroupCards(subId, groupIdx, sgIdx, backgroundPrepared = false, titleAssets = null) {
+  window.BackSwipeMotion?.rememberCreative();
   if (!backgroundPrepared) return applyCreativeBackground({ navId: currentNav, stage: 'card', screenKey: `subgroup-cards:${subId}:${groupIdx}:${sgIdx}` }, assets => showSubgroupCards(subId, groupIdx, sgIdx, true, assets), CARD_DATA[subId]?.groups?.[groupIdx]?.subgroups?.[sgIdx]);
   closeCardInfo();
   const area = document.getElementById('center-area');
@@ -2724,6 +2743,7 @@ function updateSubgroupBadges(subId, groupIdx) {
    그룹 버튼 클릭 → 해당 그룹의 카드 목록 열기 (1단계 그룹용)
 ════════════════════════════════════════════════ */
 function showGroupCards(subId, groupIdx, backgroundPrepared = false, titleAssets = null) {
+  window.BackSwipeMotion?.rememberCreative();
   if (!backgroundPrepared) return applyCreativeBackground({ navId: currentNav, stage: 'card', screenKey: `group-cards:${subId}:${groupIdx}` }, assets => showGroupCards(subId, groupIdx, true, assets), CARD_DATA[subId]?.groups?.[groupIdx]);
   closeCardInfo();
   const area = document.getElementById('center-area');
@@ -2867,6 +2887,7 @@ function updateGroupBadges(subId) {
 
 
 function showCardPage(subId, animate = true, backgroundPrepared = false) {
+  window.BackSwipeMotion?.rememberCreative();
 
   // type:'group' 인 경우 그룹 선택 화면을 열고 종료
   const navInfo2 = Object.values(NAV_DATA).find(n => n.subs.find(s => s.id === subId));
@@ -5767,74 +5788,144 @@ function createPageTitleCard(group, subId, preparedAssets = null, groupCount = C
 }
 
 
-// Root-only home return shares the hierarchy swipe's cue and distance/flick rules.
+// Interactive back previews are isolated in a shadow root: no duplicate document IDs,
+// event handlers, or app state are introduced by visual copies of previous screens.
+window.BackSwipeMotion=(()=> {
+  const previews=new Map();
+  let busy=false, css=null;
+  const routeKey=trail=>JSON.stringify((trail.length?trail:[{type:'nav',navId:currentNav}]).map(({type,navId,subId,groupIdx,sgIdx})=>({type,navId,subId,groupIdx,sgIdx})));
+  function snapshot(source) {
+    const clone=source.cloneNode(true), originals=[source,...source.querySelectorAll('*')], copies=[clone,...clone.querySelectorAll('*')];
+    const index=new Map(originals.map((node,i)=>[node,i]));
+    source.getAnimations({subtree:true}).forEach(animation=> {
+      const node=animation.effect?.target, copy=copies[index.get(node)];
+      if(!copy || !(node instanceof Element))return;
+      const paint=getComputedStyle(node);
+      copy.style.animation='none';
+      for(const property of ['opacity','transform','filter','visibility'])copy.style[property]=paint[property];
+    });
+    originals.forEach((node,i)=> {
+      if(node.matches('input, textarea, select'))copies[i].value=node.value;
+      const top=node.dataset.backScrollTop??node.scrollTop,left=node.dataset.backScrollLeft??node.scrollLeft;
+      if(Number(top))copies[i].dataset.backScrollTop=top;
+      if(Number(left))copies[i].dataset.backScrollLeft=left;
+    });
+    clone.classList.remove('back-motion-source','is-home-swiping');
+    clone.style.removeProperty('transform');clone.style.removeProperty('transition');clone.style.removeProperty('clip-path');
+    clone.querySelectorAll('.center-page').forEach(n=>{n.style.removeProperty('transform');n.style.removeProperty('transition');});
+    return clone;
+  }
+  function rememberCreative() {
+    const screen=document.getElementById('screen-create');
+    if(busy||!screen.classList.contains('active'))return;
+    const key=routeKey(addressTrail);
+    previews.delete(key);previews.set(key,snapshot(screen));
+    if(previews.size>12) {
+      const ancestors=new Set(Array.from({length:addressTrail.length+1},(_,i)=>routeKey(addressTrail.slice(0,i))));
+      const disposable=Array.from(previews.keys()).find(key=>!ancestors.has(key));
+      if(disposable)previews.delete(disposable);
+    }
+  }
+  function creativeTarget() { return previews.get(routeKey(addressTrail.slice(0,-1))); }
+  function waitFor(predicate) {
+    const started=performance.now();
+    return new Promise(resolve=>{const check=()=>{if(predicate()||performance.now()-started>1000)resolve();else requestAnimationFrame(check);};check();});
+  }
+  function begin(source,previous) {
+    if(busy||!previous)return null;
+    busy=true;
+    const rect=source.getBoundingClientRect(), host=document.createElement('div');
+    host.dataset.backPreview=previous.id;
+    host.setAttribute('aria-hidden','true');host.inert=true;
+    Object.assign(host.style,{position:'fixed',left:rect.left+'px',top:rect.top+'px',width:rect.width+'px',height:rect.height+'px',overflow:'hidden',zIndex:'149',pointerEvents:'none'});
+    const shadow=host.attachShadow({mode:'open'}), style=document.createElement('style');
+    if(css===null)css=Array.from(document.styleSheets).map(sheet=> {
+      try {
+        return Array.from(sheet.cssRules,rule=>rule.cssText.replace(/url\(\s*(["']?)(.*?)\1\s*\)/g,(match,quote,url)=> {
+          if(url.startsWith('data:')||url.startsWith('#'))return match;
+          return 'url("'+new URL(url,sheet.href||document.baseURI).href+'")';
+        })).join('\n');
+      } catch { return ''; }
+    }).join('\n');
+    style.textContent=css+'\n.screen{position:absolute!important;inset:0!important;width:100%!important;max-width:none!important;height:100%!important;margin:0!important;opacity:1!important;visibility:visible!important;transform:none!important;transition:none!important;pointer-events:none!important}.home-return-cue{display:none!important}';
+    const visual=snapshot(previous);visual.classList.add('active');
+    shadow.append(style,visual);document.body.appendChild(host);
+    visual.querySelectorAll('[data-back-scroll-top], [data-back-scroll-left]').forEach(n=>{n.scrollTop=Number(n.dataset.backScrollTop||0);n.scrollLeft=Number(n.dataset.backScrollLeft||0);});
+    const inline=source.getAttribute('style');
+    source.classList.add('back-motion-source');source.style.transition='none';
+    let offset=0,settling=false;
+    function move(value) { if(settling)return;offset=Math.max(0,Math.min(value,rect.width));source.style.transform=`translate3d(${offset}px,0,0)`;source.style.clipPath=`inset(0 ${offset}px 0 0)`; }
+    move(0);
+    async function finish(commit,action) {
+      if(settling)return;settling=true;
+      const end=commit?rect.width:0;
+      const duration=matchMedia('(prefers-reduced-motion: reduce)').matches?0:Math.max(140,Math.min(260,Math.abs(end-offset)*.7));
+      const animation=source.animate([{transform:`translate3d(${offset}px,0,0)`,clipPath:`inset(0 ${offset}px 0 0)`},{transform:`translate3d(${end}px,0,0)`,clipPath:`inset(0 ${end}px 0 0)`}],{duration,easing:'cubic-bezier(.22,.61,.36,1)',fill:'forwards'});
+      try { await animation.finished; if(commit)await action?.(); }
+      finally { animation.cancel();if(inline===null)source.removeAttribute('style');else source.setAttribute('style',inline);source.classList.remove('back-motion-source');host.remove();busy=false; }
+    }
+    return {move,finish};
+  }
+  return {begin,snapshot,rememberCreative,creativeTarget,waitFor,get busy(){return busy;}};
+})();
+
+// Only route ownership changes here; hierarchy/forward gestures retain their handlers.
 (()=> {
   let gesture=null, suppressClickUntil=0;
   for(const id of ['screen-idea-mine','screen-create','screen-narrative']) {
-    const cue=document.createElement('span');
-    cue.className='home-return-cue';
-    cue.setAttribute('aria-hidden','true');
-    document.getElementById(id).appendChild(cue);
+    const cue=document.createElement('span');cue.className='home-return-cue';cue.setAttribute('aria-hidden','true');document.getElementById(id).appendChild(cue);
   }
-  function eligibleScreen() {
+  function route() {
     if(document.querySelector('.app-dialog-overlay.active, .detail-overlay.active, .status-overlay.active') || isExtraMenuOpen())return null;
     const screen=document.querySelector('.screen.active');
-    if(screen?.id==='screen-narrative')return screen;
-    if(screen?.id==='screen-idea-mine' && !document.getElementById('mine-page-main').hidden)return screen;
-    if(screen?.id==='screen-create' && !currentSubId && document.getElementById('page-default').classList.contains('active') && !canNavigateBackInTrail())return screen;
-    return null;
+    if(screen?.id==='screen-idea-mine') {
+      const back=window.IdeaMineBackRoute?.();
+      if(back) {
+        const previous=BackSwipeMotion.snapshot(screen);
+        previous.querySelectorAll('.mine-page').forEach(n=>n.hidden=n.id!=='mine-page-'+back.target);
+        return {screen,previous,commit:back.commit};
+      }
+      if(document.getElementById('mine-page-main').hidden)return null;
+    } else if(screen?.id==='screen-create') {
+      if(currentSubId||!document.getElementById('page-default').classList.contains('active')||canNavigateBackInTrail())return null;
+    } else if(screen?.id!=='screen-narrative')return null;
+    return {screen,previous:document.getElementById('screen-home'),commit:()=>goHome({instant:true})};
   }
-  function resetGesture() {
-    gesture?.screen.classList.remove('is-home-swiping');
-    gesture=null;
-  }
+  function resetGesture() {gesture?.screen.classList.remove('is-home-swiping');gesture=null;}
   function horizontalControl(target,screen) {
     if(target.closest('a, input, textarea, select, [contenteditable], .subnav-scroll, #bottom-nav'))return true;
-    for(let node=target;node&&node!==screen;node=node.parentElement) {
-      if(node.scrollWidth>node.clientWidth+1 && /^(auto|scroll)$/.test(getComputedStyle(node).overflowX))return true;
-    }
+    for(let node=target;node&&node!==screen;node=node.parentElement)if(node.scrollWidth>node.clientWidth+1 && /^(auto|scroll)$/.test(getComputedStyle(node).overflowX))return true;
     return false;
   }
   document.addEventListener('touchstart',e=> {
-    resetGesture();
-    if(e.touches.length!==1)return;
-    const screen=eligibleScreen();
-    if(!screen || !screen.contains(e.target) || horizontalControl(e.target,screen))return;
-    const t=e.touches[0], rect=screen.getBoundingClientRect();
-    // Preserve Safari's native outer-edge history gesture, without an inner edge band.
-    if(t.clientX-rect.left<16)return;
-    gesture={screen,x:t.clientX,y:t.clientY,time:performance.now(),horizontal:false,furthest:0};
+    if(gesture?.motion)gesture.motion.finish(false);
+    resetGesture();if(e.touches.length!==1||BackSwipeMotion.busy)return;
+    const back=route();if(!back||!back.screen.contains(e.target)||horizontalControl(e.target,back.screen))return;
+    const t=e.touches[0],rect=back.screen.getBoundingClientRect();if(t.clientX-rect.left<16)return;
+    gesture={...back,x:t.clientX,y:t.clientY,time:performance.now(),horizontal:false,furthest:0,motion:null};
   },{passive:true});
   document.addEventListener('touchmove',e=> {
     if(!gesture)return;
-    if(e.touches.length!==1 || eligibleScreen()!==gesture.screen) { resetGesture(); return; }
-    const dx=e.touches[0].clientX-gesture.x, dy=e.touches[0].clientY-gesture.y;
+    if(e.touches.length!==1||!gesture.screen.classList.contains('active')) {gesture.motion?.finish(false);resetGesture();return;}
+    const dx=e.touches[0].clientX-gesture.x,dy=e.touches[0].clientY-gesture.y;
     if(!gesture.horizontal) {
       if(Math.hypot(dx,dy)<6)return;
-      if(dx<=0 || dx<Math.abs(dy)*1.15) { resetGesture(); return; }
-      gesture.horizontal=true;
-      gesture.screen.classList.add('is-home-swiping');
-      gesture.screen.querySelectorAll('.is-pressing').forEach(n=>n.classList.remove('is-pressing'));
+      if(dx<=0||dx<Math.abs(dy)*1.15) {resetGesture();return;}
+      gesture.horizontal=true;gesture.motion=BackSwipeMotion.begin(gesture.screen,gesture.previous);
+      gesture.screen.classList.add('is-home-swiping');gesture.screen.querySelectorAll('.is-pressing').forEach(n=>n.classList.remove('is-pressing'));
     }
-    gesture.furthest=Math.max(gesture.furthest,dx);
+    gesture.furthest=Math.max(gesture.furthest,dx);gesture.motion?.move(dx);
     if(e.cancelable)e.preventDefault();
   },{passive:false});
   document.addEventListener('touchend',e=> {
-    const g=gesture;
-    resetGesture();
-    if(!g || !g.horizontal || e.touches.length || eligibleScreen()!==g.screen)return;
-    // A horizontal drag must not become a button click, even when it falls short.
+    const g=gesture;resetGesture();if(!g||!g.horizontal)return;
     suppressClickUntil=performance.now()+400;
-    const t=e.changedTouches[0];
-    if(!t)return;
-    const elapsed=Math.max(1,performance.now()-g.time);
-    const threshold=Math.max(52,Math.min(80,g.screen.clientWidth*.14));
-    const fast=g.furthest>=28 && g.furthest/elapsed>=.35;
-    if(Math.abs(t.clientY-g.y)<g.furthest*1.5 && (g.furthest>=threshold||fast))goHome();
+    const t=e.changedTouches[0],elapsed=Math.max(1,performance.now()-g.time);
+    const threshold=Math.max(52,Math.min(80,g.screen.clientWidth*.14)),fast=g.furthest>=28&&g.furthest/elapsed>=.35;
+    const commit=Boolean(t&&!e.touches.length&&Math.abs(t.clientY-g.y)<g.furthest*1.5&&(g.furthest>=threshold||fast));
+    if(g.motion)g.motion.finish(commit,g.commit);else if(commit)g.commit();
   },{passive:true});
-  document.addEventListener('touchcancel',resetGesture,{passive:true});
-  window.addEventListener('blur',resetGesture);
-  document.addEventListener('click',e=> {
-    if(performance.now()<suppressClickUntil) { e.preventDefault();e.stopImmediatePropagation(); }
-  },true);
+  function cancel(){gesture?.motion?.finish(false);resetGesture();}
+  document.addEventListener('touchcancel',cancel,{passive:true});window.addEventListener('blur',cancel);
+  document.addEventListener('click',e=>{if(BackSwipeMotion.busy||performance.now()<suppressClickUntil){e.preventDefault();e.stopImmediatePropagation();}},true);
 })();

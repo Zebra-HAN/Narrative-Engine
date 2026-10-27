@@ -303,3 +303,11 @@
 #screen-idea-mine #mine-library .libtabs { scrollbar-width: none; -ms-overflow-style: none; }
 #screen-idea-mine #mine-library .libgrid::-webkit-scrollbar,
 #screen-idea-mine #mine-library .libtabs::-webkit-scrollbar { display: none; width: 0; height: 0; }
+
+/* Compress only the workbench/header whitespace; controls retain their sizes. */
+#screen-idea-mine .mining-workbench { padding-block: 4.2px; }
+#screen-idea-mine .mining-workbench .slot { padding-block: 2px; }
+#screen-idea-mine .mining-workbench .slothead { margin-bottom: 1.2px; }
+#screen-idea-mine .mining-workbench > .sectionhead { margin-bottom: 2.8px; }
+#screen-idea-mine .mode-panel { padding-top: 2.8px; }
+#screen-idea-mine .mode-panel h2 { margin-bottom: 1.4px; font-size: 9.5px; }
