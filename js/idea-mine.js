@@ -30,7 +30,7 @@
     "lock": "<rect x=\"5\" y=\"10\" width=\"14\" height=\"12\" rx=\"2\"/><path d=\"M8 10V6a4 4 0 0 1 8 0v4M12 15v3\"/>",
     "unlock": "<rect x=\"5\" y=\"10\" width=\"14\" height=\"12\" rx=\"2\"/><path d=\"M8 10V6a4 4 0 0 1 8 0M12 15v3\"/>",
     "search": "<circle cx=\"10\" cy=\"10\" r=\"6.5\"/><path d=\"m15 15 7 7\"/>",
-    "refresh": "<path d=\"M18 6a8 8 0 1 0 2 10M18 1v6h-6\"/>",
+    "refresh": "<path d=\"M21 7v5h-5M20.49 17a9 9 0 1 1-2.12-9.36L21 12\"/>",
     "gem": "<path d=\"m12 2 8 8-3 11H7L4 10z\" fill=\"currentColor\" stroke=\"none\"/><path d=\"m12 2-3 8 3 11 3-11z\" fill=\"#fff\" opacity=\".35\" stroke=\"none\"/><path d=\"M4 10h16\" stroke=\"#fff\" opacity=\".4\"/>"
   };
   const uiIcon=name=>'<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'+iconPaths[name]+'</svg>';
@@ -46,6 +46,11 @@
   let mode=0,values= {}
   ,locks= {}
   ,rollCount=0,expandOffset=0,activeField=null,activeCategory='전체';
+  const modeStates=new Map();
+  function rememberMode() {
+    modeStates.set(mode,{values:{...values},locks:{...locks},legacyObject,
+      loadedResult:loadedResult?{text:loadedResult.text,values:{...loadedResult.values}}:null});
+  }
   const storeKey='narrative_idea_mine_saves_v1';
   let saves=[];
   try {
@@ -86,7 +91,7 @@
     if(refineryIdea) { expandOffset=0; expand(); }
   }
   let dialogPending=false;
-  async function mineDialog(message, confirm=true) {
+  async function mineDialog(message, confirm=true, cancelLabel='아니오') {
     if(dialogPending)return false;
     dialogPending=true;
     const trigger=document.activeElement;
@@ -98,6 +103,7 @@
     dialog.setAttribute('aria-describedby','app-dialog-msg');
     dialog.setAttribute('aria-label',confirm?'확인':'설명 보기');
     const buttons=[...overlay.querySelectorAll('button')];
+    if(confirm)overlay.querySelector('.app-dialog-btn-cancel').textContent=cancelLabel;
     function keydown(e) {
       if(e.key==='Escape') { e.preventDefault(); e.stopImmediatePropagation(); closeAppDialog(false); }
       if(e.key==='Tab') {
@@ -144,12 +150,13 @@
     )
   }
   function switchMode(i) {
+    rememberMode();
     mode=i;
-    legacyObject=null;
-    loadedResult=null;
-    values=Object.fromEntries(modes[mode].fields.map(([key])=>[key,'']));
-    locks= {}
-    ;
+    const state=modeStates.get(mode);
+    legacyObject=state?.legacyObject??null;
+    loadedResult=state?.loadedResult??null;
+    values=state?{...state.values}:Object.fromEntries(modes[mode].fields.map(([key])=>[key,'']));
+    locks=state?{...state.locks}:{};
     activeField=null;
     $('library').hidden=true;
     resetLibraryLayout();
@@ -356,7 +363,7 @@
     const unchanged=loadedResult&&m.fields.every(([key])=>values[key]===loadedResult.values[key]);
     const hasIdea=Boolean(unchanged||m.fields.some(([key])=>values[key]?.trim()));
     $('result').textContent=unchanged?loadedResult.text:hasIdea?m.build(values):'채굴을 시작해 주세요.';
-    for(const id of ['save','copy','expand','refineShortcut'])$(id).disabled=!hasIdea;
+    for(const id of ['save','copy','refineShortcut'])$(id).disabled=!hasIdea;
     $('expPanel').hidden=true;
     $('count').textContent=`채굴 ${rollCount}회`
   }
@@ -417,6 +424,7 @@
       load.textContent='작업대에서 열기';
       load.onclick=()=> {
         const restored=core.restore(entry,window.IdeaMineCatalog);
+        rememberMode();
         mode=restored.mode;
         legacyObject=restored.legacyObject;
         values={...restored.values};
@@ -498,9 +506,11 @@
   }
   $('roll').onclick=()=>reroll();
   $('save').onclick=save;
-  $('copy').onclick=()=>copyText($('result').textContent);
-  $('expand').onclick=()=>openRefinery(true);
-  $('refineShortcut').onclick=$('expand').onclick;
+  $('copy').onclick=async()=> {
+    const text=$('result').textContent;
+    if(await mineDialog('문장을 복사하시겠습니까?',true,'아니요'))await copyText(text);
+  };
+  $('refineShortcut').onclick=()=>openRefinery(true);
   $('refinerySave').onclick=save;
   $('refineryExpand').onclick=()=> { if(refineryIdea)expand(); };
   $('refreshExpand').onclick=()=> {
