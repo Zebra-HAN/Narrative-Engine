@@ -165,18 +165,20 @@ const UI_SOUND = (() => {
     // 기존 파일명을 유지하지만 재생 방식은 다른 버튼과 같은 단발성 SFX다.
     start: 'sounds/bgm_start.mp3',
     touch: 'sounds/se/se_touch.mp3',
-    detailItem: 'sounds/click_2.mp3',
-    cardInfo: 'sounds/click_3.mp3',
-    paper1: 'sounds/paper_1.mp3',
-    paper2: 'sounds/paper_2.mp3',
-    paper3: 'sounds/paper_3.mp3',
-    paper4: 'sounds/paper_4.mp3',
+    detailItem: 'sounds/select/click_2.mp3',
+    cardInfo: 'sounds/select/click_3.mp3',
+    paper1: 'sounds/select/paper_1.mp3',
+    paper2: 'sounds/select/paper_2.mp3',
+    paper3: 'sounds/select/paper_3.mp3',
+    paper4: 'sounds/select/paper_4.mp3',
     touchNew1: 'sounds/se/se_touch_new1.mp3',
     touchNew2: 'sounds/se/se_touch_new2.mp3',
     touchNew3: 'sounds/se/se_touch_new3.mp3',
     page: 'sounds/se/se_page.mp3',
     nav: 'sounds/se/se_nav.mp3',
-    click: 'sounds/click_1.mp3',
+    menuOpen: 'sounds/select/select-1.mp3',
+    menuClose: 'sounds/select/select-2.mp3',
+    click: 'sounds/select/click_1.mp3',
     card: 'sounds/se/se_card.mp3',
     card1: 'sounds/se/se_card1.mp3',
     card2: 'sounds/se/se_card2.mp3',
@@ -288,7 +290,6 @@ function playDetailCloseSound() {
 
 function initUiSounds() {
   const cardSounds = ['pong1', 'pong2', 'pong3', 'pong4', 'pong5'];
-  const categorySounds = ['card', 'card1'];
 
   function playRandom(sounds) {
     UI_SOUND.play(sounds[Math.floor(Math.random() * sounds.length)]);
@@ -312,13 +313,15 @@ function initUiSounds() {
     } else if (target.matches('.data-card')) {
       playRandom(cardSounds);
     } else if (target.matches('#btn-extra-menu, #card-menu-toggle')) {
-      UI_SOUND.play('card');
+      UI_SOUND.play(target.getAttribute('aria-expanded') === 'true' ? 'menuClose' : 'menuOpen');
+    } else if (target.matches('#card-panel-toggle')) {
+      UI_SOUND.play('menuOpen');
     } else if (target.matches('.extra-btn-home')) {
       UI_SOUND.play('selectNo');
     } else if (target.matches('.extra-btn, .group-select-btn')) {
       UI_SOUND.play('click');
     } else if (target.matches('.subnav-item')) {
-      playRandom(categorySounds);
+      UI_SOUND.play('card');
     } else if (target.matches('.app-dialog-btn-cancel')) {
       UI_SOUND.play('cancel');
     } else if (target.matches('.app-dialog-btn-confirm, .card-info-select')) {

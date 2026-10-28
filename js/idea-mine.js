@@ -152,6 +152,7 @@
       b.setAttribute('aria-pressed',String(i===mode));
       b.className='mode'+(i===mode?' active':'');
       b.dataset.mode=m.id;
+      b.dataset.sound='nav';
       const label=document.createElement('span');label.className='mode-label';label.textContent=m.name;
       b.append(visual('mode-art',artwork.modeIcons?.[m.id]),label);
       b.onclick=()=>switchMode(i);
@@ -223,12 +224,14 @@
       ;
       let browse=document.createElement('button');
       browse.className='browse';
+      browse.dataset.sound='card';
       browse.innerHTML=uiIcon('search');
       browse.setAttribute('aria-label','목록 선택');
       browse.title=label+' 목록 선택';
       browse.onclick=()=>openLibrary(key);
       let single=document.createElement('button');
       single.className='browse';
+      single.dataset.sound='card1';
       single.innerHTML=uiIcon('refresh');
       single.setAttribute('aria-label','재추첨');
       single.title=label+' 재추첨';
@@ -525,6 +528,9 @@
     $('expPanel').hidden=false;
     // Keep the idea at the start of the refinery reading area on entry.
   }
+  $('roll').dataset.sound='card1';
+  ['back','home','refineryBack','refineShortcut'].forEach(id=>$(id).dataset.sound='card');
+  document.querySelectorAll('[data-mine-main]').forEach(b=>b.dataset.sound='card');
   $('roll').onclick=()=>reroll();
   $('save').onclick=save;
   $('copy').onclick=async()=> {
