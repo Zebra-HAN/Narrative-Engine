@@ -1,4 +1,4 @@
-/* Mining-only presentation. Gameplay, storage and other pages retain their styles. */
+/* Mining presentation and the refinery palette; gameplay and layout stay independent. */
 #screen-idea-mine:has(#mine-page-mining:not([hidden])) { background: linear-gradient(#72bdf7, #a4d7fb 66%, #f1e7d7 90%); }
 #screen-idea-mine #mine-page-mining {
   --mine-ink: #162a46;
@@ -168,7 +168,7 @@
 #screen-idea-mine #mine-page-mining .slot:nth-child(2) .field-art { color: #8d6ed3; }
 #screen-idea-mine #mine-page-mining .slot:nth-child(3) .field-art { color: #c69949; }
 #screen-idea-mine #mine-page-mining .lock { display: grid; place-items: center; flex: 0 0 24px; width: 24px; height: 24px; min-width: 24px; min-height: 24px; padding: 2px; border: 1px solid #e6d5b8; border-radius: 6px; background: #c6a675; color: #fffdf4; box-shadow: inset 0 1px 0 #fff8; }
-#screen-idea-mine #mine-page-mining .lock.on { background: #087e91; border-color: #58c9d1; color: #fff; box-shadow: inset 0 1px 0 #b9ffff77, 0 0 3px #128c9a66; }
+#screen-idea-mine #mine-page-mining .lock.on { background: linear-gradient(#f4d071, #bc8630); border-color: #76501b; color: #38260c; box-shadow: inset 0 1px 0 #fff1b7, 0 2px 0 #795525; }
 #screen-idea-mine #mine-page-mining .lock svg { width: 18px; height: 20px; vertical-align: middle; }
 #screen-idea-mine #mine-page-mining .slot textarea { height: 54px; padding: 5px; align-content: center; border: 0; border-radius: 7px; background: #343e53; color: #fff; box-shadow: inset 0 1px 0 #a9b2c844; text-align: center; font-size: 16px; line-height: 1.35; }
 #screen-idea-mine #mine-page-mining .slot textarea::placeholder { color: #cdd5e3a6; font-size: 13px; }
@@ -199,3 +199,63 @@
 #screen-idea-mine #mine-page-mining .libitem { background: #f1e6d1; color: #253b56; border-color: #dbccb2; }
 
 #screen-idea-mine:has(#mine-page-mining:not([hidden])) .toast { color: #655034; }
+
+/* Reserve the empty tag's height so first mining never moves the result frame. */
+#screen-idea-mine #mine-page-mining .idea-display .tag:empty { visibility: hidden; min-height: 22px; }
+#screen-idea-mine #mine-page-mining .mode-heading { gap: 4px; }
+#screen-idea-mine #mine-page-mining .mode-heading > * { flex-shrink: 0; }
+#screen-idea-mine #mine-miningNotice {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-left: auto;
+  color: #6e4715;
+  font-size: 9px;
+  font-weight: 700;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+/* Refinery uses the mining palette without changing its reading or action layout. */
+#screen-idea-mine:has(#mine-page-refinery:not([hidden])) { background: linear-gradient(#72bdf7, #a4d7fb 66%, #f1e7d7 90%); }
+#screen-idea-mine #mine-page-refinery { color: #162a46; }
+#screen-idea-mine #mine-page-refinery h1 { color: #162a46; text-shadow: 0 1px #fff9; }
+#screen-idea-mine #mine-page-refinery :is(.panel, .exp) {
+  background: linear-gradient(120deg, #fcf7ec, #eee2ce);
+  border-color: #d6c7ae;
+  box-shadow: inset 0 1px 0 #fff;
+}
+#screen-idea-mine #mine-page-refinery .result {
+  background: linear-gradient(115deg, #fff6df, #f8e6c6 52%, #fff3dc);
+  border-color: #92704e;
+  box-shadow: 0 0 0 2px #cfb17b, inset 0 0 0 3px #fff7e6, 0 5px 0 #624b36a6, 0 8px 12px #58422f42;
+}
+#screen-idea-mine #mine-page-refinery :is(.tag, .exp b) { color: #775526; }
+#screen-idea-mine #mine-page-refinery :is(h2, .hint) { color: #655942; }
+#screen-idea-mine #mine-page-refinery button {
+  color: #f5f8ff;
+  border-color: #91b7e2;
+  background: linear-gradient(155deg, #487fc3, #244a85);
+  box-shadow: inset 0 2px 0 #fff5, inset 0 -2px 0 #17375e66, 0 3px 0 #3d2d24;
+}
+#screen-idea-mine #mine-page-refinery .btn.primary {
+  color: #29303b;
+  border-color: #ffe6a1;
+  background: linear-gradient(#ffdc79, #efb546);
+  box-shadow: inset 0 2px 0 #fffa, inset 0 -2px 0 #c48b3d66, 0 3px 0 #78552c;
+}
+#screen-idea-mine #mine-page-refinery .lock.on {
+  background: linear-gradient(#f4d071, #bc8630);
+  border-color: #76501b;
+  color: #38260c;
+}
+#screen-idea-mine:has(#mine-page-refinery:not([hidden])) .toast { color: #655034; }
+
+/* Shared deep press: transforms preserve the button's allocated size and position. */
+#screen-idea-mine :is(#mine-page-mining, #mine-page-refinery) button {
+  transition: transform 100ms ease-out, filter 100ms ease-out, box-shadow 100ms ease-out;
+}
+#screen-idea-mine :is(#mine-page-mining, #mine-page-refinery) :is(button, #mine-roll, #mine-save):not(:disabled):is(:active, .is-pressing) {
+  transform: translateY(3px) scale(.94);
+  filter: brightness(.82);
+  box-shadow: inset 0 4px 6px #24180f66, inset 0 -1px 0 #fff4, 0 1px 0 #70502c;
+}

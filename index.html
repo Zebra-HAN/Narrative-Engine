@@ -63,7 +63,7 @@
     <button class="home-link pressable" id="btn-idea-mine">아이디어 광산</button>
     <button class="home-link pressable" id="btn-create" onclick="goToCreate()">창작 여행</button>
   </div>
-  <p class="home-version">v26.1027.2311</p>
+  <p class="home-version">v26.1028.1111</p>
 </div>
 
 
@@ -88,8 +88,8 @@
 </div>
 <div class="result idea-display">
 <span class="display-gem" aria-hidden="true"></span>
-<div class="tag" id="mine-resultType">자유 조합</div>
-<p id="mine-result">채굴을 시작해 주세요.</p>
+<div class="tag" id="mine-resultType"></div>
+<p id="mine-result"></p>
 </div>
 <div class="actions">
 <button class="btn primary" id="mine-save" aria-label="저장하기" title="저장하기"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14v19l-7-4-7 4z"/><path d="m12 6 1.4 2.8 3.1.5-2.2 2.2.5 3.1L12 13l-2.8 1.6.5-3.1-2.2-2.2 3.1-.5z" fill="currentColor" stroke="none"/></svg></button>
@@ -107,7 +107,7 @@
 </div>
 </div>
 <div class="mine-dock" aria-label="채굴 조작">
-<section class="panel mode-panel"><div class="mode-heading"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m1 20 6-13 5 7 4-11 7 17H1z" fill="currentColor" stroke="none"/></svg><h2>채굴 방식</h2><span class="mode-divider" aria-hidden="true"></span><p>원하는 산을 선택하세요</p></div><div class="modes" id="mine-modes" aria-label="채굴 방식 선택"></div></section>
+<section class="panel mode-panel"><div class="mode-heading"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m1 20 6-13 5 7 4-11 7 17H1z" fill="currentColor" stroke="none"/></svg><h2>채굴 방식</h2><span class="mode-divider" aria-hidden="true"></span><p>원하는 산을 선택하세요</p><span id="mine-miningNotice" role="status" aria-live="polite" aria-atomic="true"></span></div><div class="modes" id="mine-modes" aria-label="채굴 방식 선택"></div></section>
 <section class="panel mining-workbench" aria-label="재료 작업대">
 <div class="slots" id="mine-slots">
 </div>

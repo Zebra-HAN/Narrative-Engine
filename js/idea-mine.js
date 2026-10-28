@@ -4,6 +4,7 @@
   const core = window.IdeaMineCore;
   let legacyObject = null;
   let loadedResult = null;
+  let hasMined = false;
   const modes=[
   {
     id:'action',name:'자유 조합',fields:[['subject','주체'],['object','대상'],['verb','행동']],build:v=>`${core.withParticle(v.subject,'subject')} ${v.object===legacyObject?v.object:core.withParticle(v.object,'object')} ${v.verb}`
@@ -48,7 +49,7 @@
   ,rollCount=0,expandOffset=0,activeField=null,activeCategory='전체';
   const modeStates=new Map();
   function rememberMode() {
-    modeStates.set(mode,{values:{...values},locks:{...locks},legacyObject,
+    modeStates.set(mode,{values:{...values},locks:{...locks},legacyObject,hasMined,
       loadedResult:loadedResult?{text:loadedResult.text,values:{...loadedResult.values}}:null});
   }
   const storeKey='narrative_idea_mine_saves_v1';
@@ -76,6 +77,7 @@
     currentPage=page;
     document.querySelectorAll('#screen-idea-mine .mine-page').forEach(n=>n.hidden=n.id!=='mine-page-'+page);
     $('notice').textContent='';
+    $('miningNotice').textContent='';
     switchScreen('screen-idea-mine',null,{type:'instant'});
     document.getElementById('screen-idea-mine').scrollTop=0;
     if(page==='mining' && $('library').hidden) { resetLibraryLayout(); miningPage.scrollTop=0; }
@@ -128,9 +130,13 @@
     return pool.length?pool[Math.floor(Math.random()*pool.length)]:''
   }
   function notice(s) {
-    $('notice').textContent=s;
+    const completion=currentPage==='mining'&&['복사되었습니다.','저장되었습니다.'].includes(s);
+    const target=completion?$('miningNotice'):$('notice');
+    $('notice').textContent='';
+    $('miningNotice').textContent='';
+    target.textContent=s;
     clearTimeout(notice.timer);
-    notice.timer=setTimeout(()=>$('notice').textContent='',2400)
+    notice.timer=setTimeout(()=>target.textContent='',2400)
   }
   function drawModes() {
     miningPage.dataset.mode=modes[mode].id;
@@ -155,6 +161,7 @@
     const state=modeStates.get(mode);
     legacyObject=state?.legacyObject??null;
     loadedResult=state?.loadedResult??null;
+    hasMined=state?.hasMined??false;
     values=state?{...state.values}:Object.fromEntries(modes[mode].fields.map(([key])=>[key,'']));
     locks=state?{...state.locks}:{};
     activeField=null;
@@ -181,7 +188,7 @@
       let name=document.createElement('span');
       name.className='slotname';
       const nameText=document.createElement('span');nameText.textContent=label;
-      name.append(visual('field-art',artwork.fieldIcons?.[key]),nameText);
+      name.append(nameText);
       let lock=document.createElement('button');
       lock.className='lock'+(locks[key]?' on':'');
       lock.innerHTML=uiIcon(locks[key]?'lock':'unlock');
@@ -232,6 +239,7 @@
         if(activeField!==null)closeLibrary();
         loadedResult=null;
         values[key]=sample(pool,values[key]);
+        hasMined=true;
         rollCount++;
         if(key==='object')legacyObject=null;
         drawSlots();
@@ -348,9 +356,12 @@
     }
     );
     if(!count) {
+      hasMined=true;
+      renderResult();
       notice('모든 재료가 잠금 상태입니다.');
       return
     }
+    hasMined=true;
     rollCount++;
     drawSlots();
     renderResult();
@@ -358,11 +369,11 @@
   }
   function renderResult() {
     let m=modes[mode];
-    $('resultType').textContent=m.name;
     // Preserve saved wording exactly while its restored materials are unchanged.
     const unchanged=loadedResult&&m.fields.every(([key])=>values[key]===loadedResult.values[key]);
-    const hasIdea=Boolean(unchanged||m.fields.some(([key])=>values[key]?.trim()));
-    $('result').textContent=unchanged?loadedResult.text:hasIdea?m.build(values):'채굴을 시작해 주세요.';
+    const hasIdea=Boolean(unchanged||hasMined&&m.fields.some(([key])=>values[key]?.trim()));
+    $('result').textContent=unchanged?loadedResult.text:hasIdea?m.build(values):'';
+    $('resultType').textContent=hasIdea?m.name:'';
     for(const id of ['save','copy','refineShortcut'])$(id).disabled=!hasIdea;
     $('expPanel').hidden=true;
     $('count').textContent=`채굴 ${rollCount}회`
@@ -387,7 +398,7 @@
     saves.unshift(entry);
     const stored=persist();
     drawSaved();
-    if(stored)notice('아이디어가 저장되었습니다.')
+    if(stored)notice(currentPage==='mining'?'저장되었습니다.':'아이디어가 저장되었습니다.')
   }
   function persist() {
     try {
@@ -429,6 +440,7 @@
         legacyObject=restored.legacyObject;
         values={...restored.values};
         loadedResult={text:entry.text,values:{...values}};
+        hasMined=true;
         locks=Object.fromEntries(modes[mode].fields.map(([k])=>[k,true]));
         activeField=null;
         $('library').hidden=true;
