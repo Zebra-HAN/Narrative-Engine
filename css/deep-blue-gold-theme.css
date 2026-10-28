@@ -590,8 +590,14 @@
 }
 .card-minimap {
   --book-width: max(100cqw, 50cqh);
-  --paper-left: calc(var(--book-width) * .25);
-  --paper-right: max(16px, 4cqw, env(safe-area-inset-right, 0px));
+  --book-height: calc(var(--book-width) * 2.16793893);
+  --book-top: min(calc(var(--book-height) * -.08), calc(100cqh - var(--book-height) * .99));
+  --footer-bottom: max(6px, calc(100cqh - var(--book-top) - var(--book-height) * .99));
+  /* Bounds follow the bright paper, rather than the transparent image canvas. */
+  --paper-top: max(8px, calc(var(--book-top) + var(--book-height) * .105 + 6px));
+  --paper-bottom: max(calc(var(--footer-bottom) + 68px), calc(100cqh - var(--book-top) - var(--book-height) * .91 + 6px));
+  --paper-left: calc(var(--book-width) * .24);
+  --paper-right: max(8px, 2cqw, env(safe-area-inset-right, 0px));
   container-type: size;
   isolation: isolate;
   border: 0;
@@ -608,17 +614,22 @@
   width: var(--book-width);
   aspect-ratio: 1179 / 2556;
   left: 0;
-  top: 0;
-  transform: translateY(-8%);
+  top: var(--book-top);
+  transform: none;
   background: url('../images/core/sub-nav/list_page_new2.webp') left center / contain no-repeat;
 }
 .card-minimap-header {
-  margin: 3cqh var(--paper-right) 0 var(--paper-left);
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
   padding: 0;
-  min-height: 44px;
+  min-height: 0;
   border: 0;
   background: transparent;
   box-shadow: none;
+  overflow: hidden;
+  clip-path: inset(50%);
 }
 #card-minimap-title { color: #493523; font-family: Georgia, 'Noto Serif KR', serif; }
 .card-minimap-actions, #card-minimap-close { color: #493523; }
@@ -626,8 +637,12 @@
   background: transparent; border: 0; box-shadow: none;
 }
 .card-minimap-content {
-  margin: 0 var(--paper-right) 8cqh var(--paper-left);
+  position: absolute;
+  inset: var(--paper-top) var(--paper-right) var(--paper-bottom) var(--paper-left);
+  margin: 0;
   padding: 0;
+  /* Clip scrolling rows and their shadows at the paper's safe boundary. */
+  contain: paint;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -642,7 +657,7 @@
   box-shadow: inset 0 1px #efdfbb88, 0 1px 2px #6e50351a;
 }
 .card-minimap-tag {
-  background: #ecdfc2;
+  background: #fff9ec;
   color: #3d3026;
   border: 1px solid #947a5288;
   border-radius: 4px;
@@ -839,8 +854,8 @@
 #screen-narrative button:focus-visible { outline: 2px solid #d0b88a; outline-offset: 3px; }
 
 /* Outline-only selection plates retain their original edge and inset highlight. */
-.card-minimap-tag.is-selected { background: #cbdcb5; color: #283c25; }
-.card-minimap-tag.is-locked { background: #b8d3e5; color: #193e59; }
+.card-minimap-tag.is-selected { background: #f7efd8; color: #283c25; }
+.card-minimap-tag.is-locked { background: #fff4dc; color: #76531f; }
 .card-minimap summary { position: relative; padding-right: 40px; }
 .card-minimap-count {
   position: absolute; right: 7px; top: 50%; transform: translateY(-50%);
@@ -1024,3 +1039,32 @@
 
 /* Keep all rows on the same paper axis, including unsectioned card lists. */
 .card-minimap-tags { justify-content: center; }
+
+/* Fixed image controls stay on the lower book trim, outside the scrolling paper. */
+.card-minimap > .card-minimap-actions {
+  position: absolute;
+  z-index: 2;
+  right: max(12px, 5cqw, env(safe-area-inset-right, 0px));
+  bottom: var(--footer-bottom);
+  gap: 4px;
+  height: 64px;
+  align-items: center;
+}
+.card-minimap > .card-minimap-actions button {
+  width: 48px;
+  height: 64px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.card-minimap > .card-minimap-actions img {
+  display: block;
+  width: clamp(38px, 10cqw, 44px);
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}

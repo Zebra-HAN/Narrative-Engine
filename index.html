@@ -64,7 +64,7 @@
     <button class="home-link pressable" id="btn-idea-mine"><span class="home-menu-label">아이디어 광산</span></button>
     <button class="home-link pressable" id="btn-create" onclick="goToCreate()"><span class="home-menu-label">창작 여행</span></button>
   </div>
-  <p class="home-version">v26.1028.1616</p>
+  <p class="home-version">v26.1028.1804</p>
 </div>
 
 
@@ -404,16 +404,16 @@
       <aside id="card-minimap" class="card-minimap" role="dialog" aria-modal="true" aria-labelledby="card-minimap-title" hidden>
         <div class="card-minimap-header">
           <strong id="card-minimap-title"></strong>
-          <div class="card-minimap-actions">
-            <button type="button" id="card-minimap-expand" class="pressable" aria-label="전체 펼치기" title="전체 펼치기">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 5 6 6 6-6M6 12l6 6 6-6"/></svg>
-            </button>
-            <button type="button" id="card-minimap-collapse" class="pressable" aria-label="전체 접기" title="전체 접기">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 12 6-6 6 6M6 19l6-6 6 6"/></svg>
-            </button>
-          </div>
         </div>
         <div id="card-minimap-content" class="card-minimap-content"></div>
+        <div class="card-minimap-actions">
+          <button type="button" id="card-minimap-collapse" class="pressable" aria-label="전체 접기" title="전체 접기">
+            <img src="images/core/sub-nav/list_close.webp" alt="" aria-hidden="true" draggable="false">
+          </button>
+          <button type="button" id="card-minimap-expand" class="pressable" aria-label="전체 펼치기" title="전체 펼치기">
+            <img src="images/core/sub-nav/list_open.webp" alt="" aria-hidden="true" draggable="false">
+          </button>
+        </div>
       </aside>
     </div>
   </div>

@@ -6,7 +6,7 @@ const assert=require('node:assert/strict');const {chromium}=require('playwright'
   await page.evaluate(()=>{CARD_DATA.race.groups[2].cards=[{type:'section',label:'Swipe fixture'},...Array.from({length:150},(_,i)=>({name:'Card '+i,icon:'✦'}))];showGroupCards('race',2,true);});await page.waitForTimeout(1200);
   const cdp=await page.context().newCDPSession(page),panel=page.locator('#card-minimap');const send=(type,x,y)=>cdp.send('Input.dispatchTouchEvent',{type,touchPoints:type==='touchEnd'?[]:[{x,y}]});
   const open=async()=>{await page.locator('#card-minimap-toggle').click();await page.waitForTimeout(250);};
-  const headerPoint=()=>page.locator('.card-minimap-header').evaluate(n=>{const r=n.getBoundingClientRect();return {x:r.left+70,y:r.top+10};});
+  const headerPoint=()=>page.locator('.card-minimap-content').evaluate(n=>{const r=n.getBoundingClientRect();return {x:r.left+5,y:r.top+10};});
   const offset=()=>page.locator('#card-minimap-overlay .popup-swipe-frame').evaluate(n=>new DOMMatrixReadOnly(getComputedStyle(n).transform).m41);
   await open();
   for(const kind of ['tap','tiny','slow-short','vertical','reverse','slow-close','fast-short']){
