@@ -620,3 +620,38 @@
   new MutationObserver(fit).observe(result,{childList:true,characterData:true,subtree:true});
   new ResizeObserver(fit).observe(surface);
 })();
+
+// Map the visible cover image to the rock, independently of the dock's height.
+(()=>{
+  const screen=document.getElementById('screen-idea-mine');
+  const page=document.getElementById('mine-page-mining');
+  const content=document.getElementById('mine-content');
+  const surface=page.querySelector('.idea-display');
+  let frame=0;
+  function layout() {
+    cancelAnimationFrame(frame);
+    frame=requestAnimationFrame(()=>{
+      if(page.hidden||page.classList.contains('is-selecting'))return;
+      const viewport=screen.getBoundingClientRect(),area=content.getBoundingClientRect();
+      if(!viewport.width||!area.height)return;
+      const scale=Math.max(viewport.width/1179,viewport.height/2556);
+      const imageWidth=1179*scale,imageHeight=2556*scale;
+      const offset=Math.max(viewport.height-imageHeight,
+        Math.min(0,area.top-viewport.top+area.height*.55-imageHeight*.485));
+      screen.style.setProperty('--mine-background-y',offset+'px');
+      const imageLeft=(viewport.width-imageWidth)/2;
+      const left=Math.max(area.left+6,viewport.left+imageLeft+imageWidth*.20);
+      const right=Math.min(area.right-6,viewport.left+imageLeft+imageWidth*.80);
+      const top=Math.max(area.top+4,viewport.top+offset+imageHeight*.425);
+      const bottom=Math.min(area.bottom-56,viewport.top+offset+imageHeight*.55);
+      surface.style.setProperty('--mine-rock-left',left-area.left+'px');
+      surface.style.setProperty('--mine-rock-width',Math.max(0,right-left)+'px');
+      surface.style.setProperty('--mine-rock-top',top-area.top+'px');
+      surface.style.setProperty('--mine-rock-height',Math.max(0,bottom-top)+'px');
+    });
+  }
+  const observer=new ResizeObserver(layout);
+  observer.observe(screen);observer.observe(content);
+  new MutationObserver(layout).observe(page,{attributes:true,attributeFilter:['hidden','class']});
+  window.visualViewport?.addEventListener('resize',layout);
+})();

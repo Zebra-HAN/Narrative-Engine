@@ -6,8 +6,7 @@
   --mine-brass: #ba935c;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
   overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
   color: var(--mine-ink);
@@ -260,24 +259,31 @@
   box-shadow: inset 0 4px 6px #24180f66, inset 0 -1px 0 #fff4, 0 1px 0 #70502c;
 }
 
-/* Supplied artwork stays intact. Its width anchors the rock and HTML controls. */
-#screen-idea-mine:has(#mine-page-mining:not([hidden])) { background: #322318; }
+/* The app viewport owns height; cover artwork never contributes to layout. */
+#screen-idea-mine:has(#mine-page-mining:not([hidden])) {
+  height: 100dvh;
+  padding: 0;
+  background: url('../images/core/mine/mining_bg-1.jpg') center var(--mine-background-y, 50%) / cover no-repeat;
+}
+#screen-idea-mine:has(#mine-page-mining:not([hidden])) .mine-workbench {
+  padding: calc(6px + env(safe-area-inset-top, 0px)) 6px calc(6px + env(safe-area-inset-bottom, 0px));
+}
+#screen-idea-mine:has(#mine-page-mining:not([hidden])) > .mine-workbench > .toast:empty { display: none; }
 #screen-idea-mine #mine-page-mining { position: relative; }
 #screen-idea-mine #mine-page-mining .mining-scene {
   position: relative;
   container-type: inline-size;
   display: flex;
-  flex: 1 0 auto;
+  flex: 1;
   flex-direction: column;
   width: 100%;
-  min-height: 100%;
-  aspect-ratio: 1179 / 2556;
-  background: #322318 url('../images/core/mine/mining_bg-1.jpg') center top / 100% auto no-repeat;
+  min-height: 0;
+  overflow: hidden;
 }
 #screen-idea-mine #mine-page-mining .mine-content {
   position: relative;
-  flex: 1 0 auto;
-  min-height: 143cqw;
+  flex: 1;
+  min-height: 0;
   background: transparent;
 }
 #screen-idea-mine #mine-page-mining .mine-discovery {
@@ -301,10 +307,10 @@
 }
 #screen-idea-mine #mine-page-mining .idea-display {
   position: absolute;
-  top: 91cqw;
-  left: 20%;
-  width: 60%;
-  height: 28cqw;
+  top: var(--mine-rock-top, 35%);
+  left: var(--mine-rock-left, 20%);
+  width: var(--mine-rock-width, 60%);
+  height: var(--mine-rock-height, 25%);
   min-height: 0;
   margin: 0;
   padding: 0;
@@ -334,12 +340,14 @@
 #screen-idea-mine #mine-page-mining .idea-display p::-webkit-scrollbar { display: none; }
 #screen-idea-mine #mine-page-mining .mine-discovery > .actions {
   position: absolute;
-  top: 130cqw;
+  bottom: 8px;
   right: 6.5%;
   margin: 0;
 }
 #screen-idea-mine #mine-page-mining .mine-dock {
   position: relative;
+  flex: 0 0 auto;
+  max-height: none;
   background: linear-gradient(120deg, #fcf7ecef, #eee2ceeb);
 }
 /* The material picker keeps its independent scroll region on short screens. */
