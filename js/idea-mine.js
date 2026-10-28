@@ -598,3 +598,25 @@
   screen.addEventListener('scroll', release, {capture:true, passive:true});
   window.addEventListener('blur', release);
 })();
+
+// Presentation only: fit long results to the supplied rock without changing ideas.
+(()=>{
+  const result=document.getElementById('mine-result');
+  const surface=result.closest('.idea-display');
+  let frame=0;
+  function fit() {
+    cancelAnimationFrame(frame);
+    frame=requestAnimationFrame(()=>{
+      if(!surface.clientWidth||!surface.clientHeight)return;
+      result.style.fontSize='';
+      let size=parseFloat(getComputedStyle(result).fontSize);
+      while(size>10&&result.scrollHeight>surface.clientHeight) {
+        size=Math.max(10,size-1);
+        result.style.fontSize=size+'px';
+      }
+      result.scrollTop=0;
+    });
+  }
+  new MutationObserver(fit).observe(result,{childList:true,characterData:true,subtree:true});
+  new ResizeObserver(fit).observe(surface);
+})();

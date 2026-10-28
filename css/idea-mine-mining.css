@@ -259,3 +259,97 @@
   filter: brightness(.82);
   box-shadow: inset 0 4px 6px #24180f66, inset 0 -1px 0 #fff4, 0 1px 0 #70502c;
 }
+
+/* Supplied artwork stays intact. Its width anchors the rock and HTML controls. */
+#screen-idea-mine:has(#mine-page-mining:not([hidden])) { background: #322318; }
+#screen-idea-mine #mine-page-mining { position: relative; }
+#screen-idea-mine #mine-page-mining .mining-scene {
+  position: relative;
+  container-type: inline-size;
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100%;
+  aspect-ratio: 1179 / 2556;
+  background: #322318 url('../images/core/mine/mining_bg-1.jpg') center top / 100% auto no-repeat;
+}
+#screen-idea-mine #mine-page-mining .mine-content {
+  position: relative;
+  flex: 1 0 auto;
+  min-height: 143cqw;
+  background: transparent;
+}
+#screen-idea-mine #mine-page-mining .mine-discovery {
+  position: absolute;
+  inset: 0;
+  min-height: 0;
+  padding: 0;
+}
+/* Keep the existing result metadata available to rendering, without a banner. */
+#screen-idea-mine #mine-page-mining .discovery-sign {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+#screen-idea-mine #mine-page-mining .idea-display {
+  position: absolute;
+  top: 91cqw;
+  left: 20%;
+  width: 60%;
+  height: 28cqw;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: hidden;
+}
+#screen-idea-mine #mine-page-mining .idea-display .tag { display: none; }
+#screen-idea-mine #mine-page-mining .idea-display p {
+  flex: 0 1 auto;
+  min-height: 0;
+  max-height: 100%;
+  margin: auto 0;
+  overflow: auto;
+  scrollbar-width: none;
+  font-size: clamp(14px, 6cqw, 27px);
+  line-height: 1.35;
+  font-weight: 750;
+  color: #192e4a;
+  text-shadow: 0 1px 1px #fff6dcbb, 0 -1px 1px #46332088;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  -webkit-overflow-scrolling: touch;
+}
+#screen-idea-mine #mine-page-mining .idea-display p::-webkit-scrollbar { display: none; }
+#screen-idea-mine #mine-page-mining .mine-discovery > .actions {
+  position: absolute;
+  top: 130cqw;
+  right: 6.5%;
+  margin: 0;
+}
+#screen-idea-mine #mine-page-mining .mine-dock {
+  position: relative;
+  background: linear-gradient(120deg, #fcf7ecef, #eee2ceeb);
+}
+/* The material picker keeps its independent scroll region on short screens. */
+#screen-idea-mine #mine-page-mining.is-selecting .mining-scene {
+  flex: 1;
+  height: 100%;
+  min-height: 0;
+  aspect-ratio: auto;
+}
+#screen-idea-mine #mine-page-mining.is-selecting .mine-content {
+  flex: 1;
+  min-height: 0;
+}

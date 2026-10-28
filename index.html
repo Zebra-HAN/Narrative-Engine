@@ -63,7 +63,7 @@
     <button class="home-link pressable" id="btn-idea-mine">아이디어 광산</button>
     <button class="home-link pressable" id="btn-create" onclick="goToCreate()">창작 여행</button>
   </div>
-  <p class="home-version">v26.1028.1111</p>
+  <p class="home-version">v26.1028.1211</p>
 </div>
 
 
@@ -78,16 +78,16 @@
 </nav>
 </section>
 <section id="mine-page-mining" class="mine-page" hidden>
+<div class="mining-scene">
 <div id="mine-content" class="mine-content" role="region" aria-label="아이디어와 재료 목록" tabindex="0">
 <section class="panel mine-discovery" id="mine-discovery">
-<div class="sectionhead discovery-sign">
+<div class="sectionhead discovery-sign" aria-hidden="true">
 <span class="sign-ropes" aria-hidden="true"></span><span class="sign-gem" aria-hidden="true"></span>
 <h2>발견한 아이디어</h2>
 <span class="counter" id="mine-count">
 </span>
 </div>
 <div class="result idea-display">
-<span class="display-gem" aria-hidden="true"></span>
 <div class="tag" id="mine-resultType"></div>
 <p id="mine-result"></p>
 </div>
@@ -118,6 +118,7 @@
 <button class="btn" id="mine-refineShortcut" aria-label="아이디어 제련하기" title="아이디어 제련소"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 16c0-3-3-3-3-7a7 7 0 0 1 14 0c0 4-3 4-3 7M8 17h8M9 20h6M11 23h2M12 0v-2M2 3 0 1M22 3l2-2"/></svg></button>
 </div>
 
+</div>
 </div>
 </section>
 <section id="mine-page-refinery" class="mine-page mine-balanced" hidden>

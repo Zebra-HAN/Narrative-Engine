@@ -192,7 +192,7 @@ const root = path.resolve(__dirname, '..');
     assert.notEqual(paints[0],paints[1],'browse and reroll use distinct colors');
     assert.equal(await slots.first().locator('textarea').evaluate(n=>getComputedStyle(n).borderTopWidth),'0px');
     assert(await slots.first().locator('.slotname').evaluate(n=>n.querySelector('span:last-child').getBoundingClientRect().left-n.closest('.slot').getBoundingClientRect().left<10),'field label aligns without icon spacing');
-    assert(await page.locator('#mine-result').evaluate(n=>parseFloat(getComputedStyle(n).fontSize)>=22),'idea is the dominant text');
+    assert(await page.locator('#mine-result').evaluate(n=>parseFloat(getComputedStyle(n).fontSize)>=10),'idea fits the rock surface');
     const order=await page.locator('#mine-page-mining h2').allTextContents();
     assert.deepEqual(order,['발견한 아이디어','채굴 방식']);
     assert(await page.locator('#mine-modes').evaluate(n=>getComputedStyle(n).flexWrap==='nowrap'));
