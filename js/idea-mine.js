@@ -231,7 +231,7 @@
       browse.onclick=()=>openLibrary(key);
       let single=document.createElement('button');
       single.className='browse';
-      single.dataset.sound='mining1';
+      single.dataset.sound='mining3';
       single.innerHTML=uiIcon('refresh');
       single.setAttribute('aria-label','재추첨');
       single.title=label+' 재추첨';
@@ -528,7 +528,7 @@
     $('expPanel').hidden=false;
     // Keep the idea at the start of the refinery reading area on entry.
   }
-  $('roll').dataset.sound='mining2';
+  $('roll').dataset.sound='mining4';
   ['back','home','refineryBack','refineShortcut'].forEach(id=>$(id).dataset.sound='card');
   document.querySelectorAll('[data-mine-main]').forEach(b=>b.dataset.sound='card');
   $('roll').onclick=()=>reroll();
