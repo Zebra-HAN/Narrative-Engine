@@ -23,15 +23,15 @@ const { chromium } = require('playwright');
         selectedCards.outlineScroll = new Set([0]); lockedCards.outlineScroll = new Set([0]);
       });
       await page.waitForTimeout(500);
-      const toggle = page.locator('#card-minimap-toggle'), close = page.locator('#card-minimap-close');
+      const toggle = page.locator('#card-minimap-toggle');
       const active = async () => {
         const sections = page.locator('#card-minimap details.is-current-section');
         assert.equal(await sections.count(), 1);
         assert.equal(await page.locator('#card-minimap summary[aria-current="location"]').count(), 1);
-        return sections.locator('summary').evaluate(n=>[...n.childNodes].filter(c=>c.nodeType===3||!c.classList?.contains('card-minimap-count')).map(c=>c.textContent).join(''));
+        return sections.locator('summary').evaluate(n=>[...n.childNodes].filter(c=>c.nodeType===3||!c.classList?.contains('card-minimap-count')).map(c=>c.textContent).join('').replace(/^\d+\.\s*/,''));
       };
       const open = async () => { await toggle.click(); await page.waitForTimeout(250); };
-      const dismiss = async () => { await close.click(); await page.waitForTimeout(250); };
+      const dismiss = async () => { await page.keyboard.press('Escape'); await page.waitForTimeout(250); };
       await open(); assert((await active()).startsWith('Section 1'));
       await page.locator('#card-minimap summary').first().click(); assert(await page.locator('#card-minimap details').first().evaluate(n => n.open));
       await page.locator('#card-minimap summary').first().click(); assert.equal(await page.locator('#card-minimap details').first().evaluate(n => n.open), false);

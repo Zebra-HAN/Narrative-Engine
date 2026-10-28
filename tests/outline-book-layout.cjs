@@ -21,9 +21,10 @@ const { chromium } = require('playwright');
         return {panel:r(panel),content:r(content),group:r(panel.querySelector('.card-minimap-group')),summary:r(panel.querySelector('summary')),buttons:[...panel.querySelectorAll('.card-minimap-actions button')].map(r),border:s.borderTopWidth,shadow:s.boxShadow,bg:s.backgroundColor,art:art.backgroundImage,artW:parseFloat(art.width),artH:parseFloat(art.height),artX:art.left,artY:art.top,headerLine:header.borderBottomWidth,divider:parseFloat(getComputedStyle(panel.querySelector('details'),'::before').width),scroll:content.scrollTop};
       });
       const a=await inspect();
+      assert.equal(await page.locator('#card-minimap-content').evaluate(n=>getComputedStyle(n).scrollbarWidth),'none','only the list scrollbar is hidden');
       assert.equal(a.border,'0px');assert.equal(a.shadow,'none');assert.equal(a.bg,'rgba(0, 0, 0, 0)');assert.equal(a.headerLine,'0px');
-      assert(a.art.includes('/images/core/sub-nav/list_page.webp'));assert(Math.abs(a.artW/a.artH-1088/1360)<.001);
-      assert(a.artW>a.panel.w);assert(Math.abs(a.group.x+a.group.w/2-a.summary.x-a.summary.w/2)<1);
+      assert(a.art.includes('/images/core/sub-nav/list_page_new.webp'));assert(Math.abs(a.artW/a.artH-1179/2556)<.001);
+      assert(a.artW>=a.panel.w);assert(Math.abs(a.group.x+a.group.w/2-a.summary.x-a.summary.w/2)<1);
       assert(Math.abs(a.divider/a.content.w-.6)<.01);
       for(const r of a.buttons){assert(r.w>=44&&r.h>=44);assert(r.x>=a.content.x&&r.x+r.w<=viewport.width);assert(r.y+r.h<=a.content.y+1);}
       const last=page.locator('.card-minimap-tag').last();await last.scrollIntoViewIfNeeded();

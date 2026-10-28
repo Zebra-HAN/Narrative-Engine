@@ -575,9 +575,8 @@
 }
 #screen-create.card-controls-mode > .card-panel-toggle[aria-expanded="true"] .card-panel-arrow { transform: none; }
 
-/* Book artwork and paper content have independent coordinates. The image keeps
-   its intrinsic 1088:1360 ratio; only the list is allowed to scroll.
-   Adjust zoom/x/y to tune the crop, and paper-left/right to tune text bounds. */
+/* Keep the new book's native 1179:2556 ratio. Crop its transparent top inset,
+   while the existing full-screen swipe frame and native list scroll stay intact. */
 .card-minimap-overlay {
   justify-content: flex-end;
   padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px);
@@ -590,10 +589,8 @@
   height: 100%;
 }
 .card-minimap {
-  --book-zoom: 1.05;
-  --book-x: -3.5cqh;
-  --book-y: 50%;
-  --paper-left: max(8.5cqh, 14cqw);
+  --book-width: max(100cqw, 50cqh);
+  --paper-left: calc(var(--book-width) * .25);
   --paper-right: max(16px, 4cqw, env(safe-area-inset-right, 0px));
   container-type: size;
   isolation: isolate;
@@ -608,15 +605,15 @@
   position: absolute;
   z-index: -1;
   pointer-events: none;
-  width: max(calc(80cqh * var(--book-zoom)), 125cqw);
-  aspect-ratio: 1088 / 1360;
-  left: min(var(--book-x), -5cqw);
-  top: var(--book-y);
-  transform: translateY(-50%);
-  background: url('../images/core/sub-nav/list_page.webp') left center / contain no-repeat;
+  width: var(--book-width);
+  aspect-ratio: 1179 / 2556;
+  left: 0;
+  top: 0;
+  transform: translateY(-8%);
+  background: url('../images/core/sub-nav/list_page_new.webp') left center / contain no-repeat;
 }
 .card-minimap-header {
-  margin: 5cqh var(--paper-right) 0 var(--paper-left);
+  margin: 3cqh var(--paper-right) 0 var(--paper-left);
   padding: 0;
   min-height: 44px;
   border: 0;
@@ -629,9 +626,12 @@
   background: transparent; border: 0; box-shadow: none;
 }
 .card-minimap-content {
-  margin: 0 var(--paper-right) 10cqh var(--paper-left);
+  margin: 0 var(--paper-right) 8cqh var(--paper-left);
   padding: 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
+.card-minimap-content::-webkit-scrollbar { display: none; width: 0; height: 0; }
 .card-minimap details { margin-bottom: 6px; }
 .card-minimap summary {
   padding: 10px 8px;
