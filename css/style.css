@@ -270,7 +270,7 @@ body::after {
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: clamp(2px, .7dvh, 6px);
+      gap: clamp(3.5px, .7dvh, 6px);
       width: 100%;
       min-height: 0;
       max-height: 100%;
@@ -292,7 +292,7 @@ body::after {
       cursor: pointer;
       font-family: 'Noto Serif KR', 'Noto Serif CJK KR', 'AppleMyungjo', 'Batang', serif;
       font-size: clamp(24px, 3.9dvh, 34px);
-      font-weight: 600;
+      font-weight: 400;
       font-synthesis: none;
       color: #f3e5bb;
       letter-spacing: 0.035em;
@@ -318,12 +318,12 @@ body::after {
     }
     #screen-home .home-menu-label {
       display: inline-block;
-      background: linear-gradient(180deg, #fff9dd 0%, #ffe7aa 20%, #b8843f 39%, #fff1c2 49%, #efcb85 63%, #aa7132 84%, #ffe1a0 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      -webkit-text-stroke: .4px #d4a365;
-      filter: drop-shadow(0 1px 0 #a7773d) drop-shadow(0 2px 0 #81562d) drop-shadow(0 1px 0 #604024);
+      color: #edce91;
+      background: none;
+      -webkit-text-fill-color: currentColor;
+      -webkit-text-stroke: 0;
+      text-shadow: none;
+      filter: none;
       transition: filter 160ms ease-out;
     }
     #screen-home .home-menu-divider {
@@ -333,6 +333,9 @@ body::after {
       width: auto;
       max-width: 48%;
       object-fit: contain;
+      /* Enlarge the artwork without shifting the existing menu positions. */
+      transform: scale(1.3);
+      transform-origin: center;
       pointer-events: none;
       opacity: 0;
     }
@@ -344,7 +347,7 @@ body::after {
       transition-duration: 0s;
     }
     #screen-home .home-link:is(:active, .is-pressing) .home-menu-label {
-      filter: brightness(1.22) drop-shadow(0 1px 0 #c0924c) drop-shadow(0 0 4px #ffd580a6) drop-shadow(0 0 9px #f5bc573d);
+      filter: brightness(1.22) drop-shadow(0 0 5px #ffd58080);
       transition-duration: 0s;
     }
 

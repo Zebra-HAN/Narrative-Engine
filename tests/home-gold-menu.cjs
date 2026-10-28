@@ -30,7 +30,8 @@ const path=require('node:path');
     assert(geometry.every((r,i)=>r.y>=0&&r.y+r.h<=height&&(!i||r.y>=geometry[i-1].y+geometry[i-1].h)),'menus and ornaments fit without overlap');
     assert(await home.evaluate(n=>n.scrollHeight<=n.clientHeight),'home has no vertical overflow');
     assert(await home.locator('.home-link').evaluateAll(ns=>ns.every(n=>{const s=getComputedStyle(n),r=n.getBoundingClientRect();return s.backgroundImage==='none'&&s.boxShadow==='none'&&n.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));})),'text buttons have no panels and are reachable');
-    assert(await home.locator('.home-menu-label').evaluateAll(ns=>ns.every(n=>getComputedStyle(n).backgroundImage.includes('linear-gradient')&&getComputedStyle(n).fontWeight==='600')),'all four use CSS metallic text');
+    assert(await home.locator('.home-menu-label').evaluateAll(ns=>ns.every(n=>{const s=getComputedStyle(n);return s.backgroundImage==='none'&&s.fontWeight==='400'&&s.webkitTextStrokeWidth==='0px'&&s.filter==='none'&&s.textShadow==='none'&&s.color==='rgb(237, 206, 145)';})),'normal Korean glyphs use plain gold, without strokes or stacked shadows');
+    assert(await home.locator('.home-menu-divider').evaluateAll(ns=>ns.every(n=>Math.abs(new DOMMatrixReadOnly(getComputedStyle(n).transform).a-1.3)<.001)),'all three ornaments display at 1.3 times their previous width');
     if(engine===chromium){
      const cdp=await page.context().newCDPSession(page);
      for(const button of await home.locator('.home-link').all()){
@@ -59,7 +60,7 @@ const path=require('node:path');
      await page.evaluate(()=>switchScreen('screen-home',null,{type:'instant',skipHomeIntro:true}));
     }
     assert.deepEqual(errors,[]);
-    console.log(`PASS ${engine.name()} ${width}x${height}: four menus, ornaments, metallic text, live touch/cancel, stable layout, placeholder and original routes`);
+    console.log(`PASS ${engine.name()} ${width}x${height}: four menus, enlarged ornaments, clean gold text, live touch/cancel, stable layout, placeholder and original routes`);
     await page.close();
    }
   }finally{await browser.close();}
