@@ -20,7 +20,7 @@ const root = path.resolve(__dirname, '..');
     });
     await page.goto('https://mine.test/');await page.waitForTimeout(1600);
     await page.evaluate(()=>switchScreen('screen-home',null,{type:'instant'}));
-    assert.deepEqual(await page.locator('#screen-home button').allTextContents(),['스토리 구조','아이디어 광산','창작 여행']);
+    assert.deepEqual(await page.locator('#screen-home button').allTextContents(),['스토리 구조','캐릭터 상점','아이디어 광산','창작 여행']);
     await page.locator('#btn-idea-mine').click();
     assert(await page.locator('#mine-page-main').isVisible());
     assert.deepEqual(await page.locator('.mine-menu button').allTextContents(),['되돌아가기','설명','저장 창고','아이디어 채굴하기']);

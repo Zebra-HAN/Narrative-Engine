@@ -5899,3 +5899,24 @@ window.BackSwipeMotion=(()=> {
   document.addEventListener('touchcancel',cancel,{passive:true});window.addEventListener('blur',cancel);
   document.addEventListener('click',e=>{if(BackSwipeMotion.busy||performance.now()<suppressClickUntil){e.preventDefault();e.stopImmediatePropagation();}},true);
 })();
+
+// An independent home entry, ready for the future character shop.
+async function openCharacterShop() {
+  await showAppNotice('캐릭터 상점은 준비 중입니다.');
+  document.getElementById('btn-character-shop').focus({preventScroll:true});
+}
+
+// Immediate home feedback for mouse, pen and Safari touch; no click glow persists.
+(()=>{
+  const home=document.getElementById('screen-home');
+  let pressed=null;
+  function release(){pressed?.classList.remove('is-pressing');pressed=null;}
+  home.addEventListener('pointerdown',event=>{
+    release();
+    const button=event.target.closest('.home-link');
+    if(button&&event.isPrimary&&event.button===0){pressed=button;button.classList.add('is-pressing');}
+  },{passive:true});
+  document.addEventListener('pointerup',release,{passive:true});
+  document.addEventListener('pointercancel',release,{passive:true});
+  window.addEventListener('blur',release);
+})();
