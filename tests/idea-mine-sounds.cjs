@@ -1,0 +1,16 @@
+const {chromium}=require('playwright'),assert=require('node:assert/strict');
+(async()=>{const b=await chromium.launch({executablePath:'/usr/bin/chromium',args:['--no-sandbox']});try{const p=await b.newPage({serviceWorkers:'block'});await p.route(/fonts\.(googleapis|gstatic)\.com/,r=>r.abort());await p.goto('http://127.0.0.1:8000');await p.waitForTimeout(1500);await p.evaluate(()=>{window.played=[];UI_SOUND.play=x=>played.push(x);switchScreen('screen-home',null,{type:'instant'});});
+async function click(selector,expected){const got=await p.evaluate(s=>{played.length=0;const node=document.querySelector(s);if(!node)throw Error(s);node.click();return played.slice();},selector);assert.deepEqual(got,[expected],selector);}
+await p.evaluate(()=>document.querySelector('#btn-idea-mine').click());await p.evaluate(()=>document.querySelector('#mine-open-mining').click());
+for(let i=1;i<=6;i++)await click(`#mine-modes button:nth-child(${i})`,'card');await click('#mine-modes button','card');
+await click('#mine-slots .browse[aria-label="목록 선택"]','nav');await p.evaluate(()=>document.querySelector('#mine-closeLibrary').click());await click('#mine-slots .browse[aria-label="재추첨"]','mining1');await click('#mine-roll','mining2');await click('#mine-refineShortcut','card');await click('#mine-refineryBack','card');await click('#mine-back','card');
+await p.evaluate(()=>{goToCreate();switchNav('compass',true);});await click('#btn-extra-menu','menuOpen');await click('#btn-extra-menu','menuClose');
+await p.evaluate(()=>{switchNav('character',true);showGroupCards('race',2);});await p.waitForTimeout(800);await click('#card-menu-toggle','menuOpen');await click('#card-menu-toggle','menuClose');await click('#card-panel-toggle','menuOpen');
+const cat=await p.evaluate(()=>{const n=document.querySelector('.subnav-item');played.length=0;n.click();return played.slice();});assert.deepEqual(cat,['card']);await p.evaluate(()=>{showGroupCards('race',2);});await p.waitForTimeout(700);
+await p.evaluate(()=>document.querySelector('#card-minimap-toggle').click());await p.waitForTimeout(350);
+for(const cancel of [true,false]){
+ await p.evaluate(cancel=>{played.length=0;const n=document.querySelector('#card-minimap-title'),t=x=>new Touch({identifier:4,target:n,clientX:x,clientY:200});n.dispatchEvent(new TouchEvent('touchstart',{bubbles:true,touches:[t(100)]}));n.dispatchEvent(new TouchEvent('touchmove',{bubbles:true,cancelable:true,touches:[t(250)]}));if(played.length)throw Error('sound during minimap drag');n.dispatchEvent(new TouchEvent(cancel?'touchcancel':'touchend',{bubbles:true,cancelable:true,touches:[],changedTouches:[t(250)]}));},cancel);
+ await p.waitForTimeout(350);assert.deepEqual(await p.evaluate(()=>played.slice()),cancel?[]:['paper3']);
+}
+console.log('PASS: minimap canceled swipe is silent and successful rightward close plays paper3 exactly once.');
+console.log('PASS: six mine modes, search, reroll, mine, refinery/back, both menu open/close controls, panel arrow, category each play exactly the requested sound.');}finally{await b.close();}})().catch(e=>{console.error(e);process.exitCode=1});

@@ -176,6 +176,8 @@ const UI_SOUND = (() => {
     touchNew3: 'sounds/se/se_touch_new3.mp3',
     page: 'sounds/se/se_page.mp3',
     nav: 'sounds/se/se_nav.mp3',
+    mining1: 'sounds/select/mining-1.mp3',
+    mining2: 'sounds/select/mining-2.mp3',
     menuOpen: 'sounds/select/select-1.mp3',
     menuClose: 'sounds/select/select-2.mp3',
     click: 'sounds/select/click_1.mp3',
@@ -1082,7 +1084,8 @@ function initCenterBackSwipe() {
 
     if (shouldGoBack) {
       area.classList.remove('is-back-swiping', 'is-forward-swiping');
-      playNavigationSound();
+      if (forwardDragging) playNavigationSound();
+      else UI_SOUND.play('paper3');
       const key = pageKeys.get(sourcePage);
       if (key) scrollMemory.set(key, APP_PERF ? APP_PERF.measure('scroll.read', () => sourcePage.scrollTop, { page: sourcePage.id }) : sourcePage.scrollTop);
       if (forwardDragging) {
@@ -3759,7 +3762,7 @@ function showDetailOverlay() {
   document.getElementById('detail-overlay').classList.add('active');
   attachSwipeToClose(
     document.querySelector('.detail-overlay .popup-swipe-frame'),
-    () => closeDetailSheet(),
+    (silent = false) => closeDetailSheet(null, silent),
     { lockDirection: true, suppressSwipeClick: true, nativeVerticalScroll: true }
   );
 }
@@ -3961,9 +3964,9 @@ function _syncCardSelectedDOM(subId, globalIdx) {
   }
 }
 
-function closeDetailSheet(e) {
+function closeDetailSheet(e, silent = false) {
   if (e && e.target !== document.getElementById('detail-overlay')) return;
-  if (document.getElementById('detail-overlay').classList.contains('active')) playDetailCloseSound();
+  if (!silent && document.getElementById('detail-overlay').classList.contains('active')) playDetailCloseSound();
   document.getElementById('detail-overlay').classList.remove('active');
 }
 
@@ -3983,13 +3986,13 @@ function openStatusOverlay() {
   document.getElementById('status-overlay').classList.add('active');
   attachSwipeToClose(
     document.querySelector('.status-overlay .popup-swipe-frame'),
-     () => closeStatusOverlay()
+     (silent = false) => closeStatusOverlay(null, silent)
   );
 }
 
-function closeStatusOverlay(e) {
+function closeStatusOverlay(e, silent = false) {
   if (e && e.target !== document.getElementById('status-overlay')) return;
-  if (document.getElementById('status-overlay').classList.contains('active')) playPaperSound();
+  if (!silent && document.getElementById('status-overlay').classList.contains('active')) playPaperSound();
   document.getElementById('status-overlay').classList.remove('active');
     setBottomNavState(currentNav);
 }
@@ -5058,8 +5061,9 @@ function attachSwipeToClose(panelEl, closeFn, { lockDirection = false, suppressS
     const closeDirection = dx < 0 ? -1 : 1;
 
     if (shouldClose) {
-      // Detail/status lifecycle callbacks provide their own paper sound.
-      if (!['detail-overlay', 'status-overlay'].includes(overlayEl?.id)) UI_SOUND.play('page');
+      // Rightward back gestures play in touchend; suppress delayed lifecycle audio.
+      if (dx > 0) UI_SOUND.play('paper3');
+      else if (!['detail-overlay', 'status-overlay'].includes(overlayEl?.id)) UI_SOUND.play('page');
       // 충분히 밀었으면 스와이프 방향 그대로 닫기
       panelEl.style.transition = `transform ${CLOSE_DURATION}ms ease, opacity ${CLOSE_DURATION}ms ease`;
       panelEl.style.transform = `translateX(${closeDirection * 110}%)`;
@@ -5069,7 +5073,7 @@ function attachSwipeToClose(panelEl, closeFn, { lockDirection = false, suppressS
         overlayEl.style.opacity = '0';
       }
       closeTimer = setTimeout(() => {
-        closeFn();
+        closeFn(dx > 0);
         // 닫힌 상태에서 inline 값을 지워 다음 열림 때 잔상이 되돌아오지 않게 함
         requestAnimationFrame(resetInlineStyles);
       }, CLOSE_DURATION);
@@ -5354,19 +5358,19 @@ function initCardMinimap() {
     closing = false;
     expand.focus({ preventScroll: true });
   }
-  function hide(restoreFocus = false, immediate = false, onClosed = null) {
+  function hide(restoreFocus = false, immediate = false, onClosed = null, silent = false) {
     if (!overlay.hidden && !immediate) {
       if (closing) return;
       closing = true;
       settle(offscreen(), () => {
-        hide(restoreFocus, true, onClosed);
+        hide(restoreFocus, true, onClosed, silent);
       });
       return;
     }
     pageMotion?.cancel();
     pageMotion = null;
     closing = false;
-    if (fullyOpen) playPaperSound();
+    if (fullyOpen && !silent) playPaperSound();
     fullyOpen = false;
     gesture = null;
     swipeFrame.style.removeProperty('transform');
@@ -5566,7 +5570,10 @@ function initCardMinimap() {
       open = flick ? velocity < 0 : position < width * .65;
     }
     if (open) settle(0, opened);
-    else hide(true);
+    else {
+      if (current.inPage && fullyOpen) UI_SOUND.play('paper3');
+      hide(true, false, null, current.inPage);
+    }
   }, { capture: true, passive: false });
   document.addEventListener('touchcancel', () => {
     const current = gesture;
@@ -5896,6 +5903,7 @@ window.BackSwipeMotion=(()=> {
     const t=e.changedTouches[0],elapsed=Math.max(1,performance.now()-g.time);
     const threshold=Math.max(52,Math.min(80,g.screen.clientWidth*.14)),fast=g.furthest>=28&&g.furthest/elapsed>=.35;
     const commit=Boolean(t&&!e.touches.length&&Math.abs(t.clientY-g.y)<g.furthest*1.5&&(g.furthest>=threshold||fast));
+    if(commit)UI_SOUND.play('paper3');
     if(g.motion)g.motion.finish(commit,g.commit);else if(commit)g.commit();
   },{passive:true});
   function cancel(){gesture?.motion?.finish(false);resetGesture();}

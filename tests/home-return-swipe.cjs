@@ -14,8 +14,10 @@ const path=require('node:path');
    try{await route.fulfill({body:await fs.readFile(file),contentType:file.endsWith('.js')?'application/javascript':file.endsWith('.css')?'text/css':file.endsWith('.html')?'text/html':'image/webp'})}catch{await route.fulfill({status:404,body:''})}
   });
   await page.goto('https://swipe.test/app/');await page.waitForTimeout(1600);
+  await page.evaluate(()=>{window.swipeSounds=[];UI_SOUND.play=name=>swipeSounds.push(name);});
   const cdp=await page.context().newCDPSession(page);
   async function swipe({x=150,y=420,dx=110,dy=0,cancel=false,expectCue=false,expectMotion=false,expectedPrevious=null,expectLegacy=false,hold=0}={}){
+   await page.evaluate(()=>swipeSounds.length=0);
    await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});
    for(const progress of (dx>0&&dx<52?[1]:[.15,.4,.7,1])) {
     await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:x+dx*progress,y:y+dy*progress}]});
@@ -60,8 +62,13 @@ const path=require('node:path');
     }
    }
    if(hold)await page.waitForTimeout(hold);
+   assert.deepEqual(await page.evaluate(()=>swipeSounds.slice()),[],'drag itself stays silent');
    await cdp.send('Input.dispatchTouchEvent',{type:cancel?'touchCancel':'touchEnd',touchPoints:[]});
    await page.waitForTimeout(700);
+   const sounds=await page.evaluate(()=>swipeSounds.slice());
+   if(dx>0){assert(sounds.length<=1,JSON.stringify(sounds));assert(sounds.every(x=>x==='paper3'),JSON.stringify(sounds));}
+   if(!cancel&&(expectCue||expectMotion||expectLegacy))assert.deepEqual(sounds,['paper3']);
+   if(cancel||dx<=24||Math.abs(dy)>Math.abs(dx))assert.deepEqual(sounds,[]);
    assert.equal(await page.locator('.is-home-swiping').count(),0,'cue clears on finish/cancel');
    assert.equal(await page.locator('[data-back-preview]').count(),0,'preview is removed after settle');
    assert.equal(await page.locator('.back-motion-source').count(),0,'source positioning is restored');
