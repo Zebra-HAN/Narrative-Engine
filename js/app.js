@@ -176,6 +176,7 @@ const UI_SOUND = (() => {
     touchNew3: 'sounds/se/se_touch_new3.mp3',
     page: 'sounds/se/se_page.mp3',
     nav: 'sounds/se/se_nav.mp3',
+    select3: 'sounds/select/select-3.mp3',
     mining1: 'sounds/select/mining-1.mp3',
     mining2: 'sounds/select/mining-2.mp3',
     menuOpen: 'sounds/select/select-1.mp3',
@@ -320,6 +321,8 @@ function initUiSounds() {
       UI_SOUND.play('menuOpen');
     } else if (target.matches('.extra-btn-home')) {
       UI_SOUND.play('selectNo');
+    } else if (target.matches('.extra-btn-random')) {
+      UI_SOUND.play('select3');
     } else if (target.matches('.extra-btn, .group-select-btn')) {
       UI_SOUND.play('click');
     } else if (target.matches('.subnav-item')) {
@@ -3460,7 +3463,7 @@ function selectCurrentCard() {
   } else {
     toggleCardSelect(focusedCard.subId, focusedCard.idx);
   }
-  UI_SOUND.play(wasSelected ? 'cancel' : 'category5');
+  UI_SOUND.play(wasSelected ? 'cancel' : 'select3');
 }
 
 function isCardLocked(subId, idx) {
