@@ -270,7 +270,7 @@ body::after {
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: clamp(3.5px, .7dvh, 6px);
+      gap: clamp(10px, 1.55dvh, 14px);
       width: 100%;
       min-height: 0;
       max-height: 100%;
@@ -319,27 +319,15 @@ body::after {
     #screen-home .home-menu-label {
       display: inline-block;
       color: #edce91;
-      background: none;
-      -webkit-text-fill-color: currentColor;
+      background: linear-gradient(180deg, #fff0c5 0%, #e5bf77 38%, #b88b43 53%, #f2d598 74%, #d8ae63 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
       -webkit-text-stroke: 0;
       text-shadow: none;
       filter: none;
       transition: filter 160ms ease-out;
     }
-    #screen-home .home-menu-divider {
-      display: block;
-      flex: 0 0 auto;
-      height: clamp(22px, 4.5dvh, 38px);
-      width: calc(clamp(22px, 4.5dvh, 38px) * 3.4148148);
-      max-width: 48%;
-      object-fit: contain;
-      /* Enlarge the artwork without shifting the existing menu positions. */
-      transform: scale(1.3);
-      transform-origin: center;
-      pointer-events: none;
-      opacity: 0;
-    }
-    #screen-home.home-animate .home-menu-divider { animation: homeLinkReveal 1.2s ease-in-out .2s forwards; }
     #screen-home .home-link:is(:active, .is-pressing) {
       transform: translateY(3px) scale(.96);
       filter: brightness(1.14);

@@ -1,6 +1,6 @@
-const SHELL_CACHE = 'narrative-shell-v26.1028.1513';
+const SHELL_CACHE = 'narrative-shell-v26.1028.1524';
 const IMAGE_CACHE = 'narrative-images-v3';
-const SHELL = ['./images/core/home/main_home_section2.png', './images/core/mine/mining_bg-1.jpg', './css/idea-mine-mining.css', './data/idea-mine-appearance.js', './css/idea-mine.css', './data/idea-mine-materials.js', './js/idea-mine.js', './js/idea-mine-core.js', './', './index.html', './css/style.css', './css/layout-3.css',
+const SHELL = ['./images/core/mine/mining_bg-1.jpg', './css/idea-mine-mining.css', './data/idea-mine-appearance.js', './css/idea-mine.css', './data/idea-mine-materials.js', './js/idea-mine.js', './js/idea-mine-core.js', './', './index.html', './css/style.css', './css/layout-3.css',
   './css/fantasy-bottom-ui.css', './css/fantasy-top-panel.css', './css/deep-blue-gold-theme.css', './js/app.js', './images/core/buttons/check.webp',
   './images/core/buttons/cancel.webp', './images/core/buttons/lock.webp', './images/core/sub-nav/title_divider.webp', './images/core/sub-nav/list_page.webp'];
 

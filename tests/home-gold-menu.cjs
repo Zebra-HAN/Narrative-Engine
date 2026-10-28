@@ -21,8 +21,7 @@ const path=require('node:path');
     const home=page.locator('#screen-home');
     await page.evaluate(()=>switchScreen('screen-home',null,{type:'instant'}));await page.waitForTimeout(1450);
     assert.deepEqual(await home.locator('button').allTextContents(),['스토리 구조','캐릭터 상점','아이디어 광산','창작 여행']);
-    assert.equal(await home.locator('.home-menu-divider').count(),3);
-    assert(await home.locator('.home-menu-divider').evaluateAll(ns=>ns.every(n=>n.naturalWidth===2146&&n.naturalHeight===257&&n.getAttribute('src')==='images/core/home/main_home_section2.png'&&n.alt==='')));
+    assert.equal(await home.locator('.home-menu-divider').count(),0);
     assert(await home.evaluate(n=>getComputedStyle(n).backgroundImage.includes('forestglow.jpg')));
     assert(await home.evaluate(n=>getComputedStyle(n,'::before').backgroundImage.includes('royal-banner.webp')));
     const rects=()=>home.locator('.home-container > *').evaluateAll(ns=>ns.map(n=>{const r=n.getBoundingClientRect();return{x:r.x,y:r.y,w:r.width,h:r.height};}));
@@ -30,8 +29,7 @@ const path=require('node:path');
     assert(geometry.every((r,i)=>r.y>=0&&r.y+r.h<=height&&(!i||r.y>=geometry[i-1].y+geometry[i-1].h)),'menus and ornaments fit without overlap');
     assert(await home.evaluate(n=>n.scrollHeight<=n.clientHeight),'home has no vertical overflow');
     assert(await home.locator('.home-link').evaluateAll(ns=>ns.every(n=>{const s=getComputedStyle(n),r=n.getBoundingClientRect();return s.backgroundImage==='none'&&s.boxShadow==='none'&&n.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));})),'text buttons have no panels and are reachable');
-    assert(await home.locator('.home-menu-label').evaluateAll(ns=>ns.every(n=>{const s=getComputedStyle(n);return s.backgroundImage==='none'&&s.fontWeight==='400'&&s.webkitTextStrokeWidth==='0px'&&s.filter==='none'&&s.textShadow==='none'&&s.color==='rgb(237, 206, 145)';})),'normal Korean glyphs use plain gold, without strokes or stacked shadows');
-    assert(await home.locator('.home-menu-divider').evaluateAll(ns=>ns.every(n=>Math.abs(new DOMMatrixReadOnly(getComputedStyle(n).transform).a-1.3)<.001)),'all three ornaments display at 1.3 times their previous width');
+    assert(await home.locator('.home-menu-label').evaluateAll(ns=>ns.every(n=>{const s=getComputedStyle(n);return s.backgroundImage.includes('linear-gradient')&&s.fontWeight==='400'&&s.webkitTextStrokeWidth==='0px'&&s.filter==='none'&&s.textShadow==='none'&&s.color==='rgb(237, 206, 145)';})),'natural Korean glyphs use subtle gold highlights, without strokes or stacked shadows');
     if(engine===chromium){
      const cdp=await page.context().newCDPSession(page);
      for(const button of await home.locator('.home-link').all()){
@@ -42,7 +40,8 @@ const path=require('node:path');
       assert(await button.locator('span').evaluate(n=>getComputedStyle(n).filter.includes('brightness(1.22)')),'gold glow is active during touch');
       assert.equal(await button.evaluate(n=>getComputedStyle(n).boxShadow),'none','press never adds black button shadow');
       const during=await rects();
-      for(const index of [1,3,5])assert.deepEqual(during[index],geometry[index],'ornaments never move while pressing');
+      const current=await button.getAttribute('id');
+      for(let index=0;index<4;index++)if((await home.locator('.home-link').nth(index).getAttribute('id'))!==current)assert.deepEqual(during[index],geometry[index],'other menus never move while pressing');
       await cdp.send('Input.dispatchTouchEvent',{type:'touchCancel',touchPoints:[]});await page.waitForTimeout(180);
       assert.equal(await button.evaluate(n=>n.classList.contains('is-pressing')),false);
       assert.equal(await button.locator('span').evaluate(n=>getComputedStyle(n).filter.includes('brightness(1.22)')),false);
@@ -60,7 +59,7 @@ const path=require('node:path');
      await page.evaluate(()=>switchScreen('screen-home',null,{type:'instant',skipHomeIntro:true}));
     }
     assert.deepEqual(errors,[]);
-    console.log(`PASS ${engine.name()} ${width}x${height}: four menus, enlarged ornaments, clean gold text, live touch/cancel, stable layout, placeholder and original routes`);
+    console.log(`PASS ${engine.name()} ${width}x${height}: four compact menus, no dividers, subtle gold gradient, live touch/cancel, stable layout, placeholder and original routes`);
     await page.close();
    }
   }finally{await browser.close();}
