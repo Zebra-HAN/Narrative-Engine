@@ -11,11 +11,11 @@ for (const file of ['data/idea-mine-materials.js', 'js/idea-mine-core.js']) {
 const {IdeaMineCatalog: catalog, IdeaMineCore: core} = context.window;
 const nouns = catalog.materials.filter(x => x.kind === '명사');
 assert.equal(catalog.schemaVersion, 2);
-assert.equal(catalog.materials.length, 148);
-assert.equal(nouns.length, 43);
+assert.equal(catalog.materials.length, 6956);
+assert.equal(nouns.length, 6851);
 const allIds = catalog.materials.flatMap(x => [x.id, ...(x.legacyIds || [])]);
 assert.equal(new Set(allIds).size, allIds.length);
-assert.equal(allIds.length, 190);
+assert.equal(allIds.length, 7027);
 // Compare every original record with the new shared catalog, not just counts.
 const oldContext = {window: {}};
 vm.runInNewContext(execFileSync('git', ['show', '94c52ff:data/idea-mine-materials.js'], {cwd: root, encoding: 'utf8'}), oldContext);
@@ -58,4 +58,4 @@ for (const custom of ['유리 고래를', '노을', '구름', '아주 긴 사용
 }
 assert.equal(core.restore({version:2,mode:0,values:{object:'노을'}},catalog).legacyObject,null);
 assert.equal(core.restore({mode:3,values:{object:'인간'}},catalog).values.object,'인간');
-console.log('PASS: all 190 legacy records/IDs accounted for; 43 shared nouns + 105 unchanged non-nouns; particles; v1/v2 custom save compatibility');
+console.log('PASS: legacy records/IDs preserved; non-nouns unchanged; particles; v1/v2 custom save compatibility');

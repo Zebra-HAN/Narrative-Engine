@@ -43,7 +43,11 @@
     return node;
   }
 
-  modes.forEach(m=>m.fields.forEach(f=>f.push(window.IdeaMineCatalog.materials.filter(x=>x.roles.includes(f[0])&&(!x.modes||x.modes.includes(m.id))).map(x=>x.name))));
+  // Keep catalog records alongside name pools: identical names can belong to different source categories.
+  modes.forEach(m=>m.fields.forEach(f=> {
+    const records=window.IdeaMineCatalog.materials.filter(x=>x.roles.includes(f[0])&&(!x.modes||x.modes.includes(m.id)));
+    f.push(records.map(x=>x.name),records);
+  }));
   let mode=0,values= {}
   ,locks= {}
   ,rollCount=0,expandOffset=0,activeField=null,activeCategory='전체';
@@ -173,9 +177,6 @@
     drawSlots();
     renderResult()
   }
-  function catalogCategory(key,word) {
-    return window.IdeaMineCatalog.materials.find(x=>x.name===word&&x.roles.includes(key)&&(!x.modes||x.modes.includes(modes[mode].id)))?.category||'기타'
-  }
   function drawSlots() {
     let parent=$('slots');
     parent.innerHTML='';
@@ -294,9 +295,9 @@
     if(activeField===null)return;
     const field=modes[mode].fields.find(f=>f[0]===activeField);
     if(!field)return;
-    const [key,label,pool]=field;
+    const [key,label,pool,records]=field;
     $('libTitle').textContent=label+' · 재료 목록';
-    let cats=['전체',...new Set(pool.map(w=>catalogCategory(key,w)))];
+    let cats=['전체',...new Set(records.map(x=>x.category))];
     if(!cats.includes(activeCategory))activeCategory='전체';
     let tabs=$('libTabs');
     tabs.replaceChildren();
@@ -313,13 +314,21 @@
     }
     );
     let query=$('libSearch').value.trim().toLowerCase();
-    let filtered=pool.filter(w=>(activeCategory==='전체'||catalogCategory(key,w)===activeCategory)&&w.toLowerCase().includes(query));
+    let filtered=records.filter(x=>(activeCategory==='전체'||x.category===activeCategory)&&
+      [x.name,x.category,x.subcategory||'',x.subcategoryId||''].some(v=>v.toLowerCase().includes(query)));
     let grid=$('libGrid');
     grid.replaceChildren();
-    filtered.forEach(word=> {
+    filtered.forEach(material=> {
+      const word=material.name;
       let b=document.createElement('button');
       b.className='libitem'+(values[key]===word?' selected':'');
       b.textContent=word;
+      if(material.subcategory) {
+        const detail=document.createElement('small');
+        detail.textContent=`${material.categoryId} ${material.category} / ${material.subcategoryId} ${material.subcategory}`;
+        b.appendChild(detail);
+        b.title=detail.textContent;
+      }
       b.onclick=()=> {
         loadedResult=null;
         values[key]=word;

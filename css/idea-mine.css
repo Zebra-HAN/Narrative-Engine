@@ -311,3 +311,18 @@
 #screen-idea-mine .mining-workbench > .sectionhead { margin-bottom: 2.8px; }
 #screen-idea-mine .mode-panel { padding-top: 2.8px; }
 #screen-idea-mine .mode-panel h2 { margin-bottom: 1.4px; font-size: 9.5px; }
+
+/* Source taxonomy labels grow with each material instead of overlapping adjacent rows. */
+#screen-idea-mine #mine-library .libitem {
+  display: block;
+  height: auto;
+  min-width: 0;
+  overflow: hidden;
+}
+#screen-idea-mine #mine-library .libitem small {
+  display: block;
+  font-size: 10px;
+  opacity: .65;
+  margin-top: 4px;
+  pointer-events: none;
+}
