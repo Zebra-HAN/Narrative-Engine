@@ -610,7 +610,7 @@
   left: 0;
   top: 0;
   transform: translateY(-8%);
-  background: url('../images/core/sub-nav/list_page_new.webp') left center / contain no-repeat;
+  background: url('../images/core/sub-nav/list_page_new2.webp') left center / contain no-repeat;
 }
 .card-minimap-header {
   margin: 3cqh var(--paper-right) 0 var(--paper-left);

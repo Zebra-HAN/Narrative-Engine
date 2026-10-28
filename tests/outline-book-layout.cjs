@@ -23,7 +23,7 @@ const { chromium } = require('playwright');
       const a=await inspect();
       assert.equal(await page.locator('#card-minimap-content').evaluate(n=>getComputedStyle(n).scrollbarWidth),'none','only the list scrollbar is hidden');
       assert.equal(a.border,'0px');assert.equal(a.shadow,'none');assert.equal(a.bg,'rgba(0, 0, 0, 0)');assert.equal(a.headerLine,'0px');
-      assert(a.art.includes('/images/core/sub-nav/list_page_new.webp'));assert(Math.abs(a.artW/a.artH-1179/2556)<.001);
+      assert(a.art.includes('/images/core/sub-nav/list_page_new2.webp'));assert(Math.abs(a.artW/a.artH-1179/2556)<.001);
       assert(a.artW>=a.panel.w);assert(Math.abs(a.group.x+a.group.w/2-a.summary.x-a.summary.w/2)<1);
       assert(Math.abs(a.divider/a.content.w-.6)<.01);
       for(const r of a.buttons){assert(r.w>=44&&r.h>=44);assert(r.x>=a.content.x&&r.x+r.w<=viewport.width);assert(r.y+r.h<=a.content.y+1);}
