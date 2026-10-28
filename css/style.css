@@ -330,7 +330,7 @@ body::after {
       display: block;
       flex: 0 0 auto;
       height: clamp(22px, 4.5dvh, 38px);
-      width: auto;
+      width: calc(clamp(22px, 4.5dvh, 38px) * 3.4148148);
       max-width: 48%;
       object-fit: contain;
       /* Enlarge the artwork without shifting the existing menu positions. */

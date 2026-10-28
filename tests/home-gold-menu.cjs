@@ -22,7 +22,7 @@ const path=require('node:path');
     await page.evaluate(()=>switchScreen('screen-home',null,{type:'instant'}));await page.waitForTimeout(1450);
     assert.deepEqual(await home.locator('button').allTextContents(),['스토리 구조','캐릭터 상점','아이디어 광산','창작 여행']);
     assert.equal(await home.locator('.home-menu-divider').count(),3);
-    assert(await home.locator('.home-menu-divider').evaluateAll(ns=>ns.every(n=>n.naturalWidth===461&&n.naturalHeight===135&&n.getAttribute('src')==='images/core/home/main_home_section.png'&&n.alt==='')));
+    assert(await home.locator('.home-menu-divider').evaluateAll(ns=>ns.every(n=>n.naturalWidth===2146&&n.naturalHeight===257&&n.getAttribute('src')==='images/core/home/main_home_section2.png'&&n.alt==='')));
     assert(await home.evaluate(n=>getComputedStyle(n).backgroundImage.includes('forestglow.jpg')));
     assert(await home.evaluate(n=>getComputedStyle(n,'::before').backgroundImage.includes('royal-banner.webp')));
     const rects=()=>home.locator('.home-container > *').evaluateAll(ns=>ns.map(n=>{const r=n.getBoundingClientRect();return{x:r.x,y:r.y,w:r.width,h:r.height};}));
