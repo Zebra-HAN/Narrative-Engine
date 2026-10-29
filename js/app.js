@@ -190,6 +190,7 @@ const UI_SOUND = (() => {
     menuClose: 'sounds/select/soft_touch-4.mp3',
     click: 'sounds/select/click_1.mp3',
     card: 'sounds/se/se_card.mp3',
+    walkClick: 'sounds/se/walk-click.mp3',
     card1: 'sounds/se/se_card1.mp3',
     card2: 'sounds/se/se_card2.mp3',
     category1: 'sounds/se/se_category1.mp3',
