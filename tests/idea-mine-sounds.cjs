@@ -10,7 +10,7 @@ const cat=await p.evaluate(()=>{const n=document.querySelector('.subnav-item');p
 await p.evaluate(()=>document.querySelector('#card-minimap-toggle').click());await p.waitForTimeout(350);
 for(const cancel of [true,false]){
  await p.evaluate(cancel=>{played.length=0;const n=document.querySelector('#card-minimap-title'),t=x=>new Touch({identifier:4,target:n,clientX:x,clientY:200});n.dispatchEvent(new TouchEvent('touchstart',{bubbles:true,touches:[t(100)]}));n.dispatchEvent(new TouchEvent('touchmove',{bubbles:true,cancelable:true,touches:[t(250)]}));if(played.length)throw Error('sound during minimap drag');n.dispatchEvent(new TouchEvent(cancel?'touchcancel':'touchend',{bubbles:true,cancelable:true,touches:[],changedTouches:[t(250)]}));},cancel);
- await p.waitForTimeout(350);assert.deepEqual(await p.evaluate(()=>played.slice()),cancel?[]:['paper3']);
+ await p.waitForTimeout(350);assert.deepEqual(await p.evaluate(()=>played.slice()),cancel?[]:['paper4']);
 }
-console.log('PASS: minimap canceled swipe is silent and successful rightward close plays paper3 exactly once.');
+console.log('PASS: minimap canceled swipe is silent and successful rightward close plays paper4 exactly once.');
 console.log('PASS: six mine modes, search, reroll, mine, refinery/back, both menu open/close controls, panel arrow, category each play exactly the requested sound.');}finally{await b.close();}})().catch(e=>{console.error(e);process.exitCode=1});

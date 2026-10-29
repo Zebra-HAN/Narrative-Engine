@@ -66,8 +66,8 @@ const path=require('node:path');
    await cdp.send('Input.dispatchTouchEvent',{type:cancel?'touchCancel':'touchEnd',touchPoints:[]});
    await page.waitForTimeout(700);
    const sounds=await page.evaluate(()=>swipeSounds.slice());
-   if(dx>0){assert(sounds.length<=1,JSON.stringify(sounds));assert(sounds.every(x=>x==='paper3'),JSON.stringify(sounds));}
-   if(!cancel&&(expectCue||expectMotion||expectLegacy))assert.deepEqual(sounds,['paper3']);
+   if(dx>0){assert(sounds.length<=1,JSON.stringify(sounds));assert(sounds.every(x=>(expectLegacy?['softPage1','softPage2']:['paper3']).includes(x)),JSON.stringify(sounds));}
+   if(!cancel&&(expectCue||expectMotion))assert.deepEqual(sounds,['paper3']);if(!cancel&&expectLegacy)assert.equal(sounds.length,1);
    if(cancel||dx<=24||Math.abs(dy)>Math.abs(dx))assert.deepEqual(sounds,[]);
    assert.equal(await page.locator('.is-home-swiping').count(),0,'cue clears on finish/cancel');
    assert.equal(await page.locator('[data-back-preview]').count(),0,'preview is removed after settle');

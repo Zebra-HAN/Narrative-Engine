@@ -64,7 +64,7 @@
     <button class="home-link pressable" id="btn-idea-mine" data-sound="walkClick"><span class="home-menu-label">아이디어 광산</span></button>
     <button class="home-link pressable" id="btn-create" data-sound="walkClick" onclick="goToCreate()"><span class="home-menu-label">창작 여행</span></button>
   </div>
-  <p class="home-version">v26.1029.1433</p>
+  <p class="home-version">v26.1029.1531</p>
 </div>
 
 
@@ -426,7 +426,7 @@
           <h2 class="status-title" id="status-title">선택된 아이디어</h2>
           <div class="status-header-actions">
             <button type="button" class="status-share-btn pressable" onclick="shareStatus()">공유</button>
-            <button type="button" class="status-close pressable" onclick="closeStatusOverlay()" aria-label="선택된 아이디어 창 닫기">
+            <button type="button" class="status-close pressable" onclick="closeStatusOverlay(null, true)" aria-label="선택된 아이디어 창 닫기">
               <img class="close-icon" src="images/core/buttons/cancel.webp" alt="" aria-hidden="true" draggable="false">
             </button>
           </div>
@@ -440,7 +440,7 @@
   <div class="detail-overlay" id="detail-overlay" onclick="closeDetailSheet(event)">
     <div class="popup-swipe-frame">
       <div class="detail-sheet">
-        <button type="button" class="detail-close pressable" onclick="closeDetailSheet()" aria-label="상세정보 창 닫기">
+        <button type="button" class="detail-close pressable" onclick="closeDetailSheet(null, true)" aria-label="상세정보 창 닫기">
           <img class="close-icon" src="images/core/buttons/cancel.webp" alt="" aria-hidden="true" draggable="false">
         </button>
         <div class="detail-content" id="detail-content">

@@ -173,6 +173,12 @@ const UI_SOUND = (() => {
     lockOff: 'sounds/select/lock_2.mp3',
     text: 'sounds/select/text.mp3',
     cardInfo: 'sounds/select/click_3.mp3',
+    softPage1: 'sounds/paper/soft_page-1.mp3',
+    softPage2: 'sounds/paper/soft_page-2.mp3',
+    softPage3: 'sounds/paper/soft_page-3.mp3',
+    softTouch4: 'sounds/select/soft_touch-4.mp3',
+    cancel1: 'sounds/select/cancel-1.mp3',
+    touch2: 'sounds/select/touch-2.mp3',
     paper1: 'sounds/paper/paper_1.mp3',
     paper2: 'sounds/paper/paper_2.mp3',
     paper3: 'sounds/paper/paper_3.mp3',
@@ -306,12 +312,20 @@ const UI_SOUND = (() => {
   };
 })();
 
+function playRandomSound(names) {
+  UI_SOUND.play(names[Math.floor(Math.random() * names.length)]);
+}
+
+function playOverlaySwipeSound() {
+  playRandomSound(['softPage1', 'softPage2', 'paper3']);
+}
+
 function playPaperSound() {
   UI_SOUND.play(['paper1', 'paper2', 'paper3', 'paper4'][Math.floor(Math.random() * 4)]);
 }
 
 function playNavigationSound() {
-  UI_SOUND.play(['touchNew1', 'touchNew2', 'touchNew3'][Math.floor(Math.random() * 3)]);
+  UI_SOUND.play('touchNew2');
 }
 
 function playDetailCloseSound() {
@@ -331,7 +345,13 @@ function initUiSounds() {
 
     // 완료된 `click`에서만 피드백을 재생한다. 특히 pointerdown/touchstart는 손가락이
     // 닿는 즉시뿐 아니라 스크롤이나 길게 누르기를 시작할 때도 발생하므로 사용하지 않는다.
-    if (target.matches('.detail-close, .status-close, #detail-overlay, #status-overlay, #card-minimap-toggle, .page-title-card')) {
+    if (target.matches('.detail-close, .status-close')) {
+      UI_SOUND.play('cancel1');
+      return;
+    } else if (target.matches('#nav-idea')) {
+      // The integration overlay owns its opening sound.
+      return;
+    } else if (target.matches('#detail-overlay, #status-overlay, #card-minimap-toggle, .page-title-card')) {
       // Opening/closing feedback belongs to the actual overlay transition.
       return;
     } else if (target.matches('#detail-icon, #detail-desc')) {
@@ -1117,7 +1137,7 @@ function initCenterBackSwipe() {
     if (shouldGoBack) {
       area.classList.remove('is-back-swiping', 'is-forward-swiping');
       if (forwardDragging) playNavigationSound();
-      else UI_SOUND.play('paper3');
+      else playRandomSound(['softPage1', 'softPage2']);
       const key = pageKeys.get(sourcePage);
       if (key) scrollMemory.set(key, APP_PERF ? APP_PERF.measure('scroll.read', () => sourcePage.scrollTop, { page: sourcePage.id }) : sourcePage.scrollTop);
       if (forwardDragging) {
@@ -4014,7 +4034,7 @@ function openStatusOverlay() {
   body.style.scrollBehavior = 'auto';
   body.scrollTop = 0;
   body.style.scrollBehavior = behavior;
-  if (!document.getElementById('status-overlay').classList.contains('active')) playPaperSound();
+  if (!document.getElementById('status-overlay').classList.contains('active')) UI_SOUND.play('touch2');
   document.getElementById('status-overlay').classList.add('active');
   attachSwipeToClose(
     document.querySelector('.status-overlay .popup-swipe-frame'),
@@ -5093,9 +5113,10 @@ function attachSwipeToClose(panelEl, closeFn, { lockDirection = false, suppressS
     const closeDirection = dx < 0 ? -1 : 1;
 
     if (shouldClose) {
-      // Rightward back gestures play in touchend; suppress delayed lifecycle audio.
-      if (dx > 0) UI_SOUND.play('paper3');
-      else if (!['detail-overlay', 'status-overlay'].includes(overlayEl?.id)) UI_SOUND.play('page');
+      // Overlay-specific swipe feedback wins in either supported direction.
+      const dedicatedClose = ['detail-overlay', 'status-overlay'].includes(overlayEl?.id);
+      if (dedicatedClose) playOverlaySwipeSound();
+      else UI_SOUND.play(dx > 0 ? 'paper3' : 'page');
       // 충분히 밀었으면 스와이프 방향 그대로 닫기
       panelEl.style.transition = `transform ${CLOSE_DURATION}ms ease, opacity ${CLOSE_DURATION}ms ease`;
       panelEl.style.transform = `translateX(${closeDirection * 110}%)`;
@@ -5105,7 +5126,7 @@ function attachSwipeToClose(panelEl, closeFn, { lockDirection = false, suppressS
         overlayEl.style.opacity = '0';
       }
       closeTimer = setTimeout(() => {
-        closeFn(dx > 0);
+        closeFn(dx > 0 || dedicatedClose);
         // 닫힌 상태에서 inline 값을 지워 다음 열림 때 잔상이 되돌아오지 않게 함
         requestAnimationFrame(resetInlineStyles);
       }, CLOSE_DURATION);
@@ -5199,6 +5220,8 @@ function initCardMinimap() {
   const expand = document.getElementById('card-minimap-expand');
   const collapse = document.getElementById('card-minimap-collapse');
   if (!area || !toggle || !panel || !content || !overlay || !swipeFrame || !title || !expand || !collapse) return;
+  expand.dataset.sound = 'softPage3';
+  collapse.dataset.sound = 'softTouch4';
   expand.addEventListener('click', () => content.querySelectorAll('details').forEach(section => { section.open = true; }));
   collapse.addEventListener('click', () => content.querySelectorAll('details').forEach(section => { section.open = false; }));
   toggle.classList.add('pressable');
@@ -5385,7 +5408,7 @@ function initCardMinimap() {
     };
   }
   function opened() {
-    if (!fullyOpen) playPaperSound();
+    if (!fullyOpen) playRandomSound(['paper1', 'paper2']);
     fullyOpen = true;
     closing = false;
     expand.focus({ preventScroll: true });
@@ -5442,11 +5465,12 @@ function initCardMinimap() {
       const tag = document.createElement('button');
       tag.type = 'button';
       tag.className = 'card-minimap-tag pressable';
+      tag.dataset.sound = 'softTouch1';
       tag.textContent = String(card.name ?? '');
       const target = renderedCards[nextIndex.value++];
       tagEntries.push({ tag, card: target });
       tag.addEventListener('click', () => {
-        hide(true, false, () => scrollToSection(page, target));
+        hide(true, false, () => scrollToSection(page, target), true);
       });
       list.appendChild(tag);
     });
@@ -5500,6 +5524,7 @@ function initCardMinimap() {
       section.open = !!group.unclassified || outline.groups.filter(entry => !entry.unclassified).length <= 3;
       const heading = document.createElement('summary');
       heading.classList.add('pressable');
+      heading.dataset.sound = 'softPage1';
       setOutlineLabel(heading, `${sectionIndex + 1}. ${group.label}`, group.cards.length);
       const badge = document.createElement('span');
       badge.className = 'card-minimap-count';
@@ -5603,7 +5628,7 @@ function initCardMinimap() {
     }
     if (open) settle(0, opened);
     else {
-      if (current.inPage && fullyOpen) UI_SOUND.play('paper3');
+      if (current.inPage && fullyOpen) UI_SOUND.play('paper4');
       hide(true, false, null, current.inPage);
     }
   }, { capture: true, passive: false });
