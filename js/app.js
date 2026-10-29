@@ -394,9 +394,9 @@ function initUiSounds() {
       return;
     } else if (target.matches('.card-info-lock')) {
       // Capture the pre-click state so locking and unlocking each play once.
-      UI_SOUND.play(target.getAttribute('aria-pressed') === 'true' ? 'lockOff' : 'lockOn');
+      UI_SOUND.play(target.getAttribute('aria-pressed') === 'true' ? 'cancel1' : 'lockOn');
     } else if (target.matches('#mine-slots .lock')) {
-      UI_SOUND.play(target.classList.contains('on') ? 'lockOff' : 'lockOn');
+      UI_SOUND.play(target.classList.contains('on') ? 'cancel1' : 'lockOn');
     } else if (target.dataset.sound) {
       UI_SOUND.play(target.dataset.sound);
     } else if (target.closest('.bottom-nav')) {
@@ -5482,7 +5482,7 @@ function initCardMinimap() {
       const tag = document.createElement('button');
       tag.type = 'button';
       tag.className = 'card-minimap-tag pressable';
-      tag.dataset.sound = 'softTouch5';
+      tag.dataset.sound = 'softTouch1';
       tag.textContent = String(card.name ?? '');
       const target = renderedCards[nextIndex.value++];
       tagEntries.push({ tag, card: target });
@@ -5541,7 +5541,7 @@ function initCardMinimap() {
       section.open = !!group.unclassified || outline.groups.filter(entry => !entry.unclassified).length <= 3;
       const heading = document.createElement('summary');
       heading.classList.add('pressable');
-      heading.dataset.sound = 'softPage1';
+      heading.dataset.sound = 'softTouch5';
       setOutlineLabel(heading, `${sectionIndex + 1}. ${group.label}`, group.cards.length);
       const badge = document.createElement('span');
       badge.className = 'card-minimap-count';

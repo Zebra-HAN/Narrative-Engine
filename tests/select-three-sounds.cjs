@@ -23,7 +23,7 @@ for(const [index,name] of ['pong1','pong2','pong3','pong4','pong5','pongNew1','p
 await click('.card-info-select',['select6']);assert.equal(await page.evaluate(()=>selectedCards.soundFixture.has(0)),true);
 await click('.card-info-select',['cancel1']);assert.equal(await page.evaluate(()=>selectedCards.soundFixture.has(0)),false);
 await click('.card-info-select',['select6']);await click('.card-info-lock',['lockOn']);assert.equal(await page.evaluate(()=>isCardLocked('soundFixture',0)),true);
-assert.equal(await page.locator('.card-info-select').isDisabled(),true,'locked card selection remains disabled');await click('.card-info-lock',['lockOff']);assert.equal(await page.evaluate(()=>isCardLocked('soundFixture',0)),false);await click('.card-info-select',['cancel1']);
+assert.equal(await page.locator('.card-info-select').isDisabled(),true,'locked card selection remains disabled');await click('.card-info-lock',['cancel1']);assert.equal(await page.evaluate(()=>isCardLocked('soundFixture',0)),false);await click('.card-info-select',['cancel1']);
 assert(audio.some(([u,status])=>u.endsWith('/sounds/select/select-3.mp3')&&status===200));assert(audio.every(([,s])=>s===200));assert.deepEqual(errors,[]);
 console.log('PASS: both random button copies use click; current/all confirmations use selectYes/selectOk; cancel unchanged; random selects one; card check uses select6 and deselection cancel1; lock behavior preserved; all eight equal-width Pong intervals each play one sound; audio loads and no page errors.');
 }finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});
