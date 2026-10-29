@@ -177,8 +177,9 @@ const UI_SOUND = (() => {
     page: 'sounds/se/se_page.mp3',
     nav: 'sounds/se/se_nav.mp3',
     select3: 'sounds/select/select-3.mp3',
-    mining3: 'sounds/select/mining-3.mp3',
-    mining4: 'sounds/select/mining-4.mp3',
+    miningEntry: 'sounds/select/mining-2.mp3',
+    miningRoll: 'sounds/select/mining-3new.mp3',
+    miningRefresh: 'sounds/select/mining-4new.mp3',
     menuOpen: 'sounds/select/select-1.mp3',
     menuClose: 'sounds/select/select-2.mp3',
     click: 'sounds/select/click_1.mp3',
@@ -321,8 +322,6 @@ function initUiSounds() {
       UI_SOUND.play('menuOpen');
     } else if (target.matches('.extra-btn-home')) {
       UI_SOUND.play('selectNo');
-    } else if (target.matches('.extra-btn-random')) {
-      UI_SOUND.play('select3');
     } else if (target.matches('.extra-btn, .group-select-btn')) {
       UI_SOUND.play('click');
     } else if (target.matches('.subnav-item')) {
@@ -4727,7 +4726,7 @@ async function randomSelectCurrent() {
 
   const ok = await showAppConfirm(
     `[${navLabel} — ${subLabel}]\n랜덤 선택을 하시겠습니까?`,
-    'selectYes'
+    'select3'
   );
 
   if (!ok) {

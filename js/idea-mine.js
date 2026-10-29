@@ -231,7 +231,7 @@
       browse.onclick=()=>openLibrary(key);
       let single=document.createElement('button');
       single.className='browse';
-      single.dataset.sound='mining3';
+      single.dataset.sound='miningRefresh';
       single.innerHTML=uiIcon('refresh');
       single.setAttribute('aria-label','재추첨');
       single.title=label+' 재추첨';
@@ -528,7 +528,7 @@
     $('expPanel').hidden=false;
     // Keep the idea at the start of the refinery reading area on entry.
   }
-  $('roll').dataset.sound='mining4';
+  $('roll').dataset.sound='miningRoll';
   ['back','home','refineryBack','refineShortcut'].forEach(id=>$(id).dataset.sound='card');
   document.querySelectorAll('[data-mine-main]').forEach(b=>b.dataset.sound='card');
   $('roll').onclick=()=>reroll();
@@ -577,6 +577,7 @@
   switchMode(0);
   document.getElementById('btn-idea-mine').onclick=()=>showPage('main');
   $('home').onclick=()=>goHome();
+  $('open-mining').dataset.sound='miningEntry';
   $('open-mining').onclick=()=>showPage('mining');
   $('back').onclick=()=>showPage('main');
   $('open-guide').onclick=()=>mineDialog('설명 보기\n\n설명은 추후 추가될 예정입니다.',false);
