@@ -166,9 +166,10 @@ const UI_SOUND = (() => {
     start: 'sounds/bgm_start.mp3',
     touch: 'sounds/se/se_touch.mp3',
     detailItem: 'sounds/select/touch-1.mp3',
-    detailExclude: 'sounds/select/click_4.mp3',
+    detailExclude: 'sounds/select/soft_touch-4.mp3',
     softTouch2: 'sounds/select/soft_touch-2.mp3',
     select6: 'sounds/select/select-6.mp3',
+    lock: 'sounds/select/lock.mp3',
     text: 'sounds/select/text.mp3',
     cardInfo: 'sounds/select/click_3.mp3',
     paper1: 'sounds/paper/paper_1.mp3',
@@ -316,9 +317,9 @@ function initUiSounds() {
     if (target.matches('.detail-close, .status-close, #detail-overlay, #status-overlay, #card-minimap-toggle, .page-title-card')) {
       // Opening/closing feedback belongs to the actual overlay transition.
       return;
-    } else if (target.matches('#detail-icon, #detail-desc, .detail-sub-image-row')) {
+    } else if (target.matches('#detail-icon, #detail-desc')) {
       UI_SOUND.play('detailExclude');
-    } else if (target.matches('.detail-idea-block')) {
+    } else if (target.matches('.detail-idea-block, .detail-sub-image-row')) {
       UI_SOUND.play('detailItem');
     } else if (target.matches('.card-info-detail, .card-info-popover')) {
       // The detail overlay owns this activation sound, including keyboard opening.
@@ -345,9 +346,10 @@ function initUiSounds() {
       if (target.dataset.sound) UI_SOUND.play(target.dataset.sound);
       return;
     } else if (target.matches('.card-info-lock')) {
-      // 잠금 해제는 선택 취소와 같은 취소 피드백을 사용하고, 잠금 설정은
-      // 기존의 일반 클릭 효과음을 그대로 유지한다.
-      UI_SOUND.play(target.classList.contains('is-locked') ? 'cancel' : 'click');
+      // Inspect the pre-click state; keep the existing unlock click sound.
+      UI_SOUND.play(target.getAttribute('aria-pressed') === 'true' ? 'click' : 'lock');
+    } else if (target.matches('#mine-slots .lock')) {
+      UI_SOUND.play(target.classList.contains('on') ? 'click' : 'lock');
     } else if (target.dataset.sound) {
       UI_SOUND.play(target.dataset.sound);
     } else if (target.closest('.bottom-nav')) {
