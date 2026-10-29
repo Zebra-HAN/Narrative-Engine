@@ -12,15 +12,18 @@ for(const scope of ['#extra-menu-panel','#card-extra-menu-panel']){
  await click(scope+' .extra-btn-random-all',['click']);
  await click('.app-dialog-btn-cancel',['cancel']);
 }
-await click('#card-extra-menu-panel .extra-btn-random-all',['click']);await click('.app-dialog-btn-confirm',['selectYes']);
-await click('#card-extra-menu-panel .extra-btn-random',['click']);await click('.app-dialog-btn-confirm',['select3']);await page.waitForTimeout(700);
+await click('#card-extra-menu-panel .extra-btn-random-all',['click']);await click('.app-dialog-btn-confirm',['selectOk']);
+await click('#card-extra-menu-panel .extra-btn-random',['click']);await click('.app-dialog-btn-confirm',['selectYes']);await page.waitForTimeout(700);
 assert.equal(await page.evaluate(()=>selectedCards.race.size),1,'current random still selects one card');
 await page.evaluate(()=>{CARD_DATA.soundFixture=[{name:'선택 테스트',icon:'◆',desc:'설명'}];selectedCards.soundFixture=new Set();showCardPage('soundFixture',false,true);});await page.waitForTimeout(700);
-await page.evaluate(()=>{played.length=0;document.querySelector('.center-page.active .data-card').click();});assert((await page.evaluate(()=>played.slice())).every(s=>/^pong[1-5]$/.test(s)));
-await click('.card-info-select',['select4']);assert.equal(await page.evaluate(()=>selectedCards.soundFixture.has(0)),true);
+await page.evaluate(()=>{played.length=0;document.querySelector('.center-page.active .data-card').click();});assert((await page.evaluate(()=>played.slice())).every(s=>/^pong(?:[1-5]|New[1-3])$/.test(s)));
+for(const [index,name] of ['pong1','pong2','pong3','pong4','pong5','pongNew1','pongNew2','pongNew3'].entries()){
+ const sounds=await page.evaluate(index=>{played.length=0;const original=Math.random;Math.random=()=>(index+.5)/8;try{document.querySelector('.center-page.active .data-card').click();}finally{Math.random=original;}return played.slice();},index);assert.deepEqual(sounds,[name],'each equal-width random interval plays one sound');
+}
+await click('.card-info-select',['select6']);assert.equal(await page.evaluate(()=>selectedCards.soundFixture.has(0)),true);
 await click('.card-info-select',['cancel']);assert.equal(await page.evaluate(()=>selectedCards.soundFixture.has(0)),false);
-await click('.card-info-select',['select4']);await click('.card-info-lock',['click']);assert.equal(await page.evaluate(()=>isCardLocked('soundFixture',0)),true);
+await click('.card-info-select',['select6']);await click('.card-info-lock',['click']);assert.equal(await page.evaluate(()=>isCardLocked('soundFixture',0)),true);
 assert.equal(await page.locator('.card-info-select').isDisabled(),true,'locked card selection remains disabled');await click('.card-info-lock',['click']);assert.equal(await page.evaluate(()=>isCardLocked('soundFixture',0)),false);await click('.card-info-select',['cancel']);
 assert(audio.some(([u,status])=>u.endsWith('/sounds/select/select-3.mp3')&&status===200));assert(audio.every(([,s])=>s===200));assert.deepEqual(errors,[]);
-console.log('PASS: both random button copies use click; current-random confirmation uses select3; all-category random and cancel unchanged; random selects one; card check uses select4 and deselection cancel; lock behavior preserved; audio loads and no page errors.');
+console.log('PASS: both random button copies use click; current/all confirmations use selectYes/selectOk; cancel unchanged; random selects one; card check uses select6 and deselection cancel; lock behavior preserved; all eight equal-width Pong intervals each play one sound; audio loads and no page errors.');
 }finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

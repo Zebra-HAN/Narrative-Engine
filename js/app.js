@@ -168,7 +168,7 @@ const UI_SOUND = (() => {
     detailItem: 'sounds/select/touch-1.mp3',
     detailExclude: 'sounds/select/click_4.mp3',
     softTouch2: 'sounds/select/soft_touch-2.mp3',
-    select4: 'sounds/select/select-4.mp3',
+    select6: 'sounds/select/select-6.mp3',
     text: 'sounds/select/text.mp3',
     cardInfo: 'sounds/select/click_3.mp3',
     paper1: 'sounds/paper/paper_1.mp3',
@@ -199,12 +199,16 @@ const UI_SOUND = (() => {
     delete2: 'sounds/se/se_delete2.mp3',
     cancel: 'sounds/se/se_cancel.mp3',
     selectYes: 'sounds/se/se_select_yes.mp3',
+    selectOk: 'sounds/se/se_select_ok.mp3',
     selectNo: 'sounds/se/se_select_no.mp3',
     pong1: 'sounds/se/se_pong1.mp3',
     pong2: 'sounds/se/se_pong2.mp3',
     pong3: 'sounds/se/se_pong3.mp3',
     pong4: 'sounds/se/se_pong4.mp3',
-    pong5: 'sounds/se/se_pong5.mp3'
+    pong5: 'sounds/se/se_pong5.mp3',
+    pongNew1: 'sounds/se/se_pong-new1.mp3',
+    pongNew2: 'sounds/se/se_pong-new2.mp3',
+    pongNew3: 'sounds/se/se_pong-new3.mp3'
   };
   // 지원되는 Safari/PWA에서는 외부 음악과 혼합하는 세션을 요청한다.
   // 지원하지 않는 브라우저에서는 표준 Web Audio 효과음으로 동작한다.
@@ -297,7 +301,7 @@ function playDetailCloseSound() {
 }
 
 function initUiSounds() {
-  const cardSounds = ['pong1', 'pong2', 'pong3', 'pong4', 'pong5'];
+  const cardSounds = ['pong1', 'pong2', 'pong3', 'pong4', 'pong5', 'pongNew1', 'pongNew2', 'pongNew3'];
 
   function playRandom(sounds) {
     UI_SOUND.play(sounds[Math.floor(Math.random() * sounds.length)]);
@@ -327,7 +331,9 @@ function initUiSounds() {
       UI_SOUND.play('menuOpen');
     } else if (target.matches('.extra-btn-home')) {
       UI_SOUND.play('selectNo');
-    } else if (target.matches('.extra-btn, .group-select-btn')) {
+    } else if (target.matches('.group-select-btn')) {
+      UI_SOUND.play('detailItem');
+    } else if (target.matches('.extra-btn')) {
       UI_SOUND.play('click');
     } else if (target.matches('.subnav-item')) {
       UI_SOUND.play('card');
@@ -3441,7 +3447,7 @@ function openLocationInfo(context = getInfoPanelContext()) {
   if (context.isTitleCard && detail?.trim()) content.classList.add('detail-idea-block');
   content.textContent = detail;
   if (!context.isTitleCard || detail?.trim()) body.appendChild(content);
-  showDetailOverlay();
+  showDetailOverlay(context.isTitleCard ? 'detailItem' : 'touchNew1');
 }
 
 function selectCurrentCard() {
@@ -3467,7 +3473,7 @@ function selectCurrentCard() {
   } else {
     toggleCardSelect(focusedCard.subId, focusedCard.idx);
   }
-  UI_SOUND.play(wasSelected ? 'cancel' : 'select4');
+  UI_SOUND.play(wasSelected ? 'cancel' : 'select6');
 }
 
 function isCardLocked(subId, idx) {
@@ -4731,7 +4737,7 @@ async function randomSelectCurrent() {
 
   const ok = await showAppConfirm(
     `[${navLabel} — ${subLabel}]\n랜덤 선택을 하시겠습니까?`,
-    'select3'
+    'selectYes'
   );
 
   if (!ok) {
@@ -4785,7 +4791,7 @@ async function randomSelectCurrent() {
 // 현재 탭의 모든 서브(마름모) 각 1개씩 랜덤 선택
 async function randomSelectAll() {
   const navLabel = NAV_DATA[currentNav].label;
-  const ok = await showAppConfirm(`[${navLabel}]\n모든 카테고리에서 각 1개씩\n랜덤 선택을 하시겠습니까?`, 'selectYes');
+  const ok = await showAppConfirm(`[${navLabel}]\n모든 카테고리에서 각 1개씩\n랜덤 선택을 하시겠습니까?`, 'selectOk');
   if (!ok) return;
 
   const subs = NAV_DATA[currentNav].subs;
