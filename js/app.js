@@ -168,6 +168,9 @@ const UI_SOUND = (() => {
     detailItem: 'sounds/select/touch-1.mp3',
     detailExclude: 'sounds/select/soft_touch-4.mp3',
     softTouch1: 'sounds/select/soft_touch-1.mp3',
+    softTouch5: 'sounds/select/soft_touch-5.mp3',
+    paper5: 'sounds/paper/paper_5.mp3',
+    cardList: 'sounds/paper/card_list.mp3',
     select6: 'sounds/select/select-6.mp3',
     lockOn: 'sounds/select/lock_1.mp3',
     lockOff: 'sounds/select/lock_2.mp3',
@@ -312,6 +315,12 @@ const UI_SOUND = (() => {
   };
 })();
 
+// Add a future third return sound here only when explicitly specified.
+const RETURN_SOUNDS = ['softTouch5', 'softPage3'];
+function playReturnSound() {
+  playRandomSound(RETURN_SOUNDS);
+}
+
 function playRandomSound(names) {
   UI_SOUND.play(names[Math.floor(Math.random() * names.length)]);
 }
@@ -367,8 +376,9 @@ function initUiSounds() {
       UI_SOUND.play(target.getAttribute('aria-expanded') === 'true' ? 'menuClose' : 'menuOpen');
     } else if (target.matches('#card-panel-toggle')) {
       UI_SOUND.play('menuOpen');
-    } else if (target.matches('.extra-btn-home')) {
-      UI_SOUND.play('selectNo');
+    } else if (target.matches('.extra-btn-home, .narrative-back-btn, #mine-home')) {
+      // Home routing owns the single successful-return sound.
+      return;
     } else if (target.matches('.group-select-btn')) {
       UI_SOUND.play('detailItem');
     } else if (target.matches('.extra-btn')) {
@@ -1137,7 +1147,7 @@ function initCenterBackSwipe() {
     if (shouldGoBack) {
       area.classList.remove('is-back-swiping', 'is-forward-swiping');
       if (forwardDragging) playNavigationSound();
-      else playRandomSound(['softPage1', 'softPage2']);
+      else playReturnSound();
       const key = pageKeys.get(sourcePage);
       if (key) scrollMemory.set(key, APP_PERF ? APP_PERF.measure('scroll.read', () => sourcePage.scrollTop, { page: sourcePage.id }) : sourcePage.scrollTop);
       if (forwardDragging) {
@@ -2181,10 +2191,11 @@ function switchScreen(targetId, callback, options = {}) {
 /* ════════════════════════════════════════════════
    내비게이션
 ════════════════════════════════════════════════ */
-function goHome({ instant = false } = {}) {
+function goHome({ instant = false, playSound = true } = {}) {
+  if (playSound && !document.getElementById('screen-home').classList.contains('active')) playReturnSound();
   closeCardInfo();
-  closeDetailSheet();
-  closeStatusOverlay();
+  closeDetailSheet(null, true);
+  closeStatusOverlay(null, true);
   closeExtraMenu({ instant: true });
   
   const createScreen = document.getElementById('screen-create');
@@ -3512,7 +3523,7 @@ function selectCurrentCard() {
   } else {
     toggleCardSelect(focusedCard.subId, focusedCard.idx);
   }
-  UI_SOUND.play(wasSelected ? 'cancel' : 'select6');
+  UI_SOUND.play(wasSelected ? 'cancel1' : 'select6');
 }
 
 function isCardLocked(subId, idx) {
@@ -4018,7 +4029,10 @@ function _syncCardSelectedDOM(subId, globalIdx) {
 
 function closeDetailSheet(e, silent = false) {
   if (e && e.target !== document.getElementById('detail-overlay')) return;
-  if (!silent && document.getElementById('detail-overlay').classList.contains('active')) playDetailCloseSound();
+  if (!silent && document.getElementById('detail-overlay').classList.contains('active')) {
+    if (e) playRandomSound(['softPage3', 'softPage1']);
+    else playDetailCloseSound();
+  }
   document.getElementById('detail-overlay').classList.remove('active');
 }
 
@@ -4044,7 +4058,10 @@ function openStatusOverlay() {
 
 function closeStatusOverlay(e, silent = false) {
   if (e && e.target !== document.getElementById('status-overlay')) return;
-  if (!silent && document.getElementById('status-overlay').classList.contains('active')) playPaperSound();
+  if (!silent && document.getElementById('status-overlay').classList.contains('active')) {
+    if (e) playRandomSound(['softPage3', 'softPage1']);
+    else playPaperSound();
+  }
   document.getElementById('status-overlay').classList.remove('active');
     setBottomNavState(currentNav);
 }
@@ -5220,7 +5237,7 @@ function initCardMinimap() {
   const expand = document.getElementById('card-minimap-expand');
   const collapse = document.getElementById('card-minimap-collapse');
   if (!area || !toggle || !panel || !content || !overlay || !swipeFrame || !title || !expand || !collapse) return;
-  expand.dataset.sound = 'softPage3';
+  expand.dataset.sound = 'cardList';
   collapse.dataset.sound = 'softTouch4';
   expand.addEventListener('click', () => content.querySelectorAll('details').forEach(section => { section.open = true; }));
   collapse.addEventListener('click', () => content.querySelectorAll('details').forEach(section => { section.open = false; }));
@@ -5408,7 +5425,7 @@ function initCardMinimap() {
     };
   }
   function opened() {
-    if (!fullyOpen) playRandomSound(['paper1', 'paper2']);
+    if (!fullyOpen) playRandomSound(['paper1', 'paper2', 'paper5']);
     fullyOpen = true;
     closing = false;
     expand.focus({ preventScroll: true });
@@ -5465,7 +5482,7 @@ function initCardMinimap() {
       const tag = document.createElement('button');
       tag.type = 'button';
       tag.className = 'card-minimap-tag pressable';
-      tag.dataset.sound = 'softTouch1';
+      tag.dataset.sound = 'softTouch5';
       tag.textContent = String(card.name ?? '');
       const target = renderedCards[nextIndex.value++];
       tagEntries.push({ tag, card: target });
@@ -5920,7 +5937,7 @@ window.BackSwipeMotion=(()=> {
     } else if(screen?.id==='screen-create') {
       if(currentSubId||!document.getElementById('page-default').classList.contains('active')||canNavigateBackInTrail())return null;
     } else if(screen?.id!=='screen-narrative')return null;
-    return {screen,kind:'arrow',commit:()=>goHome()};
+    return {screen,kind:'arrow',homeReturn:true,commit:()=>goHome({playSound:false})};
   }
   function resetGesture() {
     gesture?.screen.classList.remove('is-home-swiping');
@@ -5960,7 +5977,10 @@ window.BackSwipeMotion=(()=> {
     const t=e.changedTouches[0],elapsed=Math.max(1,performance.now()-g.time);
     const threshold=Math.max(52,Math.min(80,g.screen.clientWidth*.14)),fast=g.furthest>=28&&g.furthest/elapsed>=.35;
     const commit=Boolean(t&&!e.touches.length&&Math.abs(t.clientY-g.y)<g.furthest*1.5&&(g.furthest>=threshold||fast));
-    if(commit)UI_SOUND.play('paper3');
+    if(commit) {
+      if(g.homeReturn)playReturnSound();
+      else UI_SOUND.play('paper3');
+    }
     if(g.motion)g.motion.finish(commit,g.commit);else if(commit)g.commit();
   },{passive:true});
   function cancel(){gesture?.motion?.finish(false);resetGesture();}

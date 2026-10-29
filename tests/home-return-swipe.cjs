@@ -17,6 +17,7 @@ const path=require('node:path');
   await page.evaluate(()=>{window.swipeSounds=[];UI_SOUND.play=name=>swipeSounds.push(name);});
   const cdp=await page.context().newCDPSession(page);
   async function swipe({x=150,y=420,dx=110,dy=0,cancel=false,expectCue=false,expectMotion=false,expectedPrevious=null,expectLegacy=false,hold=0}={}){
+   const returnSound=expectLegacy||await page.evaluate(()=>document.querySelector('body > .screen.active')?.id!=='screen-idea-mine'||!window.IdeaMineBackRoute?.());
    await page.evaluate(()=>swipeSounds.length=0);
    await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});
    for(const progress of (dx>0&&dx<52?[1]:[.15,.4,.7,1])) {
@@ -66,8 +67,8 @@ const path=require('node:path');
    await cdp.send('Input.dispatchTouchEvent',{type:cancel?'touchCancel':'touchEnd',touchPoints:[]});
    await page.waitForTimeout(700);
    const sounds=await page.evaluate(()=>swipeSounds.slice());
-   if(dx>0){assert(sounds.length<=1,JSON.stringify(sounds));assert(sounds.every(x=>(expectLegacy?['softPage1','softPage2']:['paper3']).includes(x)),JSON.stringify(sounds));}
-   if(!cancel&&(expectCue||expectMotion))assert.deepEqual(sounds,['paper3']);if(!cancel&&expectLegacy)assert.equal(sounds.length,1);
+   if(dx>0){assert(sounds.length<=1,JSON.stringify(sounds));assert(sounds.every(x=>(returnSound?['softTouch5','softPage3']:['paper3']).includes(x)),JSON.stringify(sounds));}
+   if(!cancel&&(expectCue||expectMotion)){if(returnSound)assert.equal(sounds.length,1);else assert.deepEqual(sounds,['paper3']);}if(!cancel&&expectLegacy)assert.equal(sounds.length,1);
    if(cancel||dx<=24||Math.abs(dy)>Math.abs(dx))assert.deepEqual(sounds,[]);
    assert.equal(await page.locator('.is-home-swiping').count(),0,'cue clears on finish/cancel');
    assert.equal(await page.locator('[data-back-preview]').count(),0,'preview is removed after settle');

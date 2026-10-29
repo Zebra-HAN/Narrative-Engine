@@ -5,7 +5,7 @@ const {chromium}=require('playwright');
  page.on('pageerror',e=>errors.push(e.message));page.on('response',r=>{if(r.url().endsWith('.mp3'))audio.push([r.url(),r.status()]);});
  await page.route(/fonts\.(googleapis|gstatic)\.com/,r=>r.abort());await page.goto(process.env.PERF_TEST_URL||'http://127.0.0.1:8000');await page.waitForTimeout(1800);
  await page.evaluate(()=>{goToCreate();switchNav('character',true);window.played=[];const original=UI_SOUND.play;UI_SOUND.play=name=>{played.push(name);original(name);};CARD_DATA.soundFixture=[{name:'음원 테스트',img:'images/character/group/human.jpg',subImg:'images/character/group/animal.jpg',desc:'설명',detail:'【 아이디어 】\n첫 아이디어\n\n둘째 아이디어'}];showCardPage('soundFixture',false,true);});
- const reset=()=>page.evaluate(()=>{played.length=0;});const sounds=()=>page.evaluate(()=>played.slice());const paper=name=>/^paper[1-4]$/.test(name);
+ const reset=()=>page.evaluate(()=>{played.length=0;});const sounds=()=>page.evaluate(()=>played.slice());const paper=name=>/^paper[1-5]$/.test(name);
  const detailCloseOnly=async()=>{const s=await sounds();assert.equal(s.length,1);assert(['paper3','touchNew2','touchNew3'].includes(s[0]),JSON.stringify(s));};
  const paperOnly=async()=>{const s=await sounds();assert.equal(s.length,1,JSON.stringify(s));assert(paper(s[0]),JSON.stringify(s));};
  await page.waitForTimeout(700);await page.locator('.center-page.active .data-card').click();await page.waitForTimeout(200);await reset();
@@ -13,7 +13,7 @@ const {chromium}=require('playwright');
  await page.waitForTimeout(350);
  for(const [selector,expected] of [['#detail-icon','detailExclude'],['#detail-desc','detailExclude'],['.detail-idea-block','detailItem'],['.detail-sub-image-row','detailItem']]){await reset();await page.locator(selector).first().click();assert.deepEqual(await sounds(),[expected]);}
  await reset();await page.locator('.detail-close').click();assert.deepEqual(await sounds(),['cancel1']);await reset();await page.evaluate(()=>closeDetailSheet());assert.deepEqual(await sounds(),[]);
- await page.evaluate(()=>openDetailSheet('card'));await page.waitForTimeout(300);await reset();await page.locator('#detail-overlay').dispatchEvent('click');await detailCloseOnly();
+ await page.evaluate(()=>openDetailSheet('card'));await page.waitForTimeout(300);await reset();await page.locator('#detail-overlay').dispatchEvent('click');assert.equal((await sounds()).length,1);assert(['softPage3','softPage1'].includes((await sounds())[0]));
  await page.locator('#card-panel-toggle').click();await page.waitForTimeout(400);await reset();await page.locator('#nav-idea').click();s=await sounds();assert.deepEqual(s,['touch2']);await page.waitForTimeout(350);
  await reset();await page.locator('.status-close').click();assert.deepEqual(await sounds(),['cancel1']);await reset();await page.evaluate(()=>closeStatusOverlay());assert.deepEqual(await sounds(),[]);
  await page.waitForTimeout(350);await page.locator('#card-panel-toggle').dispatchEvent('click');await page.waitForTimeout(400);for(let i=0;i<2;i++){await reset();await page.locator('#card-menu-toggle').click();assert.deepEqual(await sounds(),[i===0?'menuOpen':'menuClose']);await page.waitForTimeout(250);}
