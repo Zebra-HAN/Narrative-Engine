@@ -213,9 +213,10 @@ const UI_SOUND = (() => {
     pongNew3: 'sounds/se/se_pong-new3.mp3'
   };
   // File-based trim applies equally to every alias and screen, before master volume.
-  const quieterFiles = new Set([
-    'select-6.mp3', 'lock_1.mp3', 'lock_2.mp3', 'lock.mp3',
-    'se_select_ok.mp3', 'se_select_yes.mp3'
+  const fileVolumes = new Map([
+    ['select-6.mp3', 0.7], ['lock_1.mp3', 0.7], ['lock_2.mp3', 0.7],
+    ['lock.mp3', 0.7], ['se_select_ok.mp3', 0.7], ['se_select_yes.mp3', 0.7],
+    ['mining-3.mp3', 0.8], ['mining-4.mp3', 0.9]
   ]);
   // 지원되는 Safari/PWA에서는 외부 음악과 혼합하는 세션을 요청한다.
   // 지원하지 않는 브라우저에서는 표준 Web Audio 효과음으로 동작한다.
@@ -280,9 +281,10 @@ const UI_SOUND = (() => {
     // 즉시 시작되며 아무리 빠른 연속 입력도 겹쳐서 재생할 수 있다.
     const source = context.createBufferSource();
     source.buffer = buffer;
-    const trim = quieterFiles.has(sources[name]?.split('/').pop()) ? context.createGain() : null;
+    const fileVolume = fileVolumes.get(sources[name]?.split('/').pop()) ?? 1;
+    const trim = fileVolume !== 1 ? context.createGain() : null;
     if (trim) {
-      trim.gain.value = 0.7;
+      trim.gain.value = fileVolume;
       source.connect(trim);
       trim.connect(output);
     } else source.connect(output);
