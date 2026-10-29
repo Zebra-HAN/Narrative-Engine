@@ -167,9 +167,10 @@ const UI_SOUND = (() => {
     touch: 'sounds/se/se_touch.mp3',
     detailItem: 'sounds/select/touch-1.mp3',
     detailExclude: 'sounds/select/soft_touch-4.mp3',
-    softTouch2: 'sounds/select/soft_touch-2.mp3',
+    softTouch1: 'sounds/select/soft_touch-1.mp3',
     select6: 'sounds/select/select-6.mp3',
-    lock: 'sounds/select/lock.mp3',
+    lockOn: 'sounds/select/lock_1.mp3',
+    lockOff: 'sounds/select/lock_2.mp3',
     text: 'sounds/select/text.mp3',
     cardInfo: 'sounds/select/click_3.mp3',
     paper1: 'sounds/paper/paper_1.mp3',
@@ -346,10 +347,10 @@ function initUiSounds() {
       if (target.dataset.sound) UI_SOUND.play(target.dataset.sound);
       return;
     } else if (target.matches('.card-info-lock')) {
-      // Inspect the pre-click state; keep the existing unlock click sound.
-      UI_SOUND.play(target.getAttribute('aria-pressed') === 'true' ? 'click' : 'lock');
+      // Capture the pre-click state so locking and unlocking each play once.
+      UI_SOUND.play(target.getAttribute('aria-pressed') === 'true' ? 'lockOff' : 'lockOn');
     } else if (target.matches('#mine-slots .lock')) {
-      UI_SOUND.play(target.classList.contains('on') ? 'click' : 'lock');
+      UI_SOUND.play(target.classList.contains('on') ? 'lockOff' : 'lockOn');
     } else if (target.dataset.sound) {
       UI_SOUND.play(target.dataset.sound);
     } else if (target.closest('.bottom-nav')) {
@@ -3304,7 +3305,7 @@ function renderCardInfo() {
     </div>
 `;
   page.appendChild(panel);
-  const openFocusedCardDetail = () => openDetailSheet('card', 'softTouch2');
+  const openFocusedCardDetail = () => openDetailSheet('card', 'softTouch1');
   const isPanelAction = target => Boolean(target.closest('button'));
   panel.addEventListener('click', event => {
     if (!isPanelAction(event.target)) openFocusedCardDetail();
