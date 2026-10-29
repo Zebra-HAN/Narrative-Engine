@@ -152,7 +152,7 @@
       b.setAttribute('aria-pressed',String(i===mode));
       b.className='mode'+(i===mode?' active':'');
       b.dataset.mode=m.id;
-      b.dataset.sound='card';
+      b.dataset.sound='detailItem';
       const label=document.createElement('span');label.className='mode-label';label.textContent=m.name;
       b.append(visual('mode-art',artwork.modeIcons?.[m.id]),label);
       b.onclick=()=>switchMode(i);
@@ -224,7 +224,7 @@
       ;
       let browse=document.createElement('button');
       browse.className='browse';
-      browse.dataset.sound='nav';
+      browse.dataset.sound='text';
       browse.innerHTML=uiIcon('search');
       browse.setAttribute('aria-label','목록 선택');
       browse.title=label+' 목록 선택';
@@ -324,6 +324,7 @@
     filtered.forEach(material=> {
       const word=material.name;
       let b=document.createElement('button');
+      b.dataset.sound='text';
       b.className='libitem'+(values[key]===word?' selected':'');
       b.textContent=word;
       if(material.subcategory) {
@@ -470,6 +471,7 @@
       ;
       let copy=document.createElement('button');
       copy.className='mini';
+      copy.dataset.sound='text';
       copy.textContent='복사';
       copy.onclick=()=>copyText(entry.text);
       let del=document.createElement('button');
@@ -529,8 +531,9 @@
     // Keep the idea at the start of the refinery reading area on entry.
   }
   $('roll').dataset.sound='miningRoll';
-  ['back','home','refineryBack','refineShortcut'].forEach(id=>$(id).dataset.sound='card');
+  ['back','home','refineryBack'].forEach(id=>$(id).dataset.sound='card');
   document.querySelectorAll('[data-mine-main]').forEach(b=>b.dataset.sound='card');
+  ['copy','save','refineShortcut','refinerySave','refineryExpand','refreshExpand'].forEach(id=>$(id).dataset.sound='text');
   $('roll').onclick=()=>reroll();
   $('save').onclick=save;
   $('copy').onclick=async()=> {

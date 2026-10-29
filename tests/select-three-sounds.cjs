@@ -17,10 +17,10 @@ await click('#card-extra-menu-panel .extra-btn-random',['click']);await click('.
 assert.equal(await page.evaluate(()=>selectedCards.race.size),1,'current random still selects one card');
 await page.evaluate(()=>{CARD_DATA.soundFixture=[{name:'선택 테스트',icon:'◆',desc:'설명'}];selectedCards.soundFixture=new Set();showCardPage('soundFixture',false,true);});await page.waitForTimeout(700);
 await page.evaluate(()=>{played.length=0;document.querySelector('.center-page.active .data-card').click();});assert((await page.evaluate(()=>played.slice())).every(s=>/^pong[1-5]$/.test(s)));
-await click('.card-info-select',['select3']);assert.equal(await page.evaluate(()=>selectedCards.soundFixture.has(0)),true);
+await click('.card-info-select',['select4']);assert.equal(await page.evaluate(()=>selectedCards.soundFixture.has(0)),true);
 await click('.card-info-select',['cancel']);assert.equal(await page.evaluate(()=>selectedCards.soundFixture.has(0)),false);
-await click('.card-info-select',['select3']);await click('.card-info-lock',['click']);assert.equal(await page.evaluate(()=>isCardLocked('soundFixture',0)),true);
+await click('.card-info-select',['select4']);await click('.card-info-lock',['click']);assert.equal(await page.evaluate(()=>isCardLocked('soundFixture',0)),true);
 assert.equal(await page.locator('.card-info-select').isDisabled(),true,'locked card selection remains disabled');await click('.card-info-lock',['click']);assert.equal(await page.evaluate(()=>isCardLocked('soundFixture',0)),false);await click('.card-info-select',['cancel']);
 assert(audio.some(([u,status])=>u.endsWith('/sounds/select/select-3.mp3')&&status===200));assert(audio.every(([,s])=>s===200));assert.deepEqual(errors,[]);
-console.log('PASS: both random button copies use click; current-random confirmation uses select3; all-category random and cancel unchanged; random selects one; card check uses select3 and deselection cancel; lock behavior preserved; audio loads and no page errors.');
+console.log('PASS: both random button copies use click; current-random confirmation uses select3; all-category random and cancel unchanged; random selects one; card check uses select4 and deselection cancel; lock behavior preserved; audio loads and no page errors.');
 }finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

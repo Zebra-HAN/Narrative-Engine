@@ -165,7 +165,11 @@ const UI_SOUND = (() => {
     // 기존 파일명을 유지하지만 재생 방식은 다른 버튼과 같은 단발성 SFX다.
     start: 'sounds/bgm_start.mp3',
     touch: 'sounds/se/se_touch.mp3',
-    detailItem: 'sounds/select/click_2.mp3',
+    detailItem: 'sounds/select/touch-1.mp3',
+    detailExclude: 'sounds/select/click_4.mp3',
+    softTouch2: 'sounds/select/soft_touch-2.mp3',
+    select4: 'sounds/select/select-4.mp3',
+    text: 'sounds/select/text.mp3',
     cardInfo: 'sounds/select/click_3.mp3',
     paper1: 'sounds/paper/paper_1.mp3',
     paper2: 'sounds/paper/paper_2.mp3',
@@ -181,7 +185,7 @@ const UI_SOUND = (() => {
     miningRoll: 'sounds/select/mining-3new.mp3',
     miningRefresh: 'sounds/select/mining-4new.mp3',
     menuOpen: 'sounds/select/select-1.mp3',
-    menuClose: 'sounds/select/select-2.mp3',
+    menuClose: 'sounds/select/soft_touch-4.mp3',
     click: 'sounds/select/click_1.mp3',
     card: 'sounds/se/se_card.mp3',
     card1: 'sounds/se/se_card1.mp3',
@@ -308,12 +312,13 @@ function initUiSounds() {
     if (target.matches('.detail-close, .status-close, #detail-overlay, #status-overlay, #card-minimap-toggle, .page-title-card')) {
       // Opening/closing feedback belongs to the actual overlay transition.
       return;
-    } else if (target.matches('#detail-icon, #detail-desc')) {
-      UI_SOUND.play('card');
-    } else if (target.matches('.detail-idea-block, .detail-sub-image-row')) {
+    } else if (target.matches('#detail-icon, #detail-desc, .detail-sub-image-row')) {
+      UI_SOUND.play('detailExclude');
+    } else if (target.matches('.detail-idea-block')) {
       UI_SOUND.play('detailItem');
     } else if (target.matches('.card-info-detail, .card-info-popover')) {
-      UI_SOUND.play('cardInfo');
+      // The detail overlay owns this activation sound, including keyboard opening.
+      return;
     } else if (target.matches('.data-card')) {
       playRandom(cardSounds);
     } else if (target.matches('#btn-extra-menu, #card-menu-toggle')) {
@@ -3291,7 +3296,7 @@ function renderCardInfo() {
     </div>
 `;
   page.appendChild(panel);
-  const openFocusedCardDetail = () => openDetailSheet('card');
+  const openFocusedCardDetail = () => openDetailSheet('card', 'softTouch2');
   const isPanelAction = target => Boolean(target.closest('button'));
   panel.addEventListener('click', event => {
     if (!isPanelAction(event.target)) openFocusedCardDetail();
@@ -3462,7 +3467,7 @@ function selectCurrentCard() {
   } else {
     toggleCardSelect(focusedCard.subId, focusedCard.idx);
   }
-  UI_SOUND.play(wasSelected ? 'cancel' : 'select3');
+  UI_SOUND.play(wasSelected ? 'cancel' : 'select4');
 }
 
 function isCardLocked(subId, idx) {
@@ -3641,7 +3646,7 @@ function renderDetailIdeaBlock(subId, globalIdx, itemIdx, item, isChecked) {
     >${escapeHtml(item)}</button>`;
 }
 
-function openDetailSheet(mode) {
+function openDetailSheet(mode, openingSound = 'touchNew1') {
   document.querySelector('.detail-sheet').dataset.cardKey = mode === 'card' && focusedCard ? `${focusedCard.subId}__${focusedCard.idx}` : '';
   configureDetailMainImage();
   if (mode === 'card' && !focusedCard) return;
@@ -3739,7 +3744,7 @@ divEl.style.display = 'none';
     bodyEl.textContent  = '';
   }
 
-  showDetailOverlay();
+  showDetailOverlay(openingSound);
 }
 
 function syncDetailCardState(subId, idx) {
@@ -3749,7 +3754,7 @@ function syncDetailCardState(subId, idx) {
   sheet.classList.toggle('card-selected', Boolean(selectedCards[subId]?.has(idx)));
 }
 
-function showDetailOverlay() {
+function showDetailOverlay(openingSound = 'touchNew1') {
   const sheet = document.querySelector('.detail-sheet');
   const key = sheet.dataset.cardKey;
   sheet.classList.toggle('detail-modern', Boolean(key) || document.getElementById('detail-desc').classList.contains('detail-static-desc'));
@@ -3760,7 +3765,7 @@ function showDetailOverlay() {
   content.style.scrollBehavior = 'auto';
   content.scrollTop = 0;
   content.style.scrollBehavior = behavior;
-  if (!document.getElementById('detail-overlay').classList.contains('active')) UI_SOUND.play('touchNew1');
+  if (!document.getElementById('detail-overlay').classList.contains('active')) UI_SOUND.play(openingSound);
   document.getElementById('detail-overlay').classList.add('active');
   attachSwipeToClose(
     document.querySelector('.detail-overlay .popup-swipe-frame'),
