@@ -1,7 +1,7 @@
 const assert=require('node:assert/strict');
 const {execFileSync}=require('node:child_process');
 const {chromium}=require('playwright');
-const baseline=execFileSync('git',['show','2828461:css/fantasy-top-panel.css'],{encoding:'utf8',maxBuffer:4*1024*1024});
+const baseline=execFileSync('git',['show','77cebe4:css/fantasy-top-panel.css'],{encoding:'utf8',maxBuffer:4*1024*1024});
 const near=(a,b,label)=>assert(Math.abs(a-b)<.6,`${label}: ${a} / ${b}`);
 (async()=>{
  const browser=await chromium.launch({executablePath:'/usr/bin/chromium',args:['--no-sandbox']});
@@ -30,7 +30,7 @@ const near=(a,b,label)=>assert(Math.abs(a-b)<.6,`${label}: ${a} / ${b}`);
     assert.equal(s.scrollbar,'none');assert.equal(s.webkit,'none');assert.equal(s.overflow,false);
     if(count<7){assert.deepEqual(s.rects,old.rects,`${count} group geometry unchanged`);assert.equal(s.font,old.font);}
     else{
-     near(s.height/s.width,1.25,'portrait ratio');near(s.colGap,old.colGap/2,'horizontal gap');near(s.rowGap,old.rowGap/2,'vertical gap');near(s.left,s.colGap,'left edge');near(s.right,s.colGap,'right edge');assert(s.width>old.width);
+     near(s.height/s.width,1,'square ratio');near(s.colGap,old.colGap,'horizontal gap');near(s.rowGap,old.rowGap*2,'vertical gap');near(s.left,s.colGap,'left edge');near(s.right,s.colGap,'right edge');near(s.width,old.width,'button width');
     }
    }
    if(mode==='after'){
@@ -48,7 +48,7 @@ const near=(a,b,label)=>assert(Math.abs(a-b)<.6,`${label}: ${a} / ${b}`);
    }
    assert.deepEqual(errors,[]);await page.close();
   }
-  console.log(`PASS ${width}: 1–6 unchanged; 7+ portrait 3-column grids, half gaps, matching edge spacing, no scrollbar, scroll to last row`);
+  console.log(`PASS ${width}: 1–6 unchanged; 7+ square 3-column grids, preserved horizontal gaps, doubled vertical gaps, matching edge spacing, no scrollbar, scroll to last row`);
  }
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

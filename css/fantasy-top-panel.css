@@ -661,14 +661,15 @@
   flex: 1 0 auto;
   align-content: center;
   padding-inline: 8px;
-  gap: 8px;
-  /* Halve the existing 7px title clearance with the 16px grid gap. */
-  --group-title-clearance: 3.5px;
+  column-gap: 8px;
+  row-gap: 16px;
+  /* Restore vertical breathing room for the title plates below each button. */
+  --group-title-clearance: 7px;
 }
 
-/* Only the 7+ group layout grows; smaller group layouts retain their sizing. */
+/* Keep the expanded 7+ layout square; smaller groups retain their sizing. */
 #screen-create .group-layout-grid > .group-select-btn {
-  aspect-ratio: 2 / 2.5;
+  aspect-ratio: 1 / 1;
 }
 
 /* Hide group-page chrome without disabling native or gesture scrolling. */
