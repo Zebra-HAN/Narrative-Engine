@@ -654,11 +654,32 @@
   flex-direction: column;
   padding-top: 8px;
   padding-bottom: 8px;
+  padding-inline: 0;
 }
 
 #screen-create .center-page[data-chrome-view] > .group-layout-grid {
   flex: 1 0 auto;
   align-content: center;
+  padding-inline: 8px;
+  gap: 8px;
+  /* Halve the existing 7px title clearance with the 16px grid gap. */
+  --group-title-clearance: 3.5px;
+}
+
+/* Only the 7+ group layout grows; smaller group layouts retain their sizing. */
+#screen-create .group-layout-grid > .group-select-btn {
+  aspect-ratio: 2 / 2.5;
+}
+
+/* Hide group-page chrome without disabling native or gesture scrolling. */
+#screen-create .center-page[data-chrome-view="group"],
+#screen-create .center-page[data-chrome-view="subgroup"] {
+  scrollbar-width: none;
+}
+
+#screen-create .center-page[data-chrome-view="group"]::-webkit-scrollbar,
+#screen-create .center-page[data-chrome-view="subgroup"]::-webkit-scrollbar {
+  display: none;
 }
 
 /* Paint the full-strength glow once, then fade its independent surface.
