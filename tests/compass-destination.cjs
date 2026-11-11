@@ -1,28 +1,7 @@
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const vm = require('node:vm');
-const { execFileSync } = require('node:child_process');
 const { chromium } = require('playwright');
-
-function load(source) {
-  return vm.runInNewContext(`${source}\nJSON.stringify({nav:COMPASS_NAV,cards:COMPASS_CARDS})`);
-}
-const data = JSON.parse(load(fs.readFileSync('data/compass.js', 'utf8')));
-const baseline = JSON.parse(load(execFileSync('git', ['show', 'fce1bca:data/compass.js'], {encoding:'utf8',maxBuffer:8*1024*1024})));
-assert.deepEqual(data.nav.subs.map(s => s.id), ['type','genre','destination',...baseline.nav.subs.slice(2).map(s => s.id)]);
-assert.equal(data.nav.subs[2].img, data.nav.subs.find(s => s.id === 'experience').img);
-assert.deepEqual({...data.nav,subs:data.nav.subs.filter(s => s.id !== 'destination')}, baseline.nav);
-const {destination,...existing} = data.cards;
-assert.deepEqual(existing, baseline.cards, 'existing category data is unchanged');
-const source = fs.readFileSync('docs/dramatic-destination-source.md', 'utf8');
-const expectedCards = [...source.matchAll(/^\d+\. \*\*(.+)\*\* — (.+)$/gm)].map(m => ({name:m[1],desc:m[2]}));
-const expectedSections = [...source.matchAll(/^\*\*([A-E]\d+\. .+)\*\*$/gm)].map(m => m[1]);
-assert.equal(destination.groups.length,5);
-assert.deepEqual(destination.groups.map(g => g.cards.filter(c => c.type !== 'section').length),[85,64,65,32,43]);
-assert.deepEqual(destination.groups.flatMap(g => g.cards.filter(c => c.type === 'section').map(c => c.label)),expectedSections);
-assert.equal(expectedSections.length,19);
-assert.equal(expectedCards.length,289);
-assert.deepEqual(destination.groups.flatMap(g => g.cards.filter(c => c.type !== 'section')),expectedCards);
+const data = require('./compass-data.cjs');
+const destination = data.cards.destination;
 
 (async () => {
  const browser = await chromium.launch({executablePath:'/usr/bin/chromium',args:['--no-sandbox']});
@@ -39,6 +18,7 @@ assert.deepEqual(destination.groups.flatMap(g => g.cards.filter(c => c.type !== 
     await page.locator(`#page-destination [data-group-idx="${gi}"]`).click();
     await page.waitForSelector('.center-page.active[data-chrome-view=cards]');
     const group = destination.groups[gi];
+    assert.equal(await page.locator('.center-page.active .card-grid:not(.card-grid-layout-d)').count(),0);
     assert.equal(await page.locator('.center-page.active .card-section-header').count(),group.cards.filter(c => c.type === 'section').length);
     assert.deepEqual(await page.locator('.center-page.active .card-name-text').allTextContents(),group.cards.filter(c => c.type !== 'section').map(c => c.name));
     const rendered = await page.evaluate(gi => {
