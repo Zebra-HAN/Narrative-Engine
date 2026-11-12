@@ -170,7 +170,7 @@ const COMPASS_CARDS = {
 // 도달점: 제목(name)과 주요 설명문(desc)만 등록한다.
   destination: {
     groups: [
-      { id: "destination_a", label: "인물의 내면과 삶", icon: "🧭", layoutType: "2", cards: [
+      { id: "destination_a", img: "images/compass/group/experience/identity.jpg", label: "인물의 내면과 삶", icon: "🧭", layoutType: "2", cards: [
         {"type": "section", "label": "발견 · 깨달음"},
         {"name": "진정으로 원했던 것이 무엇인지 깨닫는다", "desc": "우승컵을 눈앞에 둔 선수가 관중석의 가족을 보며 자신이 원한 건 승리가 아니라 함께할 시간이었다는 걸 안다."},
         {"name": "당연하다고 믿었던 생각이 틀렸음을 알게 된다", "desc": "마을 밖은 위험하다고 믿던 문지기가 낯선 아이를 구한 외지인을 보고 성문을 연다."},
@@ -262,7 +262,7 @@ const COMPASS_CARDS = {
         {"name": "아무런 보상이 없어도 옳다고 믿는 일을 완수한다", "desc": "상도 받지 못하고 이름도 남지 않지만 등대지기는 마지막 밤까지 불을 밝힌다."},
         {"name": "자신이 믿던 신념의 잘못을 인정하고 더 나은 원칙을 선택한다", "desc": "잘못된 교리를 따랐음을 깨달은 사제가 신전 문을 열어 쫓겨난 사람들을 맞는다."},
       ] },
-      { id: "destination_b", label: "관계와 공동체", icon: "🧭", layoutType: "2", cards: [
+      { id: "destination_b", img: "images/compass/group/experience/bonds.jpg", label: "관계와 공동체", icon: "🧭", layoutType: "2", cards: [
         {"type": "section", "label": "관계 형성 · 회복 · 전환"},
         {"name": "적대하던 두 사람이 친구가 된다", "desc": "서로의 목숨을 노리던 두 검사가 마지막 결투에서 칼을 내려놓고 함께 길을 떠난다."},
         {"name": "낯선 사람들이 서로에게 소중한 존재가 된다", "desc": "서로 이름조차 모르던 피난민들이 겨울을 함께 버틴 끝에 떠나는 날 가족처럼 서로를 배웅한다."},
@@ -332,7 +332,7 @@ const COMPASS_CARDS = {
         {"name": "영원히 지속되던 세계의 순환을 끝낸다", "desc": "백 년마다 멸망을 반복하던 도시가 제단을 부수고 처음으로 백한 번째 해의 해돋이를 맞는다."},
         {"name": "세계가 구원되지만 이전의 법칙으로 돌아갈 수 없게 된다", "desc": "재앙은 막았지만 밤이 영원히 사라진 세계에서 사람들은 새로운 수면과 농사의 질서를 세운다."},
       ] },
-      { id: "destination_c", label: "목표와 갈등의 완성", icon: "🧭", layoutType: "2", cards: [
+      { id: "destination_c", img: "images/compass/group/experience/resolution.jpg", label: "목표와 갈등의 완성", icon: "🧭", layoutType: "2", cards: [
         {"type": "section", "label": "성취 · 한계 돌파"},
         {"name": "불가능한 목표를 달성한다", "desc": "모두가 포기한 사막 횡단에 성공한 탐험대가 마지막 모래언덕 너머에서 바다를 발견한다."},
         {"name": "압도적인 강적을 쓰러뜨린다", "desc": "평생 한 번도 상처 입지 않았던 거인이 쓰러지고, 작은 전사가 부러진 검을 내려놓는다."},
@@ -404,7 +404,7 @@ const COMPASS_CARDS = {
         {"name": "가해자가 죄를 인정하고 벌을 받아들인다", "desc": "도망칠 기회를 얻은 죄인이 스스로 성문으로 돌아와 자신의 범행을 고백한다."},
         {"name": "부당한 법을 바꾸는 판결을 이끌어낸다", "desc": "금지된 글을 읽었다는 이유로 체포된 아이의 재판이 끝나자 왕국의 검열법이 폐지된다."},
       ] },
-      { id: "destination_d", label: "진실과 세계의 발견", icon: "🧭", layoutType: "2", cards: [
+      { id: "destination_d", img: "images/compass/group/experience/revelation.jpg", label: "진실과 세계의 발견", icon: "🧭", layoutType: "2", cards: [
         {"type": "section", "label": "수수께끼 · 진실 해명"},
         {"name": "감춰진 사건의 진상을 밝힌다", "desc": "화재 사고의 기록을 추적한 기자가 잿더미 속에서 누군가 일부러 잠가 놓은 비상문의 흔적을 찾아낸다."},
         {"name": "범인의 정체를 밝혀낸다", "desc": "탐정이 모두가 떠난 식탁에 범인의 이름표를 올려놓자, 끝까지 침묵하던 집사가 고개를 든다."},
@@ -440,7 +440,7 @@ const COMPASS_CARDS = {
         {"name": "폐허가 거대한 생명체임을 발견한다", "desc": "무너진 성벽을 조사하던 학자가 도시 전체가 천천히 숨을 쉬고 있음을 알아챈다."},
         {"name": "미지의 세계를 발견하고도 공개하지 않는다", "desc": "외부인에게 한 번도 발견되지 않은 숲의 마을을 찾아낸 탐험가가 귀환 후 지도에서 그 위치를 지운다."},
       ] },
-      { id: "destination_e", label: "삶과 존재의 귀결", icon: "🧭", layoutType: "2", cards: [
+      { id: "destination_e", img: "images/compass/group/experience/destiny.jpg", label: "삶과 존재의 귀결", icon: "🧭", layoutType: "2", cards: [
         {"type": "section", "label": "상실 · 애도 · 이별"},
         {"name": "소중한 사람의 죽음을 받아들인다", "desc": "장례가 끝나도 빈 의자를 치우지 못하던 딸이 어느 아침 아버지의 의자를 식탁 안쪽으로 밀어 넣는다."},
         {"name": "돌아오지 못할 사람과 작별한다", "desc": "닫히는 차원의 문 앞에서 연인은 서로를 붙잡는 대신 마지막으로 이름을 불러 준다."},
@@ -2171,7 +2171,7 @@ const COMPASS_CARDS = {
    
   reader: {
     groups: [
-      { id: "reader_a", label: "도전 · 경쟁 · 위기", icon: "🧭", layoutType: "2", cards: [
+      { id: "reader_a", img: "images/compass/group/experience/challenge.jpg", label: "도전 · 경쟁 · 위기", icon: "🧭", layoutType: "2", cards: [
         {"type": "section", "label": "대결 · 경쟁"},
         {"name": "약자 vs 압도적 강자", "desc": "도저히 이길 수 없어 보이는 상대에게 도전한다."},
         {"name": "동등한 실력의 호적수", "desc": "작은 차이 하나로 승패가 갈리는 팽팽한 대결."},
@@ -2550,7 +2550,7 @@ const COMPASS_CARDS = {
         {"name": "자유를 얻었지만 돌아갈 곳이 없는 탈출", "desc": "감금에서 벗어났으나 이전의 삶으로 돌아갈 수 없음을 깨닫는다."},
         {"name": "추격자와 함께 탈출", "desc": "자신을 붙잡으려던 상대와 같은 위험에 갇히면서 서로 협력해 벗어난다."},
       ] },
-      { id: "reader_b", label: "모험 · 발견 · 탐구", icon: "🧭", layoutType: "2", cards: [
+      { id: "reader_b", img: "images/compass/group/experience/adventure.jpg", label: "모험 · 발견 · 탐구", icon: "🧭", layoutType: "2", cards: [
         {"type": "section", "label": "모험 · 탐험"},
         {"name": "미지의 대륙 진입", "desc": "돌아온 사람이 없는 땅에 첫발을 내딛고, 지도도 구조 요청도 통하지 않는 세계를 스스로 헤쳐 나간다."},
         {"name": "지도 밖의 세계 발견", "desc": "지도에는 바다뿐인 곳에서 섬을, 막다른 절벽 너머에서 새로운 대지를 발견해 세계의 경계를 넓힌다."},
@@ -2887,7 +2887,7 @@ const COMPASS_CARDS = {
         {"name": "떠나기 전에는 몰랐던 고향의 가치", "desc": "다른 지역을 여행한 뒤 익숙했던 집과 마을의 소중함을 새롭게 느낀다."},
         {"name": "여행의 끝이 다음 여행의 시작", "desc": "돌아온 뒤에도 새로운 장소에 대한 호기심이 남아 다음 여정을 꿈꾸게 된다."},
       ] },
-      { id: "reader_c", label: "수집 · 창조 · 육성", icon: "🧭", layoutType: "2", cards: [
+      { id: "reader_c", img: "images/compass/group/experience/craft.jpg", label: "수집 · 창조 · 육성", icon: "🧭", layoutType: "2", cards: [
         {"type": "section", "label": "수집 · 완성"},
         {"name": "세계의 모든 종류 수집", "desc": "세계 곳곳에 흩어진 같은 계열의 대상들을 하나씩 찾아 도감의 빈칸을 채운다. 마지막 페이지까지 채워졌을 때 수집의 여정 전체가 하나의 성취로 남는다."},
         {"name": "희귀한 마지막 한 개", "desc": "수십 년간 모아 온 목록에서 단 하나의 빈칸만 남는다. 다른 사람에게는 하찮은 물건이지만 수집가에게는 세상에서 가장 간절한 목표가 된다."},
@@ -3231,7 +3231,7 @@ const COMPASS_CARDS = {
         {"name": "돌봄을 이어받는 사람들", "desc": "한 사람의 치료와 구조 경험이 다른 사람의 생명을 지키는 활동으로 이어진다."},
         {"name": " 치료 이후 재발을 막는 공동의 노력", "desc": "같은 사고와 질환이 반복되지 않도록 환자와 치료자, 지역 사람들이 생활환경과 제도를 바꾼다. 한 사람의 회복이 다음 사람의 위험을 줄인다."},
       ] },
-      { id: "reader_d", label: "거래 · 관계 · 사회", icon: "🧭", layoutType: "2", cards: [
+      { id: "reader_d", img: "images/compass/group/experience/society.jpg", label: "거래 · 관계 · 사회", icon: "🧭", layoutType: "2", cards: [
         {"type": "section", "label": "거래 · 협상"},
         {"name": "극한의 흥정", "desc": "서로 한 푼도 양보하지 않던 상인들이 상대의 말과 표정에서 약점을 읽으며 거래의 주도권을 다툰다."},
         {"name": "가치의 불일치", "desc": "한쪽에는 잡동사니인 물건이 다른 쪽에는 생명보다 소중해, 서로 다른 가치관이 거래의 열쇠가 된다."},
@@ -3488,7 +3488,7 @@ const COMPASS_CARDS = {
         {"name": "다음 세대에게 권력을 넘기는 과정", "desc": "오랫동안 사회를 이끌던 세대가 새로운 가치관을 가진 사람들에게 결정권을 넘긴다."},
         {"name": "완벽하지 않은 사회를 함께 개선하는 결말", "desc": "모든 갈등을 없애는 대신 사람들이 문제를 논의하고 고칠 수 있는 질서를 만들어낸다."},
       ] },
-      { id: "reader_e", label: "놀이 · 웃음 · 일상", icon: "🧭", layoutType: "2", cards: [
+      { id: "reader_e", img: "images/compass/group/experience/play.jpg", label: "놀이 · 웃음 · 일상", icon: "🧭", layoutType: "2", cards: [
         {"type": "section", "label": "놀이 · 게임 · 유희"},
         {"name": "기묘한 규칙의 게임", "desc": "처음에는 황당해 보이는 승리 조건을 하나씩 시험하며 그 게임만의 공략법을 찾아낸다."},
         {"name": "게임 속 숨겨진 규칙", "desc": "모두가 우연이라 여긴 결과에서 일정한 패턴을 발견하고 숨겨진 규칙을 밝혀낸다."},
@@ -3680,7 +3680,7 @@ const COMPASS_CARDS = {
         {"name": "변화하지 않는 일상의 안정감", "desc": "매일 같은 시간에 문을 여는 가게와 늘 같은 자리에 있는 사람이 누군가에게는 중요한 안식처가 된다."},
         {"name": "평범한 생활이 새로운 꿈이 되는 순간", "desc": "화려한 모험과 성공을 경험한 인물이 결국 자신이 원하는 행복은 소중한 사람들과 보내는 일상이라는 사실을 깨닫는다."},
       ] },
-      { id: "reader_f", label: "음식 · 예술 · 감각", icon: "🧭", layoutType: "2", cards: [
+      { id: "reader_f", img: "images/compass/group/experience/culture.jpg", label: "음식 · 예술 · 감각", icon: "🧭", layoutType: "2", cards: [
         {"type": "section", "label": "음식 · 요리 · 미식"},
         {"name": "미지의 식재료 발견", "desc": "처음 보는 열매나 생물의 향과 맛, 조리했을 때의 변화를 조사하며 새로운 음식의 가능성을 발견한다."},
         {"name": "위험한 식재료의 조리", "desc": "독이 있거나 특수한 성질을 가진 재료를 정확한 지식과 기술로 처리해 안전하고 맛있는 요리로 완성한다."},
@@ -3944,7 +3944,7 @@ const COMPASS_CARDS = {
         {"name": "감각으로 전해지는 말없는 위로", "desc": "따뜻한 손길과 익숙한 목소리, 조용한 음악이 긴 설명 없이도 누군가의 마음을 편안하게 만든다."},
         {"name": "균형과 방향 감각의 낯선 체험", "desc": "중력이 뒤틀린 방에서 위아래를 잃고 비틀거리던 사람이 몸의 기울기와 움직임을 새롭게 익힌다."},
       ] },
-      { id: "reader_g", label: "변이 · 진화 · 각성", icon: "🧭", layoutType: "2", cards: [
+      { id: "reader_g", img: "images/compass/group/experience/mutation.jpg", label: "변이 · 진화 · 각성", icon: "🧭", layoutType: "2", cards: [
         {"type": "section", "label": "변신 · 변형"},
         {"name": "인간에서 다른 존재로 변신", "desc": "평범한 인간이 늑대나 거대한 기계로 변하자 문손잡이조차 다루기 어려워지고, 새로운 신체의 힘과 생활 방식을 하나씩 익힌다."},
         {"name": "자유로운 형태 변환", "desc": "좁은 틈에서는 액체처럼 흐르고 무너지는 다리 앞에서는 날개를 펼치는 등, 장애물에 맞춰 몸의 형태를 바꿔 돌파한다."},
@@ -4033,7 +4033,7 @@ const COMPASS_CARDS = {
         {"name": "변화의 선택적 복원", "desc": "괴물의 팔만 인간으로 되돌리고 날개는 남기려는 인물이 복원 주문의 순서를 바꾸며 예상 밖의 균형 문제를 해결한다."},
         {"name": "변화의 대가를 대신 짊어지는 복원", "desc": "저주받은 친구를 원래대로 돌릴 수 있지만 그 변화를 자신에게 옮겨야 한다는 조건 앞에서 누가 희생할지 선택해야 한다."},
       ] },
-      { id: "reader_h", label: "감정 · 심리 · 내면", icon: "🧭", layoutType: "2", cards: [
+      { id: "reader_h", img: "images/compass/group/experience/emotion.jpg", label: "감정 · 심리 · 내면", icon: "🧭", layoutType: "2", cards: [
         {"type": "section", "label": "욕망 · 유혹 · 충동"},
         {"name": "금지된 것을 향한 끌림", "desc": "절대 열지 말라는 상자 앞에서 밤새 망설이던 인물이 결국 손을 뻗고, 열기 전부터 자신이 달라졌음을 느낀다."},
         {"name": "작은 욕심의 끝없는 확대", "desc": "처음에는 동전 하나면 만족하던 사람이 더 큰 보상을 얻을수록 가진 것을 잃을까 봐 잠도 이루지 못한다."},
@@ -4127,7 +4127,7 @@ const COMPASS_CARDS = {
         {"name": "불확실함과 함께 살아가는 평온", "desc": "돌아오지 않은 배의 소식을 기다리던 사람이 매일 항구에 서는 대신 집에 작은 정원을 가꾸기 시작한다."},
         {"name": "분노를 놓아도 기억은 남는 순간", "desc": "복수를 포기한 사람이 원수의 이름이 적힌 종이를 태우지 않고 접어 상자에 넣은 뒤 자신의 길을 떠난다."},
       ] },
-      { id: "reader_i", label: "파괴 · 붕괴 · 소멸", icon: "🧭", layoutType: "2", cards: [
+      { id: "reader_i", img: "images/compass/group/experience/destruction.jpg", label: "파괴 · 붕괴 · 소멸", icon: "🧭", layoutType: "2", cards: [
         {"type": "section", "label": "파괴 · 분쇄 · 해체"},
         {"name": "견고한 것을 깨뜨리는 쾌감", "desc": "누구도 흠집 내지 못한 거대한 바위를 장인이 정확히 한 점을 두드려 두 조각으로 가른다."},
         {"name": "정교한 해체의 즐거움", "desc": "폐기할 시계탑을 폭파하지 않고 톱니와 축을 순서대로 풀어 내며 숨겨진 구조를 드러낸다."},
