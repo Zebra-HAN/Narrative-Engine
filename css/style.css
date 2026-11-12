@@ -3671,3 +3671,14 @@ body {
 
 /* A moving screen is its own back cue; never show an arrow alongside it. */
 .screen.back-motion-source > .home-return-cue { display: none; }
+
+/* Dramatic fun uses text-only groups/cards and the existing detail sheet. */
+#screen-create .center-page[id^="page-dramatic_fun"] .card-img-frame,
+#screen-create #page-dramatic_fun .group-btn-icon:empty,
+.detail-sheet[data-card-key^="dramatic_fun__"] #detail-icon {
+  display: none;
+}
+.detail-sheet[data-card-key^="dramatic_fun__"] .detail-section-title::before { content: '【'; }
+.detail-sheet[data-card-key^="dramatic_fun__"] .detail-section-title::after { content: '】'; }
+#screen-create .center-page[id^="page-dramatic_fun"] .page-title-media { display: none; }
+#screen-create .center-page[id^="page-dramatic_fun"] .page-title-copy { grid-column: 1 / -1; }
