@@ -37,10 +37,10 @@ for(let gi=0;gi<4;gi++){
   const page=document.querySelector('.center-page.active[data-chrome-view=cards]');
   if([...page.querySelectorAll('.page-title-media')].some(n=>getComputedStyle(n).display!=='none'))throw Error('group placeholder');
   const cards=[...page.querySelectorAll('.data-card')];
-  if(cards.some(card=>{
-   const frame=card.querySelector('.card-img-frame');
-   return !card.closest('.card-grid-layout-d')||!frame?.matches(':empty')||getComputedStyle(frame).display==='none';
-  }))throw Error('expected type 2 with the standard empty image area');
+  if(cards.some(card=>!card.closest('.card-grid-layout-d')||
+   card.querySelector('.card-img-frame')||!card.querySelector('.card-name-text'))) {
+   throw Error('expected title-only cards in the standard type 2 layout');
+  }
   return CARD_DATA.dramatic_fun.groups[gi].cards.flatMap((c,i)=>{
    if(c.type==='section')return [];
    groupCardClick('dramatic_fun',gi,i);openDetailSheet('card');

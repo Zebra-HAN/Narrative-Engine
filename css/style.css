@@ -1387,6 +1387,11 @@ body::after {
       border-radius: 6px 1px 1px 6px;
     }
 
+    .data-card:not(:has(> .card-img-frame)) > .card-name {
+      align-self: stretch;
+      border-radius: 6px;
+    }
+
     /* 상세 정보 시트 */
     .detail-overlay {
   position: fixed; inset: 0;

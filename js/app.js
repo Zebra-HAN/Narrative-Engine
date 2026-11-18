@@ -2699,7 +2699,7 @@ function showSubgroupCards(subId, groupIdx, sgIdx, backgroundPrepared = false, t
         onmouseleave="cancelLongPress()" ontouchcancel="cancelLongPress()">
         <span class="card-highlight-frame" aria-hidden="true"></span>
         <img class="card-lock-mark" src="images/core/buttons/lock.webp" alt="잠금됨" draggable="false">
-        <div class="card-img-frame ${card.img ? 'has-image' : 'has-icon'}">${renderIcon(card.icon, card.img, 'card-img')}</div>
+        ${renderCardImageFrame(card)}
         <div class="card-name"><span class="card-name-text">${card.name}</span></div>
       </div>
     `;
@@ -2841,7 +2841,7 @@ function showGroupCards(subId, groupIdx, backgroundPrepared = false, titleAssets
     onmouseleave="cancelLongPress()" ontouchcancel="cancelLongPress()">
         <span class="card-highlight-frame" aria-hidden="true"></span>
         <img class="card-lock-mark" src="images/core/buttons/lock.webp" alt="잠금됨" draggable="false">
-        <div class="card-img-frame ${card.img ? 'has-image' : 'has-icon'}">${renderIcon(card.icon, card.img, 'card-img')}</div>
+        ${renderCardImageFrame(card)}
         <div class="card-name"><span class="card-name-text">${card.name}</span></div>
       </div>
     `;
@@ -2992,7 +2992,7 @@ function showCardPage(subId, animate = true, backgroundPrepared = false) {
     onmouseleave="cancelLongPress()" ontouchcancel="cancelLongPress()">
         <span class="card-highlight-frame" aria-hidden="true"></span>
         <img class="card-lock-mark" src="images/core/buttons/lock.webp" alt="잠금됨" draggable="false">
-        <div class="card-img-frame ${card.img ? 'has-image' : 'has-icon'}">${renderIcon(card.icon, card.img, 'card-img')}</div>
+        ${renderCardImageFrame(card)}
         <div class="card-name"><span class="card-name-text">${card.name}</span></div>
       </div>
     `;
@@ -4547,6 +4547,13 @@ function renderIcon(icon, img, className) {
     return `<img src="${img}" class="${className} managed-image" alt="" decoding="async">`;
   }
   return icon || '';
+}
+
+function renderCardImageFrame(card) {
+  const img = card.img?.trim();
+  const icon = card.icon?.trim();
+  if (!img && !icon) return '';
+  return `<div class="card-img-frame ${img ? 'has-image' : 'has-icon'}">${renderIcon(card.icon, img, 'card-img')}</div>`;
 }
 
 /* 같은 이미지의 DOM을 유지하고, 변경 시에는 준비된 이미지만 한 번에 교체한다. */
