@@ -1,10 +1,10 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),{execFileSync}=require('node:child_process'),{chromium}=require('playwright');
-const code=fs.readFileSync('data/narrative.js','utf8');
+const code=fs.readFileSync('data/narrative-types.js','utf8')+'\n'+fs.readFileSync('data/narrative.js','utf8');
 const load=s=>JSON.parse(vm.runInNewContext(s+'\nJSON.stringify({nav:NARRATIVE_NAV,cards:NARRATIVE_CARDS})'));
 const data=load(code),baseline=load(execFileSync('git',['show','70235b4:data/narrative.js'],{encoding:'utf8',maxBuffer:8*1024*1024}));
-assert.equal(data.nav.subs[0].id,'dramatic_fun');assert.equal(data.nav.subs[0].img,data.nav.subs.find(s=>s.id==='event').img);
-assert.deepEqual({...data.nav,subs:data.nav.subs.slice(1)},baseline.nav);
-const {dramatic_fun,...existing}=data.cards;assert.deepEqual(existing,baseline.cards);
+assert.equal(data.nav.subs[1].id,'dramatic_fun');assert.equal(data.nav.subs[1].img,data.nav.subs.find(s=>s.id==='event').img);
+assert.deepEqual({...data.nav,subs:data.nav.subs.slice(2)},baseline.nav);
+const {dramatic_fun,narrative_types,...existing}=data.cards;assert.deepEqual(existing,baseline.cards);
 const groups=dramatic_fun.groups;
 assert.deepEqual(groups.map(g=>g.label),['인물 · 설정 · 조건','갈등 · 행동 · 해결','사건 · 구조 · 전개','발견 · 변화 · 감정']);
 assert.deepEqual(groups.map(g=>g.cards.filter(c=>c.name).length),[61,74,58,63]);
@@ -35,7 +35,12 @@ for(let gi=0;gi<4;gi++){
  assert.deepEqual(await p.locator('.center-page.active[data-chrome-view=cards] .card-name-text').allTextContents(),groups[gi].cards.filter(c=>c.name).map(c=>c.name));
  const results=await p.evaluate(gi=>{
   const page=document.querySelector('.center-page.active[data-chrome-view=cards]');
-  if([...page.querySelectorAll('.card-img-frame, .page-title-media')].some(n=>getComputedStyle(n).display!=='none'))throw Error('empty visual frame');
+  if([...page.querySelectorAll('.page-title-media')].some(n=>getComputedStyle(n).display!=='none'))throw Error('group placeholder');
+  const cards=[...page.querySelectorAll('.data-card')];
+  if(cards.some(card=>{
+   const frame=card.querySelector('.card-img-frame');
+   return !card.closest('.card-grid-layout-d')||!frame?.matches(':empty')||getComputedStyle(frame).display==='none';
+  }))throw Error('expected type 2 with the standard empty image area');
   return CARD_DATA.dramatic_fun.groups[gi].cards.flatMap((c,i)=>{
    if(c.type==='section')return [];
    groupCardClick('dramatic_fun',gi,i);openDetailSheet('card');

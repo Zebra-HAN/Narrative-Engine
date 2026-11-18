@@ -1387,31 +1387,6 @@ body::after {
       border-radius: 6px 1px 1px 6px;
     }
 
-    .card-grid-layout-d .data-card:has(.card-name-with-description) {
-      aspect-ratio: auto;
-    }
-
-    .card-grid-layout-d .card-name-with-description {
-      flex-direction: column;
-      gap: 4px;
-      padding: 6px;
-      border-radius: 6px;
-    }
-
-    .card-name-with-description .card-name-text {
-      width: 100%;
-      max-width: none;
-      font-size: 0.72rem;
-      font-weight: 700;
-      word-break: keep-all;
-    }
-
-    .card-inline-description {
-      font-size: 0.66rem;
-      overflow-wrap: anywhere;
-      word-break: keep-all;
-    }
-
     /* 상세 정보 시트 */
     .detail-overlay {
   position: fixed; inset: 0;
@@ -3697,8 +3672,7 @@ body {
 /* A moving screen is its own back cue; never show an arrow alongside it. */
 .screen.back-motion-source > .home-return-cue { display: none; }
 
-/* Dramatic fun uses text-only groups/cards and the existing detail sheet. */
-#screen-create .center-page[id^="page-dramatic_fun"] .card-img-frame,
+/* Dramatic fun omits placeholder art from group and detail panels. */
 #screen-create #page-dramatic_fun .group-btn-icon:empty,
 .detail-sheet[data-card-key^="dramatic_fun__"] #detail-icon {
   display: none;

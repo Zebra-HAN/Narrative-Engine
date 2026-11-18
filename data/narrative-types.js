@@ -1,6 +1,5 @@
 // 서사 유형 원본의 제목과 설명. 섹션 안의 카드 순서는 원본과 동일합니다.
 const NARRATIVE_TYPE_CARDS = {
-  showCardDescriptions: true,
   groups: [
     { id: "central", label: "중심 서사", icon: "📖", layoutType: "2", subgroups: [
       { id: "goals", label: "목표 · 도전 · 성취",
