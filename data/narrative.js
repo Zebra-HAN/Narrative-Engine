@@ -37,6 +37,7 @@ const NARRATIVE_NAV = {
   label: '스토리',
   resetLabel: '스토리 초기화',
   subs: [
+    { id: 'narrative_types', label: '서사 유형', img: 'images/core/sub-nav/stry/ending.webp', type: 'group' },
     { id: 'dramatic_fun', label: '극적 재미', img: 'images/core/sub-nav/stry/event.webp', type: 'group' },
     { id:'goal',    label:'목표', img:'images/core/sub-nav/stry/goal.webp', type:'group',
       description: '추후 이 항목에 대한 설명과 활용 가이드가 추가될 예정입니다.',
@@ -74,6 +75,7 @@ const NARRATIVE_NAV = {
 };
 
 const NARRATIVE_CARDS = {
+  narrative_types: NARRATIVE_TYPE_CARDS,
   dramatic_fun: {
     groups: [
       { id: "dramatic_fun_a", label: "인물 · 설정 · 조건", cards: [

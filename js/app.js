@@ -2661,6 +2661,7 @@ function showSubgroupCards(subId, groupIdx, sgIdx, backgroundPrepared = false, t
 
   const sg = grp.subgroups[sgIdx];
   if (!sg) return;
+  const showDescriptions = data.showCardDescriptions;
   preloadCards(sg.cards);
   const titleCard = createPageTitleCard(sg, subId, titleAssets, grp.subgroups.length);
   rememberGroupCardReentry(subId, groupIdx, sgIdx);
@@ -2699,8 +2700,15 @@ function showSubgroupCards(subId, groupIdx, sgIdx, backgroundPrepared = false, t
         onmouseleave="cancelLongPress()" ontouchcancel="cancelLongPress()">
         <span class="card-highlight-frame" aria-hidden="true"></span>
         <img class="card-lock-mark" src="images/core/buttons/lock.webp" alt="잠금됨" draggable="false">
-        <div class="card-img-frame ${card.img ? 'has-image' : 'has-icon'}">${renderIcon(card.icon, card.img, 'card-img')}</div>
-        <div class="card-name"><span class="card-name-text">${card.name}</span></div>
+        ${showDescriptions ? `
+          <div class="card-name card-name-with-description">
+            <span class="card-name-text">${escapeHtml(card.name)}</span>
+            <span class="card-inline-description">${escapeHtml(card.desc)}</span>
+          </div>
+        ` : `
+          <div class="card-img-frame ${card.img ? 'has-image' : 'has-icon'}">${renderIcon(card.icon, card.img, 'card-img')}</div>
+          <div class="card-name"><span class="card-name-text">${card.name}</span></div>
+        `}
       </div>
     `;
   });
