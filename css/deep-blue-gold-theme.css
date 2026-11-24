@@ -686,17 +686,6 @@
   filter: saturate(.35) brightness(.72);
 }
 
-/* TOP navigation artwork is shown whole; its neighboring information plate stays. */
-#screen-create:not(.card-controls-mode) .info-visual::after { display: none; }
-#screen-create:not(.card-controls-mode) .info-visual .info-icon-img,
-#screen-create:not(.card-controls-mode) .info-visual .info-icon-text {
-  border-radius: 0;
-  overflow: visible;
-  transform: none;
-  background: transparent;
-}
-#screen-create:not(.card-controls-mode) .info-visual .info-icon-img { object-fit: contain; }
-
 /* Larger native-ratio icons in the selected ideas window only. */
 .status-panel .status-nav-icon { width: 50px; height: 50px; flex-basis: 50px; }
 .status-panel .status-category-mark {

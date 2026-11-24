@@ -64,7 +64,7 @@
     <button class="home-link pressable" id="btn-idea-mine" data-sound="walkClick"><span class="home-menu-label">아이디어 광산</span></button>
     <button class="home-link pressable" id="btn-create" data-sound="card" onclick="goToCreate()"><span class="home-menu-label">창작 여행</span></button>
   </div>
-  <p class="home-version">v26.1124.1820</p>
+  <p class="home-version">v26.1124.2254</p>
 </div>
 
 
@@ -201,24 +201,29 @@
 ══════════════════════════════════════ -->
 <div id="screen-create" class="screen">
 
-  <!-- ① 메인 카테고리 안내창 (카드 정보는 카드 영역의 별도 패널에 표시) -->
-  <div class="create-chrome-slot create-chrome-slot-top">
-  <div class="info-panel" id="info-panel" role="button" tabindex="0" aria-haspopup="dialog" aria-controls="detail-overlay" aria-label="현재 위치 상세정보">
-    <div class="info-slider-wrap" id="info-slider-wrap">
-      <div class="info-slider-viewport">
-        <div class="info-slide info-slide-category">
-          <div class="info-visual" id="info-cat-icon" aria-hidden="true"></div>
-          <div class="info-main">
-            <div class="info-text-wrap">
-              <div class="info-name" id="info-cat-name"></div>
-              <div class="info-desc" id="info-cat-desc"></div>
-            </div>
+  <section class="creative-hud" id="creative-hud" aria-label="창작 상태창">
+    <div class="creative-hud-frame" id="creative-hud-frame">
+      <span class="creative-hud-corner" aria-hidden="true"></span>
+      <div class="creative-hud-profile">
+        <div class="creative-hud-portrait">
+          <div class="creative-hud-portrait-art" id="creative-hud-portrait" aria-hidden="true">
+            <span class="creative-hud-silhouette"></span>
           </div>
         </div>
+        <div class="creative-hud-profile-label">캐릭터 유형<span id="creative-hud-profile-title"></span></div>
       </div>
+      <div class="creative-hud-slots" id="creative-hud-slots"></div>
+      <button type="button" class="creative-hud-control creative-hud-settings" aria-label="상태창 설정" disabled>
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="currentColor" fill-rule="evenodd" d="M10 2h4l.7 2.8 1.7.7L19 4l2.8 2.8-1.5 2.6.7 1.6 3 .8v4l-3 .7-.7 1.6 1.5 2.6L19 23l-2.6-1.5-1.7.7-.7 2.8h-4l-.7-2.8-1.7-.7L5 23l-2.8-2.8 1.5-2.6-.7-1.6-3-.7v-4l3-.8.7-1.6L2.2 6.3 5 3.5l2.6 1.5 1.7-.7L10 2Zm2 6a5 5 0 1 0 0 10 5 5 0 0 0 0-10Z" transform="translate(1 .2) scale(.91)"/>
+        </svg>
+      </button>
     </div>
-  </div>
-  </div>
+    <button type="button" class="creative-hud-control creative-hud-toggle" id="creative-hud-toggle"
+      aria-label="창작 상태창 접기" aria-controls="creative-hud-frame" aria-expanded="true">
+      <span aria-hidden="true"></span>
+    </button>
+  </section>
 
   <!-- 중앙 영역 -->
   <div class="center-area" id="center-area">

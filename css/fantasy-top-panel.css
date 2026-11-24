@@ -1,320 +1,274 @@
-/* ========================================================================== 
-   생성 화면 — 삽화형 상단 정보 패널
-
-   투명 WEBP 에셋 두 개가 패널 장식을 구성한다. 패널은 활성화된 주 카테고리용이며,
-   카드 정보는 해당 카드 옆에 표시된다.
-   ========================================================================== */
-
 #screen-create {
-  --top-chrome-height: clamp(142px, 39vw, 160px);
-  --info-ink: #493522;
-  --info-muted: #715943;
-  --info-button-dark: #4f2d19;
-  --info-button-mid: #9b5d2e;
-  --info-button-light: #d79a4c;
+  --hud-safe-top: calc(env(safe-area-inset-top, 0px) + 5px);
+  --hud-height: clamp(106px, 32vw, 140px);
+  --hud-tab-height: 13px;
+  --top-chrome-height: calc(var(--hud-safe-top) + var(--hud-height) + var(--hud-tab-height));
 }
-
-/* 장식의 가장 높은 끝부분은 뷰포트 바로 너머에 두고, 그만큼의 세로 공간을
-   스크롤 콘텐츠가 다시 사용하도록 한다. */
-#screen-create .create-chrome-slot-top { top: -10px; }
+#screen-create.creative-hud-collapsed {
+  --top-chrome-height: calc(var(--hud-safe-top) + 24px);
+}
 #screen-create .center-page {
-  padding-top: calc(var(--top-chrome-height) - 2px);
+  top: var(--top-chrome-height);
+  padding-top: 6px;
 }
-
-/* 기존 직사각형 패널은 이제 투명한 레이아웃 및 애니메이션 기준점으로만 사용한다. */
-#screen-create .create-chrome-slot-top,
-#screen-create .info-panel,
-#screen-create .info-slider-wrap,
-#screen-create .info-slider-track,
-#screen-create .info-slide {
-  overflow: visible;
-}
-
-#screen-create .info-panel {
+.creative-hud {
+  position: absolute;
+  z-index: 21;
+  inset: 0 5px auto;
   height: var(--top-chrome-height);
-  min-height: var(--top-chrome-height);
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-  cursor: pointer;
-}
-
-#screen-create .info-panel:focus-visible {
-  outline: 2px solid #e9d2ab;
-  outline-offset: -4px;
-}
-
-.location-info-detail {
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  line-height: 1.75;
-}
-
-/* 눌림은 내부 표시층에만 적용해 바깥 패널의 숨김/등장 transform을 보존한다. */
-#screen-create .info-slider-wrap {
-  transition: scale 120ms ease-out;
-  transform-origin: center;
-}
-
-#screen-create .info-panel.is-info-pressed .info-slider-wrap {
-  scale: 0.975;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  #screen-create .info-slider-wrap { transition: none; }
-  #screen-create .info-panel.is-info-pressed .info-slider-wrap { scale: 1; }
-}
-
-#screen-create .info-slider-wrap,
-#screen-create .info-slider-viewport,
-#screen-create .info-slider-track {
-  height: 100%;
-}
-
-/* 뿔, 깃털, 나무, 찢어진 천을 세로로 잘라내지 않으면서 인접한 슬라이더 페이지는
-   화면에 보이지 않게 한다. */
-#screen-create .info-slider-viewport {
-  width: 100%;
-  margin: 0;
-  overflow: visible;
-  clip-path: inset(-100vh 0);
-}
-
-#screen-create .info-slide {
-  display: grid;
-  grid-template-columns: clamp(148px, 40.5vw, 166px) clamp(254px, 70vw, 287px);
-  grid-template-rows: 1fr;
-  justify-content: center;
-  align-items: start;
-  gap: 0;
-  padding: 0;
-  width: 100%;
-}
-
-/* 선택한 카드와 장식 프레임은 서로 독립된 레이어다. */
-#screen-create .info-visual {
-  position: relative;
-  z-index: 3;
-  inset: auto;
-  grid-column: 1;
-  grid-row: 1;
-  width: 100%;
-  aspect-ratio: 1;
-  overflow: visible;
-  opacity: 1;
   pointer-events: none;
-  -webkit-mask-image: none;
-  mask-image: none;
-  filter: drop-shadow(0 3px 2px rgba(47, 27, 15, .2));
+  transition: height 190ms ease-out;
+  font-family: 'Noto Sans KR', sans-serif;
 }
-
-#screen-create .info-visual.has-image,
-#screen-create .info-visual.has-icon { opacity: 1; }
-
-#screen-create .info-visual::after {
+#screen-create:not(.active) .creative-hud { visibility: hidden; }
+.creative-hud-frame {
+  --hud-gold: linear-gradient(155deg, #fff3bf 1%, #edb95f 15%, #875329 38%, #ffdd8b 65%, #a76b2b 83%, #efbc66);
+  position: absolute;
+  inset: var(--hud-safe-top) 0 auto;
+  height: var(--hud-height);
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 21%) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 5px;
+  padding: 13px 7px 14px;
+  border: 2px solid transparent;
+  border-radius: 20px;
+  background:
+    radial-gradient(ellipse at 50% 0%, #144968 0%, #0a2436 63%, #080f19) padding-box,
+    var(--hud-gold) border-box;
+  box-shadow: inset 0 0 0 1px #fcda8a80, inset 0 -3px #0006, 0 3px 6px #0009;
+  transition: transform 190ms ease-out, opacity 160ms ease-out, visibility 190ms;
+}
+.creative-hud-frame::before {
   content: '';
   position: absolute;
-  z-index: 2;
-  inset: 0;
-  background: url('../images/core/buttons/top_icon.webp') center / contain no-repeat;
+  z-index: -1;
+  inset: 5px 7px;
+  border: 1px solid #b8894590;
+  border-radius: 13px;
+  box-shadow: 0 0 0 1px #0309119c;
 }
-
-#screen-create .info-visual .info-icon-img,
-#screen-create .info-visual .info-icon-text {
+.creative-hud-corner,
+.creative-hud-corner::before,
+.creative-hud-corner::after {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.creative-hud-corner::before,
+.creative-hud-corner::after {
+  content: '';
+  inset: -1px auto 0 -1px;
+  width: 29px;
+  border: 2px solid #f3c369;
+  border-right: 0;
+  border-radius: 24px 16px 16px 24px;
+  box-shadow: -2px 0 2px #b77a34a6;
+  transform: rotate(5deg);
+}
+.creative-hud-corner::after {
+  inset: -1px -1px 0 auto;
+  transform: scaleX(-1) rotate(5deg);
+}
+.creative-hud-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+.creative-hud-portrait {
+  position: relative;
+  width: min(100%, 84px);
+  aspect-ratio: 1;
+  padding: 3px;
+  border: 1px solid #ffedac;
+  border-radius: 50%;
+  background: var(--hud-gold);
+  box-shadow: 0 0 0 1px #754b25, 0 2px 4px #0008;
+}
+.creative-hud-portrait::before,
+.creative-hud-portrait::after {
+  content: '';
   position: absolute;
   z-index: 1;
-  left: 13%;
-  top: 11.5%;
-  width: 74%;
-  height: 74%;
-  border-radius: 50%;
+  width: 8px;
+  height: 8px;
+  top: 48%;
+  left: -3px;
+  border: 1px solid #fff0b1;
+  background: linear-gradient(135deg, #fff19f, #ab6023 70%);
+  transform: rotate(45deg);
+}
+.creative-hud-portrait::after { left: auto; right: -3px; }
+.creative-hud-portrait-art {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
+  border: 1px solid #7c542b;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 25%, #326584, #183e56 60%, #081927);
 }
-
-#screen-create .info-visual .info-icon-img {
-  display: block;
-  object-fit: cover;
-  object-position: center;
-  /* 원형 장식 안의 삽화를 크게 보여 주되 가장자리는 프레임 아래로 자연스럽게 숨긴다. */
-  transform: scale(1.188);
+.creative-hud-portrait-art > img { width: 100%; height: 100%; object-fit: cover; }
+.creative-hud-silhouette {
+  width: 74%;
+  height: 80%;
+  background:
+    radial-gradient(ellipse at 50% 36%, #0a1c2c 0 25%, transparent 27%),
+    radial-gradient(ellipse at 50% 110%, #0a1c2c 0 48%, transparent 50%);
 }
-
-#screen-create .info-visual.has-icon { display: block; }
-
-#screen-create .info-visual .info-icon-text {
+.creative-hud-profile-label {
+  position: relative;
+  width: 100%;
+  margin-top: -2px;
+  padding: 2px 1px 3px;
+  border: 1px solid #dda349;
+  border-radius: 9px 9px 6px 6px;
+  background: linear-gradient(#233950, #0b1a2a);
+  box-shadow: inset 0 0 0 1px #edba6342;
+  color: #ffde86;
+  text-align: center;
+  font-size: clamp(8px, 2.45vw, 11px);
+  font-weight: 700;
+  line-height: 1.25;
+}
+#creative-hud-profile-title { display: block; color: #fff3dc; overflow-wrap: anywhere; }
+.creative-hud-slots {
+  display: grid;
+  grid-template: repeat(2, minmax(0, 1fr)) / repeat(5, minmax(0, 1fr));
+  gap: 5px 4px;
+  min-width: 0;
+}
+.creative-hud-slot {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(13px, 39%) minmax(0, 1fr);
+  border: 1px solid #bb884b;
+  border-top-color: #f5c87e;
+  border-radius: 7px;
+  background: linear-gradient(155deg, #242e3b, #151e2b);
+  box-shadow: inset 0 1px 2px #ffe1a829, 0 1px 2px #0007;
+}
+.creative-hud-slot-label {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: clamp(2.7rem, 11vw, 3.7rem);
+  gap: 2px;
+  min-width: 0;
+  border-bottom: 1px solid #9e78497a;
+  border-radius: 6px 6px 0 0;
+  background: linear-gradient(#1e2833, #0f1822);
+  color: #ffdc7e;
+  font-size: clamp(7px, 2vw, 9.5px);
+  font-weight: 700;
   line-height: 1;
-  background: #ead8ae;
-  transform: scale(1.1);
+  white-space: nowrap;
 }
-
-/* 원본 종횡비(1729 / 983)를 유지한다. 천을 왼쪽으로 당기면 원형 프레임의
-   해골 및 깃털 장식과 자연스럽게 이어진다. */
-#screen-create .info-main {
-  position: relative;
-  z-index: 1;
-  grid-column: 2;
-  grid-row: 1;
-  align-self: start;
-  width: calc(100% + clamp(22px, 6vw, 26px));
-  height: auto;
-  aspect-ratio: 1729 / 983;
-  min-width: 0;
-  margin-left: clamp(-34px, -8vw, -28px);
-  padding: 0;
-  background: url('../images/core/buttons/top_panel.webp') center / contain no-repeat;
-  filter: drop-shadow(0 3px 2px rgba(47, 27, 15, .18));
-}
-
-/* 글을 배치할 수 있는 천 영역에서는 주변의 나무, 밧줄, 찢어진 부분을 제외한다. */
-#screen-create .info-text-wrap {
-  position: absolute;
-  z-index: 2;
-  /* 고정 너비의 글 영역을 양피지 왼쪽으로 살짝 옮겨 삽화와 균형을 맞춘다. */
-  inset: 29% 16% 27% 17%;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  min-width: 0;
-  height: auto;
-  padding: 0;
-  overflow: hidden;
-  color: var(--info-ink);
-  text-align: center;
-  text-shadow: 0 1px rgba(255,255,255,.8);
-}
-
-#screen-create .info-text-wrap::before { display: none; }
-
-#screen-create .info-name {
+.creative-hud-slot-icon {
+  display: grid;
+  place-items: center;
   flex: 0 0 auto;
-  max-height: none;
-  margin: 0 0 3px;
-  overflow: hidden;
-  color: #3f2c1d;
-  font-family: 'Noto Serif KR', serif;
-  font-size: clamp(.94rem, 4vw, 1.12rem);
-  font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: .025em;
+  width: clamp(8px, 3vw, 13px);
+  height: 100%;
+  font-size: clamp(8px, 2.8vw, 13px);
 }
-
-#screen-create .info-desc {
+.creative-hud-icon-img { width: 100%; height: min(100%, 14px); object-fit: contain; }
+.creative-hud-value {
+  display: grid;
+  place-items: center;
+  min-width: 0;
   min-height: 0;
-  overflow: hidden;
-  color: var(--info-muted);
-  font-size: clamp(.68rem, 2.75vw, .79rem);
-  line-height: 1.25;
-  overflow-wrap: anywhere;
-}
-
-#screen-create .info-actions {
-  position: relative;
-  z-index: 4;
-  grid-column: 2;
-  grid-row: 1;
-  align-self: start;
-  justify-self: center;
-  display: flex;
-  flex-direction: row;
-  gap: 6px;
-  margin: clamp(104px, 28vw, 115px) 0 0 clamp(-22px, -5vw, -16px);
-  transform: none;
-}
-
-#screen-create .info-btn-detail,
-#screen-create .info-btn-select {
-  position: relative;
-  height: clamp(25px, 6.8vw, 28px);
-  min-width: 68px;
-  padding: 1px 9px 2px;
-  border: 1px solid #4c2916;
-  border-radius: 6px 9px 6px 9px;
-  color: #fff2cf;
-  background: linear-gradient(180deg, var(--info-button-light), var(--info-button-mid) 55%, var(--info-button-dark));
-  box-shadow: inset 0 1px rgba(255,225,158,.72), 0 2px 2px rgba(48,25,12,.3);
-  font-family: 'Noto Sans KR', sans-serif;
-  font-size: clamp(.61rem, 2.5vw, .7rem);
-  font-weight: 700;
-  line-height: 1;
-  text-shadow: 0 1px 1px rgba(45,22,9,.75);
-}
-
-#screen-create .info-btn-detail::before,
-#screen-create .info-btn-select::before {
-  content: '◆';
-  margin-right: 3px;
-  color: #f2cf78;
-  font-size: .48rem;
-}
-
-#screen-create .info-btn-select {
-  background: linear-gradient(180deg, #66824b, #3f6039 58%, #29442c);
-  border-color: #29371f;
-}
-
-#screen-create .info-btn-select.is-selected {
-  color: #fff2cf;
-  background: linear-gradient(180deg, #b96045, #873c2d 58%, #60251d);
-  border-color: #512117;
-}
-
-#screen-create .info-btn-detail:focus-visible,
-#screen-create .info-btn-select:focus-visible {
-  outline: 2px solid #f1d17d;
-  outline-offset: 1px;
-}
-
-#screen-create .info-btn-detail:active,
-#screen-create .info-btn-select:active {
-  transform: scale(.94);
-  box-shadow: 0 2px 4px rgba(0,0,0,.05);
-}
-
-#screen-create .info-dots {
-  position: absolute;
-  z-index: 6;
-  top: 4px;
-  left: 50%;
-  padding: 0;
-  transform: translateX(-50%);
-}
-
-#screen-create .info-dot {
-  width: 5px;
-  height: 5px;
-  background: #725035;
-  box-shadow: 0 0 0 1px rgba(255,247,220,.85);
-}
-
-#screen-create .info-empty {
-  align-self: center;
-  width: min(287px, 74vw);
-  padding: 48px 42px 38px;
-  color: var(--info-muted);
-  background: url('../images/core/buttons/top_panel.webp') center / contain no-repeat;
-  font-family: 'Noto Serif KR', serif;
-  font-size: .78rem;
-  font-weight: 600;
+  padding: 1px 2px;
+  border: 0;
+  background: transparent;
+  color: #fff6e7;
+  text-shadow: 0 1px 2px #000;
+  font: 500 clamp(8px, 2.25vw, 10.5px)/1.22 'Noto Sans KR', sans-serif;
   text-align: center;
-  text-shadow: 0 1px rgba(255,255,255,.8);
+  overflow: hidden;
 }
-
-@media (max-width: 340px) {
-  #screen-create .info-slide {
-    grid-template-columns: 136px 238px;
-  }
-
-  #screen-create .info-btn-detail,
-  #screen-create .info-btn-select {
-    min-width: 62px;
-    padding-inline: 7px;
-  }
+.creative-hud-value:not(:disabled) { pointer-events: auto; cursor: pointer; }
+.creative-hud-value > span {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  word-break: keep-all;
+}
+.creative-hud-badge:not([hidden]) {
+  position: absolute;
+  z-index: 1;
+  top: -4px;
+  right: -3px;
+  display: grid;
+  place-items: center;
+  min-width: 12px;
+  height: 12px;
+  padding-inline: 1px;
+  border: 1px solid #edbc71;
+  border-radius: 999px;
+  background: #50301b;
+  color: #fff2c1;
+  font: 700 7px/1 'Noto Sans KR', sans-serif;
+  pointer-events: none;
+}
+.creative-hud-control {
+  --hud-gold: linear-gradient(160deg, #fff1bb, #e8b45f 38%, #935b25 68%, #ffd47d);
+  position: absolute;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 2px solid transparent;
+  background: radial-gradient(ellipse at top, #284c63, #081a2b 70%) padding-box, var(--hud-gold) border-box;
+  box-shadow: 0 2px 2px #0009, inset 0 0 0 1px #f2cc7d55;
+  color: #ffdc86;
+}
+.creative-hud-toggle {
+  z-index: 2;
+  bottom: 1px;
+  left: 50%;
+  width: 41px;
+  height: 24px;
+  transform: translateX(-50%);
+  border-radius: 18px;
+  pointer-events: auto;
+  cursor: pointer;
+}
+.creative-hud-toggle span {
+  width: 10px;
+  height: 10px;
+  border: solid currentColor;
+  border-width: 2px 2px 0 0;
+  transform: translateY(2px) rotate(-45deg);
+}
+.creative-hud-settings {
+  right: 12px;
+  bottom: -13px;
+  width: 31px;
+  height: 29px;
+  border-radius: 50%;
+  opacity: 1;
+}
+.creative-hud-settings svg { width: 18px; height: 18px; filter: drop-shadow(0 1px 1px #000); }
+.creative-hud-control:focus-visible,
+.creative-hud-value:focus-visible { outline: 2px solid #fff0a7; outline-offset: 1px; }
+.creative-hud-collapsed .creative-hud-frame {
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(calc(-100% - var(--hud-safe-top)));
+}
+.creative-hud-collapsed .creative-hud-toggle span {
+  transform: translateY(-2px) rotate(135deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .creative-hud, .creative-hud-frame { transition: none; }
 }
 
 /* 카드에 부착되는 정보 패널이다. 스크롤 페이지 안에 절대 위치로 배치되므로

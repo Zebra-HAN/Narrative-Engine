@@ -117,7 +117,6 @@ const NAV_IMAGE_VERSION = '20261005-1';
 
 const CORE_IMAGE_SOURCES = [
   'images/core/home/forestglow.jpg', 'images/core/home/royal-banner.webp',
-  'images/core/buttons/top_panel.webp', 'images/core/buttons/top_icon.webp',
   'images/core/buttons/bottom_panel.jpg', 'images/core/buttons/check.webp',
   'images/core/buttons/lock.webp', 'images/core/buttons/cancel.webp',
   'images/core/buttons/select.webp', 'images/core/buttons/detail.webp',
@@ -904,7 +903,6 @@ function getSubInfo(subId) {
 function setAddressTrail(trail) {
   addressTrail = trail.filter(item => item && item.label);
   renderAddressTrail();
-  updateInfoPanel();
 }
 
 function renderAddressTrail() {
@@ -1332,11 +1330,88 @@ if ('serviceWorker' in navigator) {
 
 
 
+const CREATIVE_HUD_SLOTS = [
+  { id: 'race' },
+  { id: 'job' },
+  { label: '결핍', icon: '💔' },
+  { id: 'want' },
+  { label: '내적 과제', icon: '🌱' },
+  { id: 'obstacle' },
+  { label: '대가', icon: '⚖️' },
+  { label: '테마', icon: '✦' },
+  { id: 'narrative_types' },
+  { id: 'ending' }
+];
+
+const creativeHudValues = new Map();
+
+function initCreativeHud() {
+  const screen = document.getElementById('screen-create');
+  const frame = document.getElementById('creative-hud-frame');
+  const toggle = document.getElementById('creative-hud-toggle');
+  const slots = document.getElementById('creative-hud-slots');
+  for (const entry of CREATIVE_HUD_SLOTS) {
+    const sub = entry.id ? getSubInfo(entry.id) : null;
+    const label = sub?.label || entry.label;
+    const slot = document.createElement('div');
+    slot.className = 'creative-hud-slot';
+    slot.innerHTML = `
+      <div class="creative-hud-slot-label">
+        <span class="creative-hud-slot-icon" aria-hidden="true">${renderIcon(sub?.icon || entry.icon, sub?.img, 'creative-hud-icon-img')}</span>
+        <span>${escapeHtml(label)}</span>
+      </div>
+      <button class="creative-hud-value" type="button" disabled><span></span></button>
+      <span class="creative-hud-badge" hidden></span>`;
+    slots.appendChild(slot);
+    if (!entry.id) continue;
+    slot.dataset.hudCategory = entry.id;
+    const value = slot.querySelector('.creative-hud-value');
+    const title = value.firstElementChild;
+    const badge = slot.querySelector('.creative-hud-badge');
+    value.addEventListener('click', () => showAppNotice(title.textContent));
+    creativeHudValues.set(entry.id, { label, value, title, badge });
+  }
+  toggle.addEventListener('click', () => {
+    const collapsed = screen.classList.toggle('creative-hud-collapsed');
+    toggle.setAttribute('aria-expanded', String(!collapsed));
+    toggle.setAttribute('aria-label', collapsed ? '창작 상태창 펼치기' : '창작 상태창 접기');
+    frame.inert = collapsed;
+    requestCardEdgePosition();
+  });
+  updateCreativeHud();
+}
+
+function updateCreativeHud() {
+  for (const [subId, { label, value, title, badge }] of creativeHudValues) {
+    const selected = selectedCards[subId];
+    let latestTitle = '';
+    for (const index of selected || []) {
+      const card = getCardByGlobalIdx(subId, index);
+      if (card?.name) latestTitle = card.name;
+    }
+    const count = selected?.size ?? 0;
+    if (title.textContent !== latestTitle) {
+      title.textContent = latestTitle;
+      value.title = latestTitle;
+      value.disabled = !latestTitle;
+    }
+    if (badge.textContent !== String(count)) {
+      badge.textContent = String(count);
+      badge.hidden = count < 2;
+    }
+    const accessible = latestTitle ? `${label}: ${latestTitle}${count > 1 ? `, ${count}개 선택` : ''}` : label;
+    if (value.getAttribute('aria-label') !== accessible) value.setAttribute('aria-label', accessible);
+  }
+}
+
+function getCreativeHudBottom() {
+  return document.getElementById('creative-hud').getBoundingClientRect().bottom;
+}
+
 initCenterBackSwipe();
 initScrollResponsiveChrome();
 initCardMinimap();
-initInfoPanelAction();
-initInfoTextAutoFit();
+initCreativeHud();
 initUiSounds();
 
 /* ════════════════════════════════════════════════
@@ -1659,58 +1734,6 @@ if (document.fonts) {
 }
 
 /* ════════════════════════════════════════════════
-   정보 패널 문구 자동 맞춤
-   패널 높이는 그대로 둔 채 실제 렌더링 영역을 넘는 텍스트만 단계적으로 축소한다.
-════════════════════════════════════════════════ */
-const INFO_TEXT_MIN_SCALE = 0.75;
-const INFO_TEXT_STEP_PX = 0.5;
-let infoTextFitFrame = 0;
-
-function elementHasVerticalOverflow(element) {
-  return element.scrollHeight > element.clientHeight + 0.5;
-}
-
-function fitInfoTextElement(element) {
-  if (!element) return;
-
-  // 이전 카드에서 적용된 축소를 먼저 지워 짧은 텍스트가 항상 기본 크기로 돌아오게 한다.
-  element.style.removeProperty('font-size');
-  const baseSize = parseFloat(getComputedStyle(element).fontSize);
-  if (!baseSize || !elementHasVerticalOverflow(element)) return;
-
-  const minimumSize = baseSize * INFO_TEXT_MIN_SCALE;
-  let nextSize = baseSize;
-  while (elementHasVerticalOverflow(element) && nextSize > minimumSize) {
-    nextSize = Math.max(minimumSize, nextSize - INFO_TEXT_STEP_PX);
-    element.style.fontSize = `${nextSize}px`;
-  }
-}
-
-function fitInfoPanelText() {
-  document.querySelectorAll('.info-slide').forEach(slide => {
-    // 제목과 설명은 각자의 실제 clientHeight/scrollHeight를 별도로 비교한다.
-    fitInfoTextElement(slide.querySelector('.info-name'));
-    fitInfoTextElement(slide.querySelector('.info-desc'));
-
-    // 제목 축소로 설명 영역이 달라질 수 있으므로 최종 레이아웃에서 한 번 더 확인한다.
-    fitInfoTextElement(slide.querySelector('.info-desc'));
-  });
-}
-
-function requestInfoTextAutoFit() {
-  if (infoTextFitFrame) cancelAnimationFrame(infoTextFitFrame);
-  infoTextFitFrame = requestAnimationFrame(() => {
-    infoTextFitFrame = 0;
-    fitInfoPanelText();
-  });
-}
-
-function initInfoTextAutoFit() {
-  window.addEventListener('resize', requestInfoTextAutoFit, { passive: true });
-  if (document.fonts?.ready) document.fonts.ready.then(requestInfoTextAutoFit);
-}
-
-/* ════════════════════════════════════════════════
    스크롤 반응형 창작 화면 장식
    빠르고 분명한 탐색 제스처만 받아 패널을 일정한 시간으로 끝까지 움직인다.
    wheel/touch를 직접 추적하므로 콘텐츠가 짧아도 같은 방식으로 동작한다.
@@ -1719,9 +1742,8 @@ function initInfoTextAutoFit() {
 function initScrollResponsiveChrome() {
   const screen = document.getElementById('screen-create');
   const area = document.getElementById('center-area');
-  const infoPanel = document.getElementById('info-panel');
   const bottomChrome = document.getElementById('create-chrome-bottom');
-  if (!screen || !area || !infoPanel || !bottomChrome) return;
+  if (!screen || !area || !bottomChrome) return;
 
   const panelToggle = document.getElementById('card-panel-toggle');
   const dock = document.getElementById('card-controls-dock');
@@ -1795,13 +1817,10 @@ function initScrollResponsiveChrome() {
   let lastTouchY = null;
   let touchDirection = null;
   let menuSwipeSuppressClickUntil = 0;
-  let targetTopProgress = 0;
   let targetBottomProgress = 0;
-  let renderedTopProgress = 0;
   let renderedBottomProgress = 0;
   let animationFrame = 0;
   let animationStartedAt = 0;
-  let animationStartTopProgress = 0;
   let animationStartBottomProgress = 0;
   let lastDirectInputAt = -Infinity;
   let previousView = 'top';
@@ -1822,21 +1841,14 @@ function initScrollResponsiveChrome() {
     // RAF의 프레임 시각은 같은 프레임에서 저장한 시작 시각보다 앞설 수 있다.
     // 시작과 갱신 모두 같은 현재 시각을 사용하고 진행률의 양끝을 제한한다.
     const elapsed = Math.max(0, performance.now() - animationStartedAt);
-    const travelDistance = Math.max(
-      Math.abs(targetTopProgress - animationStartTopProgress),
-      Math.abs(targetBottomProgress - animationStartBottomProgress)
-    );
+    const travelDistance = Math.abs(targetBottomProgress - animationStartBottomProgress);
     const duration = ANIMATION_DURATION * travelDistance;
     const timeProgress = duration ? Math.max(0, Math.min(1, elapsed / duration)) : 1;
     const easedProgress = 1 - Math.pow(1 - timeProgress, 3);
-    renderedTopProgress = Math.max(0, Math.min(1, animationStartTopProgress
-      + (targetTopProgress - animationStartTopProgress) * easedProgress));
     renderedBottomProgress = Math.max(0, Math.min(1, animationStartBottomProgress
       + (targetBottomProgress - animationStartBottomProgress) * easedProgress));
     // transform는 상속되지 않으므로 패널 밖 카드의 스타일을 무효화하지 않는다.
-    infoPanel.style.transform = `translate3d(0, ${renderedTopProgress * -100}%, 0)`;
     bottomChrome.style.transform = `translate3d(0, ${renderedBottomProgress * 100}%, 0)`;
-    infoPanel.classList.toggle('top-chrome-hidden', renderedTopProgress > 0.98);
     bottomChrome.classList.toggle('bottom-chrome-hidden', renderedBottomProgress > 0.98);
     screen.classList.toggle('bottom-panel-visible', dockMode
       && (targetBottomProgress < 1 || renderedBottomProgress < 1));
@@ -1845,42 +1857,32 @@ function initScrollResponsiveChrome() {
     if (timeProgress < 1) {
       animationFrame = requestAnimationFrame(renderChrome);
     } else {
-      renderedTopProgress = targetTopProgress;
       renderedBottomProgress = targetBottomProgress;
       animationFrame = 0;
-      infoPanel.classList.toggle('chrome-render-suspended', targetTopProgress === 1);
       bottomChrome.classList.toggle('chrome-render-suspended', targetBottomProgress === 1);
-      APP_PERF?.mark('panel.animation-finish', { top: targetTopProgress, bottom: targetBottomProgress });
+      APP_PERF?.mark('panel.animation-finish', { bottom: targetBottomProgress });
     }
     APP_PERF?.end(perfRender);
   }
 
-  function animateChrome(topProgress, bottomProgress) {
-    const nextTopProgress = Math.max(0, Math.min(1, topProgress));
+  function animateChrome(bottomProgress) {
     const nextBottomProgress = Math.max(0, Math.min(1, bottomProgress));
     screen.classList.toggle('bottom-panel-visible', dockMode
       && (nextBottomProgress < 1 || renderedBottomProgress < 1));
     screen.classList.toggle('bottom-panel-closing', dockMode
       && nextBottomProgress === 1 && renderedBottomProgress < 1);
-    if (nextTopProgress === targetTopProgress
-        && nextBottomProgress === targetBottomProgress
-        && animationFrame) return;
-    if (nextTopProgress === renderedTopProgress
-        && nextBottomProgress === renderedBottomProgress
-        && !animationFrame) return;
+    if (nextBottomProgress === targetBottomProgress && animationFrame) return;
+    if (nextBottomProgress === renderedBottomProgress && !animationFrame) return;
     // Restore painting at the existing offscreen transform before the two RAFs.
-    if (nextTopProgress < 1) infoPanel.classList.remove('chrome-render-suspended');
     if (nextBottomProgress < 1) bottomChrome.classList.remove('chrome-render-suspended');
-    targetTopProgress = nextTopProgress;
     targetBottomProgress = nextBottomProgress;
-    animationStartTopProgress = renderedTopProgress;
     animationStartBottomProgress = renderedBottomProgress;
     if (animationFrame) cancelAnimationFrame(animationFrame);
     // Start the clock after the initial route layout has had a paint opportunity.
     animationFrame = requestAnimationFrame(() => {
       animationFrame = requestAnimationFrame(() => {
         animationStartedAt = performance.now();
-        APP_PERF?.mark('panel.animation-start', { top: nextTopProgress, bottom: nextBottomProgress, nominalDurationMs: ANIMATION_DURATION });
+        APP_PERF?.mark('panel.animation-start', { bottom: nextBottomProgress, nominalDurationMs: ANIMATION_DURATION });
         renderChrome();
       });
     });
@@ -1900,7 +1902,7 @@ function initScrollResponsiveChrome() {
     // 메뉴를 단순히 아래로 끌고 가지 않아 다음 표시 때 닫힌 상태가 유지된다.
     if (progress > 0 && isExtraMenuOpen()) closeExtraMenu();
     else if (progress === 0 && extraMenuState.dock) closeExtraMenu({ instant: true, scope: 'dock' });
-    animateChrome(cardPanelMode ? 1 : progress, progress);
+    animateChrome(progress);
   }
 
   panelToggle?.addEventListener('click', () => {
@@ -1994,22 +1996,14 @@ function initScrollResponsiveChrome() {
 
   area.addEventListener('touchstart', onChromeTouchStart, { passive: true });
   area.addEventListener('touchmove', onChromeTouchMove, { passive: true });
-  // 위쪽 설명 패널에서 시작한 수직 스와이프도 동일하게 숨김 동작을 수행한다.
-  infoPanel.addEventListener('touchstart', onChromeTouchStart, { passive: true });
-  infoPanel.addEventListener('touchmove', onChromeTouchMove, { passive: true });
 
   const chromeResizeObserver = new ResizeObserver(() => {
-    const topHeight = infoPanel.getBoundingClientRect().height;
     const bottomHeight = bottomChrome.getBoundingClientRect().height;
-    screen.style.setProperty('--top-chrome-height', `${topHeight}px`);
     screen.style.setProperty('--bottom-chrome-height', `${bottomHeight}px`);
   });
-  chromeResizeObserver.observe(infoPanel);
   chromeResizeObserver.observe(bottomChrome);
   area.addEventListener('touchend', onChromeTouchEnd, { passive: true });
   area.addEventListener('touchcancel', onChromeTouchEnd, { passive: true });
-  infoPanel.addEventListener('touchend', onChromeTouchEnd, { passive: true });
-  infoPanel.addEventListener('touchcancel', onChromeTouchEnd, { passive: true });
   // With the call arrow hidden, the open panel must still accept its closing gesture.
   bottomChrome.addEventListener('touchstart', onChromeTouchStart, { passive: true });
   bottomChrome.addEventListener('touchmove', onChromeTouchMove, { passive: true });
@@ -2050,7 +2044,7 @@ function initScrollResponsiveChrome() {
     // Groups hide on entry; subgroups retain the intended state except on card return.
     const hideOnEntry = view === 'cards' || view === 'group'
       || (view === 'subgroup' && (previousView === 'cards'
-        || (targetTopProgress === 1 && targetBottomProgress === 1)));
+        || targetBottomProgress === 1));
     cardPanelMode = view === 'cards';
     manualHierarchyPanels = view === 'group' || view === 'subgroup';
     dockMode = hierarchyView;
@@ -2064,7 +2058,6 @@ function initScrollResponsiveChrome() {
       cardPanelsLocked = true;
       if (animationFrame) cancelAnimationFrame(animationFrame);
       animationFrame = 0;
-      targetTopProgress = renderedTopProgress = animationStartTopProgress = 1;
       targetBottomProgress = renderedBottomProgress = animationStartBottomProgress = 1;
       animationStartedAt = performance.now();
       if (isExtraMenuOpen()) closeExtraMenu({ instant: true });
@@ -2220,6 +2213,7 @@ function goToCreate() {
   switchScreen('screen-create', () => {
     switchNav('character', true, { silentAddress: true });
     setAddressTrail([]);
+    updateCreativeHud();
     restartCreateIntro();
   }, { type: 'instant' });
 }
@@ -2274,7 +2268,6 @@ function switchNav(navId, skipAnimation, options = {}, backgroundPrepared = fals
   // 중앙 기본 상태로
   closeCardInfo();
   const backgroundReady = showDefaultCenter(true);
-  updateInfoPanel();
    if (!options.silentAddress) setNavAddress(navId);
   return backgroundReady;
 }
@@ -2346,7 +2339,6 @@ function selectSub(subId, navId, backgroundPrepared = false, restoreBackground =
   const data = CARD_DATA[subId];
   if (data?.groups) preloadGroupDestinations(subId);
   else preloadCards(data);
-  updateInfoPanel();
     setSubAddress(subId, navId || currentNav);
 }
 
@@ -2468,9 +2460,8 @@ function scopeCardRevealAnimations(page, cards) {
     const perfGeometry = APP_PERF?.begin('cardReveal.measureGeometry');
     const view = page.getBoundingClientRect();
     // Chrome overlays the scroll area; cards fully behind it are not visible.
-    const topPanel = document.getElementById('info-panel')?.getBoundingClientRect();
     const bottomPanel = document.getElementById('create-chrome-bottom')?.getBoundingClientRect();
-    const top = Math.max(view.top + page.clientTop, 0, topPanel?.bottom || 0);
+    const top = Math.max(view.top + page.clientTop, 0, getCreativeHudBottom());
     const bottom = Math.min(view.top + page.clientTop + page.clientHeight, window.innerHeight,
       bottomPanel?.top ?? window.innerHeight);
     const left = Math.max(view.left + page.clientLeft, 0);
@@ -3308,8 +3299,14 @@ function positionCardInfo(panel, cardEl, geometry = null) {
     + (cardRect.width - panelWidth) / 2;
   const left = Math.max(12, Math.min(centeredLeft, g.scrollWidth - panelWidth - 12));
   const cardTop = cardRect.top - pageRect.top + g.scrollTop;
-  const available = Math.max(40, cardTop - 14);
+  const visibleTop = Math.max(0, g.scrollTop + page.clientTop);
+  const spaceAbove = cardTop - visibleTop - 14;
+  const belowTop = cardTop + cardRect.height + 10;
+  const spaceBelow = g.bottom - pageRect.top + g.scrollTop - belowTop;
   let panelHeight = panel.offsetHeight;
+  const below = panelHeight > spaceAbove && spaceBelow > spaceAbove;
+  panel.classList.toggle('is-below-card', below);
+  const available = Math.max(40, below ? spaceBelow : spaceAbove);
   if (panelHeight > available) {
     panel.style.minHeight = '0';
     const copy = panel.querySelector('.card-info-copy');
@@ -3317,7 +3314,7 @@ function positionCardInfo(panel, cardEl, geometry = null) {
     copy.style.overflowY = 'auto';
     panelHeight = panel.offsetHeight;
   }
-  const top = cardTop - panelHeight - 10;
+  const top = below ? belowTop : cardTop - panelHeight - 10;
   panel.style.left = `${left}px`;
   panel.style.top = `${Math.max(4, top)}px`;
   panel.style.setProperty('--card-anchor-x', `${Math.max(18, Math.min(panelWidth - 18, cardRect.left - pageRect.left + g.scrollLeft + cardRect.width / 2 - left))}px`);
@@ -3415,69 +3412,7 @@ function getInfoPanelContext(includeTitleGroup = false) {
   return { item: items[items.length - 1], group, description, detail };
 }
 
-function updateInfoPanel() {
-  const nav = NAV_DATA[currentNav];
-  const info = MAIN_CATEGORY_INFO[currentNav] || {};
-  const sub = currentSubId ? nav?.subs.find(item => item.id === currentSubId) : null;
-  const context = getInfoPanelContext();
-  // 설명은 현재 깊은 위치를 따르되 이미지는 NAV/카테고리만 표시한다.
-  const image = sub?.img || MAIN_CATEGORY_IMAGE[currentNav];
-  const icon = sub?.icon || info.icon || '◆';
-
-  setInfoVisual(document.getElementById('info-cat-icon'), image, icon);
-  document.getElementById('info-cat-name').textContent = context.item?.label || '';
-  document.getElementById('info-cat-desc').textContent = context.description;
-  document.getElementById('info-panel').setAttribute('aria-label', `${context.item?.label || ''} 상세정보`);
-  requestInfoTextAutoFit();
-}
-
-function initInfoPanelAction() {
-  const panel = document.getElementById('info-panel');
-  const visual = panel.querySelector('.info-slider-wrap');
-  let start = null;
-  let dragged = false;
-  let feedback = null;
-  const release = () => panel.classList.remove('is-info-pressed');
-  const activate = () => {
-    release();
-    feedback?.cancel();
-    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      feedback = visual.animate([{ scale: '0.975' }, { scale: '1' }], {
-        duration: 160, easing: 'ease-out'
-      });
-    }
-    openLocationInfo();
-  };
-  panel.addEventListener('pointerdown', event => {
-    if (!event.isPrimary || event.button !== 0) return;
-    start = { x: event.clientX, y: event.clientY };
-    dragged = false;
-    feedback?.cancel();
-    panel.classList.add('is-info-pressed');
-  });
-  panel.addEventListener('pointermove', event => {
-    if (start && Math.hypot(event.clientX - start.x, event.clientY - start.y) > 8) {
-      dragged = true;
-      release();
-    }
-  });
-  panel.addEventListener('pointercancel', () => { dragged = true; start = null; release(); });
-  panel.addEventListener('pointerleave', release);
-  window.addEventListener('pointerup', () => { start = null; release(); });
-  window.addEventListener('blur', release);
-  panel.addEventListener('click', event => {
-    if (dragged && event.detail !== 0) return;
-    activate();
-  });
-  panel.addEventListener('keydown', event => {
-    if (event.key !== 'Enter' && event.key !== ' ') return;
-    event.preventDefault();
-    if (!event.repeat) activate();
-  });
-}
-
-// 표시와 닫기 동작만 공유하고 카드 선택 데이터는 읽거나 변경하지 않는다.
-function openLocationInfo(context = getInfoPanelContext()) {
+function openLocationInfo(context) {
   configureDetailMainImage();
   const { item, description, detail } = context;
   if (!item) return;
@@ -4021,7 +3956,6 @@ function _syncCardSelectedDOM(subId, globalIdx) {
   }
    
   if (focusedCard && focusedCard.subId === subId && focusedCard.idx === globalIdx) {
-    updateInfoPanel();
     // Sync existing controls without moving the row or replaying its animation.
     updateCardEdgeActions({ deferPosition: true });
   }
@@ -4489,7 +4423,7 @@ async function partialReset() {
   subs.forEach(sub => {
     const locks = lockedCards[sub.id];
     if (locks?.size) {
-      selectedCards[sub.id] = new Set(locks);
+      selectedCards[sub.id] = getLockedSelections(sub.id);
     } else {
       delete selectedCards[sub.id];
     }
@@ -4502,7 +4436,6 @@ async function partialReset() {
     const el = document.querySelector(`[data-sub-id="${currentSubId}"]`);
     if (el) el.classList.add('active');
   }
-  updateInfoPanel();
    updateNavBadges();  // ← 여기 추가,  선택한 총량 표시 배지 추가
   refreshStatusIfOpen();
 }
@@ -4527,7 +4460,6 @@ async function fullReset() {
     const el = document.querySelector(`[data-sub-id="${currentSubId}"]`);
     if (el) el.classList.add('active');
   }
-  updateInfoPanel();
    updateNavBadges();  // ← 여기 추가,  선택한 총량 표시 배지 추가
   refreshStatusIfOpen();
 }
@@ -4535,6 +4467,7 @@ async function fullReset() {
 
     // 해당 탭 전체 선택 수 합산 하단 탭 배지 렌더 함수
 function updateNavBadges() {
+  updateCreativeHud();
   Object.keys(NAV_DATA).forEach(navId => {
     const navMap = {
       character: 'nav-character',
@@ -4721,6 +4654,17 @@ function getCurrentRandomScope(subId) {
   return {};
 }
 
+function getLockedSelections(subId) {
+  const locks = lockedCards[subId];
+  if (!locks?.size) return new Set();
+  const ordered = new Set();
+  for (const index of selectedCards[subId] || []) {
+    if (locks.has(index)) ordered.add(index);
+  }
+  for (const index of locks) ordered.add(index);
+  return ordered;
+}
+
 function getRandomCandidates(subId, scope = {}) {
   const data = CARD_DATA[subId];
   let candidates = [];
@@ -4841,7 +4785,7 @@ async function randomSelectCurrent() {
   const pick =
     allCards[Math.floor(Math.random() * allCards.length)];
 
-  selectedCards[currentSubId] = new Set(lockedCards[currentSubId] || []);
+  selectedCards[currentSubId] = getLockedSelections(currentSubId);
   selectedCards[currentSubId].add(pick.globalIdx);
   autoSelectedCardKeys.delete(`${currentSubId}__${pick.globalIdx}`);
   includeCardDefaults(currentSubId, pick.globalIdx);
@@ -4869,7 +4813,6 @@ async function randomSelectCurrent() {
     img: pick.img
   };
 
-  updateInfoPanel();
   refreshStatusIfOpen();
   updateNavBadges();
 }
@@ -4886,7 +4829,7 @@ subs.forEach(sub => {
     .filter(card => !isCardLocked(sub.id, card.globalIdx));
   if (allCards.length === 0) return;
   const pick = allCards[Math.floor(Math.random() * allCards.length)];
-  selectedCards[sub.id] = new Set(lockedCards[sub.id] || []);
+  selectedCards[sub.id] = getLockedSelections(sub.id);
   selectedCards[sub.id].add(pick.globalIdx);
   autoSelectedCardKeys.delete(`${sub.id}__${pick.globalIdx}`);
   includeCardDefaults(sub.id, pick.globalIdx);
@@ -4901,7 +4844,6 @@ subs.forEach(sub => {
     const el = document.querySelector(`[data-sub-id="${currentSubId}"]`);
     if (el) el.classList.add('active');
   }
-  updateInfoPanel();
   refreshStatusIfOpen();
    updateNavBadges();  // ← 여기 추가,  선택한 총량 표시 배지 추가
 }
@@ -5304,9 +5246,7 @@ function initCardMinimap() {
     const page = activePage();
     if (overlay.hidden || !page || !sectionEntries.length) return;
     const view = page.getBoundingClientRect();
-    const info = document.getElementById('info-panel');
-    const infoBottom = getComputedStyle(info).visibility === 'hidden' ? 0 : info.getBoundingClientRect().bottom;
-    const visibleTop = Math.max(0, view.top + page.clientTop, infoBottom);
+    const visibleTop = Math.max(0, view.top + page.clientTop, getCreativeHudBottom());
     // Use fractional screen coordinates: offsetTop rounds nested grid rows.
     const boundaries = sectionEntries.map(entry => {
       const rows = [];
@@ -5365,9 +5305,7 @@ function initCardMinimap() {
     while (heading && !heading.classList.contains('card-section-header')) heading = heading.previousElementSibling;
     const target = heading || grid;
     const view = page.getBoundingClientRect();
-    const info = document.getElementById('info-panel');
-    const infoBottom = getComputedStyle(info).visibility === 'hidden' ? 0 : info.getBoundingClientRect().bottom;
-    const visibleTop = Math.max(0, view.top + page.clientTop, infoBottom);
+    const visibleTop = Math.max(0, view.top + page.clientTop, getCreativeHudBottom());
     const from = page.scrollTop;
     const to = Math.max(0, Math.min(page.scrollHeight - page.clientHeight,
       from + target.getBoundingClientRect().top - visibleTop - 8));
