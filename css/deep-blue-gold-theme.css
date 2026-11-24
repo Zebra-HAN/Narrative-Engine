@@ -1068,3 +1068,94 @@
   user-select: none;
   -webkit-user-drag: none;
 }
+
+/* Standalone board for PNG export. The live integration panel and PDF keep their layout. */
+.status-png-board {
+  --status-card-width: 286px;
+  --status-card-gap: 12px;
+  width: max-content;
+  max-width: none;
+  box-sizing: border-box;
+  border-color: #8e826c;
+  background: linear-gradient(160deg, #224257, #102439);
+  box-shadow: none;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+.status-png-board img.managed-image { opacity: 1; transition: none; }
+.status-png-board :is(.status-header, .status-chip, .status-idea-section, .status-chip-detail-line) {
+  box-shadow: none;
+}
+.status-png-board .status-header { padding: 12px 18px; }
+.status-png-board .status-body { padding: 16px; }
+.status-png-board .status-two-col {
+  gap: 16px;
+  width: max-content;
+}
+.status-png-board .status-col {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  max-width: none;
+}
+.status-png-board .status-section {
+  margin: 0;
+  padding: 12px;
+  border: 1px solid #8e826c;
+  border-radius: 10px;
+  background: linear-gradient(160deg, #27465b, #19354b);
+}
+.status-png-board .status-section-title {
+  gap: 8px;
+  margin-bottom: 10px;
+  font-family: 'Noto Serif KR', serif;
+  font-size: 1.05rem;
+}
+.status-png-board .status-nav-icon { width: 26px; height: 26px; flex-basis: 26px; }
+.status-png-cards {
+  display: grid;
+  grid-template-columns: repeat(var(--status-card-columns, 1), var(--status-card-width));
+  align-items: start;
+  gap: var(--status-card-gap);
+}
+.status-png-card-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--status-card-gap);
+}
+.status-png-board .status-chip {
+  box-sizing: border-box;
+  padding: 10px;
+  border: 1px solid #768f9b;
+  background: linear-gradient(165deg, #2c4b60, #213c51);
+  gap: 8px;
+  overflow-wrap: anywhere;
+}
+.status-png-board .status-card-meta {
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  font-size: .78rem;
+}
+.status-png-board .status-category-mark { width: 22px; height: 22px; flex-basis: 22px; }
+.status-png-board .status-category-name { white-space: normal; }
+.status-png-board .status-card-path { font-size: .72rem; }
+.status-png-board :is(.status-category-name, .status-card-path) { opacity: 1; }
+.status-png-board .status-card-meta + .status-chip-img { margin-top: 0; }
+.status-png-board :is(.status-chip-img, .status-chip-sub-img) {
+  max-width: 100%;
+  max-height: 300px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  box-sizing: content-box;
+}
+.status-png-board .status-chip-name { font-size: .96rem; }
+.status-png-board :is(.status-chip-desc, .status-chip-detail-line) {
+  font-size: .8rem;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+.status-png-board .status-idea-section-title { font-size: .8rem; }

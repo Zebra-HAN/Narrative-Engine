@@ -4184,10 +4184,10 @@ async function shareStatus() {
   if (format === 'pdf') exportStatusAsPdf();
 }
 
-function statusExportFilename(extension, part) {
+function statusExportFilename(extension) {
   const now = new Date();
   const date = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, '0'), String(now.getDate()).padStart(2, '0')].join('-');
-  return `아이디어통합_${date}${part ? `_${part}` : ''}.${extension}`;
+  return `아이디어통합_${date}.${extension}`;
 }
 
 function createStatusExportClone() {
@@ -4209,64 +4209,95 @@ function createStatusExportClone() {
   return clone;
 }
 
-async function waitForExportImages(root) {
-  await Promise.all(Array.from(root.querySelectorAll('img')).map(img => {
-    if (img.complete && img.naturalWidth) return Promise.resolve();
-    return new Promise(resolve => {
-      img.addEventListener('load', resolve, { once: true });
-      img.addEventListener('error', resolve, { once: true });
-    });
-  }));
-  if (document.fonts?.ready) await document.fonts.ready;
-}
+function createStatusPngBoard() {
+  const board = createStatusExportClone();
+  board.classList.add('status-png-board');
+  board.style.removeProperty('width');
+  board.querySelector('.status-header-actions')?.remove();
 
-async function imageToDataUrl(url) {
-  if (!url || url.startsWith('data:') || url.startsWith('blob:')) return url;
-  try {
-    const response = await fetch(url);
-    const blob = await response.blob();
-    return await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-  } catch (_) {
-    return url;
+  const layout = board.querySelector('.status-two-col');
+  const stacks = Array.from(layout.children);
+  const sections = [];
+  for (const stack of stacks) {
+    for (const section of Array.from(stack.children)) {
+      const cards = Array.from(section.querySelectorAll('.status-chip-wrap'));
+      if (!cards.length) {
+        section.remove();
+        continue;
+      }
+      section.querySelectorAll('.status-sub').forEach(sub => sub.remove());
+      const grid = document.createElement('div');
+      grid.className = 'status-png-cards';
+      grid.append(...cards);
+      section.appendChild(grid);
+      sections.push({ section, grid, cards });
+    }
   }
+  // Keep established quadrants when both sides have content. Two sections on
+  // the same side can sit next to each other when the other side is empty.
+  if (sections.length === 2 && stacks.some(stack => !stack.childElementCount)) {
+    const [first, second] = sections;
+    stacks[0].appendChild(first.section);
+    stacks[1].appendChild(second.section);
+  }
+  stacks.filter(stack => !stack.childElementCount).forEach(stack => stack.remove());
+  return { board, sections };
 }
 
-async function prepareCloneForSvg(root) {
-  const sourceRoot = document.querySelector('.status-panel');
-  const originals = document.querySelectorAll('.status-panel *');
-  const clones = root.querySelectorAll('*');
-  // foreignObject is isolated from the page stylesheet, so preserve the exact
-  // computed appearance on every node rather than changing the visible panel.
-  const copyComputedStyle = (original, node) => {
-    const computed = getComputedStyle(original);
-    node.style.cssText = Array.from(computed).map(prop => `${prop}:${computed.getPropertyValue(prop)};`).join('');
-  };
-  copyComputedStyle(sourceRoot, root);
-  clones.forEach((node, i) => {
-    const original = originals[i];
-    if (!original) return;
-    copyComputedStyle(original, node);
-  });
-  // Export a settled panel; copied animation styles would replay its entrance.
-  root.style.animation = 'none';
-  root.style.width = `${sourceRoot.getBoundingClientRect().width}px`;
-  root.style.height = 'auto';
-  root.style.maxHeight = 'none';
-  root.style.opacity = '1';
-  root.style.transform = 'none';
-  root.style.overflow = 'visible';
-  const body = root.querySelector('.status-body');
-  body.style.height = 'auto';
-  body.style.overflow = 'visible';
-  body.style.flex = 'none';
-  await Promise.all(Array.from(root.querySelectorAll('img')).map(async img => {
-    img.src = await imageToDataUrl(img.currentSrc || img.src);
+async function waitForStatusPngAssets(board) {
+  await Promise.all(Array.from(board.querySelectorAll('img'), async img => {
+    try {
+      await img.decode();
+    } catch (_) {
+      // A missing source should leave no broken icon or empty image frame.
+      img.remove();
+    }
   }));
+  // Resolve the fonts requested by the board, including its section headings.
+  board.getBoundingClientRect();
+  await document.fonts?.ready;
+}
+
+function arrangeStatusPngCards({ grid, cards }) {
+  const bounds = cards.map(card => card.getBoundingClientRect());
+  const gap = parseFloat(getComputedStyle(grid).rowGap);
+  const totalHeight = bounds.reduce((total, card) => total + card.height + gap, 0);
+  // Choose a compact section width based on actual content height, then
+  // distribute tall and short cards without stretching their neighbors.
+  const idealColumns = Math.round(Math.sqrt(totalHeight / (bounds[0].width + gap)));
+  const count = Math.min(cards.length, 12, Math.max(2, idealColumns));
+  grid.style.setProperty('--status-card-columns', count);
+  const columns = Array.from({ length: count }, () => {
+    const node = document.createElement('div');
+    node.className = 'status-png-card-column';
+    return { node, height: 0 };
+  });
+  cards.forEach((card, index) => {
+    const shortest = columns.reduce((first, next) => next.height < first.height ? next : first);
+    shortest.node.appendChild(card);
+    shortest.height += bounds[index].height + gap;
+  });
+  grid.replaceChildren(...columns.map(column => column.node));
+}
+
+let statusPngRenderer;
+function loadStatusPngRenderer() {
+  if (!statusPngRenderer) {
+    statusPngRenderer = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'js/vendor/html2canvas.min.js';
+      script.onload = () => resolve(window.html2canvas);
+      script.onerror = () => {
+        script.remove();
+        reject(new Error('이미지 출력 모듈을 불러오지 못했습니다.'));
+      };
+      document.head.appendChild(script);
+    }).catch(error => {
+      statusPngRenderer = null;
+      throw error;
+    });
+  }
+  return statusPngRenderer;
 }
 
 function canvasToBlob(canvas) {
@@ -4274,27 +4305,6 @@ function canvasToBlob(canvas) {
     blob => blob ? resolve(blob) : reject(new Error('PNG 이미지를 만들지 못했습니다.')),
     'image/png'
   ));
-}
-
-async function renderStatusSlice(root, width, top, height, scale) {
-  const serialized = new XMLSerializer().serializeToString(root);
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width * scale}" height="${height * scale}" viewBox="0 0 ${width} ${height}"><foreignObject width="${width}" height="${height}"><div xmlns="http://www.w3.org/1999/xhtml" style="width:${width}px;transform:translateY(-${top}px);transform-origin:top left">${serialized}</div></foreignObject></svg>`;
-  // A data URL keeps foreignObject rasterization origin-clean for PNG export.
-  const svgUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
-  const image = new Image();
-  await new Promise((resolve, reject) => {
-    image.onload = resolve;
-    image.onerror = () => reject(new Error('캡처 이미지를 렌더링하지 못했습니다.'));
-    image.src = svgUrl;
-  });
-  const canvas = document.createElement('canvas');
-  canvas.width = Math.ceil(width * scale);
-  canvas.height = Math.ceil(height * scale);
-  const context = canvas.getContext('2d');
-  context.fillStyle = '#f9f9f9';
-  context.fillRect(0, 0, canvas.width, canvas.height);
-  context.drawImage(image, 0, 0, canvas.width, canvas.height);
-  return canvasToBlob(canvas);
 }
 
 async function deliverExportFiles(files) {
@@ -4327,27 +4337,36 @@ async function exportStatusAsPng() {
   button.textContent = '준비 중…';
   const stage = document.createElement('div');
   stage.className = 'status-export-stage';
-  const clone = createStatusExportClone();
-  stage.appendChild(clone);
-  document.body.appendChild(stage);
+  let canvas;
   try {
-    await waitForExportImages(clone);
-    await prepareCloneForSvg(clone);
-    clone.querySelector('.status-header-actions')?.remove();
-    const bounds = clone.getBoundingClientRect();
-    const width = Math.ceil(Math.max(clone.scrollWidth, bounds.width));
-    const fullHeight = Math.ceil(Math.max(clone.scrollHeight, bounds.height));
-    // 16 MP / 8192 px stays below conservative iOS Safari canvas limits.
-    const scale = Math.min(2, 8192 / width, Math.sqrt(16000000 / (width * Math.min(fullHeight, 7000))));
-    const sliceHeight = Math.max(1, Math.floor(Math.min(7000, 8192 / scale)));
-    const count = Math.ceil(fullHeight / sliceHeight);
-    const files = [];
-    for (let index = 0; index < count; index += 1) {
-      const top = index * sliceHeight;
-      const height = Math.min(sliceHeight, fullHeight - top);
-      const blob = await renderStatusSlice(clone, width, top, height, scale);
-      files.push({ blob, name: statusExportFilename('png', count > 1 ? `${index + 1}-${count}` : '') });
+    const { board, sections } = createStatusPngBoard();
+    if (!sections.length) {
+      showAppNotice('저장할 아이디어를 먼저 선택해 주세요.');
+      return;
     }
+    stage.appendChild(board);
+    document.body.appendChild(stage);
+    const [render] = await Promise.all([loadStatusPngRenderer(), waitForStatusPngAssets(board)]);
+    sections.forEach(arrangeStatusPngCards);
+
+    const bounds = board.getBoundingClientRect();
+    const width = Math.ceil(bounds.width);
+    const height = Math.ceil(bounds.height);
+    // Keep a single PNG. Bound both dimensions and backing-store memory on mobile.
+    const scale = Math.min(2, 8192 / width, 8192 / height, Math.sqrt(12000000 / (width * height)));
+    canvas = await render(board, {
+      width,
+      height,
+      scale,
+      backgroundColor: '#102439',
+      logging: false,
+      ignoreElements: node => node.parentNode === document.body && node !== stage
+    });
+    const blob = await canvasToBlob(canvas);
+    canvas.width = 0;
+    canvas.height = 0;
+    canvas = null;
+    stage.remove();
     const isAppleTouchDevice = /iPad|iPhone|iPod/.test(navigator.userAgent)
       || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     if (isAppleTouchDevice && navigator.share && navigator.canShare) {
@@ -4357,11 +4376,15 @@ async function exportStatusAsPng() {
         { label: '공유 시트 열기', className: 'app-dialog-btn-single', value: true }
       ]);
     }
-    await deliverExportFiles(files);
+    await deliverExportFiles([{ blob, name: statusExportFilename('png') }]);
   } catch (error) {
     console.error(error);
     showAppNotice('이미지 저장에 실패했습니다. 잠시 후 다시 시도해 주세요.');
   } finally {
+    if (canvas) {
+      canvas.width = 0;
+      canvas.height = 0;
+    }
     stage.remove();
     button.disabled = false;
     button.textContent = originalLabel;
