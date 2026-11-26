@@ -1146,6 +1146,9 @@ body::after {
     max(78px, calc(env(safe-area-inset-bottom) + 44px));
   opacity: 0; pointer-events: none;
 }
+.detail-overlay.above-status { z-index: 601; }
+.detail-overlay.above-status .detail-content { overscroll-behavior: contain; }
+
 .detail-overlay.active {
   opacity: 1; pointer-events: all;
 }
@@ -1487,6 +1490,8 @@ body::after {
       scrollbar-width: thin;
       scrollbar-color: var(--gold-dim) transparent;
     }
+    #status-body [data-status-card-index] { cursor: pointer; }
+    #status-body [data-status-card-index]:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
     .status-body::-webkit-scrollbar { width: 4px; }
     .status-body::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
 

@@ -3637,10 +3637,10 @@ function renderDetailIdeaBlock(subId, globalIdx, itemIdx, item, isChecked) {
     >${escapeHtml(item)}</button>`;
 }
 
-function openDetailSheet(mode, openingSound = 'touchNew1') {
-  document.querySelector('.detail-sheet').dataset.cardKey = mode === 'card' && focusedCard ? `${focusedCard.subId}__${focusedCard.idx}` : '';
+function openDetailSheet(mode, openingSound = 'touchNew1', cardTarget = focusedCard) {
+  document.querySelector('.detail-sheet').dataset.cardKey = mode === 'card' && cardTarget ? `${cardTarget.subId}__${cardTarget.idx}` : '';
   configureDetailMainImage();
-  if (mode === 'card' && !focusedCard) return;
+  if (mode === 'card' && !cardTarget) return;
   if (mode === 'category' && !currentSubId) return;
 
   const iconEl   = document.getElementById('detail-icon');
@@ -3649,22 +3649,22 @@ function openDetailSheet(mode, openingSound = 'touchNew1') {
   const divEl    = document.getElementById('detail-divider');
   const bodyEl   = document.getElementById('detail-body');
 
-  if (mode === 'card' && focusedCard) {
+  if (mode === 'card' && cardTarget) {
     // 카드 데이터 꺼내기
-    const card = getCardByGlobalIdx(focusedCard.subId, focusedCard.idx);
+    const card = getCardByGlobalIdx(cardTarget.subId, cardTarget.idx);
     // 아이콘 / 이미지 렌더링
-    if (focusedCard.img) {
-      iconEl.innerHTML = `<img class="detail-card-img" src="${focusedCard.img}" alt="${focusedCard.name}">`;
+    if (cardTarget.img) {
+      iconEl.innerHTML = `<img class="detail-card-img" src="${cardTarget.img}" alt="${cardTarget.name}">`;
     } else {
-      iconEl.innerHTML = `<div style="font-size:2.4rem;text-align:center;">${focusedCard.icon || '✦'}</div>`;
+      iconEl.innerHTML = `<div style="font-size:2.4rem;text-align:center;">${cardTarget.icon || '✦'}</div>`;
     }
-    nameEl.textContent = focusedCard.name;
+    nameEl.textContent = cardTarget.name;
     descEl.textContent = card?.desc || '';
-    configureDetailDescSelection(focusedCard.subId, focusedCard.idx);
-    configureDetailMainImage(focusedCard.subId, focusedCard.idx);
+    configureDetailDescSelection(cardTarget.subId, cardTarget.idx);
+    configureDetailMainImage(cardTarget.subId, cardTarget.idx);
 
     // 세부정보(detail) 파싱 및 선택 블록 렌더
-    const detailKey = `${focusedCard.subId}__${focusedCard.idx}`;
+    const detailKey = `${cardTarget.subId}__${cardTarget.idx}`;
     const detailColumns = getCardDetailColumns(card);
     const hasDetailItems = detailColumns.some(column => column.items.length > 0);
     const hasSubImage = Boolean(card?.subImg);
@@ -3678,7 +3678,7 @@ function openDetailSheet(mode, openingSound = 'touchNew1') {
       const renderColumn = column => column.sections.map(section => {
         const itemsHtml = section.items.map(item => {
           const itemIdx = globalItemIdx++;
-          return renderDetailIdeaBlock(focusedCard.subId, focusedCard.idx, itemIdx, item.display, checkedSet.has(itemIdx));
+          return renderDetailIdeaBlock(cardTarget.subId, cardTarget.idx, itemIdx, item.display, checkedSet.has(itemIdx));
         }).join('');
         if (!section.title) return `<div class="detail-section-items">${itemsHtml}</div>`;
         return `<section class="detail-section">
@@ -3704,15 +3704,15 @@ function openDetailSheet(mode, openingSound = 'touchNew1') {
           <button
             type="button"
             class="detail-sub-image-row pressable${subImageChecked ? ' checked' : ''}"
-            ${isCardLocked(focusedCard.subId, focusedCard.idx) ? 'disabled' : ''}
-            onclick="toggleSubImageCheck('${focusedCard.subId}', ${focusedCard.idx})"
+            ${isCardLocked(cardTarget.subId, cardTarget.idx) ? 'disabled' : ''}
+            onclick="toggleSubImageCheck('${cardTarget.subId}', ${cardTarget.idx})"
             aria-pressed="${subImageChecked ? 'true' : 'false'}"
           >
             <span class="detail-image-selection-frame">
             <img
               class="detail-sub-img"
               src="${card.subImg}"
-              alt="${focusedCard.name} 서브 이미지"
+              alt="${cardTarget.name} 서브 이미지"
               draggable="false"
             >
             </span>
@@ -3968,12 +3968,98 @@ function closeDetailSheet(e, silent = false) {
     else playDetailCloseSound();
   }
   document.getElementById('detail-overlay').classList.remove('active');
+  restoreStatusAfterDetail();
 }
 
 
 /* ════════════════════════════════════════════════
    상태 오버레이
 ════════════════════════════════════════════════ */
+const statusBody = document.getElementById('status-body');
+const statusOverlay = document.getElementById('status-overlay');
+const detailOverlay = document.getElementById('detail-overlay');
+const detailSheet = detailOverlay.querySelector('.detail-sheet');
+let statusDetailOrigin = null;
+
+function openStatusCardDetail(chip) {
+  if (!chip || !statusOverlay.classList.contains('active') || statusOverlay.inert) return;
+  const subId = chip.dataset.statusCardSub;
+  const idx = Number(chip.dataset.statusCardIndex);
+  const card = getCardByGlobalIdx(subId, idx);
+  if (!card) return;
+
+  statusDetailOrigin = { subId, idx, scrollTop: statusBody.scrollTop, chip };
+  statusOverlay.inert = true;
+  detailOverlay.classList.add('above-status');
+  detailSheet.setAttribute('role', 'dialog');
+  detailSheet.setAttribute('aria-modal', 'true');
+  detailSheet.setAttribute('aria-labelledby', 'detail-name');
+  openDetailSheet('card', 'softTouch1', { ...card, subId, idx });
+  detailSheet.querySelector('.detail-close').focus({ preventScroll: true });
+}
+
+function restoreStatusAfterDetail() {
+  if (!statusDetailOrigin) return;
+  const { subId, idx, scrollTop, chip } = statusDetailOrigin;
+  statusDetailOrigin = null;
+  detailOverlay.classList.remove('above-status');
+  for (const attribute of ['role', 'aria-modal', 'aria-labelledby']) detailSheet.removeAttribute(attribute);
+  statusOverlay.inert = false;
+  statusBody.scrollTo({ top: scrollTop, behavior: 'instant' });
+  const target = chip.isConnected ? chip
+    : statusBody.querySelector(`[data-status-card-sub="${CSS.escape(subId)}"][data-status-card-index="${idx}"]`);
+  (target || statusOverlay.querySelector('.status-close')).focus({ preventScroll: true });
+}
+
+// Keep native scrolling and inertia. A cancelled pointer or a moved contact
+// cannot open a card through the click synthesized at the end of a gesture.
+let statusCardPointer = null;
+statusBody.addEventListener('pointerdown', event => {
+  if (!event.isPrimary) {
+    if (statusCardPointer) statusCardPointer.moved = true;
+    return;
+  }
+  statusCardPointer = {
+    id: event.pointerId, x: event.clientX, y: event.clientY,
+    scrollTop: statusBody.scrollTop, moved: false
+  };
+}, { passive: true });
+function trackStatusCardPointer(event) {
+  if (statusCardPointer?.id !== event.pointerId) return;
+  if (event.type === 'pointercancel'
+      || Math.hypot(event.clientX - statusCardPointer.x, event.clientY - statusCardPointer.y) > 8) {
+    statusCardPointer.moved = true;
+  }
+}
+for (const type of ['pointermove', 'pointerup', 'pointercancel']) {
+  statusBody.addEventListener(type, trackStatusCardPointer, { passive: true });
+}
+statusBody.addEventListener('click', event => {
+  const pointer = statusCardPointer;
+  statusCardPointer = null;
+  if (event.detail && pointer && (pointer.moved || Math.abs(statusBody.scrollTop - pointer.scrollTop) > 2)) return;
+  openStatusCardDetail(event.target.closest('[data-status-card-index]'));
+});
+statusBody.addEventListener('keydown', event => {
+  if (!event.target.matches('[data-status-card-index]') || !['Enter', ' '].includes(event.key)) return;
+  event.preventDefault();
+  if (!event.repeat) openStatusCardDetail(event.target);
+});
+detailOverlay.addEventListener('keydown', event => {
+  if (!statusDetailOrigin) return;
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    closeDetailSheet();
+  } else if (event.key === 'Tab') {
+    const focusable = Array.from(detailSheet.querySelectorAll('button:not(:disabled), [tabindex="0"]'));
+    const edge = event.shiftKey ? focusable[0] : focusable[focusable.length - 1];
+    if (document.activeElement === edge) {
+      event.preventDefault();
+      (event.shiftKey ? focusable[focusable.length - 1] : focusable[0]).focus();
+    }
+  }
+});
+
 function openStatusOverlay() {
   setBottomNavState('idea');
   renderStatusContent();
@@ -3991,7 +4077,7 @@ function openStatusOverlay() {
 }
 
 function closeStatusOverlay(e, silent = false) {
-  if (e && e.target !== document.getElementById('status-overlay')) return;
+  if (statusDetailOrigin || (e && e.target !== statusOverlay)) return;
   if (!silent && document.getElementById('status-overlay').classList.contains('active')) {
     if (e) playRandomSound(['softPage3', 'softPage1']);
     else playPaperSound();
@@ -4047,7 +4133,6 @@ function renderStatusContent() {
       hasAny = true;
       itemsHtml += `<div class="status-sub"><div class="status-sub-label">${sub.label}</div><div class="status-chips">`;
 
-      const data = CARD_DATA[sub.id];
       set.forEach(globalIdx => {
        const card = getCardByGlobalIdx(sub.id, globalIdx);
         if (card) {
@@ -4069,7 +4154,8 @@ function renderStatusContent() {
             ? `<div class="status-chip-extra">${detailHtml}${subImageHtml}</div>`
             : '';
           itemsHtml += `<div class="status-chip-wrap">
-            <div class="status-chip">
+            <div class="status-chip" role="button" tabindex="0" aria-haspopup="dialog"
+                 aria-label="${escapeHtml(card.name)} 상세 정보" data-status-card-sub="${escapeHtml(sub.id)}" data-status-card-index="${globalIdx}">
               ${metaHtml}
               ${chipImgHtml}
               <div class="status-chip-text">
@@ -4129,6 +4215,11 @@ function createStatusExportClone() {
   const clone = source.cloneNode(true);
   clone.removeAttribute('style');
   clone.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
+  clone.querySelectorAll('[data-status-card-index]').forEach(chip => {
+    for (const attribute of ['role', 'tabindex', 'aria-haspopup', 'aria-label', 'data-status-card-sub', 'data-status-card-index']) {
+      chip.removeAttribute(attribute);
+    }
+  });
   clone.classList.add('status-export-panel');
   clone.style.width = `${source.getBoundingClientRect().width}px`;
   clone.style.height = 'auto';
@@ -4405,9 +4496,10 @@ function showAppConfirm(msg, confirmSound, destructiveLabel = null) {
 }
 
 function refreshStatusIfOpen() {
-  const overlay = document.getElementById('status-overlay');
-  if (overlay && overlay.classList.contains('active')) {
-    renderStatusContent();
+  if (!statusOverlay.classList.contains('active')) return;
+  renderStatusContent();
+  if (statusDetailOrigin) {
+    statusBody.scrollTo({ top: statusDetailOrigin.scrollTop, behavior: 'instant' });
   }
 }
 
